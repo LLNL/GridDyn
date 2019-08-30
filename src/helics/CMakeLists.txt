@@ -94,16 +94,3 @@ list(
         ${CMAKE_CURRENT_SOURCE_DIR}/test/helicsTest.cpp
 )
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
-
-install(
-    TARGETS helicsLib
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${griddynHELICS_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/helics
-    COMPONENT headers
-)

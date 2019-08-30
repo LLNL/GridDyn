@@ -43,14 +43,14 @@ class deadbandBlock : public Block
     };
 
   protected:
-    parameter_t deadbandHigh = -kBigNum;  //!< upper limit on the deadband
-    parameter_t deadbandLow = kBigNum;  //!< lower deadband limit
-    parameter_t rampUpband = 0;  //!< ramp band on the up side
-    parameter_t rampDownband = 0;  //!< ramp band on the low side
-    parameter_t resetHigh = -kBigNum;  //!< the reset level to go off the deadband
-    parameter_t resetLow = kBigNum;  //!< the reset level to go back in the deadband on the low side
-    parameter_t deadbandLevel = 0.0;  //!<  the output level while the input is inside the deadband
-    parameter_t tolerance = 1e-6;  //!< the tolerance for resetting on the check function
+    model_parameter deadbandHigh = -kBigNum;  //!< upper limit on the deadband
+    model_parameter deadbandLow = kBigNum;  //!< lower deadband limit
+    model_parameter rampUpband = 0;  //!< ramp band on the up side
+    model_parameter rampDownband = 0;  //!< ramp band on the low side
+    model_parameter resetHigh = -kBigNum;  //!< the reset level to go off the deadband
+    model_parameter resetLow = kBigNum;  //!< the reset level to go back in the deadband on the low side
+    model_parameter deadbandLevel = 0.0;  //!<  the output level while the input is inside the deadband
+    model_parameter tolerance = 1e-6;  //!< the tolerance for resetting on the check function
     deadbandstate_t dbstate = deadbandstate_t::normal;  //!< the current state of the deadband block
 
   public:
@@ -68,7 +68,7 @@ class deadbandBlock : public Block
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
     // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);

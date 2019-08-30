@@ -55,23 +55,23 @@ class Generator : public gridSecondary
   protected:
     double P = 0.0;  //!< [pu] Electrical generation real power output
     double Q = 0.0;  //!< [pu] Electrical generation reactive power output
-    parameter_t Pset = -kBigNum;  //!< [pu] target power set point
-    parameter_t dPdt = 0.0;  //!< define the power ramp
-    parameter_t dQdt = 0.0;  //!< define the reactive power ramp
-    parameter_t Qmax = kBigNum;  //!< [pu mbase] max steady state reactive power values for Power flow analysis
-    parameter_t Qmin = -kBigNum;  //!< [pu mbase] min steady state reactive power values for Power flow analysis
-    parameter_t Qbias = 0.0;  //!<[pu] targetted Q output for generators with remote voltage control
-    parameter_t Pmax = kBigNum;  //!< [pu mbase]max steady state real power values for the generator
-    parameter_t Pmin = -kBigNum;  //!< [pu mbase] min steady state real power values for the generator
-    parameter_t participation = 1.0;  //!< [%]a participation factor used in auto allocating load.
-    parameter_t vRegFraction = 1.0;  //!< [%]  fraction of output reactive power to maintain voltage regulation
-    parameter_t machineBasePower = 100;  //!< MW the internal base power of the generator;
+    model_parameter Pset = -kBigNum;  //!< [pu] target power set point
+    model_parameter dPdt = 0.0;  //!< define the power ramp
+    model_parameter dQdt = 0.0;  //!< define the reactive power ramp
+    model_parameter Qmax = kBigNum;  //!< [pu mbase] max steady state reactive power values for Power flow analysis
+    model_parameter Qmin = -kBigNum;  //!< [pu mbase] min steady state reactive power values for Power flow analysis
+    model_parameter Qbias = 0.0;  //!<[pu] targetted Q output for generators with remote voltage control
+    model_parameter Pmax = kBigNum;  //!< [pu mbase]max steady state real power values for the generator
+    model_parameter Pmin = -kBigNum;  //!< [pu mbase] min steady state real power values for the generator
+    model_parameter participation = 1.0;  //!< [%]a participation factor used in auto allocating load.
+    model_parameter vRegFraction = 1.0;  //!< [%]  fraction of output reactive power to maintain voltage regulation
+    model_parameter machineBasePower = 100;  //!< MW the internal base power of the generator;
 
     scheduler *sched = nullptr;  //!< alias to pSetControl if pSetControl is a scheduler
 
-    parameter_t m_Vtarget = -1;  //!< voltage target for the generator at the control bus
-    parameter_t m_Rs = 0.0;  //!< the real part of the generator impedance
-    parameter_t m_Xs = 1.0;  //!< generator impedance defined on Mbase;
+    model_parameter m_Vtarget = -1;  //!< voltage target for the generator at the control bus
+    model_parameter m_Rs = 0.0;  //!< the real part of the generator impedance
+    model_parameter m_Xs = 1.0;  //!< generator impedance defined on Mbase;
     gridBus *remoteBus = nullptr;  //!< the bus for remote control
     std::unique_ptr<utilities::OperatingBoundary> bounds;
 
@@ -96,8 +96,8 @@ class Generator : public gridSecondary
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 
     virtual void add (coreObject *obj) override;

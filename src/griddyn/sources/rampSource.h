@@ -22,14 +22,14 @@ namespace sources
 class rampSource : public Source
 {
   protected:
-    parameter_t mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output
+    model_parameter mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output
   public:
     rampSource (const std::string &objName = "rampSource_#", double startVal = 0.0);
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual double computeOutput (coreTime time) const override;
     virtual double

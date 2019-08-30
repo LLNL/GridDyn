@@ -87,9 +87,9 @@ class gridGenOpt : public gridOptObject
     // parameter set functions
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // parameter get functions
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     virtual void loadCostCoeff (std::vector<double> const &coeff, int mode);
     // find components

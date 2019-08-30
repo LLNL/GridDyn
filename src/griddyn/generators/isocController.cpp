@@ -15,7 +15,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <algorithm>
 
@@ -73,7 +73,7 @@ void isocController::setLimits (double minV, double maxV)
 {
     minLevel = std::min (maxV, minV);
     maxLevel = std::max (maxV, minV);
-    m_output = valLimit (m_output, minLevel, maxLevel);
+    m_output = gmlc::utilities::valLimit(m_output, minLevel, maxLevel);
 }
 
 void isocController::updateA (coreTime time)
@@ -106,7 +106,7 @@ void isocController::updateA (coreTime time)
             m_output += downStep;
         }
     }
-    m_output = valLimit (m_output, minLevel, maxLevel);
+    m_output = gmlc::utilities::valLimit(m_output, minLevel, maxLevel);
     lastUpdateTime = time;
     // printf("t=%f,output=%f\n", time, m_output);
 }
@@ -123,7 +123,7 @@ void isocController::timestep (coreTime time, const IOdata &inputs, const solver
 }
 
 void isocController::set (const std::string &param, const std::string &val) { gridSubModel::set (param, val); }
-void isocController::set (const std::string &param, double val, gridUnits::units_t unitType)
+void isocController::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "deadband") || (param == "db"))
     {
@@ -164,7 +164,7 @@ void isocController::set (const std::string &param, double val, gridUnits::units
     }
 }
 
-void isocController::setLevel (double newLevel) { m_output = valLimit (newLevel, minLevel, maxLevel); }
+void isocController::setLevel (double newLevel) { m_output = gmlc::utilities::valLimit (newLevel, minLevel, maxLevel); }
 void isocController::setFreq (double freq) { lastFreq = freq; }
 void isocController::deactivate ()
 {

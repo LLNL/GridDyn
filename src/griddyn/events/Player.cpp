@@ -14,7 +14,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <sstream>
 
 namespace griddyn
@@ -123,7 +123,7 @@ void Player::setTimeValue (coreTime time, double val)
 
 void Player::setTimeValue (const std::vector<coreTime> &time, const std::vector<double> &val)
 {
-    ts.reserve (static_cast<fsize_t> (time.size ()));
+    ts.reserve (static_cast<gmlc::utilities::fsize_t> (time.size ()));
 
     ts.addData (time, val);
 
@@ -200,9 +200,9 @@ std::string Player::to_string ()
             ss << " | ";
         }
         ss << fullObjectName (m_obj) << ':' << field;
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = " << value;
         if (!ts.empty ())
@@ -216,9 +216,9 @@ std::string Player::to_string ()
     else
     {
         ss << fullObjectName (m_obj) << ':' << field;
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = {" << eFile;
         if (column > 0)

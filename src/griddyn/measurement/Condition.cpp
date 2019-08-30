@@ -13,10 +13,12 @@
 #include "Condition.h"
 #include "grabberInterpreter.hpp"
 #include "grabberSet.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 std::unique_ptr<Condition> make_condition (const std::string &condString, coreObject *rootObject)
 {
     auto cString = stringOps::xmlCharacterCodeReplace (condString);

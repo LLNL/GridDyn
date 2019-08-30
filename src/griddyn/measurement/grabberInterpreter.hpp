@@ -9,11 +9,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef GRABBER_INTERPRETER_H_
-#define GRABBER_INTERPRETER_H_
-
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include "core/objectInterpreter.h"
 #include "utilities/functionInterpreter.h"
@@ -110,10 +108,10 @@ class grabberInterpreter
             std::string cmdBlock = command.substr (0, outer_chunks[0].first);
             if (isFunctionName (cmdBlock))
             {
-                std::string fcallstr = stringOps::trim (
+                std::string fcallstr = gmlc::utilities::stringOps::trim (
                   command.substr (outer_chunks[0].first + 1, outer_chunks[0].second - outer_chunks[0].first - 1));
 
-                auto gstr = stringOps::splitlineBracket (fcallstr);
+                auto gstr = gmlc::utilities::stringOps::splitlineBracket(fcallstr);
                 if (gstr.size () == 1)
                 {
                     std::unique_ptr<baseX> ggbA = interpretGrabberBlock (fcallstr, obj);
@@ -150,7 +148,7 @@ class grabberInterpreter
     {
         coreObject *mobj = obj;
         std::string field (command);
-        gridUnits::units_t outUnit = gridUnits::defUnit;
+        units::unit outUnit = units::defunit;
         // get the object which to grab from
         size_t fieldSeperatorLocation = command.find_last_of (":?");
         if (fieldSeperatorLocation != std::string::npos)
@@ -169,7 +167,7 @@ class grabberInterpreter
             size_t closeParenthesisLocation = field.find_first_of (')', openParenthesisLocation);
             std::string unitName =
               field.substr (openParenthesisLocation + 1, closeParenthesisLocation - openParenthesisLocation - 1);
-            outUnit = gridUnits::getUnits (unitName);
+            outUnit = units::unit_cast_from_string(unitName);
             field = field.substr (0, openParenthesisLocation);
         }
         std::unique_ptr<baseX> ggb = createX (field, mobj);
@@ -183,7 +181,8 @@ class grabberInterpreter
 
     std::unique_ptr<baseX> addSubGrabberBlocks (const std::string &command, coreObject *obj, size_t rlc)
     {
-        using namespace stringOps;
+        using namespace gmlc::utilities::stringOps;
+		using namespace gmlc::utilities;
         std::unique_ptr<baseX> ggb = nullptr;
         std::string Ablock = command.substr (0, rlc);
         trimString (Ablock);
@@ -257,7 +256,8 @@ class grabberInterpreter
 
     std::unique_ptr<baseX> multDivGrabberBlocks (const std::string &command, coreObject *obj, size_t rlc)
     {
-        using namespace stringOps;
+        using namespace gmlc::utilities::stringOps;
+		using namespace gmlc::utilities;
         std::unique_ptr<baseX> ggb = nullptr;
 
         std::string Ablock = command.substr (0, rlc);
@@ -381,4 +381,3 @@ class grabberInterpreter
 };
 
 }  // namespace griddyn
-#endif

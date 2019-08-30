@@ -30,7 +30,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 // setup the load object factories
 static typeFactory<Load> glf ("load", stringVec{"simple", "constant"});
@@ -199,7 +199,7 @@ void zipLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-double zipLoad::get (const std::string &param, units_t unitType) const
+double zipLoad::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param.length () == 1)
@@ -207,10 +207,10 @@ double zipLoad::get (const std::string &param, units_t unitType) const
         switch (param[0])
         {
         case 'p':
-            val = unitConversion (getP (), puMW, unitType, systemBasePower);
+            val = convert (getP (), puMW, unitType, systemBasePower);
             break;
         case 'q':
-            val = unitConversion (getQ (), puMW, unitType, systemBasePower);
+            val = convert (getQ (), puMW, unitType, systemBasePower);
             break;
         case 'r':
             val = getr ();
@@ -237,19 +237,19 @@ double zipLoad::get (const std::string &param, units_t unitType) const
     }
     if (param == "yp")
     {
-        val = unitConversion (Yp, puMW, unitType, systemBasePower);
+        val = convert (Yp, puMW, unitType, systemBasePower);
     }
     else if (param == "yq")
     {
-        val = unitConversion (Yq, puMW, unitType, systemBasePower);
+        val = convert (Yq, puMW, unitType, systemBasePower);
     }
     else if (param == "ip")
     {
-        val = unitConversion (Ip, puMW, unitType, systemBasePower);
+        val = convert (Ip, puMW, unitType, systemBasePower);
     }
     else if (param == "iq")
     {
-        val = unitConversion (Iq, puMW, unitType, systemBasePower);
+        val = convert (Iq, puMW, unitType, systemBasePower);
     }
     else if (param == "pf")
     {
@@ -262,7 +262,7 @@ double zipLoad::get (const std::string &param, units_t unitType) const
     return val;
 }
 
-void zipLoad::set (const std::string &param, double val, units_t unitType)
+void zipLoad::set (const std::string &param, double val, unit unitType)
 {
     if (param.empty ())
     {
@@ -273,22 +273,22 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
         switch (param[0])
         {
         case 'p':
-            setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setP (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'q':
-            setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setQ (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'r':
-            setr (unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage));
+            setr (convert (val, unitType, puOhm, systemBasePower, localBaseVoltage));
             break;
         case 'x':
-            setx (unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage));
+            setx (convert (val, unitType, puOhm, systemBasePower, localBaseVoltage));
             break;
         case 'g':
-            setYp (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setYp (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'b':
-            setYq (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setYq (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         default:
             throw (unrecognizedParameter (param));
@@ -301,32 +301,32 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
         // load increments  allows a delta on the load through the set functions
         if (param == "p+")
         {
-            P += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            P += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkpfq ();
         }
         else if (param == "q+")
         {
-            Q += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Q += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             updatepfq ();
         }
         else if ((param == "yp+") || (param == "zr+"))
         {
-            Yp += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Yp += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if ((param == "yq+") || (param == "zq+"))
         {
-            Yq += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Yq += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if ((param == "ir+") || (param == "ip+"))
         {
-            Ip += unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage);
+            Ip += convert (val, unitType, puA, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if (param == "iq+")
         {
-            Iq += unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage);
+            Iq += convert (val, unitType, puA, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else
@@ -374,27 +374,27 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "load p")
     {
-        setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setP (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if (param == "load q")
     {
-        setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setQ (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "yp") || (param == "shunt g") || (param == "zr"))
     {
-        setYp (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setYp (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "yq") || (param == "shunt b") || (param == "zq"))
     {
-        setYq (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setYq (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "ir") || (param == "ip"))
     {
-        setIp (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage));
+        setIp (convert (val, unitType, puA, systemBasePower, localBaseVoltage));
     }
     else if (param == "iq")
     {
-        setIq (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage));
+        setIq (convert (val, unitType, puA, systemBasePower, localBaseVoltage));
     }
     else if ((param == "pf") || (param == "powerfactor"))
     {
@@ -435,7 +435,7 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     {
         if (!opFlags[no_pqvoltage_limit])
         {
-            Vpqmin = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+            Vpqmin = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
             trigVVlow = 1.0 / (Vpqmin * Vpqmin);
         }
     }
@@ -443,7 +443,7 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     {
         if (!opFlags[no_pqvoltage_limit])
         {
-            Vpqmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+            Vpqmax = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
             trigVVhigh = 1.0 / (Vpqmax * Vpqmax);
         }
     }

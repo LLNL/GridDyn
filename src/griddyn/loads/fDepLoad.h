@@ -23,8 +23,8 @@ class fDepLoad : public exponentialLoad
 {
   public:
   protected:
-    parameter_t betaP = 0.0;  //!< the frequency exponent parameter for the real power output
-    parameter_t betaQ = 0.0;  //!< the frequency exponent parameter for the reactive power output
+    model_parameter betaP = 0.0;  //!< the frequency exponent parameter for the real power output
+    model_parameter betaQ = 0.0;  //!< the frequency exponent parameter for the reactive power output
 
   public:
     explicit fDepLoad (const std::string &objName = "fdepLoad_$");
@@ -41,7 +41,7 @@ class fDepLoad : public exponentialLoad
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void ioPartialDerivatives (const IOdata &inputs,
                                        const stateData &sD,

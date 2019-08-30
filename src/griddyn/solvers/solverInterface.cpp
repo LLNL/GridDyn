@@ -17,8 +17,8 @@
 #include "core/factoryTemplates.hpp"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
-#include "utilities/mapOps.hpp"
-#include "utilities/stringConversion.h"
+#include "gmlc/containers/mapOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
 #include <iostream>
 #include <new>
 
@@ -176,6 +176,8 @@ double SolverInterface::get(const std::string &param) const
 
 void SolverInterface::set(const std::string &param, const std::string &val)
 {
+	using gmlc::utilities::convertToLowerCase;
+
     if ((param == "approx") || (param == "approximation"))
     {
         setApproximation(convertToLowerCase(val));
@@ -234,7 +236,7 @@ void SolverInterface::set(const std::string &param, const std::string &val)
     }
     else if (param == "mask")
     {
-        auto sep = str2vector<int>(val, -1, ",;");
+        auto sep = gmlc::utilities::str2vector<int>(val, -1, ",;");
         maskElements.resize(sep.size());
         for (size_t kk = 0; kk < sep.size(); ++kk)
         {

@@ -12,7 +12,7 @@
 
 #include "controlRelay.h"
 #include "core/coreExceptions.h"
-//#include "utilities/timeSeries.hpp"
+//#include "utilities/TimeSeries.hpp"
 #include "../comms/Communicator.h"
 #include "../comms/controlMessage.h"
 #include "core/coreObjectTemplates.hpp"
@@ -20,7 +20,7 @@
 #include "../events/eventQueue.h"
 #include "../measurement/gridGrabbers.h"
 #include "../simulation/gridSimulation.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <boost/format.hpp>
 
@@ -65,7 +65,7 @@ void controlRelay::addMeasurement (const std::string &measure)
 
     for (auto &ggb : vals)
     {
-        pointNames_.emplace (convertToLowerCase (ggb->getDesc ()),
+        pointNames_.emplace (gmlc::utilities::convertToLowerCase (ggb->getDesc ()),
                              static_cast<index_t> (measurement_points_.size ()));
         measurement_points_.push_back (std::move (ggb));
     }
@@ -108,7 +108,7 @@ void controlRelay::set (const std::string &param, const std::string &val)
     }
 }
 
-void controlRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlRelay::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "autoname")
     {
@@ -412,11 +412,11 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
     actions[act].measureAction = true;
     actions[act].sourceID = sourceID;
     actions[act].triggerTime = eventTime;
-    makeLowerCase (message->m_field);
+    gmlc::utilities::makeLowerCase(message->m_field);
     actions[act].field = message->m_field;
     if (!(message->m_units.empty ()))
     {
-        actions[act].unitType = gridUnits::getUnits (message->m_units);
+        actions[act].unitType = units::unit_cast_from_string(message->m_units);
     }
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
 	/** this is so the get event triggers last*/
@@ -434,13 +434,13 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime e
     actions[act].measureAction = false;
     actions[act].sourceID = sourceID;
     actions[act].triggerTime = eventTime;
-    makeLowerCase (message->m_field);
+    gmlc::utilities::makeLowerCase(message->m_field);
     actions[act].field = message->m_field;
     actions[act].val = message->m_value;
 
     if (!message->m_units.empty ())
     {
-        actions[act].unitType = gridUnits::getUnits (message->m_units);
+        actions[act].unitType = units::unit_cast_from_string(message->m_units);
     }
 
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
@@ -465,7 +465,7 @@ index_t controlRelay::getFreeAction ()
     }
     // if we didn't find an open one,  make the actions vector longer and return the new index
 
-    actions.resize ((asize + 1) * 2);  // double the size
+    actions.resize ((static_cast<size_t>(asize) + 1) * 2);  // double the size
     return asize;
 }
 }  // namespace relays

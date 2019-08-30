@@ -18,7 +18,7 @@
 
 #include "core/objectInterpreter.h"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "core/objectFactory.hpp"
 
@@ -48,8 +48,8 @@ gridBus *readBusElement (std::shared_ptr<readerElement> &element, readerInfo &ri
         {
             std::string A = valType.substr (0, cloc);
             std::string B = valType.substr (cloc + 1);
-            stringOps::trimString (A);
-            stringOps::trimString (B);
+            gmlc::utilities::stringOps::trimString (A);
+            gmlc::utilities::stringOps::trimString (B);
             try
             {
                 bus->set ("type", A);

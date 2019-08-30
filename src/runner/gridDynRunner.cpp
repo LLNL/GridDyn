@@ -23,7 +23,7 @@
 #include "griddyn/events/Event.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/workQueue.h"
 
 #include "CLI11/CLI11.hpp"
@@ -39,7 +39,7 @@ namespace filesystem = boost::filesystem;
 
 namespace griddyn
 {
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
 
 GriddynRunner::GriddynRunner() = default;
 
@@ -461,8 +461,9 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
     ptr
       ->add_flag_function(
         "--warn{1},-w{1},--warn-all{2},--no-warn{0},--warn-important{1}",
-        [](int val) { readerConfig::setWarnMode(val); }, "specify warning level output")
-      ->disable_flag_override();
+        [](int64_t val) { readerConfig::setWarnMode(static_cast<int>(val)); }, "specify warning level output")
+      ->disable_flag_override()
+      ->multi_option_policy(CLI::MultiOptionPolicy::TakeLast);
     ptr
       ->add_option_function<int>(
         "--threads,-j", [](int val) { workQueue::instance(val); },

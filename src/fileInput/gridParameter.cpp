@@ -13,7 +13,7 @@
 #include "gridParameter.h"
 #include "core/coreExceptions.h"
 #include "griddyn/gridDynDefinitions.hpp"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 namespace griddyn
 {
@@ -27,14 +27,15 @@ gridParameter::gridParameter (std::string fld, std::string val)
 
 void gridParameter::reset ()
 {
-    valid = false, stringType = false, paramUnits = gridUnits::defUnit;
+    valid = false, stringType = false, paramUnits = units::defunit;
     applyIndex.resize (0);
 }
 
 void gridParameter::fromString (const std::string &str)
 {
-    using namespace utilities::string_viewOps;
-    utilities::string_view strv (str);
+    using namespace gmlc::utilities::string_viewOps;
+	using gmlc::utilities::string_view;
+    string_view strv (str);
     valid = false;
     size_t rlc = strv.find_last_of ('=');
     if (rlc == std::string::npos)
@@ -46,14 +47,14 @@ void gridParameter::fromString (const std::string &str)
 
     // now read the value
     strVal = strv.substr (rlc + 1).to_string ();
-    value = numeric_conversionComplete (strVal, kNullVal);
+    value = gmlc::utilities::numeric_conversionComplete(strVal, kNullVal);
     stringType = (value == kNullVal);
 
     rlc = fld.find_first_of ('(');
     if (rlc != string_view::npos)
     {
         size_t rlc2 = fld.find_last_of (')');
-        paramUnits = gridUnits::getUnits (fld.substr (rlc + 1, rlc2 - rlc - 1).to_string ());
+        paramUnits = units::unit_cast_from_string (fld.substr (rlc + 1, rlc2 - rlc - 1).to_string ());
         field = fld.substr (0, rlc).to_string ();
     }
     else

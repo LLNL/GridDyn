@@ -20,7 +20,7 @@ namespace griddyn
 {
 namespace governors
 {
-using namespace gridUnits;
+using namespace units;
 
 GovernorTgov1::GovernorTgov1 (const std::string &objName) : GovernorIeeeSimple (objName)
 {
@@ -283,7 +283,7 @@ void GovernorTgov1::set (const std::string &param, const std::string &val)
     GovernorIeeeSimple::set (param, val);
 }
 
-void GovernorTgov1::set (const std::string &param, double val, units_t unitType)
+void GovernorTgov1::set (const std::string &param, double val, unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     if (param == "dt")

@@ -21,9 +21,9 @@
 #include "griddyn/primary/acBus.h"
 #include "griddyn/primary/dcBus.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
-#include "utilities/stringOps.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -34,9 +34,10 @@ namespace griddyn
 {
 const static bool unimplemented = false;
 
-using namespace gridUnits;
-using namespace utilities::string_viewOps;
-using utilities::string_view;
+using namespace units;
+using namespace gmlc::utilities::string_viewOps;
+using gmlc::utilities::string_view;
+using namespace gmlc::utilities;
 
 void epcReadBus (gridBus *bus, string_view line, double base, const basicReaderInfo &bri);
 void epcReadDCBus (dcBus *bus, string_view line, double base, const basicReaderInfo &bri);
@@ -1041,7 +1042,7 @@ void epcReadGen (Generator *gen, string_view line, double /*base*/)
 }
 
 /** function to generate a name for a line based on the input data*/
-std::string generateLineName (const utilities::string_viewVector &svec, const std::string &prefix)
+std::string generateLineName (const string_viewVector &svec, const std::string &prefix)
 {
     std::string temp = trim (removeQuotes (svec[1])).to_string ();
     std::string temp2;

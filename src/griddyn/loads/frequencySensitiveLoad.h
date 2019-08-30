@@ -29,8 +29,8 @@ class frequencySensitiveLoad : public Load
     double Pout = 0.0;  //!< Pout before applying frequency variation
     double Qout = 0.0;  //!< Qout before applying frequency variation
   protected:
-    parameter_t M = 0.0;  //!< load droop factor
-    parameter_t H = 0.0;  //!< load inertia used in computing dPdf
+    model_parameter M = 0.0;  //!< load droop factor
+    model_parameter H = 0.0;  //!< load inertia used in computing dPdf
     Load *subLoad;  //!< pointer to the subload type
   public:
     explicit frequencySensitiveLoad (const std::string &objName = "load_$");
@@ -45,10 +45,10 @@ class frequencySensitiveLoad : public Load
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
     /** update the actual outputs with a frequency related calculation*/

@@ -19,7 +19,7 @@
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <complex>
@@ -115,7 +115,8 @@ void GenModelClassical::algebraicUpdate (const IOdata &inputs,
 {
 	auto Loc = offsets.getLocations(sD,update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
-    solve2x2 (Rs, (Xd), -(Xd), Rs, -Vd, inputs[genModelEftInLocation] - Vq, Loc.destLoc[0], Loc.destLoc[1]);
+    gmlc::utilities::solve2x2(Rs, (Xd), -(Xd), Rs, -Vd, inputs[genModelEftInLocation] - Vq, Loc.destLoc[0],
+                              Loc.destLoc[1]);
     m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }
 
@@ -455,7 +456,7 @@ static const stringVec genModelClassicStateNames{"id", "iq", "delta", "freq"};
 stringVec GenModelClassical::localStateNames () const { return genModelClassicStateNames; }
 // set parameters
 void GenModelClassical::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
-void GenModelClassical::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModelClassical::set (const std::string &param, double val, units::unit unitType)
 {
     if (param.length () == 1)
     {
@@ -474,7 +475,7 @@ void GenModelClassical::set (const std::string &param, double val, gridUnits::un
             H = val / 2.0;
             break;
         case 'd':
-            D = gridUnits::unitConversionFreq (val, unitType, gridUnits::puHz, systemBaseFrequency);
+            D = units::convert(val, unitType, units::puHz, systemBaseFrequency);
             break;
 
         default:

@@ -10,12 +10,14 @@
 * LLNS Copyright End
 */
 
+#include "core/factoryTemplates.hpp"
+#include "core/objectFactory.hpp"
+
 #include "tcpInterface.h"
 #include "tcpCommunicator.h"
 #include "tcpCollector.h"
 
-#include "core/factoryTemplates.hpp"
-#include "core/objectFactory.hpp"
+
 
 
 namespace griddyn

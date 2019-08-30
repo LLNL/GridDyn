@@ -23,7 +23,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 std::atomic<count_t> Load::loadCount (0);
 Load::Load (const std::string &objName) : gridSecondary (objName) { constructionHelper (); }
@@ -52,15 +52,15 @@ coreObject *Load::clone (coreObject *obj) const
     return nobj;
 }
 
-void Load::setLoad (double level, units_t unitType)
+void Load::setLoad (double level, unit unitType)
 {
-    setP (unitConversion (level, unitType, puMW, systemBasePower));
+    setP (convert (level, unitType, puMW, systemBasePower));
 }
 
-void Load::setLoad (double Plevel, double Qlevel, units_t unitType)
+void Load::setLoad (double Plevel, double Qlevel, unit unitType)
 {
-    setP (unitConversion (Plevel, unitType, puMW, systemBasePower));
-    setQ (unitConversion (Qlevel, unitType, puMW, systemBasePower));
+    setP (convert (Plevel, unitType, puMW, systemBasePower));
+    setQ (convert (Qlevel, unitType, puMW, systemBasePower));
 }
 
 static const stringVec locNumStrings{"p", "q", "pf"};
@@ -111,7 +111,7 @@ void Load::set (const std::string &param, const std::string &val)
     }
 }
 
-double Load::get (const std::string &param, units_t unitType) const
+double Load::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param.length () == 1)
@@ -119,10 +119,10 @@ double Load::get (const std::string &param, units_t unitType) const
         switch (param[0])
         {
         case 'p':
-            val = unitConversion (P, puMW, unitType, systemBasePower, localBaseVoltage);
+            val = convert (P, puMW, unitType, systemBasePower, localBaseVoltage);
             break;
         case 'q':
-            val = unitConversion (Q, puMW, unitType, systemBasePower, localBaseVoltage);
+            val = convert (Q, puMW, unitType, systemBasePower, localBaseVoltage);
             break;
         default:
             break;
@@ -138,7 +138,7 @@ double Load::get (const std::string &param, units_t unitType) const
     {
         auto unit = getObjectFunction (this, param).second;
         coreObject *tobj = const_cast<Load *> (this);
-        val = unitConversion (fptr (tobj), unit, unitType, systemBasePower, localBaseVoltage);
+        val = convert (fptr (tobj), unit, unitType, systemBasePower, localBaseVoltage);
     }
     else
     {
@@ -147,7 +147,7 @@ double Load::get (const std::string &param, units_t unitType) const
     return val;
 }
 
-void Load::set (const std::string &param, double val, units_t unitType)
+void Load::set (const std::string &param, double val, unit unitType)
 {
     if (param.empty ())
     {
@@ -158,10 +158,10 @@ void Load::set (const std::string &param, double val, units_t unitType)
         switch (param.front ())
         {
         case 'p':
-            setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setP (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'q':
-            setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+            setQ (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         default:
             throw (unrecognizedParameter (param));
@@ -178,12 +178,12 @@ void Load::set (const std::string &param, double val, units_t unitType)
         // load increments  allows a delta on the load through the set functions
         if (param == "p+")
         {
-            P += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            P += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkpfq ();
         }
         else if (param == "q+")
         {
-            Q += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Q += convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             updatepfq ();
         }
         else
@@ -211,11 +211,11 @@ void Load::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "load p")
     {
-        setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setP (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if (param == "load q")
     {
-        setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        setQ (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "pf") || (param == "powerfactor"))
     {

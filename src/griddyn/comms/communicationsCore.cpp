@@ -12,7 +12,7 @@
 
 #include "communicationsCore.h"
 #include "Communicator.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 
 namespace griddyn
 {

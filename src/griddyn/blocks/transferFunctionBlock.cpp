@@ -14,8 +14,10 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
+
+using namespace gmlc::utilities;
 
 namespace griddyn
 {
@@ -92,7 +94,7 @@ void transferFunctionBlock::dynObjectInitializeB (const IOdata &inputs,
         if (opFlags[has_limits])
         {
             Block::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-            m_state[0] = valLimit (m_state[0], Omin, Omax);
+            m_state[0] = gmlc::utilities::valLimit (m_state[0], Omin, Omax);
         }
         fieldSet[0] = m_state[0];
         prevInput = inputs[0] + bias;
@@ -253,7 +255,7 @@ void transferFunctionBlock::set (const std::string &param, const std::string &va
     }
 }
 
-void transferFunctionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void transferFunctionBlock::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     std::string pstr;

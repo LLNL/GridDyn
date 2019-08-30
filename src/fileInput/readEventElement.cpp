@@ -16,8 +16,8 @@
 #include "readerHelper.h"
 
 #include "griddyn/events/Event.h"
-#include "utilities/stringConversion.h"
-#include "utilities/units.h"
+#include "gmlc/utilities/stringConversion.h"
+#include "units/units.hpp"
 #include <iostream>
 
 namespace griddyn
@@ -32,6 +32,7 @@ static const IgnoreListType eventIgnoreStrings{"file",        "name",   "column"
 
 void readEventElement (std::shared_ptr<readerElement> &aP, EventInfo &gdEI, readerInfo &ri, coreObject *obj)
 {
+	using namespace gmlc::utilities;
     if (aP->getName () != "event")
     {
         gdEI.type = aP->getName ();
@@ -76,7 +77,7 @@ void readEventElement (std::shared_ptr<readerElement> &aP, EventInfo &gdEI, read
     for (auto &ss : unitList)
     {
         ss = ri.checkDefines (ss);
-        gdEI.units.push_back (gridUnits::getUnits (ss));
+        gdEI.units.push_back (units::unit_cast_from_string(ss));
     }
 
     gdEI.description = getElementField (aP, "description", defMatchType);

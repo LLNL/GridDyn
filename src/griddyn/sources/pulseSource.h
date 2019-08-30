@@ -31,18 +31,18 @@ public:
 	pulse_type_t ptype = pulse_type_t::square;  //!< the type of the pulse
 protected:
 	coreTime period = maxTime;         //!<[s] pulse period
-	parameter_t dutyCycle = 0.5;           //!<[%] pulse duty cycle
-	parameter_t Amplitude = 0.0;                    //!< pulse amplitude
+	model_parameter dutyCycle = 0.5;           //!<[%] pulse duty cycle
+	model_parameter Amplitude = 0.0;                    //!< pulse amplitude
 	coreTime cycleTime = maxTime;           //!<[s] the start time of the last cycle
-	parameter_t baseValue;                  //!< the base level of the output
-	parameter_t shift = 0.0;                 //!< storage for phase shift fraction (should be between 0 and 1)
+	model_parameter baseValue;                  //!< the base level of the output
+	model_parameter shift = 0.0;                 //!< storage for phase shift fraction (should be between 0 and 1)
 
 public:
 	pulseSource(const std::string &objName = "pulseSource_#", double startVal = 0.0);
 
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
 	virtual void updateOutput(coreTime time) override;

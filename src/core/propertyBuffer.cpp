@@ -24,7 +24,7 @@ void propertyBuffer::set (const std::string &param, double val)
 {
     properties.emplace_back (param, property_type (val));
 }
-void propertyBuffer::set (const std::string &param, double val, gridUnits::units_t unitType)
+void propertyBuffer::set (const std::string &param, double val, units::unit unitType)
 {
     properties.emplace_back (param, property_type (std::make_pair (val, unitType)));
 }
@@ -57,8 +57,8 @@ void propertyBuffer::apply (coreObject *obj) const
             obj->set (prop.first, mpark::get<double> (prop.second));
             break;
         case 1:
-            obj->set (prop.first, mpark::get<std::pair<double, gridUnits::units_t>> (prop.second).first,
-                      mpark::get<std::pair<double, gridUnits::units_t>> (prop.second).second);
+            obj->set (prop.first, mpark::get<std::pair<double, units::unit>> (prop.second).first,
+                      mpark::get<std::pair<double, units::unit>> (prop.second).second);
             break;
         case 2:
             obj->set (prop.first, mpark::get<int> (prop.second));

@@ -24,8 +24,7 @@
 #include "helics/helicsRunner.h"
 #include "helics/helicsSource.h"
 #include "helics/helicsSupport.h"
-#include "utilities/stringToCmdLine.h"
-#include "utilities/string_viewOps.h"
+#include "gmlc/utilities/string_viewOps.h"
 #include <complex>
 #include <fstream>
 #include <future>
@@ -305,7 +304,7 @@ BOOST_AUTO_TEST_CASE (test_recorder_player)
     std::getline (inFile, line);
     std::getline (inFile, line);
     BOOST_CHECK (!line.empty ());
-    using namespace utilities::string_viewOps;
+    using namespace gmlc::utilities::string_viewOps;
     auto lineEle = split (line, whiteSpaceCharacters, delimiter_compression::on);
     BOOST_REQUIRE_GE (lineEle.size (), 3);
     BOOST_CHECK_EQUAL (lineEle[0], "3");
@@ -371,8 +370,8 @@ BOOST_AUTO_TEST_CASE (test_collector)
     auto sim = hR->getSim ();
 
     auto brk = helics::apps::BrokerApp ("2");
-    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
-    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+    auto cmd = std::vector<std::string>{"--tags=\"mag1,mag2,ang1,ang2\""};
+    auto rec = helics::apps::Recorder (cmd);
 
     auto fut = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
     hR->simInitialize ();
@@ -399,8 +398,8 @@ BOOST_AUTO_TEST_CASE (test_collector_vector)
     auto sim = hR->getSim ();
 
     auto brk = helics::apps::BrokerApp ("2");
-    auto cmd = utilities::StringToCmdLine ("--tags=vout");
-    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+    auto cmd = std::vector<std::string>{"--tags=vout"};
+    auto rec = helics::apps::Recorder (cmd);
 
     auto fut = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
     hR->simInitialize ();
@@ -431,8 +430,8 @@ BOOST_AUTO_TEST_CASE (test_event)
     auto sim = hR->getSim ();
 
     auto brk = helics::apps::BrokerApp ("-f 3");
-    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
-    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+    auto cmd = std::vector<std::string>{"--tags=\"mag1,mag2,ang1,ang2\""};
+    auto rec = helics::apps::Recorder (cmd);
 
     // add a single point
     auto play = helics::apps::Player (std::string{}, helics::FederateInfo ());
@@ -453,7 +452,7 @@ BOOST_AUTO_TEST_CASE (test_event)
     auto pts = rec.pointCount ();
     BOOST_CHECK_EQUAL (pts, 41 * 4);
     auto endpt = rec.getValue (163);
-    BOOST_CHECK_EQUAL (numeric_conversion (endpt.second, 45.7), 0.0);
+    BOOST_CHECK_EQUAL (gmlc::utilities::numeric_conversion (endpt.second, 45.7), 0.0);
     rec.finalize ();
     // I want this freed first PT
     hR = nullptr;
@@ -468,8 +467,8 @@ BOOST_AUTO_TEST_CASE (test_vector_event)
     auto sim = hR->getSim ();
 
     auto brk = helics::apps::BrokerApp ("-f 3");
-    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
-    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+    auto cmd = std::vector<std::string>{"--tags=\"mag1,mag2,ang1,ang2\""};
+    auto rec = helics::apps::Recorder (cmd);
 
     // add a single point
     auto play = helics::apps::Player (std::string{}, helics::FederateInfo{});
@@ -490,7 +489,7 @@ BOOST_AUTO_TEST_CASE (test_vector_event)
     auto pts = rec.pointCount ();
     BOOST_CHECK_EQUAL (pts, 41 * 4);
     auto endpt = rec.getValue (163);
-    BOOST_CHECK_EQUAL (numeric_conversion (endpt.second, 45.7), 0.0);
+    BOOST_CHECK_EQUAL (gmlc::utilities::numeric_conversion (endpt.second, 45.7), 0.0);
     rec.finalize ();
     // I want this freed first PT
     hR = nullptr;

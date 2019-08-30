@@ -3,11 +3,13 @@ set(BUILD_CVODES OFF CACHE INTERNAL "")
 set(BUILD_IDAS OFF CACHE INTERNAL "")
 set(BUILD_IDA ON CACHE INTERNAL "")
 set(BUILD_KINSOL ON CACHE INTERNAL "")
-set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+
 set(EXAMPLES_ENABLE_C OFF CACHE INTERNAL "")
 set(EXAMPLES_ENABLE_CXX OFF CACHE INTERNAL "")
 set(EXAMPLES_INSTALL OFF CACHE INTERNAL "")
 set(SUNDIALS_INDEX_SIZE 32 CACHE INTERNAL "")
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+set(BUILD_STATIC_LIBS ON CACHE INTERNAL "")
 
 if (ENABLE_OPENMP_SUNDIALS)
 set(OPENMP_ENABLE ON CACHE INTERNAL "")
@@ -64,29 +66,21 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunmatrixsparse_static
 	sundials_sunnonlinsolfixedpoint_static
 	sundials_sunnonlinsolnewton_static
-	sundials_generic_static_obj
 	sundials_nvecmanyvector_static
-	sundials_nvecopenmp_static
+	
 	sundials_sunlinsolklu_static
 )
-set_target_properties ( ${SUNDIALS_LIBRARIES} PROPERTIES FOLDER sundials)
+set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
+
+if (TARGET sundials_nvecopenmp_static )
+   set_target_properties ( sundials_nvecopenmp_static PROPERTIES FOLDER sundials)
+
+   target_link_libraries(sundials_all INTERFACE sundials_nvecopenmp_static)
+endif()
+
 if (MSVC)
 target_compile_options(sundials_cvode_static PRIVATE "/sdl-")
 target_compile_options(sundials_cvode_static PRIVATE "/W3")
 endif()
-
-if(NOT CMAKE_VERSION VERSION_LESS 3.13)
-message(STATUS "installing sundials as GridDyn EXPORT")
-install(TARGETS ${SUNDIALS_LIBRARIES}
-    EXPORT griddyn-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT libs)
-	
-endif()
-
-install(TARGETS sundials_all EXPORT griddyn-targets)

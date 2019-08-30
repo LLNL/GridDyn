@@ -17,16 +17,3 @@ add_library(runner STATIC ${runner_sources} ${runner_headers})
 target_link_libraries(runner PUBLIC fileInput utilities)
 
 set_target_properties(runner PROPERTIES FOLDER libraries)
-
-install(
-    TARGETS runner
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${runner_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/runner
-    COMPONENT headers
-)

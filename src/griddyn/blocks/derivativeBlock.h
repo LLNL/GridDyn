@@ -26,7 +26,7 @@ if the time constant is very small it reverts to the basic block
 class derivativeBlock : public Block
 {
   protected:
-    parameter_t m_T1 = 0.1;  //!< delay time constant for the derivative filtering operation
+    model_parameter m_T1 = 0.1;  //!< delay time constant for the derivative filtering operation
   public:
     //!< default constructor
     explicit derivativeBlock (const std::string &objName = "derivBlock_#");
@@ -44,7 +44,7 @@ class derivativeBlock : public Block
   public:
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
     virtual void blockDerivative (double input,

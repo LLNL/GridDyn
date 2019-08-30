@@ -11,8 +11,8 @@
 */
 
 #include "../testHelper.h"
-#include "utilities/timeSeries.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdio>

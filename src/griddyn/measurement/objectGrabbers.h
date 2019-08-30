@@ -29,7 +29,7 @@ class Area;
 class Relay;
 class gridSubModel;
 
-using fobjectPair = std::pair<std::function<double(coreObject *)>, gridUnits::units_t>;
+using fobjectPair = std::pair<std::function<double(coreObject *)>, units::unit>;
 
 fobjectPair getObjectFunction (const gridComponent *comp, const std::string &field);
 fobjectPair getObjectFunction (const gridBus *bus, const std::string &field);
@@ -40,7 +40,7 @@ fobjectPair getObjectFunction (const Area *area, const std::string &field);
 fobjectPair getObjectFunction (const Relay *rel, const std::string &field);
 fobjectPair getObjectFunction (const gridSubModel *sub, const std::string &field);
 
-using fvecPair = std::pair<std::function<void(coreObject *, std::vector<double> &)>, gridUnits::units_t>;
+using fvecPair = std::pair<std::function<void(coreObject *, std::vector<double> &)>, units::unit>;
 
 fvecPair getObjectVectorFunction (const gridComponent *comp, const std::string &field);
 
@@ -207,7 +207,7 @@ class objectOffsetGrabber : public gridGrabber
         {
             loaded = true;
             makeDescription ();
-            inputUnits = gridUnits::defUnit;
+            inputUnits = units::defunit;
         }
     }
 
@@ -233,7 +233,7 @@ class objectOffsetGrabber : public gridGrabber
                 {
                     loaded = true;
                     makeDescription ();
-                    inputUnits = gridUnits::defUnit;
+                    inputUnits = units::defunit;
                 }
             }
         }

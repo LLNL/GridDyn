@@ -41,17 +41,17 @@ class Governor : public gridSubModel
     };
 
   protected:
-    parameter_t K = 16.667;  //!< [pu] droop gain (1/R)
-    parameter_t T1 = 0.1;  //!< [s]   droop control time constant 1
-    parameter_t T2 = 0.0;  //!< [s]   droop control  time constant 2
-    parameter_t T3 = 0.0;  //!< [s]  throttle response
-    parameter_t Pmax = kBigNum;  //!< [pu] maximum turbine output
-    parameter_t Pmin = -kBigNum;  //!< [pu] minimum turbine output
-    parameter_t Pset = 0.0;  //!< [pu] Set point and initial Pm
-    parameter_t Wref = -kBigNum;  //!<[rad]  reference frequency
-    parameter_t deadbandHigh = -kBigNum;  //!< upper threshold on the deadband;
-    parameter_t deadbandLow = kBigNum;  //!< lower threshold on the deadband;
-    parameter_t machineBasePower = 100.0;  //!< the machine base of the generator;
+    model_parameter K = 16.667;  //!< [pu] droop gain (1/R)
+    model_parameter T1 = 0.1;  //!< [s]   droop control time constant 1
+    model_parameter T2 = 0.0;  //!< [s]   droop control  time constant 2
+    model_parameter T3 = 0.0;  //!< [s]  throttle response
+    model_parameter Pmax = kBigNum;  //!< [pu] maximum turbine output
+    model_parameter Pmin = -kBigNum;  //!< [pu] minimum turbine output
+    model_parameter Pset = 0.0;  //!< [pu] Set point and initial Pm
+    model_parameter Wref = -kBigNum;  //!<[rad]  reference frequency
+    model_parameter deadbandHigh = -kBigNum;  //!< upper threshold on the deadband;
+    model_parameter deadbandLow = kBigNum;  //!< lower threshold on the deadband;
+    model_parameter machineBasePower = 100.0;  //!< the machine base of the generator;
     blocks::deadbandBlock dbb;  //!< block managing the deadband
     blocks::controlBlock cb;  //!< block managing the filtering functions on the frequency response
     blocks::delayBlock delay;  //!< block managing the throttle filter
@@ -67,9 +67,9 @@ class Governor : public gridSubModel
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val) override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
     virtual void
     residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;

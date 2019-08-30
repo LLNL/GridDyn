@@ -14,7 +14,7 @@
 #include "dcBus.h"
 #include "../gridSecondary.h"
 #include "../links/dcLink.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -147,6 +147,7 @@ void DcBusControls::removeControlObject (id_type_t oid, bool update)
         }
     }
 }
+using gmlc::utilities::sum;
 
 void DcBusControls::updateControls ()
 {

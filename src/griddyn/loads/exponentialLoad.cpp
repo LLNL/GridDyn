@@ -14,7 +14,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cmath>
 namespace griddyn
 {
@@ -37,7 +37,7 @@ coreObject *exponentialLoad::clone (coreObject *obj) const
 
 // set properties
 void exponentialLoad::set (const std::string &param, const std::string &val) { Load::set (param, val); }
-void exponentialLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void exponentialLoad::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "alphap") || (param == "ap"))
     {

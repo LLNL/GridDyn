@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE (event_test_loadstring)
     BOOST_CHECK(gdEI.targetObjs[0] != nullptr);
     BOOST_CHECK_EQUAL(gdEI.fieldList[0], "param");
     BOOST_CHECK_EQUAL(gdEI.value[0], 13);
-    BOOST_CHECK_EQUAL(gdEI.units[0], gridUnits::MW);
+    BOOST_CHECK(gdEI.units[0]==units::MW);
     BOOST_CHECK_EQUAL(gdEI.time[0], griddyn::coreTime(2));
     BOOST_CHECK_EQUAL(gdEI.period, griddyn::coreTime(3));
 }

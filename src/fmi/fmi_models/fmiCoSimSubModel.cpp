@@ -17,8 +17,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "outputEstimator.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <algorithm>
 
@@ -244,6 +244,8 @@ stringVec fmiCoSimSubModel::getInputNames () const { return cs->getInputNames ()
 
 void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
+
     if ((param == "fmu") || (param == "file"))
     {
         if (!(cs))
@@ -287,7 +289,7 @@ void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
     }
 }
 static const std::string localIntegrationtimeString ("localintegrationtime");
-void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiCoSimSubModel::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "timestep") || (param == localIntegrationtimeString))
     {
@@ -309,7 +311,7 @@ void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::uni
     }
 }
 
-double fmiCoSimSubModel::get (const std::string &param, gridUnits::units_t unitType) const
+double fmiCoSimSubModel::get (const std::string &param, units::unit unitType) const
 {
     if (param == localIntegrationtimeString)
     {

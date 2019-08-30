@@ -19,7 +19,7 @@
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/loads/zipLoad.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -27,8 +27,9 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
-using namespace stringOps;
+using namespace units;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);
 void ptiReadLoad (Load *ld, const std::string &line, basicReaderInfo &opt);

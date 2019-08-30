@@ -14,7 +14,7 @@
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <array>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
@@ -33,6 +33,7 @@
 BOOST_FIXTURE_TEST_SUITE(input_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
+using namespace gmlc::utilities;
 
 namespace data = boost::unit_test::data;
 

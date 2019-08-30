@@ -47,7 +47,7 @@ void longLine::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 }
 
 void longLine::set (const std::string &param, const std::string &val) { return Link::set (param, val); }
-void longLine::set (const std::string &param, double val, gridUnits::units_t unitType)
+void longLine::set (const std::string &param, double val, units::unit unitType)
 {
     if (param.length () == 1)
     {
@@ -74,11 +74,11 @@ void longLine::set (const std::string &param, double val, gridUnits::units_t uni
 
     if ((param == "segmentationlength") || (param == "segmentlength"))
     {
-        segmentationLength = gridUnits::unitConversionDistance (val, unitType, gridUnits::km);
+        segmentationLength = convert (val, unitType, units::km);
     }
     else if (param == "length")
     {
-        length = unitConversionDistance (val, unitType, gridUnits::km);
+        length = convert(val, unitType, units::km);
     }
     else if (param == "fault")
     {
@@ -129,7 +129,7 @@ void longLine::set (const std::string &param, double val, gridUnits::units_t uni
     }
 }
 
-double longLine::get (const std::string &param, gridUnits::units_t unitType) const
+double longLine::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param == "segmentationlength")
@@ -145,7 +145,7 @@ double longLine::get (const std::string &param, gridUnits::units_t unitType) con
 
 void longLine::generateIntermediateLinks ()
 {
-    int numLinks = std::ceil (length / segmentationLength);
+    int numLinks = static_cast<int>(std::ceil (length / segmentationLength));
 
     double sr = r / static_cast<double> (numLinks);
     double sx = x / static_cast<double> (numLinks);

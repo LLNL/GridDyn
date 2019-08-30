@@ -20,7 +20,7 @@
 #include "griddyn/gridBus.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/simulation/diagnostics.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 //#include <crtdbg.h>
 // test case for link objects
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE (link_test_fault_powerflow)
     BOOST_CHECK (std::all_of (v.begin (), v.end (), [](double a) { return (a > 0.95); }));
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-    auto mm = countDiffs (v3, v, 0.0001);
+    auto mm = gmlc::utilities::countDiffs (v3, v, 0.0001);
 
     BOOST_CHECK_EQUAL (mm, 0u);
 }
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE (link_test_fault_powerflow2)
     BOOST_CHECK (std::all_of (v.begin (), v.end (), [](double a) { return (a > 0.95); }));
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-    auto mm = countDiffs (v3, v, 0.0001);
+    auto mm = gmlc::utilities::countDiffs (v3, v, 0.0001);
     BOOST_CHECK_EQUAL (mm, 0u);
 }
 

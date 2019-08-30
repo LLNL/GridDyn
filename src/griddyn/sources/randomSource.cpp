@@ -14,9 +14,11 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/gridRandom.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <iostream>
+
+using gmlc::utilities::convertToLowerCase;
 
 namespace griddyn
 {
@@ -120,7 +122,7 @@ void randomSource::setFlag (const std::string &flag, bool val)
     }
 }
 
-void randomSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void randomSource::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "min_t")
     {

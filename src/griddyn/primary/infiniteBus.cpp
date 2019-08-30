@@ -18,7 +18,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 infiniteBus::infiniteBus (const std::string &objName) : gridBus (objName)
 {
@@ -83,15 +83,15 @@ void infiniteBus::set (const std::string &param, const std::string &val)
     }
 }
 
-void infiniteBus::set (const std::string &param, double val, units_t unitType)
+void infiniteBus::set (const std::string &param, double val, unit unitType)
 {
     if (param == "dvdt")
     {
-        dvdt = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        dvdt = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "dfdt")
     {
-        dfdt = unitConversionFreq (val, unitType, puHz, systemBaseFrequency);
+        dfdt = convert (val, unitType, puHz, systemBaseFrequency);
     }
     else
     {

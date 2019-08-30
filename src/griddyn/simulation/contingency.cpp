@@ -13,7 +13,7 @@
 #include "contingency.h"
 #include "../events/Event.h"
 #include "../gridDynSimulation.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <map>
 #include <sstream>
@@ -169,7 +169,7 @@ void contingency::setContingencyRoot (gridDynSimulation *gdSim)
 
 void contingency::add (std::shared_ptr<Event> ge, index_t stage)
 {
-    ensureSizeAtLeast (eventList, stage + 1);
+    gmlc::utilities::ensureSizeAtLeast (eventList, stage + 1);
     eventList[stage].push_back (std::move (ge));
 }
 

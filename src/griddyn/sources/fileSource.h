@@ -10,11 +10,10 @@
 * LLNS Copyright End
 */
 
-#ifndef FILE_SOURCE_H_
-#define FILE_SOURCE_H_
+#pragma once
 
 #include "rampSource.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 
 namespace griddyn
 {
@@ -32,7 +31,7 @@ public:
 	};
 private:
 	std::string fileName_;  //!< name of the file
-	timeSeries<double, coreTime> schedLoad;  //!< time series containing the output schedule
+	gmlc::utilities::timeSeries<double, coreTime> schedLoad;  //!< time series containing the output schedule
 	index_t currIndex = 0;                //!< the current location in the file
 	count_t count = 0;            //!< the total number of elements in the file
 	index_t m_column = 0;         //!< the column of the file to use
@@ -44,7 +43,7 @@ public:
 
 	virtual void setFlag(const std::string &flag, bool val) override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 	int setFile(const std::string &fileName, index_t column);
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
@@ -59,6 +58,4 @@ private:
 };
 }//namespace sources
 }//namespace griddyn
-
-#endif
 

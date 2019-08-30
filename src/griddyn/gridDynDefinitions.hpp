@@ -85,7 +85,7 @@ using parameterName = const std::string &;
 
 /* may at some point use this type alias to convert all object parameters to this type and then move them to a new
 class to enable additional functionality*/
-using parameter_t = double;
+using model_parameter = double;
 
 /* define the basic vector types*/
 }  // namespace griddyn

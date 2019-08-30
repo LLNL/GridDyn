@@ -15,7 +15,7 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cmath>
 namespace griddyn
@@ -24,7 +24,7 @@ namespace loads
 {
 static typeFactory<aggregateLoad> glfld ("load", stringVec{"composite", "cluster", "group"});
 
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
 aggregateLoad::aggregateLoad (const std::string &objName) : zipLoad (objName)
 {
     aggregateLoad::add (new zipLoad (getName () + "sub"));
@@ -251,7 +251,7 @@ void aggregateLoad::set (const std::string &param, const std::string &val)
     }
     else if (param == "fraction")
     {
-        auto fval = str2vector<double> (val, -1.0);
+        auto fval = gmlc::utilities::str2vector<double> (val, -1.0);
         for (size_t nn = 0; nn < fval.size (); ++nn)
         {
             if (nn + 1 >= fraction.size ())
@@ -279,7 +279,7 @@ void aggregateLoad::set (const std::string &param, const std::string &val)
         zipLoad::set (param, val);
     }
 }
-void aggregateLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void aggregateLoad::set (const std::string &param, double val, units::unit unitType)
 {
     std::string iparam;
     int num = trailingStringInt (param, iparam, -1);

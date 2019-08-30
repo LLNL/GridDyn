@@ -38,12 +38,12 @@ public:
 	};
 
 protected:
-	parameter_t param1_t = 0.0;           //!< parameter 1 for time distribution
-	parameter_t param2_t = 100;           //!< parameter 2 for time distribution
-	parameter_t param1_L = 0.0;           //!< parameter 1 for level distribution
-	parameter_t param2_L = 0.0;           //!< parameter 2 for level distribution
-	parameter_t zbias = 0.0;           //!< a factor describing the preference of changes to trend toward zero mean
-	parameter_t offset = 0.0;          //!< the current bias in the value
+	model_parameter param1_t = 0.0;           //!< parameter 1 for time distribution
+	model_parameter param2_t = 100;           //!< parameter 2 for time distribution
+	model_parameter param1_L = 0.0;           //!< parameter 1 for level distribution
+	model_parameter param2_L = 0.0;           //!< parameter 2 for level distribution
+	model_parameter zbias = 0.0;           //!< a factor describing the preference of changes to trend toward zero mean
+	model_parameter offset = 0.0;          //!< the current bias in the value
 	coreTime keyTime = 0.0;         //!< the next time change
 	std::string timeDistribution = "constant";  //!< string representing the time Distribution random number generation type
 	std::string valDistribution = "constant";	//!< string representing the value Distribution random number generation type
@@ -66,7 +66,7 @@ public:
 	virtual void reset(reset_levels level = reset_levels::minimal) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 	virtual void updateA(coreTime time) override;
 
 	void setFlag(const std::string &flag, bool val = true) override;

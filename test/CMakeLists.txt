@@ -42,8 +42,6 @@ set(
     testLibrary_sources
     libraryTests/testCore.cpp
     libraryTests/testXML.cpp
-    libraryTests/testStringOps.cpp
-    libraryTests/testString_viewOps.cpp
     testHelperFunctions.cpp
     exeTestHelper.cpp
     libraryTests/libraryTests.cpp
@@ -55,9 +53,6 @@ set(
     libraryTests/testMatrixData.cpp
     libraryTests/testWorkQueue.cpp
     libraryTests/testZipUtilities.cpp
-    libraryTests/testStringConversion.cpp
-    libraryTests/testString_viewConversion.cpp
-    libraryTests/simpleQueueTests.cpp
     libraryTests/testOperatingBounds.cpp
     libraryTests/testValuePredictors.cpp
 )

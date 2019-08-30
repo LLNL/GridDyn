@@ -17,7 +17,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -49,6 +49,7 @@ std::ostream &operator<< (std::ostream &stream, const std::pair<std::string, std
 }
 
 using namespace griddyn;
+using namespace gmlc::utilities;
 
 static const std::vector<file_pair_t> compare_cases{
   {"case4gs.m", "case4gs_res.m"},

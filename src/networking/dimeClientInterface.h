@@ -13,7 +13,7 @@
 #pragma once
 
 #include "cppzmq/zmq_addon.hpp"
-#include "json/jsoncpp.h"
+#include "json/json.h"
 #include <exception>
 #include <memory>
 #include <string>
@@ -54,5 +54,4 @@ class dimeClientInterface
 
   private:
     std::unique_ptr<zmq::socket_t> socket;
-    std::unique_ptr<Json_gd::StreamWriter> writer{};
 };

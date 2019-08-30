@@ -24,7 +24,7 @@ class GovernorHydro : public GovernorIeeeSimple
 {
   public:
   protected:
-    parameter_t Tw;  //!< [s] spill tube time constant
+    model_parameter Tw;  //!< [s] spill tube time constant
   public:
     explicit GovernorHydro (const std::string &objName = "govHydro_#");
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
@@ -35,7 +35,7 @@ class GovernorHydro : public GovernorIeeeSimple
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
     virtual void

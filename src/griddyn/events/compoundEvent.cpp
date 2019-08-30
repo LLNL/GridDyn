@@ -12,7 +12,7 @@
 
 #include "compoundEvent.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "core/coreExceptions.h"
 #include <sstream>
 
@@ -95,7 +95,7 @@ void compoundEvent::getObjects(std::vector<coreObject *> &objects) const
 	}
 }
 
-void compoundEvent::setValue(double val, gridUnits::units_t newUnits)
+void compoundEvent::setValue(double val, units::unit newUnits)
 {
 	//TODO(pt):: THIS has issues
 	for (auto &vv : values)
@@ -147,17 +147,17 @@ std::string compoundEvent::to_string()
 		ss << '@' << triggerTime << " | ";
 		
 		ss << fullObjectName(targetObjects[0]) << ':' << fields[0];
-		if (units[0] != gridUnits::defUnit)
+		if (units[0] != units::defunit)
 		{
-			ss << '(' << gridUnits::to_string(units[0]) << ')';
+			ss << '(' << units::to_string(units[0]) << ')';
 		}
 		ss << " = " << values[0];
 		for (index_t kk = 1; kk < static_cast<index_t>(values.size()); ++kk)
 		{
 			ss << "; "<<fullObjectName(targetObjects[kk]) << ':' << fields[kk];
-			if (units[kk] != gridUnits::defUnit)
+			if (units[kk] != units::defunit)
 			{
-				ss << '(' << gridUnits::to_string(units[kk]) << ')';
+				ss << '(' << units::to_string(units[kk]) << ')';
 			}
 			ss << " = " << values[kk];
 		}

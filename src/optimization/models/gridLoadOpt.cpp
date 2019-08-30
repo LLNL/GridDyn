@@ -17,14 +17,14 @@
 #include "gridBusOpt.h"
 #include "griddyn/loads/zipLoad.h"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <utility>
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 static optObjectFactory<gridLoadOpt, zipLoad> opLoad ("basic", "load");
 
@@ -195,7 +195,7 @@ void gridLoadOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridLoadOpt::set (const std::string &param, double val, units_t unitType)
+void gridLoadOpt::set (const std::string &param, double val, unit unitType)
 {
     if (param[0] == '#')
     {
@@ -206,7 +206,7 @@ void gridLoadOpt::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double gridLoadOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridLoadOpt::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param == "#")

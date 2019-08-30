@@ -17,7 +17,7 @@
 #include "griddyn/Exciter.h"
 #include "griddyn/GenModel.h"
 #include "griddyn/Governor.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <iostream>
@@ -32,6 +32,8 @@ static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/")
 BOOST_FIXTURE_TEST_SUITE(xml_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
+using namespace gmlc::utilities;
+
 BOOST_AUTO_TEST_CASE (xml_test1)
 {
     // test the loading of a single bus
@@ -484,7 +486,7 @@ BOOST_AUTO_TEST_CASE (test_param_specs)
     BOOST_CHECK_CLOSE (ld1->get ("yq"), 0.11, 0.0001);
 
     BOOST_CHECK_CLOSE (ld2->get ("p"), 0.31, 0.0001);
-    BOOST_CHECK_CLOSE (ld2->get ("q", gridUnits::MVAR), 14.8, 0.0001);
+    BOOST_CHECK_CLOSE (ld2->get ("q", units::MVAR), 14.8, 0.0001);
     BOOST_CHECK_CLOSE (ld2->get ("yp"), 1.27, 0.0001);
     BOOST_CHECK_CLOSE (ld2->get ("yq"), 0.74, 0.0001);
     // TODO:: PT this capability is not enabled yet

@@ -100,7 +100,7 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
     if (!elementText.empty ())
     {
         elementText = ri.checkDefines (elementText);
-        gdRI.outputUnits = gridUnits::getUnits (elementText);
+        gdRI.outputUnits = units::unit_cast_from_string(elementText);
     }
     elementText = getElementField (element, "column", defMatchType);
     if (!elementText.empty ())

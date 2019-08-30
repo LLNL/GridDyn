@@ -14,54 +14,52 @@
 
 #include "core/helperObject.h"
 #include "elementReaderTemplates.hpp"
+#include "gmlc/utilities/stringConversion.h"
 #include "griddyn/gridDynSimulation.h"
 #include "readerHelper.h"
 #include "utilities/gridRandom.h"
-#include "utilities/stringConversion.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
 
 namespace griddyn
 {
 using namespace readerConfig;
+using namespace gmlc::utilities;
 
-void loadElementInformation (coreObject *obj,
-                             std::shared_ptr<readerElement> &element,
-                             const std::string &objectName,
-                             readerInfo &ri,
-                             const IgnoreListType &ignoreList)
+void loadElementInformation(coreObject *obj,
+                            std::shared_ptr<readerElement> &element,
+                            const std::string &objectName,
+                            readerInfo &ri,
+                            const IgnoreListType &ignoreList)
 {
-    objSetAttributes (obj, element, objectName, ri, ignoreList);
-    readImports (element, ri, obj, false);
+    objSetAttributes(obj, element, objectName, ri, ignoreList);
+    readImports(element, ri, obj, false);
     // check for child objects
-    loadSubObjects (element, ri, obj);
+    loadSubObjects(element, ri, obj);
 
     // get all element fields
-    paramLoopElement (obj, element, objectName, ri, ignoreList);
-    readImports (element, ri, obj, true);
+    paramLoopElement(obj, element, objectName, ri, ignoreList);
+    readImports(element, ri, obj, true);
 }
 
-void checkForEndUnits (gridParameter &param, const std::string &paramStr);
+void checkForEndUnits(gridParameter &param, const std::string &paramStr);
 
-static const std::string importString ("import");
-void readImports (std::shared_ptr<readerElement> &element,
-                  readerInfo &ri,
-                  coreObject *parentObject,
-                  bool finalFlag)
+static const std::string importString("import");
+void readImports(std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject, bool finalFlag)
 {
-    if (!element->hasElement (importString))
+    if (!element->hasElement(importString))
     {
         return;
     }
 
     // run any source files
-    auto bflags = ri.getFlags ();
-    element->bookmark ();
-    element->moveToFirstChild (importString);
-    while (element->isValid ())
+    auto bflags = ri.getFlags();
+    element->bookmark();
+    element->moveToFirstChild(importString);
+    while (element->isValid())
     {
         bool finalMode = false;
-        std::string fstring = getElementField (element, "final", defMatchType);
+        std::string fstring = getElementField(element, "final", defMatchType);
 
         if ((fstring == "true") || (fstring == "1"))
         {
@@ -70,139 +68,139 @@ void readImports (std::shared_ptr<readerElement> &element,
 
         if (finalFlag != finalMode)
         {
-            element->moveToNextSibling (importString);
+            element->moveToNextSibling(importString);
             continue;
         }
 
-        std::string flags = getElementField (element, "flags", defMatchType);
-        if (!flags.empty ())
+        std::string flags = getElementField(element, "flags", defMatchType);
+        if (!flags.empty())
         {
-            addflags (ri, flags);
+            addflags(ri, flags);
         }
-        std::string sourceFile = getElementField (element, "file", defMatchType);
-        if (sourceFile.empty ())
+        std::string sourceFile = getElementField(element, "file", defMatchType);
+        if (sourceFile.empty())
         {
             // if we don't find a field named file, just use the text in the source element
-            sourceFile = element->getText ();
+            sourceFile = element->getText();
         }
 
         // check through the files to find the right location
-        ri.checkFileParam (sourceFile, true);
+        ri.checkFileParam(sourceFile, true);
 
-        boost::filesystem::path sourcePath (sourceFile);
-        std::string prefix = getElementField (element, "prefix", match_type::capital_case_match);
+        boost::filesystem::path sourcePath(sourceFile);
+        std::string prefix = getElementField(element, "prefix", match_type::capital_case_match);
         // get the prefix if any
-        if (prefix.empty ())
+        if (prefix.empty())
         {
             prefix = ri.prefix;
         }
-        else if (!(ri.prefix.empty ()))
+        else if (!(ri.prefix.empty()))
         {
             prefix = ri.prefix + '_' + prefix;
         }
 
         // check for type override
-        std::string ext = convertToLowerCase (getElementField (element, "filetype", defMatchType));
+        std::string ext = convertToLowerCase(getElementField(element, "filetype", defMatchType));
 
-        std::swap (prefix, ri.prefix);
-        if (ext.empty ())
+        std::swap(prefix, ri.prefix);
+        if (ext.empty())
         {
-            loadFile (parentObject, sourceFile, &ri);
+            loadFile(parentObject, sourceFile, &ri);
         }
         else
         {
-            loadFile (parentObject, sourceFile, &ri, ext);
+            loadFile(parentObject, sourceFile, &ri, ext);
         }
-        std::swap (prefix, ri.prefix);
+        std::swap(prefix, ri.prefix);
 
-        ri.setAllFlags (bflags);
-        element->moveToNextSibling (importString);  // next import file
+        ri.setAllFlags(bflags);
+        element->moveToNextSibling(importString);  // next import file
     }
-    element->restore ();
+    element->restore();
 }
 
-static const std::string unitString1 ("units");
-static const std::string unitString2 ("unit");
+static const std::string unitString1("units");
+static const std::string unitString2("unit");
 
-gridUnits::units_t readUnits (const std::shared_ptr<readerElement> &element, const std::string &field)
+units::unit readUnits(const std::shared_ptr<readerElement> &element, const std::string &field)
 {
-    std::string uname = element->getAttributeText (unitString1);
+    std::string uname = element->getAttributeText(unitString1);
     // actually specifying a "unit" attribute takes precedence
-    if (uname.empty ())
+    if (uname.empty())
     {
-        uname = element->getAttributeText (unitString2);
+        uname = element->getAttributeText(unitString2);
     }
-    if (!uname.empty ())
+    if (!uname.empty())
     {
-        auto retUnits = gridUnits::getUnits (uname);
-        if (retUnits == gridUnits::defUnit)
+        auto retUnits = units::unit_cast_from_string(uname);
+        if (!units::is_valid(retUnits))
         {
-            WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
+            WARNPRINT(READER_WARN_ALL, "unknown unit " << uname);
         }
         return retUnits;
     }
-    if (field.back () == ')')
+    if (field.back() == ')')
     {
-        auto p = field.find_last_of ('(');
+        auto p = field.find_last_of('(');
 
         if (p != std::string::npos)
         {
-            uname = field.substr (p + 1, field.length () - 2 - p);
-            auto retUnits = gridUnits::getUnits (uname);
-            if (retUnits == gridUnits::defUnit)
+            uname = field.substr(p + 1, field.length() - 2 - p);
+            auto retUnits = units::unit_cast_from_string(uname);
+            if (!units::is_valid(retUnits))
             {
-                WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
+                WARNPRINT(READER_WARN_ALL, "unknown unit " << uname);
             }
             return retUnits;
         }
     }
-    return gridUnits::defUnit;
+    return units::defunit;
 }
 
-static const std::string valueString ("value");
+static const std::string valueString("value");
 
-gridParameter getElementParam (const std::shared_ptr<readerElement> &element)
+gridParameter getElementParam(const std::shared_ptr<readerElement> &element)
 {
     gridParameter P;
-    getElementParam (element, P);
+    getElementParam(element, P);
     return P;
 }
 
-void getElementParam (const std::shared_ptr<readerElement> &element, gridParameter &param)
+void getElementParam(const std::shared_ptr<readerElement> &element, gridParameter &param)
 {
-    param.paramUnits = gridUnits::defUnit;
+    param.paramUnits = units::defunit;
     param.valid = false;
-    std::string fieldName = convertToLowerCase (element->getName ());
+    std::string fieldName = convertToLowerCase(element->getName());
 
     if (fieldName == "param")
     {
-        std::string pname = element->getAttributeText ("name");
-        if (pname.empty ())
+        std::string pname = element->getAttributeText("name");
+        if (pname.empty())
         {
-            pname = element->getAttributeText ("field");
+            pname = element->getAttributeText("field");
         }
-        if (pname.empty ())
+        if (pname.empty())
         {
             // no name or field attribute so just read the string and see if we can process it
-            param.fromString (element->getText ());
+            param.fromString(element->getText());
             return;
         }
-        param.paramUnits = readUnits (element, pname);
-        if (pname.back () == ')')
+        param.paramUnits = readUnits(element, pname);
+        if (pname.back() == ')')
         {
-            auto p = pname.find_last_of ('(');
+            auto p = pname.find_last_of('(');
             if (p != std::string::npos)
             {
-                pname.erase (p);
+                pname.erase(p);
             }
         }
-        param.field = convertToLowerCase (pname);
-        if (element->hasAttribute (valueString))
+        param.field = convertToLowerCase(pname);
+        if (element->hasAttribute(valueString))
         {
-            param.value = element->getAttributeValue (valueString);
+            param.value = element->getAttributeValue(valueString);
             if (param.value == readerNullVal)
             {
-                checkForEndUnits (param, element->getAttributeText (valueString));
+                checkForEndUnits(param, element->getAttributeText(valueString));
             }
             else
             {
@@ -211,10 +209,10 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
         }
         else
         {
-            param.value = element->getValue ();
+            param.value = element->getValue();
             if (param.value == readerNullVal)
             {
-                checkForEndUnits (param, element->getText ());
+                checkForEndUnits(param, element->getText());
             }
             else
             {
@@ -225,20 +223,20 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
     // all other properties
     else
     {
-        param.paramUnits = readUnits (element, fieldName);
-        if (fieldName.back () == ')')
+        param.paramUnits = readUnits(element, fieldName);
+        if (fieldName.back() == ')')
         {
-            auto p = fieldName.find_last_of ('(');
+            auto p = fieldName.find_last_of('(');
             if (p != std::string::npos)
             {
-                fieldName.erase (p);
+                fieldName.erase(p);
             }
         }
         param.field = fieldName;
-        param.value = element->getValue ();
+        param.value = element->getValue();
         if (param.value == readerNullVal)
         {
-            checkForEndUnits (param, element->getText ());
+            checkForEndUnits(param, element->getText());
         }
         else
         {
@@ -248,408 +246,412 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
     param.valid = true;
 }
 
-void checkForEndUnits (gridParameter &param, const std::string &paramStr)
+void checkForEndUnits(gridParameter &param, const std::string &paramStr)
 {
-    double val = numeric_conversion (paramStr, readerNullVal);
+    double val = numeric_conversion(paramStr, readerNullVal);
     if (val != readerNullVal)
     {
-        auto N = paramStr.find_last_of ("012345689. )]");
-        auto Unit = gridUnits::getUnits (paramStr.substr (N + 1));
-        if (Unit != gridUnits::defUnit)
+        auto N = paramStr.find_last_of("012345689. )]");
+        if (N < paramStr.size() - 1)
         {
-            param.value = val;
-            param.paramUnits = Unit;
-            param.stringType = false;
-            return;
+            auto Unit = units::unit_cast_from_string(paramStr.substr(N + 1));
+            if (units::is_valid(Unit))
+            {
+                param.value = val;
+                param.paramUnits = Unit;
+                param.stringType = false;
+                return;
+            }
         }
+        
     }
     param.strVal = paramStr;
     param.stringType = true;
 }
 
-static const IgnoreListType keywords{"type",      "ref",      "number",        "index",   "retype",
-                                     "name",      "define",   "library",       "import",  "area",
-                                     "bus",       "link",     "load",          "exciter", "if",
-                                     "source",    "governor", "block",         "pss",     "simulation",
-                                     "generator", "array",    "relay",         "parent",  "genmodel",
-                                     "line",      "solver",   "agc",           "reserve", "reservedispatch",
-                                     "dispatch",  "econ",     "configuration", "custom",  "purpose",
-                                     "event",     "collector","extra"};
+static const IgnoreListType keywords{"type",      "ref",       "number",        "index",   "retype",
+                                     "name",      "define",    "library",       "import",  "area",
+                                     "bus",       "link",      "load",          "exciter", "if",
+                                     "source",    "governor",  "block",         "pss",     "simulation",
+                                     "generator", "array",     "relay",         "parent",  "genmodel",
+                                     "line",      "solver",    "agc",           "reserve", "reservedispatch",
+                                     "dispatch",  "econ",      "configuration", "custom",  "purpose",
+                                     "event",     "collector", "extra"};
 
-void objSetAttributes (coreObject *obj,
-                       std::shared_ptr<readerElement> &element,
-                       const std::string &component,
-                       readerInfo &ri,
-                       const IgnoreListType &ignoreList)
+void objSetAttributes(coreObject *obj,
+                      std::shared_ptr<readerElement> &element,
+                      const std::string &component,
+                      readerInfo &ri,
+                      const IgnoreListType &ignoreList)
 {
-    auto att = element->getFirstAttribute ();
-    while (att.isValid ())
+    auto att = element->getFirstAttribute();
+    while (att.isValid())
     {
-        gridUnits::units_t unitType = gridUnits::defUnit;
-        std::string fieldName = convertToLowerCase (att.getName ());
+        units::unit unitType = units::defunit;
+        std::string fieldName = convertToLowerCase(att.getName());
 
-        if (fieldName.back () == ')')
+        if (fieldName.back() == ')')
         {
-            auto p = fieldName.find_last_of ('(');
+            auto p = fieldName.find_last_of('(');
             if (p != std::string::npos)
             {
-                std::string ustring = fieldName.substr (p + 1, fieldName.length () - 2 - p);
-                unitType = gridUnits::getUnits (ustring);
-                fieldName = fieldName.substr (0, p - 1);
+                std::string ustring = fieldName.substr(p + 1, fieldName.length() - 2 - p);
+                unitType = units::unit_cast_from_string(ustring);
+                fieldName = fieldName.substr(0, p - 1);
             }
         }
-        auto ifind = keywords.find (fieldName);
-        if (ifind != keywords.end ())
+        auto ifind = keywords.find(fieldName);
+        if (ifind != keywords.end())
         {
-            att = element->getNextAttribute ();
+            att = element->getNextAttribute();
             continue;
         }
-        ifind = ignoreList.find (fieldName);
-        if (ifind != ignoreList.end ())
+        ifind = ignoreList.find(fieldName);
+        if (ifind != ignoreList.end())
         {
-            att = element->getNextAttribute ();
+            att = element->getNextAttribute();
             continue;
         }
 
-        if ((fieldName.find ("file") != std::string::npos) || (fieldName == "fmu"))
+        if ((fieldName.find("file") != std::string::npos) || (fieldName == "fmu"))
         {
-            std::string strVal = att.getText ();
-            ri.checkFileParam (strVal);
-            gridParameter po (fieldName, strVal);
-            objectParameterSet (component, obj, po);
+            std::string strVal = att.getText();
+            ri.checkFileParam(strVal);
+            gridParameter po(fieldName, strVal);
+            objectParameterSet(component, obj, po);
         }
-        else if ((fieldName.find ("workdir") != std::string::npos) ||
-                 (fieldName.find ("directory") != std::string::npos))
+        else if ((fieldName.find("workdir") != std::string::npos) ||
+                 (fieldName.find("directory") != std::string::npos))
         {
-            std::string strVal = att.getText ();
-            ri.checkDirectoryParam (strVal);
-            gridParameter po (fieldName, strVal);
-            objectParameterSet (component, obj, po);
+            std::string strVal = att.getText();
+            ri.checkDirectoryParam(strVal);
+            gridParameter po(fieldName, strVal);
+            objectParameterSet(component, obj, po);
         }
         else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
         {
             try
             {
-                setMultipleFlags (obj, att.getText ());
+                setMultipleFlags(obj, att.getText());
             }
             catch (const unrecognizedParameter &)
             {
-                WARNPRINT (READER_WARN_ALL, "unrecognized flag " << att.getText () << "\n");
+                WARNPRINT(READER_WARN_ALL, "unrecognized flag " << att.getText() << "\n");
             }
         }
         else
         {
-            double val = att.getValue ();
+            double val = att.getValue();
             if (val != readerNullVal)
             {
-                gridParameter po (fieldName, val);
+                gridParameter po(fieldName, val);
                 po.paramUnits = unitType;
-                objectParameterSet (component, obj, po);
+                objectParameterSet(component, obj, po);
             }
             else
             {
-                gridParameter po (fieldName, att.getText ());
-                paramStringProcess (po, ri);
-                objectParameterSet (component, obj, po);
+                gridParameter po(fieldName, att.getText());
+                paramStringProcess(po, ri);
+                objectParameterSet(component, obj, po);
             }
         }
-        att = element->getNextAttribute ();
+        att = element->getNextAttribute();
     }
 }
 
-void paramLoopElement (coreObject *obj,
-                       std::shared_ptr<readerElement> &element,
-                       const std::string &component,
-                       readerInfo &ri,
-                       const IgnoreListType &ignoreList)
+void paramLoopElement(coreObject *obj,
+                      std::shared_ptr<readerElement> &element,
+                      const std::string &component,
+                      readerInfo &ri,
+                      const IgnoreListType &ignoreList)
 {
-    element->moveToFirstChild ();
-    while (element->isValid ())
+    element->moveToFirstChild();
+    while (element->isValid())
     {
-        std::string fieldName = convertToLowerCase (element->getName ());
-        auto ifind = keywords.find (fieldName);
-        if (ifind != keywords.end ())
+        std::string fieldName = convertToLowerCase(element->getName());
+        auto ifind = keywords.find(fieldName);
+        if (ifind != keywords.end())
         {
-            element->moveToNextSibling ();
+            element->moveToNextSibling();
             continue;
         }
-        ifind = ri.getIgnoreList ().find (fieldName);
-        if (ifind != ri.getIgnoreList ().end ())
+        ifind = ri.getIgnoreList().find(fieldName);
+        if (ifind != ri.getIgnoreList().end())
         {
-            element->moveToNextSibling ();
+            element->moveToNextSibling();
             continue;
         }
-        ifind = ignoreList.find (fieldName);
-        if (ifind != ignoreList.end ())
+        ifind = ignoreList.find(fieldName);
+        if (ifind != ignoreList.end())
         {
-            element->moveToNextSibling ();
+            element->moveToNextSibling();
             continue;
         }
         // get all the parameter fields
-        auto param = getElementParam (element);
+        auto param = getElementParam(element);
         if (param.valid)
         {
             if (param.stringType)
             {
-                if ((param.field.find ("file") != std::string::npos) || (param.field == "fmu"))
+                if ((param.field.find("file") != std::string::npos) || (param.field == "fmu"))
                 {
-                    ri.checkFileParam (param.strVal);
-                    objectParameterSet (component, obj, param);
+                    ri.checkFileParam(param.strVal);
+                    objectParameterSet(component, obj, param);
                 }
-                else if ((param.field.find ("workdir") != std::string::npos) ||
-                         (param.field.find ("directory") != std::string::npos))
+                else if ((param.field.find("workdir") != std::string::npos) ||
+                         (param.field.find("directory") != std::string::npos))
                 {
-                    ri.checkDirectoryParam (param.strVal);
-                    objectParameterSet (component, obj, param);
+                    ri.checkDirectoryParam(param.strVal);
+                    objectParameterSet(component, obj, param);
                 }
                 else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
                 {
-                    paramStringProcess (param, ri);
+                    paramStringProcess(param, ri);
                     try
                     {
-                        setMultipleFlags (obj, param.strVal);
+                        setMultipleFlags(obj, param.strVal);
                     }
                     catch (const unrecognizedParameter &)
                     {
-                        WARNPRINT (READER_WARN_ALL, "unrecognized flag in " << param.strVal << "\n");
+                        WARNPRINT(READER_WARN_ALL, "unrecognized flag in " << param.strVal << "\n");
                     }
                 }
                 else
                 {
-                    paramStringProcess (param, ri);
-                    objectParameterSet (component, obj, param);
+                    paramStringProcess(param, ri);
+                    objectParameterSet(component, obj, param);
                 }
             }
             else
             {
-                objectParameterSet (component, obj, param);
+                objectParameterSet(component, obj, param);
             }
         }
-        element->moveToNextSibling ();
+        element->moveToNextSibling();
     }
-    element->moveToParent ();
+    element->moveToParent();
 }
 
-void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & /*ri*/)
+void readConfigurationFields(std::shared_ptr<readerElement> &sim, readerInfo & /*ri*/)
 {
-    if (sim->hasElement ("configuration"))
+    if (sim->hasElement("configuration"))
     {
-        sim->bookmark ();
-        sim->moveToFirstChild ("configuration");
-        auto cfgAtt = sim->getFirstAttribute ();
+        sim->bookmark();
+        sim->moveToFirstChild("configuration");
+        auto cfgAtt = sim->getFirstAttribute();
 
-        while (cfgAtt.isValid ())
+        while (cfgAtt.isValid())
         {
-            auto cfgname = convertToLowerCase (cfgAtt.getName ());
+            auto cfgname = convertToLowerCase(cfgAtt.getName());
             if ((cfgname == "matching") || (cfgname == "match_type"))
             {
-                readerConfig::setDefaultMatchType (cfgAtt.getText ());
+                readerConfig::setDefaultMatchType(cfgAtt.getText());
             }
             else if (cfgname == "printlevel")
             {
-                readerConfig::setPrintMode (cfgAtt.getText ());
+                readerConfig::setPrintMode(cfgAtt.getText());
             }
             else if ((cfgname == "xmlreader") || (cfgname == "xml"))
             {
-                readerConfig::setDefaultXMLReader (cfgAtt.getText ());
+                readerConfig::setDefaultXMLReader(cfgAtt.getText());
             }
             else if ((cfgname == "seed"))
             {
                 try
                 {
-                    auto seed = std::stoll (cfgAtt.getText ());
-                    utilities::gridRandom::setSeed (seed);
+                    auto seed = std::stoul(cfgAtt.getText());
+                    utilities::gridRandom::setSeed(seed);
                 }
                 catch (const std::invalid_argument &)
                 {
-                    WARNPRINT (READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
                 }
             }
-            cfgAtt = sim->getNextAttribute ();
+            cfgAtt = sim->getNextAttribute();
         }
 
-        sim->moveToFirstChild ();
-        while (sim->isValid ())
+        sim->moveToFirstChild();
+        while (sim->isValid())
         {
-            auto fieldName = convertToLowerCase (sim->getName ());
+            auto fieldName = convertToLowerCase(sim->getName());
             if ((fieldName == "matching") || (fieldName == "match_type"))
             {
-                readerConfig::setDefaultMatchType (sim->getText ());
+                readerConfig::setDefaultMatchType(sim->getText());
             }
             else if (fieldName == "printlevel")
             {
-                readerConfig::setPrintMode (sim->getText ());
+                readerConfig::setPrintMode(sim->getText());
             }
             else if ((fieldName == "xmlreader") || (fieldName == "xml"))
             {
-                readerConfig::setDefaultXMLReader (sim->getText ());
+                readerConfig::setDefaultXMLReader(sim->getText());
             }
             else if ((fieldName == "seed"))
             {
                 try
                 {
-                    auto seed = std::stoll (cfgAtt.getText ());
-                    utilities::gridRandom::setSeed (seed);
+                    auto seed = std::stoul(cfgAtt.getText());
+                    utilities::gridRandom::setSeed(seed);
                 }
                 catch (const std::invalid_argument &)
                 {
-                    WARNPRINT (READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
                 }
             }
-            sim->moveToNextSibling ();
+            sim->moveToNextSibling();
         }
 
-        sim->restore ();
+        sim->restore();
     }
 }
 
-void setAttributes (helperObject *obj,
-                    std::shared_ptr<readerElement> &element,
-                    const std::string &component,
-                    readerInfo &ri,
-                    const IgnoreListType &ignoreList)
+void setAttributes(helperObject *obj,
+                   std::shared_ptr<readerElement> &element,
+                   const std::string &component,
+                   readerInfo &ri,
+                   const IgnoreListType &ignoreList)
 {
     using namespace readerConfig;
-    auto att = element->getFirstAttribute ();
+    auto att = element->getFirstAttribute();
 
-    while (att.isValid ())
+    while (att.isValid())
     {
-        std::string fieldName = convertToLowerCase (att.getName ());
+        std::string fieldName = convertToLowerCase(att.getName());
 
-        auto ifind = ignoreList.find (fieldName);
-        if (ifind != ignoreList.end ())
+        auto ifind = ignoreList.find(fieldName);
+        if (ifind != ignoreList.end())
         {
-            att = element->getNextAttribute ();
+            att = element->getNextAttribute();
             continue;
         }
         try
         {
-            if ((fieldName.find ("file") != std::string::npos) || (fieldName == "fmu"))
+            if ((fieldName.find("file") != std::string::npos) || (fieldName == "fmu"))
             {
-                std::string strVal = att.getText ();
-                ri.checkFileParam (strVal);
-                LEVELPRINT (READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << strVal);
-                obj->set (fieldName, strVal);
+                std::string strVal = att.getText();
+                ri.checkFileParam(strVal);
+                LEVELPRINT(READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << strVal);
+                obj->set(fieldName, strVal);
             }
             else
             {
-                double val = att.getValue ();
+                double val = att.getValue();
                 if ((val != readerNullVal) && (val != kNullVal))
                 {
-                    LEVELPRINT (READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << val);
-                    obj->set (fieldName, val);
+                    LEVELPRINT(READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << val);
+                    obj->set(fieldName, val);
                 }
                 else
                 {
-                    gridParameter po (fieldName, att.getText ());
-                    paramStringProcess (po, ri);
+                    gridParameter po(fieldName, att.getText());
+                    paramStringProcess(po, ri);
                     if (po.stringType)
                     {
-                        obj->set (po.field, po.strVal);
-                        LEVELPRINT (READER_VERBOSE_PRINT,
-                                    component << ": setting " << fieldName << " to " << po.strVal);
+                        obj->set(po.field, po.strVal);
+                        LEVELPRINT(READER_VERBOSE_PRINT,
+                                   component << ": setting " << fieldName << " to " << po.strVal);
                     }
                     else
                     {
-                        obj->set (po.field, po.value);
-                        LEVELPRINT (READER_VERBOSE_PRINT,
-                                    component << ": setting " << fieldName << " to " << po.value);
+                        obj->set(po.field, po.value);
+                        LEVELPRINT(READER_VERBOSE_PRINT,
+                                   component << ": setting " << fieldName << " to " << po.value);
                     }
                 }
             }
         }
         catch (const unrecognizedParameter &)
         {
-            WARNPRINT (READER_WARN_ALL, "unknown " << component << " parameter " << fieldName);
+            WARNPRINT(READER_WARN_ALL, "unknown " << component << " parameter " << fieldName);
         }
         catch (const invalidParameterValue &)
         {
-            WARNPRINT (READER_WARN_ALL, "value for " << component << " parameter " << fieldName << " ("
-                                                     << att.getText () << ") is invalid");
+            WARNPRINT(READER_WARN_ALL, "value for " << component << " parameter " << fieldName << " ("
+                                                    << att.getText() << ") is invalid");
         }
 
-        att = element->getNextAttribute ();
+        att = element->getNextAttribute();
     }
 }
 
-void setParams (helperObject *obj,
-                std::shared_ptr<readerElement> &element,
-                const std::string &component,
-                readerInfo &ri,
-                const IgnoreListType &ignoreList)
+void setParams(helperObject *obj,
+               std::shared_ptr<readerElement> &element,
+               const std::string &component,
+               readerInfo &ri,
+               const IgnoreListType &ignoreList)
 {
     using namespace readerConfig;
 
-    element->moveToFirstChild ();
-    while (element->isValid ())
+    element->moveToFirstChild();
+    while (element->isValid())
     {
-        std::string fieldName = convertToLowerCase (element->getName ());
-        auto ifind = ignoreList.find (fieldName);
-        if (ifind != ignoreList.end ())
+        std::string fieldName = convertToLowerCase(element->getName());
+        auto ifind = ignoreList.find(fieldName);
+        if (ifind != ignoreList.end())
         {
-            element->moveToNextSibling ();
+            element->moveToNextSibling();
             continue;
         }
 
-        auto param = getElementParam (element);
+        auto param = getElementParam(element);
         if (param.valid)
         {
             try
             {
                 if (param.stringType)
                 {
-                    if ((param.field.find ("file") != std::string::npos) || (param.field == "fmu"))
+                    if ((param.field.find("file") != std::string::npos) || (param.field == "fmu"))
                     {
-                        ri.checkFileParam (param.strVal);
-                        LEVELPRINT (READER_VERBOSE_PRINT,
-                                    component << ":setting " << obj->getName () << " file to " << param.strVal);
-                        obj->set (param.field, param.strVal);
+                        ri.checkFileParam(param.strVal);
+                        LEVELPRINT(READER_VERBOSE_PRINT,
+                                   component << ":setting " << obj->getName() << " file to " << param.strVal);
+                        obj->set(param.field, param.strVal);
                     }
                     else
                     {
-                        paramStringProcess (param, ri);
+                        paramStringProcess(param, ri);
                         if (param.stringType)
                         {
-                            LEVELPRINT (READER_VERBOSE_PRINT, component << ":setting " << obj->getName () << " "
-                                                                        << param.field << " to " << param.strVal);
-                            obj->set (param.field, param.strVal);
+                            LEVELPRINT(READER_VERBOSE_PRINT, component << ":setting " << obj->getName() << " "
+                                                                       << param.field << " to " << param.strVal);
+                            obj->set(param.field, param.strVal);
                         }
                         else
                         {
-                            LEVELPRINT (READER_VERBOSE_PRINT, component << ":setting " << obj->getName () << " "
-                                                                        << param.field << " to " << param.value);
-                            obj->set (param.field, param.value);
+                            LEVELPRINT(READER_VERBOSE_PRINT, component << ":setting " << obj->getName() << " "
+                                                                       << param.field << " to " << param.value);
+                            obj->set(param.field, param.value);
                         }
                     }
                 }
                 else
                 {
-                    LEVELPRINT (READER_VERBOSE_PRINT, component << ":setting " << obj->getName () << " "
-                                                                << param.field << " to " << param.value);
-                    obj->set (param.field, param.value);
+                    LEVELPRINT(READER_VERBOSE_PRINT, component << ":setting " << obj->getName() << " "
+                                                               << param.field << " to " << param.value);
+                    obj->set(param.field, param.value);
                 }
             }
             catch (const unrecognizedParameter &)
             {
-                WARNPRINT (READER_WARN_ALL, "unknown " << component << " parameter " << param.field);
+                WARNPRINT(READER_WARN_ALL, "unknown " << component << " parameter " << param.field);
             }
             catch (const invalidParameterValue &)
             {
                 if (param.stringType)
                 {
-                    WARNPRINT (READER_WARN_ALL, "value for " << component << " parameter " << param.field << " ("
-                                                             << param.strVal << ") is invalid");
+                    WARNPRINT(READER_WARN_ALL, "value for " << component << " parameter " << param.field << " ("
+                                                            << param.strVal << ") is invalid");
                 }
                 else
                 {
-                    WARNPRINT (READER_WARN_ALL, "value for " << component << " parameter " << param.field << " ("
-                                                             << param.value << ") is invalid");
+                    WARNPRINT(READER_WARN_ALL, "value for " << component << " parameter " << param.field << " ("
+                                                            << param.value << ") is invalid");
                 }
             }
         }
-        element->moveToNextSibling ();
+        element->moveToNextSibling();
     }
-    element->moveToParent ();
+    element->moveToParent();
 }
 
 }  // namespace griddyn

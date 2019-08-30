@@ -26,7 +26,7 @@ class compoundEvent : public Event
   protected:
     stringVec fields;  //!< the vector of fields to modify
     std::vector<double> values;  //!< the vector of values to change to
-    std::vector<gridUnits::units_t> units;  //!< vector of units corresponding to the changes
+    std::vector<units::unit> units;  //!< vector of units corresponding to the changes
     std::vector<coreObject *> targetObjects;  //!< the set of objects to target
   public:
     explicit compoundEvent (const std::string &eventName);
@@ -43,7 +43,7 @@ class compoundEvent : public Event
     virtual void set (const std::string &param, double val) override;
     virtual void set (const std::string &param, const std::string &val) override;
 
-    virtual void setValue (double val, gridUnits::units_t newUnits = gridUnits::defUnit) override;
+    virtual void setValue (double val, units::unit newUnits = units::defunit) override;
     virtual void setValue (const std::vector<double> &val);
     virtual std::string to_string () override;
 

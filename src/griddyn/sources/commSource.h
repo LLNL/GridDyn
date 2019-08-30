@@ -29,7 +29,7 @@ class commSource : public rampSource
     std::shared_ptr<Communicator> commLink;  //!< communicator link
     gridSimulation *rootSim = nullptr;  //!< pointer to the root simulation
     comms::commManager cManager;  //!< comm manager object to build and manage the comm link
-    parameter_t maxRamp = kBigNum;  //!< the maximum rate of change of the source
+    model_parameter maxRamp = kBigNum;  //!< the maximum rate of change of the source
   public:
     enum commSourceFlags
     {
@@ -43,7 +43,7 @@ class commSource : public rampSource
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val) override;
 
     virtual void setLevel (double val) override;

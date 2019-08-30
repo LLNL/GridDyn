@@ -173,12 +173,12 @@ void nullBlock::setFlag (const std::string &flag, bool val)
 
 // set parameters
 void nullBlock::set (const std::string &param, const std::string &val) { gridSubModel::set (param, val); }
-void nullBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void nullBlock::set (const std::string &param, double val, units::unit unitType)
 {
     gridSubModel::set (param, val, unitType);
 }
 
-double nullBlock::get (const std::string &param, gridUnits::units_t unitType) const
+double nullBlock::get (const std::string &param, units::unit unitType) const
 {
     return gridSubModel::get (param, unitType);
 }

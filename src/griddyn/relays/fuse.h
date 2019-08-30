@@ -35,8 +35,8 @@ class fuse : public Relay
   protected:
     index_t m_terminal = 1;  //!< line terminal  (typically 1 or 2)
     // 4 byte gap here to use for something if need be
-    parameter_t limit = kBigNum;  //!<[puA] maximum current
-    parameter_t mp_I2T = 0.0;  //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
+    model_parameter limit = kBigNum;  //!<[puA] maximum current
+    model_parameter mp_I2T = 0.0;  //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
     coreTime minBlowTime = 0.001;  //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
   private:
     double cI2T = 0.0;  //!< calculated I2t value for fuse
@@ -50,7 +50,7 @@ class fuse : public Relay
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 

@@ -15,7 +15,7 @@
 #include "../gridBus.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 
@@ -90,7 +90,7 @@ void GenModelGENROU::algebraicUpdate (const IOdata &inputs,
 {
     auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
-    solve2x2 (Rs, (Xqpp + Xl), -(Xdpp + Xl), Rs, Loc.diffStateLoc[4] - Vd, Loc.diffStateLoc[5] - Vq,
+    gmlc::utilities::solve2x2 (Rs, (Xqpp + Xl), -(Xdpp + Xl), Rs, Loc.diffStateLoc[4] - Vd, Loc.diffStateLoc[5] - Vq,
               Loc.destLoc[0], Loc.destLoc[1]);
     m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }

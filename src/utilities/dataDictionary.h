@@ -10,11 +10,9 @@
  * LLNS Copyright End
  */
 
-#ifndef DATA_DICTIONARY_H_
-#define DATA_DICTIONARY_H_
 #pragma once
 
-#include "mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include <mutex>
 /** creating a thread safe database object
 @tparam keyType the lookup key type
@@ -83,4 +81,3 @@ class dataDictionary
     }
 };
 
-#endif

@@ -14,8 +14,8 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -308,7 +308,7 @@ void blockSequence::set (const std::string &param, const std::string &val)
     }
 }
 
-void blockSequence::set (const std::string &param, double val, gridUnits::units_t unitType)
+void blockSequence::set (const std::string &param, double val, units::unit unitType)
 {
     if (param[0] == '#')
     {

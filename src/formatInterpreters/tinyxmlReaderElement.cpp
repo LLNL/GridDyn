@@ -21,7 +21,10 @@
 #include <ticpp/ticpp.h>
 #endif
 
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
+
+using namespace gmlc::utilities;
+
 tinyxmlReaderElement::tinyxmlReaderElement () = default;
 tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName)
 {

@@ -132,7 +132,7 @@ class Link : public gridPrimary
     virtual int fixRealPower (double power,
                               id_type_t measureTerminal,
                               id_type_t fixedTerminal = 0,
-                              gridUnits::units_t unitType = gridUnits::defUnit);
+                              units::unit unitType = units::defunit);
     /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
      performs the calculations necessary to get the power at the measureTerminal to be a certain value
     @param[in] rPower  the desired real power flow as measured by measureTerminal
@@ -148,7 +148,7 @@ class Link : public gridPrimary
                           double qPower,
                           id_type_t measureTerminal,
                           id_type_t fixedTerminal = 0,
-                          gridUnits::units_t unitType = gridUnits::defUnit);
+                          units::unit unitType = units::defunit);
     /** @brief propagate a network number to all connected buses
      checks if a link actually connects the two buses in an AC sense, then checks if a bus is already part of the
     specified network and if not it adds it to the queue
@@ -271,10 +271,10 @@ class Link : public gridPrimary
     virtual double getMaxTransfer () const;
 
     virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     gridBus *getBus (index_t busInd) const override;
 

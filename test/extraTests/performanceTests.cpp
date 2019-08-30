@@ -18,7 +18,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <chrono>
 #include <cstdio>
 #include <iostream>
@@ -28,6 +28,7 @@
 #include <fstream>
 
 using namespace griddyn;
+using namespace gmlc::utilities;
 
 BOOST_FIXTURE_TEST_SUITE (performance_tests, gridDynSimulationTestFixture)
 

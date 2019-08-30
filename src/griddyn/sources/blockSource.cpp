@@ -149,7 +149,7 @@ void blockSource::set (const std::string &param, const std::string &val)
         }
     }
 }
-void blockSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void blockSource::set (const std::string &param, double val, units::unit unitType)
 {
     if (subObjectSet (param, val, unitType))
     {
@@ -174,7 +174,7 @@ void blockSource::set (const std::string &param, double val, gridUnits::units_t 
         }
     }
 }
-double blockSource::get (const std::string &param, gridUnits::units_t unitType) const
+double blockSource::get (const std::string &param, units::unit unitType) const
 {
     double rval = Source::get (param, unitType);
     if (rval == kNullVal)

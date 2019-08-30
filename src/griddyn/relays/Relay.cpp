@@ -29,14 +29,14 @@
 #include "fuse.h"
 #include "loadRelay.h"
 #include "pmu.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "zonalRelay.h"
 #include <stdexcept>
 #include <boost/format.hpp>
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 static typeFactory<Relay> gbf ("relay", stringVec{"basic"}, "basic");
 static typeFactory<sensor> snsr ("relay", "sensor");
@@ -392,7 +392,7 @@ void Relay::set (const std::string &param, const std::string &val)
     }
 }
 
-void Relay::set (const std::string &param, double val, units_t unitType)
+void Relay::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "samplingperiod") || (param == "ts") || (param == "sampleperiod"))
     {
@@ -401,7 +401,7 @@ void Relay::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "rate") || (param == "fs") || (param == "samplerate"))
     {
-        coreObject::set ("period", 1.0 / unitConversion (val, unitType, Hz));
+        coreObject::set ("period", 1.0 / convert (val, unitType, units::Hz));
         m_nextSampleTime = timeZero;
     }
     else
@@ -417,13 +417,13 @@ void Relay::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double Relay::get (const std::string &param, gridUnits::units_t unitType) const
+double Relay::get (const std::string &param, units::unit unitType) const
 {
     auto fptr = getObjectFunction (this, param);
     if (fptr.first)
     {
         coreObject *tobj = const_cast<Relay *> (this);
-        return unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
+        return convert (fptr.first (tobj), fptr.second, unitType, systemBasePower);
     }
     return gridPrimary::get (param, unitType);
 }
@@ -813,6 +813,7 @@ void Relay::clearCondChecks (index_t conditionNumber)
 
 std::unique_ptr<eventAdapter> Relay::make_alarm (const std::string &val)
 {
+	using namespace gmlc::utilities;
     auto lc = convertToLowerCase (val);
     if (lc.compare (0, 5, "alarm") == 0)
     {

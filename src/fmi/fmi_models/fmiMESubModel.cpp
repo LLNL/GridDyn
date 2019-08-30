@@ -17,8 +17,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "outputEstimator.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <algorithm>
 
@@ -26,6 +26,8 @@ namespace griddyn
 {
 namespace fmi
 {
+	using namespace gmlc::utilities;
+
 fmiMESubModel::fmiMESubModel (const std::string &newName, std::shared_ptr<fmi2ModelExchangeObject> fmi)
     : gridSubModel (newName), me (std::move (fmi))
 {
@@ -323,7 +325,7 @@ void fmiMESubModel::set (const std::string &param, const std::string &val)
     }
 }
 
-void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiMESubModel::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "timestep") || (param == "localintegrationtime"))
     {
@@ -359,7 +361,7 @@ void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_
     }
 }
 
-double fmiMESubModel::get (const std::string &param, gridUnits::units_t unitType) const
+double fmiMESubModel::get (const std::string &param, units::unit unitType) const
 {
     if (param == "localintegrationtime")
     {

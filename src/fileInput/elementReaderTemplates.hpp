@@ -19,7 +19,7 @@
 #include "formatInterpreters/readerElement.h"
 #include "readElement.h"
 #include "readerHelper.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {
@@ -145,7 +145,7 @@ COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
         if (!valType.empty ())
         {
             valType = ri.checkDefines (valType);
-            makeLowerCase (valType);
+            gmlc::utilities::makeLowerCase (valType);
             if (!tf->isValidType (valType))
             {
                 WARNPRINT (READER_WARN_IMPORTANT,
@@ -192,7 +192,7 @@ COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
         if (!valType.empty ())
         {
             valType = ri.checkDefines (valType);
-            makeLowerCase (valType);
+            gmlc::utilities::makeLowerCase (valType);
             if (!tf->isValidType (valType))
             {
                 WARNPRINT (READER_WARN_IMPORTANT,

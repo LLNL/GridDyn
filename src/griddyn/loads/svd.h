@@ -35,18 +35,18 @@ class svd : public rampLoad
 
   protected:
     gridBus *controlBus = nullptr;  //!< pointer to the control bus
-    parameter_t Qmin = -kBigNum;  //!<[puMVA] the minimum reactive power
-    parameter_t Qmax = kBigNum;  //!<[puMVA] the maximum reactive power output
-    parameter_t Vmin = 0.8;  //!<[puV] the low voltage threshold
-    parameter_t Vmax = 1.2;  //!<[puV] the high voltage threshold
+    model_parameter Qmin = -kBigNum;  //!<[puMVA] the minimum reactive power
+    model_parameter Qmax = kBigNum;  //!<[puMVA] the maximum reactive power output
+    model_parameter Vmin = 0.8;  //!<[puV] the low voltage threshold
+    model_parameter Vmax = 1.2;  //!<[puV] the high voltage threshold
 
-    parameter_t Qlow = 0.0;  //!<[puMVA] the lowest available Q block level
-    parameter_t Qhigh = kBigNum;  //!<[puMVA] the maximum reactive power block level
+    model_parameter Qlow = 0.0;  //!<[puMVA] the lowest available Q block level
+    model_parameter Qhigh = kBigNum;  //!<[puMVA] the maximum reactive power block level
     int currentStep = 0;  //!< the current step level
     int stepCount = 0;  //!< the total number of steps available
     std::vector<std::pair<int, double>> Cblocks;  // a vector containing the capacitive blocks (count, size[puMW])
 
-    parameter_t participation = 1.0;  //!< a participation factor
+    model_parameter participation = 1.0;  //!< a participation factor
 
   public:
     svd (const std::string &objName = "svd_$");
@@ -60,8 +60,8 @@ class svd : public rampLoad
 
     virtual void
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
-    virtual void setLoad (double level, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    virtual void setLoad (double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    virtual void setLoad (double level, units::unit unitType = units::defunit) override;
+    virtual void setLoad (double Plevel, double Qlevel, units::unit unitType = units::defunit) override;
     virtual void setState (coreTime time,
                            const double state[],
                            const double dstate_dt[],
@@ -75,7 +75,7 @@ class svd : public rampLoad
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     /** define which bus the svd is controlling voltage on if it is not otherwise specified it is assumed to be the
      * parent bus
      */
@@ -86,7 +86,7 @@ class svd : public rampLoad
     @param[in] Qstep  the size of each step
     @param[in] unitType  the units of Qstep
     */
-    void addBlock (int steps, double Qstep, gridUnits::units_t unitType = gridUnits::defUnit);
+    void addBlock (int steps, double Qstep, units::unit unitType = units::defunit);
 
     virtual change_code powerFlowAdjust (const IOdata &inputs, std::uint32_t flags, check_level_t level) override;
     virtual void reset (reset_levels level = reset_levels::minimal) override;

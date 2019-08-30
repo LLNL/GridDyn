@@ -14,7 +14,7 @@
 #include "../core/coreObject.h"
 
 #include "../core/coreExceptions.h"
-#include "../utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "helics/helics.hpp"
 #include "helicsSupport.h"
 #include <complex>
@@ -32,7 +32,7 @@ class PubInfo
 {
   public:
     helics::data_type type;
-    gridUnits::units_t unitType = gridUnits::defUnit;
+    units::unit unitType = units::defunit;
     std::string name;
 };
 
@@ -41,7 +41,7 @@ class SubInfo
 {
   public:
     bool isValid = false;
-    gridUnits::units_t unitType = gridUnits::defUnit;
+    units::unit unitType = units::defunit;
     std::string name;
     helics::defV defaults;
 };
@@ -137,7 +137,7 @@ class helicsCoordinator : public coreObject
     void addEvent (helicsEvent *evnt);
     void addCollector (helicsCollector *col);
     void set (const std::string &param, const std::string &val) override;
-    void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     void setFlag (const std::string &flag, bool val) override;
     /** add a publication to the helics federate
     @param[in] pubName the name of the value to publish
@@ -147,7 +147,7 @@ class helicsCoordinator : public coreObject
     */
     int32_t addPublication(const std::string &pubName,
                            helics::data_type type,
-                           gridUnits::units_t unitType = gridUnits::defUnit);
+                           units::unit unitType = units::defunit);
     /** update a publication
     @param[in] index the identifier for the publication
     @param[in] pubName the name of the value to publish
@@ -157,13 +157,13 @@ class helicsCoordinator : public coreObject
     void updatePublication(int32_t index,
                            const std::string &pubName,
                            helics::data_type type,
-                           gridUnits::units_t unitType = gridUnits::defUnit);
+                           units::unit unitType = units::defunit);
     /** add a subscription to the helics federate
     @param[in] pubName the name of the value to subscribe to
     @param[in] unitType the units of the publication
     @return an identifier value for the publication
     */
-    int32_t addSubscription(const std::string &pubName, gridUnits::units_t unitType = gridUnits::defUnit);
+    int32_t addSubscription(const std::string &pubName, units::unit unitType = units::defunit);
     /** update a subscription
     @param[in] index the identifier for the subscription
     @param[in] pubName the name of the value to subscribe to
@@ -171,7 +171,7 @@ class helicsCoordinator : public coreObject
     */
     void updateSubscription(int32_t index,
                             const std::string &subName,
-                            gridUnits::units_t unitType = gridUnits::defUnit);
+                            units::unit unitType = units::defunit);
 
     /** add an endpoint to the helics federate
     @param[in] eptName the name of the endpoint

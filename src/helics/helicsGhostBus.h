@@ -27,7 +27,7 @@ protected:
 	std::string loadKey; 	//!< time series containing the load information
 	int32_t voltageIndex; //!< reference indices for the voltage
 	int32_t loadIndex; //!< reference indices for the load
-	gridUnits::units_t outUnits = gridUnits::defUnit;
+	units::unit outUnits = units::defunit;
 	helicsCoordinator *coord_ = nullptr;
 public:
 	explicit helicsGhostBus(const std::string &objName = "helicsGhostbus_$");
@@ -41,7 +41,7 @@ public:
 	virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 	virtual void setFlag(const std::string &param, bool val = true) override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 private:
 	void updateSubscription();

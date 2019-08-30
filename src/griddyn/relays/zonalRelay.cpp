@@ -17,8 +17,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../events/Event.h"
 #include "../measurement/Condition.h"
-#include "utilities/stringConversion.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/TimeSeries.hpp"
 #include <algorithm>
 
 #include <boost/format.hpp>
@@ -27,6 +27,8 @@ namespace griddyn
 {
 namespace relays
 {
+	using namespace gmlc::utilities;
+
 zonalRelay::zonalRelay (const std::string &objName) : Relay (objName) { opFlags.set (continuous_flag); }
 
 coreObject *zonalRelay::clone (coreObject *obj) const
@@ -65,6 +67,7 @@ std::string commType;
 */
 void zonalRelay::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if (param == "levels")
     {
         auto dvals = str2vector<double> (val, kNullVal);
@@ -76,7 +79,7 @@ void zonalRelay::set (const std::string &param, const std::string &val)
                 throw (invalidParameterValue (param));
             }
         }
-        set ("zones", dvals.size ());
+        set ("zones", static_cast<double>(dvals.size ()));
         m_zoneLevels = std::move (dvals);
     }
     else if (param == "delay")
@@ -102,8 +105,9 @@ void zonalRelay::set (const std::string &param, const std::string &val)
     }
 }
 
-void zonalRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void zonalRelay::set (const std::string &param, double val, units::unit unitType)
 {
+	using namespace gmlc::utilities;
     index_t zn;
     if (param == "zones")
     {
@@ -170,7 +174,7 @@ void zonalRelay::set (const std::string &param, double val, gridUnits::units_t u
     }
 }
 
-double zonalRelay::get (const std::string &param, gridUnits::units_t unitType) const
+double zonalRelay::get (const std::string &param, units::unit unitType) const
 {
     double val;
     if (param == "condition")

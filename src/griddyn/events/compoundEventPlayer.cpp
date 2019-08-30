@@ -14,7 +14,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <sstream>
 
 namespace griddyn
@@ -161,9 +161,9 @@ std::string compoundEventPlayer::to_string ()
             ss << " | ";
         }
         ss << fullObjectName (m_obj) << ':' << field;
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = " << value;
         if (Ntargets > 0)
@@ -177,9 +177,9 @@ std::string compoundEventPlayer::to_string ()
     else
     {
         ss << fullObjectName (m_obj) << ':' << field;
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = <" << eFile;
 

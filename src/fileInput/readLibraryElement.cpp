@@ -80,7 +80,7 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo &ri
     while (element->isValid ())
     {
         coreObject *obj = nullptr;
-        std::string fieldName = convertToLowerCase (element->getName ());
+        std::string fieldName = gmlc::utilities::convertToLowerCase (element->getName ());
         // std::cout<<"library model :"<<fieldName<<":\n";
         if ((fieldName == "define") || (fieldName == "recorder") || (fieldName == "event"))
         {

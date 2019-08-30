@@ -253,7 +253,7 @@ void ExciterIEEEtype2::set(const std::string &param, const std::string &val)
 }
 
 // set parameters
-void ExciterIEEEtype2::set(const std::string &param, double val, gridUnits::units_t unitType)
+void ExciterIEEEtype2::set(const std::string &param, double val, units::unit unitType)
 {
 	if (param == "tf1")
 	{

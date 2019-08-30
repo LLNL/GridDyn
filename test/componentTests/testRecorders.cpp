@@ -15,7 +15,7 @@
 #include "fileInput/fileInput.h"
 #include "griddyn/measurement/collector.h"
 #include "../testHelper.h"
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cmath>
@@ -28,6 +28,8 @@ static const std::string collector_test_directory = std::string (GRIDDYN_TEST_DI
 
 BOOST_FIXTURE_TEST_SUITE(recorder_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
+using namespace gmlc::utilities;
+
 BOOST_AUTO_TEST_CASE (tsMulti_tests)
 {
     timeSeriesMulti<> ts2;

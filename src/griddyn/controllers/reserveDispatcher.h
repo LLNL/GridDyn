@@ -10,12 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef RESERVEDISPATCHER_H_
-#define RESERVEDISPATCHER_H_
 #pragma once
 
 #include "../gridSubModel.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -61,7 +59,7 @@ class reserveDispatcher : public coreObject
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     double getAvailable () { return reserveAvailable; }
 
@@ -73,4 +71,3 @@ class reserveDispatcher : public coreObject
 };
 
 }  // namespace griddyn
-#endif

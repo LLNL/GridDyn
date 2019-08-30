@@ -19,8 +19,8 @@
 #include "griddyn/Link.h"
 #include "readerHelper.h"
 #include "griddyn/Relay.h"
-#include "utilities/stringOps.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -28,9 +28,11 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace readerConfig;
-using namespace utilities::string_viewOps;
+using namespace gmlc::utilities::string_viewOps;
+using namespace gmlc::utilities;
+
 
 enum mode_state
 {
@@ -51,7 +53,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
     int lineNumber = 0;
     stringVec headers;
     std::vector<int> skipToken;
-    std::vector<units_t> units;
+    std::vector<unit> units;
     std::string ObjectMode;
     int typekey = -1;
     int refkey = -1;
@@ -104,7 +106,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                 }
             }
 
-            units = std::vector<units_t> (headers.size (), defUnit);
+            units = std::vector<unit> (headers.size (), defunit);
             skipToken.resize (headers.size (), 0);
             typekey = -1;
             int nn = 0;
@@ -136,7 +138,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                     if (p != std::string::npos)
                     {
                         std::string uname = tk.substr (p + 1, tk.length () - 2 - p);
-                        units[nn] = getUnits (uname);
+                        units[nn] = unit_cast_from_string (uname);
                         tk = stringOps::trim (tk.substr (0, p));
                     }
                 }

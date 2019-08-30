@@ -16,7 +16,7 @@
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "griddyn/solvers/solverInterface.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <chrono>

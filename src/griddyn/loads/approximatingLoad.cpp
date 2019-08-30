@@ -15,14 +15,16 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/workQueue.h"
 #include <complex>
 
 #include <cassert>
 #include <cmath>
 #include <iostream>
+
+using gmlc::utilities::convertToLowerCase;
 
 //#define SGS_DEBUG
 namespace griddyn
@@ -602,7 +604,7 @@ void approximatingLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void approximatingLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void approximatingLoad::set (const std::string &param, double val, units::unit unitType)
 {
     // TODO:: PT convert some to a setFlags function
     if ((param == "spread") || (param == "band"))

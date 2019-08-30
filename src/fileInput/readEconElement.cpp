@@ -23,7 +23,7 @@
 #include "optimization/optObjectFactory.h"
 #endif
 
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {

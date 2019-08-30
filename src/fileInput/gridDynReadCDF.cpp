@@ -18,15 +18,16 @@
 #include "griddyn/loads/zipLoad.h"
 #include "griddyn/primary/acBus.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
 namespace griddyn
 {
-using namespace gridUnits;
-using namespace stringOps;
+using namespace units;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 void cdfReadBusLine (gridBus *bus, const std::string &line, double base, const basicReaderInfo &bri);
 void cdfReadBranch (coreObject *parentObject,

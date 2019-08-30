@@ -69,15 +69,15 @@ void loadRelay::set (const std::string &param, const std::string &val)
     }
 }
 
-void loadRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void loadRelay::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "cutoutvoltage") || (param == "voltagelimit"))
     {
-        cutoutVoltage = gridUnits::unitConversion (val, unitType, gridUnits::puV, systemBasePower);
+        cutoutVoltage = units::convert (val, unitType, units::puV, systemBasePower, baseVoltage());
     }
     else if ((param == "cutoutfrequency") || (param == "freqlimit"))
     {
-        cutoutFrequency = gridUnits::unitConversion (val, unitType, gridUnits::puHz, systemBaseFrequency);
+        cutoutFrequency = units::convert (val, unitType, units::puHz, systemBaseFrequency);
     }
     else if (param == "delay")
     {

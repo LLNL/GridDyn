@@ -14,7 +14,7 @@
 
 #include "../gridDynDefinitions.hpp"
 #include "core/objectOperatorInterface.hpp"
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include <functional>
 #include <memory>
 
@@ -36,8 +36,8 @@ class gridGrabber : public objectOperatorInterface
     bool vectorGrab = false;  //!< flag if the grabber is meant to grab a vector of data
     bool cloneable = true;  //!< flag indicating if the grabber is cloneable
     bool customDesc = false;  //!< flag indicating the grabber uses a custom description
-    gridUnits::units_t outputUnits = gridUnits::defUnit;  //!< the desired input units of the grabber
-    gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< the units of the actual grabbed data
+    units::unit outputUnits = units::defunit;  //!< the desired input units of the grabber
+    units::unit inputUnits = units::defunit;  //!< the units of the actual grabbed data
     double gain = 1.0;  //!< gain multiplier on the output data
     double bias = 0.0;  //!< bias shift on the output
   protected:

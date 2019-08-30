@@ -52,37 +52,37 @@ class adjustableTransformer : public acLine
 
   protected:
     control_mode_t cMode = control_mode_t::manual_control;  //!< control Mode
-    parameter_t stepSize = 0.01;  //!< step size of the adjustment for non-continuous adjustments
-    parameter_t maxTapAngle = kPI / 4.0;  //!< maximum tap angle
-    parameter_t minTapAngle = -kPI / 4.0;  //!< minimum tap angle
-    parameter_t minTap = 0.9;  //!< minimum tap setting
-    parameter_t maxTap = 1.1;  //!< maximum tap setting
-    parameter_t Vtarget = -kBigNum;  //!< target voltage
-    parameter_t Vmax = kBigNum;  //!< maximum voltage before changing the tap
-    parameter_t Vmin = 0.0;  //!< minimum voltage before changing the tap
+    model_parameter stepSize = 0.01;  //!< step size of the adjustment for non-continuous adjustments
+    model_parameter maxTapAngle = kPI / 4.0;  //!< maximum tap angle
+    model_parameter minTapAngle = -kPI / 4.0;  //!< minimum tap angle
+    model_parameter minTap = 0.9;  //!< minimum tap setting
+    model_parameter maxTap = 1.1;  //!< maximum tap setting
+    model_parameter Vtarget = -kBigNum;  //!< target voltage
+    model_parameter Vmax = kBigNum;  //!< maximum voltage before changing the tap
+    model_parameter Vmin = 0.0;  //!< minimum voltage before changing the tap
 
-    parameter_t Ptarget = -kBigNum;  //!< the target power flow
-    parameter_t Pmin = -kBigNum;  //!< the minimum power level before changing the tap
-    parameter_t Pmax = kBigNum;  //!< the maximum power before changing the tap
+    model_parameter Ptarget = -kBigNum;  //!< the target power flow
+    model_parameter Pmin = -kBigNum;  //!< the minimum power level before changing the tap
+    model_parameter Pmax = kBigNum;  //!< the maximum power before changing the tap
 
-    parameter_t Qtarget = -kBigNum;  //!< the target reactive power flow
-    parameter_t Qmax = kBigNum;  //!< the minimum power level before changing the tap
-    parameter_t Qmin = -kBigNum;  //!< the maximum power before changing the tap
+    model_parameter Qtarget = -kBigNum;  //!< the target reactive power flow
+    model_parameter Qmax = kBigNum;  //!< the minimum power level before changing the tap
+    model_parameter Qmin = -kBigNum;  //!< the maximum power before changing the tap
     // double Tm;				//!< time constant
     // double Td;				//!< time constant
     double direction = 1;  //!< variable storing whether the directional derivate of the tap changes with respect
                            //!< to voltage or power is positive or negative
-    parameter_t tapMaxChangeRate = kBigNum;  //!< maximum rate at which the tap can change
-    parameter_t sample_rate = 4.0;  //!< [s]the rate at which the measurements are sampled
+    model_parameter tapMaxChangeRate = kBigNum;  //!< maximum rate at which the tap can change
+    model_parameter sample_rate = 4.0;  //!< [s]the rate at which the measurements are sampled
     gridBus *controlBus = nullptr;  //!< the control bus to monitor voltage
 
     double tap0 = 0.0;  //!< baseline tap position used for continuous tap settings
     double tapAngle0 = 0.0;  //!< baseline tapAngle position used for continuous tap settings
-    parameter_t stepDelay =
+    model_parameter stepDelay =
       30;  //!< step control for adjusting the quantity or the time constant for continuous system
-    parameter_t mp_Tm = 0.05;  //!< time constant for continuous tap settings
-    parameter_t dTapdt = 0;  //!< rate of change of the tap
-    parameter_t dTapAdt = 0;  //!< rate of change of the tapAngle
+    model_parameter mp_Tm = 0.05;  //!< time constant for continuous tap settings
+    model_parameter dTapdt = 0;  //!< rate of change of the tap
+    model_parameter dTapAdt = 0;  //!< rate of change of the tapAngle
   private:
     int controlNum = -1;  //!< the control bus and number setting are not fully determined until initialization so
                           //!< this stores information from the startup phase
@@ -105,8 +105,8 @@ class adjustableTransformer : public acLine
 
     virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
     void set (const std::string &param, const std::string &val) override;
-    void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+    double get (const std::string &param, units::unit unitType = units::defunit) const override;
     // adjuster specific functions
     /**@ brief set the control bus to a specified bus pointer
     @param[in] cBus  the specified control Bus*/

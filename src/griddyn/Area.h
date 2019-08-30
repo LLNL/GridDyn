@@ -176,15 +176,15 @@ class Area : public gridPrimary
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void
     getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
     void setAll (const std::string &type,
                  const std::string &param,
                  double val,
-                 gridUnits::units_t unitType = gridUnits::defUnit) override;
+                 units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     /** @brief determine if an object is already a member of the area
     @param[in] obj  the object to check
     @return true if the object is a member false if not

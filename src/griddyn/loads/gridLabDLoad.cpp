@@ -16,9 +16,9 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "coupling/GhostSwingBusManager.h"
-#include "utilities/stringConversion.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -482,7 +482,7 @@ void gridLabDLoad::runGridLabA (coreTime time, const IOdata &inputs)
     // get the right timer interval
     if (dt > (timeOneSecond))
     {
-        tInt = dt.seconds ();
+        tInt = static_cast<int>(dt.seconds ());
         m_lastCallTime += static_cast<double> (tInt);
     }
 
@@ -760,7 +760,7 @@ void gridLabDLoad::run3GridLabA (coreTime time, const IOdata &inputs)
     {
         for (size_t kk = 0; kk < task_id.size (); ++kk)
         {
-            gsm->sendVoltageStep (task_id[kk], Vg, tInt);
+            gsm->sendVoltageStep (task_id[kk], Vg, static_cast<unsigned int>(tInt));
             if (opFlags[dual_mode_flag])
             {
                 if (opFlags[dyn_initialized])
@@ -964,6 +964,7 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
 void gridLabDLoad::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     std::string numstr;
     int num;
 
@@ -1088,7 +1089,7 @@ void gridLabDLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridLabDLoad::set (const std::string &param, double val, units::unit unitType)
 {
     // TODO:: PT convert some to a setFlags function
     if ((param == "spread") || (param == "band"))

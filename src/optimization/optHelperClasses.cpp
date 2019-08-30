@@ -12,7 +12,7 @@
 
 #include "optHelperClasses.h"
 #include <cstring>
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -210,6 +210,7 @@ void optimOffsets::setOffset (index_t newOffset)
   contOffset = qOffset + total.qSize;
   intOffset = contOffset + total.contSize;
 }
+using gmlc::utilities::ensureSizeAtLeast;
 
 optimOffsets & optOffsetTable::getOffsets (const optimMode &oMode)
 {

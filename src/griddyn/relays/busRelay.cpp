@@ -68,11 +68,11 @@ void busRelay::set (const std::string &param, const std::string &val)
     }
 }
 
-void busRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void busRelay::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "cutoutvoltage") || (param == "voltagelimit"))
     {
-        cutoutVoltage = gridUnits::unitConversion (val, unitType, gridUnits::puV, systemBasePower);
+        cutoutVoltage = units::convert (val, unitType, units::puV, systemBasePower,baseVoltage());
         if (opFlags[dyn_initialized])
         {
             setConditionLevel (0, cutoutVoltage);
@@ -80,7 +80,7 @@ void busRelay::set (const std::string &param, double val, gridUnits::units_t uni
     }
     else if ((param == "cutoutfrequency") || (param == "freqlimit"))
     {
-        cutoutFrequency = gridUnits::unitConversion (val, unitType, gridUnits::puHz, systemBaseFrequency);
+        cutoutFrequency = units::convert (val, unitType, units::puHz, systemBaseFrequency);
         if (opFlags[dyn_initialized])
         {
             setConditionLevel (1, cutoutFrequency);

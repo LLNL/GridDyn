@@ -31,7 +31,7 @@ namespace griddyn
 {
 namespace relays
 {
-using namespace gridUnits;
+using namespace units;
 breaker::breaker(const std::string &objName) : Relay(objName), useCTI(extra_bool) { opFlags.set(continuous_flag); }
 
 coreObject *breaker::clone(coreObject *obj) const
@@ -86,7 +86,7 @@ void breaker::set(const std::string &param, const std::string &val)
     }
 }
 
-void breaker::set(const std::string &param, double val, gridUnits::units_t unitType)
+void breaker::set(const std::string &param, double val, units::unit unitType)
 {
     if (param == "reclosetime")
     {
@@ -111,7 +111,7 @@ void breaker::set(const std::string &param, double val, gridUnits::units_t unitT
     }
     else if (param == "limit")
     {
-        limit = unitConversion(val, unitType, puA, systemBasePower, Vbase);
+        limit = convert(val, unitType, puA, systemBasePower, Vbase);
     }
     else if ((param == "reclosertap") || (param == "tap"))
     {

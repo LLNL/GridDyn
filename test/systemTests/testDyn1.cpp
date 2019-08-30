@@ -14,12 +14,14 @@
 #include "griddyn/primary/infiniteBus.h"
 #include "griddyn/simulation/diagnostics.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 // test case for coreObject object
 
 using namespace griddyn;
+using namespace gmlc::utilities;
+
 #define DYN1_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/dyn_tests1/"
 
 BOOST_FIXTURE_TEST_SUITE (dyn_tests1, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))

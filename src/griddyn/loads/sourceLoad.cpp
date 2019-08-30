@@ -262,7 +262,7 @@ void sourceLoad::setState (coreTime time, const double state[], const double dst
     prevTime = time;
 }
 
-void sourceLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void sourceLoad::set (const std::string &param, double val, units::unit unitType)
 {
     auto sfnd = param.find_last_of (":?");
     if (sfnd != std::string::npos)
@@ -303,7 +303,7 @@ void sourceLoad::set (const std::string &param, double val, gridUnits::units_t u
         {
             if ((static_cast<int> (sources.size ()) > keyind->second) && (sources[keyind->second] != nullptr))
             {
-                sources[keyind->second]->set ("level", gridUnits::unitConversion (val, unitType, gridUnits::puMW,
+                sources[keyind->second]->set ("level", units::convert (val, unitType, units::puMW,
                                                                                   systemBasePower));
                 return;
             }

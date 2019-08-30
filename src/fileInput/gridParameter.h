@@ -9,11 +9,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef GRIDPARAMETER_H_
-#define GRIDPARAMETER_H_
-
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include <string>
 #include <vector>
 namespace griddyn
@@ -28,7 +26,7 @@ class gridParameter
     std::string strVal;  //!< a string value of the parameter
     std::vector<int> applyIndex;  //!< a vector of indices the parameter should be applied to
     double value = 0.0;  //!< the numerical value of the parameter
-    gridUnits::units_t paramUnits = gridUnits::defUnit;  //!< the units used for the parameter
+    units::unit paramUnits = units::defunit;  //!< the units used for the parameter
     bool valid = false;  //!< indicator if the parameter is valid
     bool stringType = false;  //!< indicator that the parameter is using the string property
     /** @brief constructor*/
@@ -57,4 +55,3 @@ class gridParameter
 };
 
 }  // namespace griddyn
-#endif

@@ -19,7 +19,6 @@
 #include "../gridBus.h"
 #include "../measurement/Condition.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/timeSeries.hpp"
 
 namespace griddyn
 {
@@ -90,7 +89,7 @@ void differentialRelay::getParameterStrings (stringVec &pstr, paramStringType ps
     getParamString<differentialRelay, Relay> (this, pstr, locNumStrings, locStrStrings, {}, pstype);
 }
 
-void differentialRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void differentialRelay::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "delay")
     {

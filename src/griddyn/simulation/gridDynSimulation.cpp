@@ -24,9 +24,9 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "gridDynSimulationFileOps.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -814,6 +814,7 @@ count_t gridDynSimulation::nonZeros (const solverMode &sMode) const
 // --------------- set properties ---------------
 void gridDynSimulation::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if (param == "powerflowfile")
     {
         powerFlowFile = val;
@@ -1055,9 +1056,9 @@ void gridDynSimulation::setFlag (const std::string &flag, bool val)
     }
 }
 
-void gridDynSimulation::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynSimulation::set (const std::string &param, double val, units::unit unitType)
 {
-    using namespace gridUnits;
+    using namespace units;
 
     if ((param == "tolerance") || (param == "rtol"))
     {
@@ -1065,11 +1066,11 @@ void gridDynSimulation::set (const std::string &param, double val, gridUnits::un
     }
     else if (param == "voltagetolerance")
     {
-        tols.voltageTolerance = unitConversionPower (val, unitType, puV, systemBasePower);
+        tols.voltageTolerance = convert(val, unitType, puV, systemBasePower);
     }
     else if (param == "angletolerance")
     {
-        tols.angleTolerance = unitConversionAngle (val, unitType, rad);
+        tols.angleTolerance = convert (val, unitType, rad);
     }
     else if (param == "defaulttolerance")
     {
@@ -1081,15 +1082,15 @@ void gridDynSimulation::set (const std::string &param, double val, gridUnits::un
     }
     else if (param == "powerflowstarttime")
     {
-        powerFlowStartTime = unitConversionTime (val, unitType, sec);
+        powerFlowStartTime = convert(val, unitType, second);
     }
     else if (param == "timetolerance")
     {
-        tols.timeTol = unitConversionTime (val, unitType, sec);
+        tols.timeTol = convert(val, unitType, second);
     }
     else if (param == "poweradjustthreshold")
     {
-        powerAdjustThreshold = unitConversionPower (val, unitType, puMW, systemBasePower);
+        powerAdjustThreshold = convert(val, unitType, puMW, systemBasePower);
     }
     else if (param == "maxpoweradjustiterations")
     {
@@ -1140,7 +1141,7 @@ void gridDynSimulation::solverSet (const std::string &solverName, const std::str
     sd->set (field, val);
 }
 
-double gridDynSimulation::get (const std::string &param, gridUnits::units_t unitType) const
+double gridDynSimulation::get (const std::string &param, units::unit unitType) const
 {
     count_t val = kInvalidCount;
     double fval = kNullVal;

@@ -12,8 +12,8 @@
 
 #include "pulseSource.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cmath>
 
 namespace griddyn
@@ -28,7 +28,7 @@ double period;
 double duty_cylce;
 double A;
 double nextCycleTime;*/
-using namespace gridUnits;
+using namespace units;
 
 pulseSource::pulseSource (const std::string &objName, double startVal)
     : Source (objName, startVal), baseValue (startVal)
@@ -121,7 +121,7 @@ void pulseSource::set (const std::string &param, const std::string &val)
 {
     if ((param == "type") || (param == "pulsetype"))
     {
-        auto vtype = convertToLowerCase (val);
+        auto vtype = gmlc::utilities::convertToLowerCase(val);
         if (vtype == "square")
         {
             ptype = pulse_type_t::square;
@@ -166,7 +166,7 @@ void pulseSource::setLevel (double val)
     cycleTime = cycleTime - period;
 }
 
-void pulseSource::set (const std::string &param, double val, units_t unitType)
+void pulseSource::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "a") || (param == "amplitude")||(param=="amp"))
     {

@@ -13,7 +13,7 @@
 #include "core/objectFactory.hpp"
 #include "griddyn/Generator.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE (root_exciter_test)
     std::vector<double> st2 = gds->getState ();
 
     // check for stability
-    auto diff = countDiffs (st, st2, 0.0001);
+    auto diff = gmlc::utilities::countDiffs (st, st2, 0.0001);
     BOOST_CHECK_EQUAL (diff, 0u);
 }
 

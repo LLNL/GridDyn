@@ -16,10 +16,9 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
  * All rights reserved..
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef ZMQREACTOR_H_
-#define ZMQREACTOR_H_
-#include "utilities/simpleQueue.hpp"
+#include "gmlc/containers/simpleQueue.hpp"
 #include "zmqSocketDescriptor.h"
 #include <atomic>
 #include <memory>
@@ -50,7 +49,7 @@ class zmqReactor
     std::string name;
     std::shared_ptr<zmqContextManager> contextManager;  //!< pointer the context the reactor is using
 
-    SimpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>>
+    gmlc::containers::SimpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>>
       updates;  //!< the modifications to make the reactor sockets
 
     std::unique_ptr<zmq::socket_t> notifier;
@@ -83,4 +82,3 @@ class zmqReactor
     void reactorLoop ();
 };
 }  // namespace zmqlib
-#endif

@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYNREADELEMENT_H_
-#define GRIDDYNREADELEMENT_H_
+#pragma once
 
 // headers
 
@@ -165,4 +163,4 @@ inline const std::string &parentSearchComponent (gridPrimary *) { return areaTyp
 
 inline const std::string &parentSearchComponent (gridSecondary *) { return busTypeString; }
 }  // namespace griddyn
-#endif
+

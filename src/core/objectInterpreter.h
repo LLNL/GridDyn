@@ -9,12 +9,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef OBJECT_INTERPRETER_H_
-#define OBJECT_INTERPRETER_H_
+#pragma once
 
 #include "coreObject.h"
-#include "utilities/units.h"
 
 namespace griddyn
 {
@@ -26,7 +23,7 @@ class objInfo
   public:
     coreObject *m_obj = nullptr;  //!< pointer to the object being referenced
     std::string m_field;  //!< the field referenced
-    gridUnits::units_t m_unitType = gridUnits::defUnit;  //!< the units corresponding to the reference
+    units::unit m_unitType = units::defunit;  //!< the units corresponding to the reference
 
     /** @brief default constructor*/
     objInfo () = default;
@@ -70,5 +67,3 @@ meant to target cloning operations where pointers need to be mapped to a new hie
 coreObject *findMatchingObject (coreObject *obj, coreObject *root);
 
 }  // namespace griddyn
-
-#endif

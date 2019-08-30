@@ -36,7 +36,7 @@ class helicsLoad : public loads::rampLoad
     std::string loadKey;  //!< time series containing the load information
     int32_t voltageIndex = -1;  //!< index for sending the voltage data
     int32_t loadIndex = -1;  //!< index for getting the load data
-    gridUnits::units_t inputUnits = gridUnits::MW;
+    units::unit inputUnits = units::MW;
     helics::data_type loadType;
     helics::data_type voltageType;
     double scaleFactor = 1.0;  //!< scaling factor on the load
@@ -58,7 +58,7 @@ class helicsLoad : public loads::rampLoad
     virtual void setFlag (const std::string &param, bool val = true) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
   private:
     void setSubscription ();

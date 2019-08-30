@@ -23,10 +23,10 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "isocController.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 //#include <set>
 /*
@@ -47,7 +47,7 @@ namespace griddyn
 {
 static typeFactory<DynamicGenerator> gf ("generator", stringVec{"local_dynamic"});
 
-using namespace gridUnits;
+using namespace units;
 
 // default bus object
 
@@ -83,8 +83,8 @@ const std::map<std::string, DynamicGenerator::dynModel_t> dynModelFromStringMap{
 
 DynamicGenerator::dynModel_t DynamicGenerator::dynModelFromString (const std::string &dynModelType)
 {
-    auto str = convertToLowerCase (dynModelType);
-    return mapFind (dynModelFromStringMap, str, dynModel_t::invalid);
+    auto str = gmlc::utilities::convertToLowerCase(dynModelType);
+    return mapFind(dynModelFromStringMap, str, dynModel_t::invalid);
 }
 
 void DynamicGenerator::buildDynModel (dynModel_t dynModel)
@@ -353,7 +353,7 @@ void DynamicGenerator::setState (coreTime time,
             }
         }
         Pset += dPdt * (time - prevTime);
-        Pset = valLimit (Pset, Pmin, Pmax);
+        Pset = gmlc::utilities::valLimit(Pset, Pmin, Pmax);
         updateLocalCache (noInputs, emptyStateData, cLocalSolverMode);
     }
     else if (stateSize (sMode) > 0)
@@ -651,7 +651,7 @@ void DynamicGenerator::setFlag (const std::string &flag, bool val)
     }
 }
 
-void DynamicGenerator::set (const std::string &param, double val, units_t unitType)
+void DynamicGenerator::set (const std::string &param, double val, unit unitType)
 {
     if (param.length () == 1)
     {
@@ -717,12 +717,12 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
         }
         else
         {
-            m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+            m_Vtarget = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
         }
     }
     else if ((param == "rating") || (param == "base") || (param == "mbase"))
     {
-        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
+        machineBasePower = convert (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         opFlags.set (independent_machine_base);
         if (genModel != nullptr)
         {
@@ -732,7 +732,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
 
     else if (param == "basepower")
     {
-        systemBasePower = unitConversion (val, unitType, gridUnits::MW);
+        systemBasePower = convert (val, unitType, units::MW);
         if (opFlags[independent_machine_base])
         {
         }
@@ -747,7 +747,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
     }
     else if ((param == "basefrequency") || (param == "basefreq"))
     {
-        systemBaseFrequency = unitConversionFreq (val, unitType, rps);
+        systemBaseFrequency = convert (val, unitType, rad/s);
         if (genModel != nullptr)
         {
             genModel->set (param, systemBaseFrequency);
@@ -760,10 +760,10 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
 
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0)
         {
-            machineBasePower = unitConversionPower (Pmax, puMW, MW, systemBasePower);
+            machineBasePower = convert(Pmax, puMW, MW, systemBasePower);
         }
         if (gov != nullptr)
         {
@@ -772,7 +772,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (gov != nullptr)
         {
             gov->set ("pmin", Pmin * systemBasePower / machineBasePower);
@@ -1168,7 +1168,7 @@ void DynamicGenerator::generateSubModelInputs (const IOdata &inputs, const state
 
     double scale = systemBasePower / machineBasePower;
     double Pcontrol = pSetControlUpdate (inputs, sD, sMode);
-    Pcontrol = valLimit (Pcontrol, Pmin, Pmax);
+    Pcontrol = gmlc::utilities::valLimit(Pcontrol, Pmin, Pmax);
 
     subInputs.inputs[governor_loc][govpSetInLocation] = Pcontrol * scale;
 

@@ -26,8 +26,8 @@ scheduled change in voltage and frequency and hence angle, objects attached to i
 class infiniteBus : public gridBus
 {
   protected:
-    parameter_t dvdt = 0;  //!< [puV/s] ramp rate for voltage
-    parameter_t dfdt = 0;  //!< [puHz/s] ramp rate for frequency
+    model_parameter dvdt = 0;  //!< [puV/s] ramp rate for voltage
+    model_parameter dfdt = 0;  //!< [puHz/s] ramp rate for frequency
   public:
     /** @brief default constructor
      *@param[in] objName  the name of the infinite bus object
@@ -47,7 +47,7 @@ class infiniteBus : public gridBus
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual bool checkCapable () override;
 

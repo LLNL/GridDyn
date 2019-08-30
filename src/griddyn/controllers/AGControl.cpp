@@ -61,8 +61,8 @@ public:
         double currentValue();
 
         double addGen(scheduler *sched);
-        void set (const std::string &param, double val,units_t unitType=defUnit);
-        void set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val,
+        void set (const std::string &param, double val,unit unitType=defunit);
+        void set (const std::string &param, double val,unit unitType=defunit){return set(param,&val,
 unitType);};
 
         void regChange();
@@ -223,7 +223,7 @@ void AGControl::remove (coreObject *obj)
 
 void AGControl::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 
-void AGControl::set (const std::string &param, double val, gridUnits::units_t unitType)
+void AGControl::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "deadband")
     {

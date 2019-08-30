@@ -14,12 +14,14 @@
 
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
 
 using namespace griddyn;
+using gmlc::utilities::countDiffs;
+
 static std::string pFlow_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
 BOOST_FIXTURE_TEST_SUITE (output_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))

@@ -70,7 +70,7 @@ class helperObject
     /**
      * @brief get a parameter from the object
      * @param[in] param the name of the parameter to get
-     * @param[in] unitType a type indicating the units of the val a defUnit default value
+     * @param[in] unitType a type indicating the units of the val a defunit default value
      * @return val the value of the parameter returns kNullVal if no property is found
      */
     virtual double get (const std::string &param) const;

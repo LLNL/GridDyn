@@ -12,6 +12,11 @@
 cmake_minimum_required(VERSION 3.5)
 cmake_policy(VERSION 3.5)
 
+if (POLICY CMP0079)
+cmake_policy(SET CMP0079 NEW)
+endif()
+
+
 # project name
 project(GRIDDYN VERSION 0.9.1)
 
@@ -46,12 +51,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # ------------------------------------------------------------
 # set the module path and include some common macros
 # ------------------------------------------------------------
-set(
-    CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
-)
-
-include(extraMacros)
-include(CMakeDependentOption)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	set(GRIDDYN_ROOT_PROJ ON)
@@ -59,6 +58,19 @@ else()
     set(GRIDDYN_ROOT_PROJ OFF)
 endif()
 
+if (GRIDDYN_ROOT_PROJ)
+set(CMAKE_MODULE_PATH
+     ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
+)
+else()
+	set(ORIGINAL_MODULE_PATH ${CMAKE_MODULE_PATH})
+	set(CMAKE_MODULE_PATH
+    "${PROJECT_SOURCE_DIR}/config/cmake/" ${CMAKE_MODULE_PATH}
+)
+endif()
+
+include(extraMacros)
+include(CMakeDependentOption)
 # ------------------------------------------------------------
 # set the install path to a local directory
 # ------------------------------------------------------------
@@ -71,15 +83,26 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
                 CACHE PATH "default install path"
                 FORCE
             )
-        else(MSYS)
+		elif (CYGWIN)
+			set(
+                CMAKE_INSTALL_PREFIX
+                "/usr/local/helics_${HELICS_VERSION_UNDERSCORE}/"
+                CACHE PATH "default install path"
+                FORCE
+            )
+        else()
             set(
                 CMAKE_INSTALL_PREFIX
                 "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path"
                 FORCE
             )
-        endif(MSYS)
+        endif()
     endif(WIN32)
+endif()
+
+if (MSYS OR CYGWIN OR UNIX OR APPLE)
+	set(UNIX_LIKE TRUE)
 endif()
 
 show_variable(
@@ -115,6 +138,17 @@ option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ON)
 endif()
 endif()
 
+
+option(GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ${GRIDDYN_ROOT_PROJ})
+mark_as_advanced(GRIDDYN_WITH_CMAKE_PACKAGE)
+
+# Install instructions for this target
+if(GRIDDYN_WITH_CMAKE_PACKAGE)
+    set(GRIDDYN_EXPORT_COMMAND EXPORT griddyn-targets)
+else(GRIDDYN_WITH_CMAKE_PACKAGE)
+    set(GRIDDYN_EXPORT_COMMAND)
+endif(GRIDDYN_WITH_CMAKE_PACKAGE)
+
 option(
     ENABLE_FMI_EXPORT
     "Enable construction of a binary fmi shared library for GridDyn"
@@ -148,12 +182,6 @@ option(
 option(
     BUILD_JAVA_INTERFACE
     "Build Java extension"
-    OFF
-)
-
-option(
-    BUILD_GRIDDYN_SHARED_LIBRARY
-    "Build a shared library of the C/C++ interface"
     OFF
 )
 
@@ -263,6 +291,7 @@ option(
     OFF
 )
 
+
 # -----------------
 # dependent options
 # -----------------
@@ -273,22 +302,6 @@ cmake_dependent_option(
     "set all indexing and count variables to 64 bit unsigned (Usually not required)"
     OFF
     "EXTENDED_INDEXING_ALLOWED"
-    OFF
-)
-
-cmake_dependent_option(
-    ENABLE_TCP
-    "Enable TCP connection library"
-    ON
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-
-cmake_dependent_option(
-    ENABLE_DIME
-    "Enable connection with Dime"
-    OFF
-    "ENABLE_NETWORKING_LIBRARY"
     OFF
 )
 
@@ -308,26 +321,9 @@ cmake_dependent_option(
     OFF
 )
 
-mark_as_advanced(BUILD_GRIDDYN_SHARED_LIBRARY)
-
 # add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
 add_library(griddyn_optional INTERFACE)
-
-# TODO this should be in compiler_flags
-show_variable(
-    COMPILER_OPTIMIZATION_LEVEL
-    STRING
-    "set the optimization level for the compiler (not implemented yet)"
-    "normal"
-)
-
-set(optimization_levels normal;high;machine;full)
-
-set_property(
-    CACHE COMPILER_OPTIMIZATION_LEVEL
-    PROPERTY STRINGS ${optimization_levels}
-)
 
 # -----------------------------------------------------------------------------
 # General project wide configuration for debug postfix
@@ -338,6 +334,15 @@ if(NOT NO_DEBUG_POSFIX)
     endif()
 endif()
 
+if (BUILD_SHARED_LIBS)
+	set(BUILD_GRIDDYN_C_SHARED_LIBRARY ON)
+	set(BUILD_GRIDDYN_CXX_SHARED_LIBRARY ON)
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+else()
+	option(BUILD_GRIDDYN_C_SHARED_LIBRARY OFF "Enable construction of GridDyn binary C based shared library")
+	option(BUILD_GRIDDYN_CXX_SHARED_LIBRARY OFF "Build the GridDyn C++ shared library")
+endif()
+
 if(
     BUILD_PYTHON_INTERFACE
     OR BUILD_PYTHON2_INTERFACE
@@ -346,7 +351,7 @@ if(
     OR BUILD_OCTAVE_INTERFACE
 )
     set(INTERFACE_BUILD ON)
-    hide_variable(BUILD_GRIDDYN_SHARED_LIBRARY)
+    hide_variable(BUILD_GRIDDYN_C_SHARED_LIBRARY)
     show_variable(
         DISABLE_SWIG
         BOOL
@@ -356,20 +361,16 @@ if(
 else()
     set(INTERFACE_BUILD OFF)
     hide_variable(DISABLE_SWIG)
-    show_variable(
-        BUILD_GRIDDYN_SHARED_LIBRARY
-        BOOL
-        "Enable construction of GridDyn binary C based shared library"
-        OFF
-    )
 endif()
+
+
 
 if(
     INTERFACE_BUILD
-    OR BUILD_GRIDDYN_SHARED_LIBRARY
+    OR BUILD_GRIDDYN_CXX_SHARED_LIBRARY
+	OR BUILD_GRIDDYN_C_SHARED_LIBRARY
     OR ENABLE_FMI_EXPORT
 )
-    set(BUILD_SHARED_LIBS ON)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -384,6 +385,7 @@ endif()
 
 if (NOT TARGET compile_flags_target)
    add_library(compile_flags_target INTERFACE)
+
 endif()
 
 if (GRIDDYN_ROOT_PROJECT)
@@ -402,6 +404,14 @@ if (GRIDDYN_ROOT_PROJECT)
 	endif(CXX_STANDARD_FLAG)
 	
 endif()
+
+   install(
+    TARGETS compile_flags_target
+    ${GRIDDYN_EXPORT_COMMAND}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 if (GRIDDYN_ROOT_PROJ)
 cmake_dependent_option(
@@ -571,6 +581,14 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/sundials/include/ida/ida.h")
 	submod_update(extern/sundials)
 endif()
 
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/utilities/gmlc/utilities/stringOps.h")
+	submod_update(ThirdParty/utilities)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/units/units/units.hpp")
+	submod_update(ThirdParty/units)
+endif()
+
 
 # ------------------------------------------------------------
 # finding MPI
@@ -718,6 +736,24 @@ include(addfmt)
 #  Create the target for jsoncpp
 # -----------------------------------------------------------
 include(addJsoncpp)
+set_target_properties(jsoncpp_lib PROPERTIES FOLDER Extern)
+
+# --------------------------------------------------------------
+#  Create the target for unitslib
+# -----------------------------------------------------------
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14) # Supported values are ``11``, ``14``, and ``17``.
+endif()
+set(BUILD_UNITS_STATIC_LIBRARY ON CACHE INTERNAL "")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ThirdParty/units" "${PROJECT_BINARY_DIR}/ThirdParty/units")
+set_target_properties(units-static PROPERTIES FOLDER Extern)
+
+# -----------------------------------------------------------------------------
+# create utilities target
+# -----------------------------------------------------------------------------
+add_subdirectory(ThirdParty/utilities)
+set_target_properties(gmlc_utilities PROPERTIES FOLDER Extern)
+target_include_directories(gmlc_utilities SYSTEM PRIVATE $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
 # ------------------------------------------------------------
 # load the required subdirectories
@@ -754,13 +790,6 @@ endif(ENABLE_GRIDDYN_DOXYGEN)
 file(GLOB KEY_LIBRARY_FILES ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
 
-install(
-    TARGETS griddyn_base griddyn_optional
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
 # TODO this should probably be in a different file
 # ------------------------------------------------------------
 # Enable clang analysis and formatting tools
@@ -776,9 +805,9 @@ endif(ENABLE_CLANG_TOOLS)
 if(ENABLE_GRIDDYN_TESTS)
     # message(STATUS "otcf:${optional_component_test_files}")
     add_subdirectory(test)
-    if(BUILD_SHARED_LIBS)
+    if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
         add_subdirectory(test/testSharedLibrary)
-    endif(BUILD_SHARED_LIBS)
+    endif()
     enable_testing()
     # add_test(NAME gridDynTest COMMAND testCore)
 endif(ENABLE_GRIDDYN_TESTS)
@@ -826,7 +855,7 @@ install(
 # ------------------------------------------------------------
 # CTest
 # ------------------------------------------------------------
-if(ENABLE_TESTS)
+if(ENABLE_GRIDDYN_TESTS)
     include(CTest)
     find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 
@@ -872,7 +901,7 @@ if(ENABLE_TESTS)
             Valgrind
     )
 
-    if(BUILD_GRIDDYN_SHARED_LIBRARY)
+    if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
         add_test(NAME testSharedLibrary COMMAND shared_library_tests)
         set_property(TEST testSharedLibrary PROPERTY LABELS Nightly Release)
 
@@ -989,3 +1018,8 @@ if(ENABLE_PACKAGE_BUILD)
     # THIS LINE MUST BE LAST
     include(CPack)
 endif(ENABLE_PACKAGE_BUILD)
+
+if (NOT GRIDDYN_ROOT_PROJ)
+	#restore the original module path
+	set(CMAKE_MODULE_PATH ${ORIGINAL_MODULE_PATH})
+endif()

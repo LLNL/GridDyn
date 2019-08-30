@@ -11,7 +11,7 @@
 */
 
 #include "commMessage.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -22,6 +22,8 @@ using retriever = cereal::PortableBinaryInputArchive;
 
 namespace griddyn
 {
+
+	using namespace gmlc::utilities;
 
 REGISTER_MESSAGE_TYPE (m1, "IGNORE", commMessage::ignoreMessageType);
 REGISTER_MESSAGE_TYPE (m2, "ping", commMessage::pingMessageType);
@@ -60,7 +62,7 @@ std::string commMessage::to_string() const
     if (code != 0xFFFF'FFFF)
     {
         message.push_back('[');
-        appendInteger(message, code);
+        stringOps::appendInteger(message, code);
         message.push_back(']');
     }
     if (payload)
@@ -248,7 +250,7 @@ uint32_t MessageTypeRegistry::getType(const std::string &name) const
             return fnd->second;
         }
         auto ret = std::string("type_");
-        appendInteger(ret, type);
+        stringOps::appendInteger(ret, type);
         return ret;
     }
 

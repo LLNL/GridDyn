@@ -44,19 +44,24 @@ void dimeClientInterface::init ()
     socket = std::make_unique<zmq::socket_t> (context->getBaseContext (), zmq::socket_type::req);
     socket->connect (address);
 
-    Json_gd::Value outgoing;
+    Json::Value outgoing;
     outgoing["command"] = "connect";
     outgoing["name"] = name;
     outgoing["listen_to_events"] = false;
 
-    std::stringstream ss;
-    writer->write(outgoing, &ss);
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    auto writer = builder.newStreamWriter ();
+    std::stringstream sstr;
+    writer->write (outgoing, &sstr);
+    delete writer;
 
-    socket->send (ss.str());
+    socket->send (sstr.str ());
 
     char buffer[3] = {};
     auto sz = socket->recv (buffer, 3, 0);
-    if ((sz != 2) || (strncmp(buffer, "OK", 3) != 0))
+    if ((sz != 2) || (strncmp (buffer, "OK", 3) != 0))
     {
         throw initFailure ();
     }
@@ -66,12 +71,18 @@ void dimeClientInterface::close ()
 {
     if (socket)
     {
-        Json_gd::Value outgoing;
+        Json::Value outgoing;
         outgoing["command"] = "exit";
         outgoing["name"] = name;
 
         std::stringstream ss;
-        writer->write(outgoing, &ss);
+
+        Json::StreamWriterBuilder builder;
+        builder["commentStyle"] = "None";
+        builder["indentation"] = "   ";  // or whatever you like
+        auto writer = builder.newStreamWriter ();
+        writer->write (outgoing, &ss);
+        delete writer;
 
         socket->send (ss.str ());
 
@@ -82,14 +93,14 @@ void dimeClientInterface::close ()
 
 void dimeClientInterface::sync () {}
 
-void encodeVariableMessage (Json_gd::Value &data, double val)
+void encodeVariableMessage (Json::Value &data, double val)
 {
-    Json_gd::Value content;
+    Json::Value content;
     content["stdout"] = "";
     content["figures"] = "";
     content["datadir"] = "/tmp MatlabData/";
 
-    Json_gd::Value response;
+    Json::Value response;
     response["content"] = content;
     response["result"] = val;
     response["success"] = true;
@@ -102,7 +113,7 @@ void encodeVariableMessage (Json_gd::Value &data, double val)
 void dimeClientInterface::send_var (const std::string &varName, double val, const std::string &recipient)
 {
     // outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
-    Json_gd::Value outgoing;
+    Json::Value outgoing;
 
     outgoing["command"] = (recipient.empty ()) ? "broadcast" : "send";
 
@@ -110,14 +121,21 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     outgoing["args"] = varName;
 
     std::stringstream ss;
-    writer->write(outgoing, &ss);
-    socket->send (ss.str());
+
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    auto writer = builder.newStreamWriter ();
+    writer->write (outgoing, &ss);
+    delete writer;
+
+    socket->send (ss.str ());
 
     char buffer[3];
     auto sz = socket->recv (buffer, 3, 0);
     // TODO check recv value
 
-    Json_gd::Value outgoingData;
+    Json::Value outgoingData;
     outgoingData["command"] = "response";
     outgoingData["name"] = name;
     if (!recipient.empty ())
@@ -128,20 +146,22 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     outgoingData["meta"]["var_name"] = varName;
     encodeVariableMessage (outgoingData, val);
 
-    std::stringstream().swap(ss); // reset ss
-    writer->write(outgoingData, &ss);
+    std::stringstream ().swap (ss);  // reset ss
+
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    writer = builder.newStreamWriter ();
+    writer->write (outgoing, &ss);
+    delete writer;
     socket->send (ss.str ());
 
     sz = socket->recv (buffer, 3, 0);
-    if (sz != 2) // TODO check for "OK"
+    if (sz != 2)  // TODO check for "OK"
     {
         throw (sendFailure ());
     }
 }
 
-void dimeClientInterface::broadcast (const std::string &varName, double val)
-{
-    send_var (varName, val);
-}
+void dimeClientInterface::broadcast (const std::string &varName, double val) { send_var (varName, val); }
 
 void dimeClientInterface::get_devices () {}

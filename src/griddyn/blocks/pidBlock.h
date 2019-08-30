@@ -49,7 +49,7 @@ class pidBlock : public Block
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
     virtual void blockDerivative (double input,

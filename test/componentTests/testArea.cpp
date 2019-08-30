@@ -14,7 +14,7 @@
 #include "griddyn/gridBus.h"
 #include "griddyn/Link.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cmath>
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
 
 
     auto st2 = gds2->getState ();
-    auto diffs = countDiffs (st, st2, 0.00001);
+    auto diffs = gmlc::utilities::countDiffs (st, st2, 0.00001);
     BOOST_CHECK (diffs == 0);
 }
 

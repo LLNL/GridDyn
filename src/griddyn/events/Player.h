@@ -10,12 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_PLAYER_H_
-#define GRIDDYN_PLAYER_H_
 #pragma once
 
 #include "Event.h"
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 
 #include <future>
 namespace griddyn
@@ -30,7 +28,7 @@ class Player : public Event
     // the bool is first to take advantage of the empty space in event there will still be a 3 byte gap
     bool loadFileProcess = false;  //!< flag indicating that the files need to be loaded yet
     coreTime period = maxTime;  //!< period of the player
-    timeSeries<double, coreTime> ts;  //!< the time series containing the data for the player
+    gmlc::utilities::timeSeries<double, coreTime> ts;  //!< the time series containing the data for the player
     index_t currIndex = kNullLocation;  //!< the current index of the player
     index_t column = 0;  //!< the column in the file to use as the value set
     coreTime timeOffset = timeZero;  //!< an offset to the time series time
@@ -83,4 +81,3 @@ class Player : public Event
 };
 }  // namespace events
 }  // namespace griddyn
-#endif

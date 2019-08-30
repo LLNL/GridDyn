@@ -100,10 +100,10 @@ class gridBus : public gridPrimary
     IOdata outputs;  //!< the current output values
     IOlocs outLocs;  //!< the current output locations
 
-    parameter_t localBaseVoltage = 120;  //!< [kV]    base voltage level
+    model_parameter localBaseVoltage = 120;  //!< [kV]    base voltage level
 
-    parameter_t Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
-    parameter_t Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
+    model_parameter Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
+    model_parameter Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
 
     coreTime lowVtime = negTime;  //!< the last time a low voltage alert was triggered
 
@@ -168,15 +168,15 @@ class gridBus : public gridPrimary
     virtual void setAll (const std::string &objtype,
                          const std::string &param,
                          double val,
-                         gridUnits::units_t unitType = gridUnits::defUnit) override;
+                         units::unit unitType = units::defunit) override;
     virtual void
     getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // parameter get functions
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     // solver functions
     virtual void preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
@@ -446,7 +446,7 @@ class gridBus : public gridPrimary
     virtual void removePowerControl (gridComponent *comp);
 
     virtual const std::vector<stringVec> &outputNames () const override;
-    gridUnits::units_t outputUnits (index_t outputNum) const override;
+    units::unit outputUnits (index_t outputNum) const override;
 
   protected:
     /** @brief

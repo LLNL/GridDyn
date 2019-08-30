@@ -13,14 +13,16 @@
 #include "fileLoad.h"
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
 namespace loads
 {
+	using namespace gmlc::utilities;
+
 fileLoad::fileLoad (const std::string &objName) : rampLoad (objName) {}
 
 fileLoad::fileLoad (const std::string &objName, std::string fileName)
@@ -260,7 +262,7 @@ void fileLoad::set (const std::string &param, const std::string &val)
     }
     else if (param == "units")
     {
-        inputUnits = gridUnits::getUnits (val);
+        inputUnits = units::unit_cast_from_string (val);
     }
     else if ((param == "mode") || (param == "timemode"))
     {
@@ -273,7 +275,7 @@ void fileLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void fileLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fileLoad::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "scalefactor") || (param == "scaling"))
     {
@@ -302,10 +304,10 @@ count_t fileLoad::loadFile ()
     if (!schedLoad.empty ())
     {
         schedLoad.addData (maxTime, schedLoad.lastData ());
-        if (inputUnits != gridUnits::defUnit)
+        if (inputUnits != units::defunit)
         {
             double scalar =
-              gridUnits::unitConversion (1.0, inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
+              units::convert (1.0, inputUnits, units::puMW, systemBasePower, localBaseVoltage);
             if (scalar != 1.0)
             {
                 schedLoad.scaleData (scalar);

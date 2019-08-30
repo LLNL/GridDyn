@@ -17,7 +17,7 @@
 
 #include "griddyn/measurement/gridGrabbers.h"
 #include "helicsCoordinator.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {
@@ -162,7 +162,7 @@ void helicsCollector::set (const std::string &param, double val) { collector::se
 
 void helicsCollector::set (const std::string &param, const std::string &val)
 {
-    using namespace stringOps;
+    using namespace gmlc::utilities::stringOps;
     if (param == "complex")
     {
         auto asLoc = val.find ("as");

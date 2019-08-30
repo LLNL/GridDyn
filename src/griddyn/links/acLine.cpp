@@ -20,16 +20,16 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/matrixDataCompact.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <complex>
 #include <cstring>
 namespace griddyn
 {
-using namespace gridUnits;
-
+using namespace units;
+using namespace gmlc::utilities;
 // make the object factory types
 
 // helper defines to have things make more sense
@@ -263,7 +263,7 @@ void acLine::set (const std::string &param, const std::string &val)
     }
 }
 
-void acLine::set (const std::string &param, double val, units_t unitType)
+void acLine::set (const std::string &param, double val, unit unitType)
 {
     if (param.length () == 1)
     {
@@ -286,7 +286,7 @@ void acLine::set (const std::string &param, double val, units_t unitType)
             mp_G = val;
             break;
         case 'p':
-            Pset = unitConversion (val, unitType, puMW, systemBasePower);
+            Pset = convert (val, unitType, puMW, systemBasePower);
             opFlags.set (fixed_target_power);
             break;
         default:
@@ -298,7 +298,7 @@ void acLine::set (const std::string &param, double val, units_t unitType)
     stringOps::trailingStringInt (param, outparam, 1);
     if (outparam == "length")
     {
-        length = unitConversionDistance (val, unitType, km);
+        length = convert (val, unitType, km);
     }
     else if ((outparam == "tap") || (param == "ratio"))
     {
@@ -306,16 +306,16 @@ void acLine::set (const std::string &param, double val, units_t unitType)
     }
     else if (outparam == "tapangle")
     {
-        tapAngle = unitConversion (val, unitType, rad);
+        tapAngle = convert (val, unitType, rad);
     }
     else if (outparam == "fault")
     {
         double temp = val;
-        if (unitType != defUnit)
+        if (unitType != defunit)
         {
             if (length > 0.0)
             {
-                temp = unitConversionDistance (val, unitType, km);
+                temp = convert (val, unitType, km);
                 temp = temp / length;
             }
         }
@@ -341,11 +341,11 @@ void acLine::set (const std::string &param, double val, units_t unitType)
     }
     else if (outparam == "minangle")
     {
-        minAngle = unitConversion (val, unitType, rad);
+        minAngle = convert (val, unitType, rad);
     }
     else if (outparam == "maxangle")
     {
-        maxAngle = unitConversion (val, unitType, rad);
+        maxAngle = convert (val, unitType, rad);
     }
     else
     {
@@ -353,7 +353,7 @@ void acLine::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double acLine::get (const std::string &param, units_t unitType) const
+double acLine::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param.length () == 1)
@@ -404,9 +404,9 @@ double acLine::get (const std::string &param, units_t unitType) const
     return val;
 }
 
-int acLine::fixRealPower (double power, id_type_t measureTerminal, id_type_t fixedTerminal, units_t unitType)
+int acLine::fixRealPower (double power, id_type_t measureTerminal, id_type_t fixedTerminal, unit unitType)
 {
-    Pset = unitConversion (power, unitType, puMW, systemBasePower);
+    Pset = convert (power, unitType, puMW, systemBasePower);
     updateLocalCache ();
     double ang = asin (Pset / b / linkComp.Vmx);
     if (!std::isnormal (ang))
@@ -447,10 +447,10 @@ int acLine::fixPower (double rPower,
                       double qPower,
                       id_type_t measureTerminal,
                       id_type_t fixedTerminal,
-                      gridUnits::units_t unitType)
+                      units::unit unitType)
 {
-    double valp = unitConversion (rPower, unitType, puMW, systemBasePower);
-    double valq = unitConversion (qPower, unitType, puMW, systemBasePower);
+    double valp = convert (rPower, unitType, puMW, systemBasePower);
+    double valq = convert (qPower, unitType, puMW, systemBasePower);
     opFlags.set (fixed_target_power);
     double v1 = B1->getVoltage ();
     double v2 = B2->getVoltage ();

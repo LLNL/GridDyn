@@ -12,12 +12,14 @@
 
 #include "jsonReaderElement.h"
 #include "jsonElement.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
 // default initialized empty string
 static const std::string nullStr;
+
+using namespace gmlc::utilities;
 
 bool isElement(const Json::Value &testValue);
 bool isAttribute(const Json::Value &testValue);

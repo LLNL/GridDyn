@@ -17,7 +17,7 @@
 #include "gridOptObjects.h"
 #include "models/gridAreaOpt.h"
 #include "optObjectFactory.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 // system headers
 
 #include <cmath>
@@ -78,8 +78,8 @@ void gridDynOptimization::set (const std::string &param, const std::string &val)
 {
     if (param == "flags")
     {
-        auto v = stringOps::splitline (val);
-        stringOps::trim (v);
+        auto v = gmlc::utilities::stringOps::splitline (val);
+        gmlc::utilities::stringOps::trim (v);
         for (auto &flagstr : v)
         {
             setFlag (flagstr, true);
@@ -100,7 +100,7 @@ void gridDynOptimization::set (const std::string &param, const std::string &val)
         /*default_solution,
     dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
     steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
-        auto temp = convertToLowerCase (val);
+        auto temp = gmlc::utilities::convertToLowerCase (val);
         if ((temp == "dcopf") || (temp == "opf"))
         {
             optimization_mode = DCOPF;
@@ -150,7 +150,7 @@ void gridDynOptimization::setFlags (size_t param, int val)
     controlFlags.set (param, (val > 0));
 }
 
-void gridDynOptimization::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynOptimization::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "optimtol")
     {
@@ -171,7 +171,7 @@ void gridDynOptimization::set (const std::string &param, double val, gridUnits::
     }
 }
 
-double gridDynOptimization::get (const std::string &param, gridUnits::units_t unitType) const
+double gridDynOptimization::get (const std::string &param, units::unit unitType) const
 {
     double val;
     if (param == "voltagetolerance")

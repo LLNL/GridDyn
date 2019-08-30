@@ -158,7 +158,7 @@ void fileSource::set (const std::string &param, const std::string &val)
     }
 }
 
-void fileSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fileSource::set (const std::string &param, double val, units::unit unitType)
 {
     {
         Source::set (param, val, unitType);

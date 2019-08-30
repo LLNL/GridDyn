@@ -18,7 +18,7 @@
 #include "griddyn/GenModel.h"
 #include "griddyn/Governor.h"
 
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cstdio>
 #include <fstream>
@@ -26,6 +26,8 @@
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance ();
 
 void loadGENROU (coreObject *parentObject, stringVec &tokens);

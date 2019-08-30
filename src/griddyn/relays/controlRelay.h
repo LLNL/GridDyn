@@ -40,7 +40,7 @@ struct delayedControlAction
     coreTime triggerTime;  //!< the time the delayed action should be triggered
     coreTime executionTime;  //!< the time it was executed
     double val;  //!< the value associated with the change
-    gridUnits::units_t unitType = gridUnits::defUnit;  //!< the units associated with the action
+    units::unit unitType = units::defunit;  //!< the units associated with the action
     bool executed;  //!< flag indicating the action is executed
     bool measureAction;  //!< flag indicating the action is a measurement event
 };
@@ -78,7 +78,7 @@ class controlRelay : public Relay
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
     virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;

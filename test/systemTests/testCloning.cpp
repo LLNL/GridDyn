@@ -13,7 +13,7 @@
 
 #include "griddyn/simulation/diagnostics.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
@@ -26,6 +26,7 @@ static const std::string clone_test_directory = std::string (GRIDDYN_TEST_DIRECT
 
 BOOST_FIXTURE_TEST_SUITE (clone_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
+using gmlc::utilities::countDiffs;
 BOOST_AUTO_TEST_CASE (cloning_test1)
 {
     std::string fileName = clone_test_directory + "clone_test1.xml";

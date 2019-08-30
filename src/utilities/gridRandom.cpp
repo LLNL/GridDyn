@@ -11,8 +11,8 @@
  */
 
 #include "gridRandom.h"
-#include "mapOps.hpp"
-#include "vectorOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <ctime>
 
@@ -184,7 +184,7 @@ std::vector<double> gridRandom::getNewValues (size_t count)
 
 void gridRandom::getNewValues (std::vector<double> &rvec, size_t count)
 {
-    ensureSizeAtLeast (rvec, count);
+    gmlc::utilities::ensureSizeAtLeast (rvec, count);
     std::generate (rvec.begin (), rvec.begin () + count - 1, [=]() { return (*dobj) (); });
 }
 

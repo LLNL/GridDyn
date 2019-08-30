@@ -22,8 +22,8 @@
 #include "core/objectInterpreter.h"
 #include "dcLink.h"
 #include "utilities/matrixDataCompact.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include "../measurement/objectGrabbers.h"
 
@@ -32,7 +32,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 // make the object factory types
 
@@ -221,7 +221,7 @@ void Link::set (const std::string &param, const std::string &val)
     }
     else if (param == "status")
     {
-        auto v2 = convertToLowerCase (val);
+        auto v2 = gmlc::utilities::convertToLowerCase (val);
         if ((v2 == "closed") || (v2 == "connected"))
         {
             reconnect ();
@@ -369,7 +369,7 @@ void Link::reconnect ()
     }
 }
 
-void Link::set (const std::string &param, double val, units_t unitType)
+void Link::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "state") || (param == "switch") || (param == "switch1") || (param == "breaker") ||
         (param == "breaker_open") || (param == "breaker1") || (param == "breaker_open1"))
@@ -390,7 +390,7 @@ void Link::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "pset")
     {
-        Pset = unitConversion (val, unitType, puMW, systemBasePower);
+        Pset = convert (val, unitType, puMW, systemBasePower);
         opFlags.set (fixed_target_power);
         computePowers ();
     }
@@ -401,15 +401,15 @@ void Link::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "ratinga") || (param == "rating"))
     {
-        ratingA = unitConversion (val, unitType, puMW, systemBasePower);
+        ratingA = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "ratingb")
     {
-        ratingB = unitConversion (val, unitType, puMW, systemBasePower);
+        ratingB = convert (val, unitType, puMW, systemBasePower);
     }
     else if ((param == "ratinge") || (param == "emergency_rating") || (param == "erating") || (param == "ratingc"))
     {
-        Erating = unitConversion (val, unitType, puMW, systemBasePower);
+        Erating = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "circuit")
     {
@@ -430,7 +430,7 @@ coreObject *Link::getSubObject (const std::string &typeName, index_t num) const
     return nullptr;
 }
 
-double Link::get (const std::string &param, units_t unitType) const
+double Link::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
 
@@ -448,7 +448,7 @@ double Link::get (const std::string &param, units_t unitType) const
     }
     else if ((param == "set") || (param == "pset"))
     {
-        val = gridUnits::unitConversion (Pset, puMW, unitType, systemBasePower);
+        val = units::convert (Pset, puMW, unitType, systemBasePower);
     }
     else if (param == "linkcount")
     {
@@ -472,7 +472,7 @@ double Link::get (const std::string &param, units_t unitType) const
     }
     else if (param == "loss")
     {
-        val = unitConversion (getLoss (), puMW, unitType, systemBasePower);
+        val = convert (getLoss (), puMW, unitType, systemBasePower);
     }
     else if (param == "lossfraction")
     {
@@ -488,7 +488,7 @@ double Link::get (const std::string &param, units_t unitType) const
         if (fptr.first)
         {
             coreObject *tobj = const_cast<Link *> (this);
-            val = unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
+            val = convert (fptr.first (tobj), fptr.second, unitType, systemBasePower);
         }
         else
         {
@@ -511,15 +511,15 @@ void Link::pFlowObjectInitializeA (coreTime /*time0*/, std::uint32_t /*flags*/)
 }
 
 bool Link::isConnected () const { return (!(opFlags[switch1_open_flag] || opFlags[switch2_open_flag])); }
-int Link::fixRealPower (double power, id_type_t measureTerminal, id_type_t /*fixedTerminal*/, units_t unitType)
+int Link::fixRealPower (double power, id_type_t measureTerminal, id_type_t /*fixedTerminal*/, unit unitType)
 {
     if (measureTerminal == 1)
     {
-        Pset = unitConversion (power, unitType, puMW, systemBasePower);
+        Pset = convert (power, unitType, puMW, systemBasePower);
     }
     else
     {
-        Pset = unitConversion (power, unitType, puMW, systemBasePower) / (1.0 - lossFraction);
+        Pset = convert (power, unitType, puMW, systemBasePower) / (1.0 - lossFraction);
     }
     opFlags.set (fixed_target_power);
     return 1;
@@ -531,7 +531,7 @@ int Link::fixPower (double rPower,
                     double /*qPower*/,
                     id_type_t measureTerminal,
                     id_type_t fixedTerminal,
-                    gridUnits::units_t unitType)
+                    units::unit unitType)
 {
     return fixRealPower (rPower, measureTerminal, fixedTerminal, unitType);
 }
@@ -658,7 +658,7 @@ double Link::getBusAngle (id_type_t busId) const
 {
     if (busId < 500_ind)
     {
-        auto B = getBus (busId);
+        auto B = getBus (static_cast<index_t>(busId));
         if (B != nullptr)
         {
             return B->getAngle ();
@@ -674,7 +674,7 @@ double Link::getBusAngle (id_type_t busId) const
         return (B2 != nullptr) ? B2->getAngle () : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus (busId);
+    auto B = getBus (static_cast<index_t>(busId));
     if (B != nullptr)
     {
         return B->getAngle ();
@@ -686,7 +686,7 @@ double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_
 {
     if (busId < 500_ind)
     {
-        auto B = getBus (busId);
+        auto B = getBus (static_cast<index_t>(busId));
         if (B != nullptr)
         {
             return B->getAngle ();
@@ -702,7 +702,7 @@ double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_
         return (B2 != nullptr) ? B2->getAngle (sD, sMode) : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus (busId);
+    auto B = getBus (static_cast<index_t>(busId));
     if (B != nullptr)
     {
         return B->getAngle (sD, sMode);
@@ -812,6 +812,7 @@ double Link::getImagImpedance (id_type_t busId) const
 
 double Link::getTotalImpedance (id_type_t busId) const
 {
+	using gmlc::utilities::signn;
     if (isBus2 (busId, B2))  // from bus
     {
         //  printf("id2 impedance=%f\n", signn(linkFlows.P2 + linkFlows.Q2)*(linkInfo.v2*linkInfo.v2) /

@@ -14,40 +14,22 @@ set(
     utilities_sources
     gridRandom.cpp
     saturation.cpp
-    stringOps.cpp
-    string_viewOps.cpp
     ThreePhaseFunctions.cpp
     matrixOps.cpp
-    stringConversion.cpp
-    units.cpp
-    vectorOps.cpp
     functionInterpreter.cpp
-    charMapper.cpp
     workQueue.cpp
     zipUtilities.cpp
-    base64.cpp
     matrixCreation.cpp
     logger.cpp
+	loggerCore.cpp
     matrixDataSparse.cpp
     OperatingBoundary.cpp
-    stringToCmdLine.cpp
-    TripWire.cpp
 )
 
 set(
     utilities_headers
-    units.h
     dataDictionary.hpp
-    timeSeries.hpp
-    charMapper.h
-    timeSeriesMulti.hpp
     ThreePhaseFunctions.h
-    vectorOps.hpp
-    generic_string_ops.hpp
-    stringOps.h
-    string_viewOps.h
-    string_viewDef.h
-    optionalDef.hpp
     gridRandom.h
     saturation.h
     vectData.hpp
@@ -66,21 +48,14 @@ set(
     matrixDataFilter.hpp
     matrixDataCustomWriteOnly.hpp
     functionInterpreter.h
-    TripWire.hpp
     workQueue.h
-    simpleQueue.hpp
     zipUtilities.h
-    base64.h
-    stringConversion.h
-    string_viewConversion.h
-    mapOps.hpp
     valuePredictor.hpp
     matrixCreation.h
-    timeRepresentation.hpp
     indexTypes.hpp
     logger.h
+	loggerCore.hpp
     OperatingBoundary.h
-    stringToCmdLine.h
 )
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
@@ -107,7 +82,7 @@ if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizi
 endif()
 include(${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
 
-target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib griddyn_base)
+target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib gmlc_utilities griddyn_base)
 set_target_properties(utilities PROPERTIES FOLDER libraries)
 
 if(ENABLE_64_BIT_INDEXING)
@@ -116,13 +91,6 @@ endif(ENABLE_64_BIT_INDEXING)
 if(UNSIGNED_INDEXING)
     target_compile_definitions(utilities PUBLIC -DUNSIGNED_INDEXING)
 endif(UNSIGNED_INDEXING)
-
-install(
-    TARGETS utilities
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
 
 install(
     FILES ${utilities_headers}

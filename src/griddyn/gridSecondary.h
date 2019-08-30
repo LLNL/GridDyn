@@ -50,7 +50,7 @@ class gridSecondary : public gridComponent
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     /**
     *@brief get the real output power
@@ -157,9 +157,9 @@ class gridSecondary : public gridComponent
     virtual const std::vector<stringVec> &inputNames () const override;
     virtual const std::vector<stringVec> &outputNames () const override;
 
-    virtual gridUnits::units_t inputUnits (index_t inputNum) const override;
+    virtual units::unit inputUnits (index_t inputNum) const override;
 
-    virtual gridUnits::units_t outputUnits (index_t outputNum) const override;
+    virtual units::unit outputUnits (index_t outputNum) const override;
 };
 
 }  // namespace griddyn

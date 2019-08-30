@@ -22,15 +22,3 @@ add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})
 
 target_link_libraries(coupling_static_lib PUBLIC griddyn_base)
 set_target_properties(coupling_static_lib PROPERTIES FOLDER libraries)
-install(
-    TARGETS coupling_static_lib
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${shared_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-    COMPONENT headers
-)

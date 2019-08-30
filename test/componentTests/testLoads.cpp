@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(file_load_test2)
 	ldT->set("column", "yp");
 	ldT->set("scaling", 1.0);
 	ldT->set("qratio", 0.3);
-	timeSeries<> Tdata(fileName);
+	gmlc::utilities::timeSeries<> Tdata(fileName);
 	ldT->pFlowInitializeA(timeZero, 0u);
 
 	double val = ldT->getRealPower();

@@ -55,8 +55,8 @@ public:
 
         virtual void addGen(scheduler *sched);
         virtual void removeSched(scheduler *sched);
-        virtual void set (const std::string &param, double val,units_t unitType=defUnit);
-        virtual void set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val,
+        virtual void set (const std::string &param, double val,unit unitType=defunit);
+        virtual void set (const std::string &param, double val,unit unitType=defunit){return set(param,&val,
 unitType);};
 
         double getAvailable(){return sum(&resAvailable)-sum(&resUsed);};
@@ -236,7 +236,7 @@ void reserveDispatcher::remove (coreObject *obj)
 
 void reserveDispatcher::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 
-void reserveDispatcher::set (const std::string &param, double val, gridUnits::units_t unitType)
+void reserveDispatcher::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "threshold") || (param == "thresholdstart"))
     {

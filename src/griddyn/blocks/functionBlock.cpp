@@ -14,8 +14,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/functionInterpreter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -142,7 +142,7 @@ void functionBlock::set (const std::string &param, const std::string &val)
 {
     if ((param == "function") || (param == "func"))
     {
-        auto v2 = convertToLowerCase (val);
+        auto v2 = gmlc::utilities::convertToLowerCase (val);
         setFunction (v2);
     }
     else
@@ -151,7 +151,7 @@ void functionBlock::set (const std::string &param, const std::string &val)
     }
 }
 
-void functionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void functionBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "gain")
     {

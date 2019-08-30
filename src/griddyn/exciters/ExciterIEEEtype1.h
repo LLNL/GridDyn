@@ -22,12 +22,12 @@ namespace griddyn
 class ExciterIEEEtype1 : public Exciter
 {
 protected:
-	parameter_t Ke = 1.0;            // [pu] self-excited field
-	parameter_t Te = 1.0;            // [s]    exciter time constant
-	parameter_t Kf = 0.03;            // [pu] stabilizer gain
-	parameter_t Tf = 1.0;            // [s]    stabilizer time constant
-	parameter_t Aex = 0.0;           // [pu] parameter saturation function
-	parameter_t Bex = 0.0;           // [pu] parameter saturation function
+	model_parameter Ke = 1.0;            // [pu] self-excited field
+	model_parameter Te = 1.0;            // [s]    exciter time constant
+	model_parameter Kf = 0.03;            // [pu] stabilizer gain
+	model_parameter Tf = 1.0;            // [s]    stabilizer time constant
+	model_parameter Aex = 0.0;           // [pu] parameter saturation function
+	model_parameter Bex = 0.0;           // [pu] parameter saturation function
 public:
 	explicit ExciterIEEEtype1(const std::string &objName = "exciterIEEEtype1_#");
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
@@ -35,7 +35,7 @@ public:
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 	virtual stringVec localStateNames() const override;
 

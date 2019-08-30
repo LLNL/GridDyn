@@ -42,6 +42,7 @@ set(
 add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
 set_target_properties(coreObjects PROPERTIES FOLDER libraries)
 target_link_libraries(coreObjects PUBLIC utilities)
+target_link_libraries(coreObjects PUBLIC units-static)
 
 target_include_directories(
     coreObjects
@@ -49,15 +50,3 @@ target_include_directories(
     PUBLIC # TODO stop leaking the variant include, make this private
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
 
-install(
-    TARGETS coreObjects
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${coreObject_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/core
-    COMPONENT headers
-)

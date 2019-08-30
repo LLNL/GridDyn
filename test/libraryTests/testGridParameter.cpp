@@ -22,7 +22,7 @@
 
 static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 
-BOOST_AUTO_TEST_SUITE (gridParameter_tests)
+BOOST_AUTO_TEST_SUITE (gridmodel_parameterests)
 
-BOOST_AUTO_TEST_CASE (gridParameter_test1) {}
+BOOST_AUTO_TEST_CASE (gridmodel_parameterest1) {}
 BOOST_AUTO_TEST_SUITE_END ()

@@ -15,7 +15,7 @@
 #include "fileInput.h"
 #include "readElement.h"
 #include "readerHelper.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {

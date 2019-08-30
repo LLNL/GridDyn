@@ -16,10 +16,11 @@
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
 #include "griddyn/griddyn-config.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
+
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 // operator overloads for Tsched object
 bool operator< (const tsched &td1, const tsched &td2) { return (td1.time < td2.time); }
@@ -88,7 +89,7 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
 
 void scheduler::setTarget (const std::string &fileName)
 {
-    timeSeries<double, coreTime> targets;
+    gmlc::utilities::timeSeries<double, coreTime> targets;
     targets.loadFile (fileName);
 
     std::list<tsched> flist;
@@ -211,11 +212,11 @@ void scheduler::set (const std::string &param, const std::string &val)
     }
 }
 
-void scheduler::set (const std::string &param, double val, units_t unitType)
+void scheduler::set (const std::string &param, double val, unit unitType)
 {
     if (param == "min")
     {
-        Pmin = unitConversion (val, unitType, puMW, m_Base);
+        Pmin = convert (val, unitType, puMW, m_Base);
         if (PCurr < Pmin)
         {
             PCurr = Pmin;
@@ -223,7 +224,7 @@ void scheduler::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "max")
     {
-        Pmax = unitConversion (val, unitType, puMW, m_Base);
+        Pmax = convert (val, unitType, puMW, m_Base);
         if (PCurr > Pmax)
         {
             PCurr = Pmax;
@@ -231,11 +232,11 @@ void scheduler::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "base")
     {
-        m_Base = unitConversion (val, unitType, MW, systemBasePower);
+        m_Base = convert (val, unitType, MW, systemBasePower);
     }
     else if (param == "target")
     {
-        setTarget (unitConversion (val, unitType, puMW, m_Base));
+        setTarget (convert (val, unitType, puMW, m_Base));
     }
     else
     {
@@ -254,16 +255,16 @@ void scheduler::setFlag (const std::string &flag, bool val)
     }
 }
 
-double scheduler::get (const std::string &param, units_t unitType) const
+double scheduler::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param == "min")
     {
-        val = unitConversion (Pmin, puMW, unitType, m_Base);
+        val = convert (Pmin, puMW, unitType, m_Base);
     }
     else if (param == "max")
     {
-        val = unitConversion (Pmax, puMW, unitType, m_Base);
+        val = convert (Pmax, puMW, unitType, m_Base);
     }
     else
     {

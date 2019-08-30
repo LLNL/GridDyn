@@ -13,7 +13,8 @@
 #pragma once
 
 #include "coreDefinitions.hpp"
-#include "utilities/units.h"
+#include "units/units.hpp"
+
 // common libraries in all code
 // library for printf debug statements
 
@@ -172,9 +173,9 @@ class coreObject
      * @brief sets a numeric parameter of an object
      * @param[in] param the name of the parameter to change
      * @param[in] val the value of the parameter to set
-     * @param[in] unitType a type indicating the units of the val a defUnit default value
+     * @param[in] unitType a type indicating the units of the val a defunit default value
      */
-    virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
+    virtual void set (const std::string &param, double val, units::unit unitType = units::defunit);
     /** @brief get flags
     @param flag -the name of the flag to be queried
     @param val the value to the set the flag ;
@@ -189,10 +190,10 @@ class coreObject
     /**
      * @brief get a parameter from the object
      * @param[in] param the name of the parameter to get
-     * @param[in] unitType a type indicating the units of the val a defUnit default value
+     * @param[in] unitType a type indicating the units of the val a defunit default value
      * @return val the value of the parameter returns kNullVal if no property is found
      */
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const;
     /**
      * helper function wrapper to return an int (instead of a double) from the get function
      * @param[in] param the name of the parameter to get

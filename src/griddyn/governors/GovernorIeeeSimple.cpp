@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace governors
 {
-using namespace gridUnits;
+using namespace units;
 
 GovernorIeeeSimple::GovernorIeeeSimple (const std::string &objName) : Governor (objName)
 {
@@ -282,7 +282,7 @@ void GovernorIeeeSimple::rootTrigger (coreTime /*time*/,
 // set parameters
 void GovernorIeeeSimple::set (const std::string &param, const std::string &val) { Governor::set (param, val); }
 
-void GovernorIeeeSimple::set (const std::string &param, double val, units_t unitType)
+void GovernorIeeeSimple::set (const std::string &param, double val, unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     if (param == "t3")
@@ -291,16 +291,16 @@ void GovernorIeeeSimple::set (const std::string &param, double val, units_t unit
     }
     else if (param == "pup")
     {
-        Pup = unitConversion (val, unitType, puMW, systemBasePower);
+        Pup = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "pdown")
     {
-        Pdown = unitConversion (val, unitType, puMW, systemBasePower);
+        Pdown = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "ramplimit")
     {
-        Pup = unitConversion (val, unitType, puMW, systemBasePower);
-        Pdown = unitConversion (val, unitType, puMW, systemBasePower);
+        Pup = convert (val, unitType, puMW, systemBasePower);
+        Pdown = convert (val, unitType, puMW, systemBasePower);
     }
     else
     {

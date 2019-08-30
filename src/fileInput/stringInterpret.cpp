@@ -13,14 +13,15 @@
 #include "core/objectInterpreter.h"
 #include "fileInput.h"
 #include "utilities/functionInterpreter.h"
-#include "utilities/stringConversion.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 #include <cctype>
 #include <cmath>
 
 namespace griddyn
 {
-using namespace utilities::string_viewOps;
+using namespace gmlc::utilities::string_viewOps;
+using gmlc::utilities::string_view;
 
 double interpretStringBlock (string_view command, readerInfo &ri);
 
@@ -144,14 +145,14 @@ double interpretString_sv (string_view command, readerInfo &ri)
 
 double interpretStringBlock (string_view command, readerInfo &ri)
 {
-    auto val = numeric_conversionComplete<double> (command, std::nan ("0"));
+    auto val = gmlc::utilities::numeric_conversionComplete<double> (command, std::nan ("0"));
     if (std::isnan (val))
     {
         std::string ncommand = ri.checkDefines (command.to_string ());
         // iterate the process until the variable is no longer modified and still fails conversion to numerical
         if (command != ncommand)
         {
-            val = numeric_conversionComplete<double> (ncommand, std::nan ("0"));
+            val = gmlc::utilities::numeric_conversionComplete<double>(ncommand, std::nan("0"));
             if (std::isnan (val))
             {
                 val = interpretString (ncommand, ri);
@@ -304,15 +305,16 @@ double ObjectQuery (string_view command, coreObject *obj)
 
 double stringBlocktoDouble (string_view block, readerInfo &ri)
 {
-    if (nonNumericFirstCharacter (
-          block))  // if the first character is not a digit then go to the string interpreter
+    // if the first character is not a digit then go to the string interpreter
+    if (gmlc::utilities::nonNumericFirstCharacter(
+          block))  
     {
         return interpretString_sv (block, ri);
     }
     try
     {
         size_t mpos;
-        double valA = numConvComp<double> (block, mpos);
+        double valA = gmlc::utilities::numConvComp<double> (block, mpos);
         if (mpos < block.length ())
         {
             valA = interpretString_sv (block, ri);

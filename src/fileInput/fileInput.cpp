@@ -20,7 +20,7 @@
 #include "formatInterpreters/tinyxmlReaderElement.h"
 #include "formatInterpreters/yamlReaderElement.h"
 #include "readElementFile.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/filesystem.hpp>
@@ -180,9 +180,9 @@ static const std::map<std::string, int> flagStringMap
 
 void addflags (basicReaderInfo &bri, const std::string &flags)
 {
-    using namespace stringOps;
-    auto flagsep = splitline (flags);
-    trim (flagsep);
+    using namespace gmlc::utilities;
+    auto flagsep = stringOps::splitline (flags);
+    stringOps::trim (flagsep);
     for (auto &flag : flagsep)
     {
 		auto fnd = flagStringMap.find(convertToLowerCase(flag));
@@ -208,7 +208,7 @@ void loadFile (coreObject *parentObject, const std::string &fileName, readerInfo
     if (ext.empty ())
     {
 		boost::filesystem::path sourcePath(fileName);
-        ext = convertToLowerCase (sourcePath.extension ().string ());
+        ext = gmlc::utilities::convertToLowerCase (sourcePath.extension ().string ());
         if (ext[0] == '.')
         {
             ext.erase (0, 1);

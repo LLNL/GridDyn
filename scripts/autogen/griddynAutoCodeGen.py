@@ -87,7 +87,8 @@ class Parse:
             node {cland.index} -- [clang cursor]
             fn {string} -- [filename]
         """
-
+        # Ask clang to parse every node of the Abstract Syntax tree.
+        #
         for c in node.get_children():
             filename = str(c.location)
             # if(filename.find("griddyn_autogen") != -1):
@@ -96,20 +97,31 @@ class Parse:
             # print "Data %s" % (c.data)
             if(str(c.location).find(str(fn)) != -1):
                 #
-                # we can read a line directly in the source file.includes
+                # we can read a line directly in the source file.
+                # using c.location.file.name and openening the file.
+                # Sometimes clang tell me where is the line in the file,
+                # So I extract it from "contents" and parse it manually.
                 #
                 filename = c.location.file.name
                 with open(filename, 'r') as fh:
                     contents = fh.read()
+
                 # print c.kind, c.spelling, c.type.spelling, c.access_specifier
                 # if c.kic.kinnd == clang.cindex.CursorKind.FIELD_DECL and
                 # (c.type.spelling.find('parameter_t') != -1):
+
+                #
+                # Save all the namespace found by clang.
                 if c.kind == clang.cindex.CursorKind.NAMESPACE:
                     self.namespaceList.append(c.spelling)
 
+                # "model_parameter" are found in CLASS_DECL
+                # Here we create an Ordered Dictionary with all
+                # possible extractions.  These are used later when
+                # we create the file.
                 if c.kind == clang.cindex.CursorKind.CLASS_DECL:
                     self.autogen.update(OrderedDict(
-                        {c.spelling: {'Parameters': OrderedDict(),  # Parameter_t for Get and Set
+                        {c.spelling: {'Parameters': OrderedDict(),  # model_parameter for Get and Set
                                       'StringParam': OrderedDict(),
                                       'AliasParam': OrderedDict(),
                                       'AliasFlags': OrderedDict(),
@@ -137,6 +149,9 @@ class Parse:
                                       'HasGetString': False}
                          }))
 
+                    # This save the parent class in case we need to call the parent of that function.
+                    # i.e. Load::get() for motorLoad::get()
+                    #
                     self.parentClass[c.spelling] = []
                     for child in c.get_children():
                         if child.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER:
@@ -146,8 +161,11 @@ class Parse:
 
                 #
                 # Extract information when METHOD Declaration Macro are found in .h class file.
+                # Here we read all macros in order to create the .cpp file for GET/SET
                 #
-                if(c.kind == clang.cindex.CursorKind.CXX_METHOD) and self.currentClass != '':
+                if (c.kind == clang.cindex.CursorKind.CXX_METHOD) and self.currentClass != '':
+                    # Extract the macro from the source file.
+                    # Set the appropriate autogen value.
                     declaration = contents[c.extent.start.offset:c.extent.end.offset]
                     autogen = self.autogen[self.currentClass]
                     if declaration == GET:
@@ -232,12 +250,16 @@ class Parse:
                         self.autogen['HasMacro'] = True
                 #
                 # Extract information from CLASS Comment block
-                # The comment block does not triggered the function, but the macro declaration does.
+                # Here we read all custom parameters, strings and flags from the comment.
                 #
                 if(c.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL and
                         c.brief_comment is not None):
-                    if(c.brief_comment.find(AUTOGEN) != -1):
+                    # We are looking for the string "--AUTOGEN--" in the comment.
+                    if (c.brief_comment.find(AUTOGEN) != -1):
+                        # debug...
                         # print "brief", c.brief_comment, c.kind
+
+                        # Extract each section for clarity
 
                         GetCustomParam = self.autogen[self.currentClass]['GetCustomParam']
                         SetCustomParam = self.autogen[self.currentClass]['SetCustomParam']
@@ -246,6 +268,8 @@ class Parse:
                         SetFlagsParam = self.autogen[self.currentClass]['SetFlagCustomParam']
                         GetFlagsParam = self.autogen[self.currentClass]['GetFlagCustomParam']
 
+                        # Extract from the comment, custom parameters, flags, or strings
+                        # Each one are split by space after "<TAG>:"
                         Comment = c.raw_comment.split('\n')
                         for i in range(len(Comment)):
                             if Comment[i].find('GET_CUSTOM') != -1:
@@ -276,12 +300,8 @@ class Parse:
                 # print c.kind, c.spelling, c.raw_comment, c.location
                 # print c.referenced.access_specifier
                 #
-                # Do not extract PROTECTED parameter_t
-                #
-                # if c.referenced is not None and c.referenced.access_specifier.name == 'PROTECTED':
-                #    continue
                 # ---------------------------------
-                # enum must be attached to a class
+                # Section to parse "ENUM" for flags
                 # ---------------------------------
                 if c.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL and(
                         c.type.spelling.find('flags') != -1) and \
@@ -297,9 +317,11 @@ class Parse:
                     Flags.update(OrderedDict({c.displayname: c.type.spelling}))
                     pass
 
+                # This section parse each model_parameter
+                # It will extract the [units] and {aliases}
                 if c.kind == clang.cindex.CursorKind.FIELD_DECL and (
-                        c.type.spelling.find('parameter_t') != -1):
-                    # print c.referenced.access_specifier.name
+                        c.type.spelling.find('model_parameter') != -1):
+                    # print(c.referenced.access_specifier.name)
                     key = c.spelling.upper()
                     Parameters = self.autogen[self.currentClass]['Parameters']
                     StringParam = self.autogen[self.currentClass]['StringParam']
@@ -311,7 +333,7 @@ class Parse:
                             # print c.raw_comment
                             begin = c.raw_comment.find("[") + 1
                             end = c.raw_comment.find("]")
-                            template = "unitConversion ({}, {}, unitType, systemBasePower)".format(
+                            template = "convert ({}, {}, unitType, systemBasePower)".format(
                                 "{}", c.raw_comment[begin:end])
                             Parameters.update(OrderedDict({key: template}))
                         else:
@@ -331,6 +353,9 @@ class Parse:
 
 
 class createFile:
+    """Create AutoGen.cpp file for a specific ".h" if AUTOGEN macros are present.
+
+    """
 
     def __init__(self):
         self.tab = 0
@@ -343,10 +368,10 @@ class createFile:
             paramListKey {all parameters} -- create enumeration class
         """
         tab = self.tab
-        print COPYRIGHT
-        print tab * " ", '#include "' + allClass[0] + '.h"'
-        print tab * " ", '#include "core/coreObjectTemplates.hpp"'
-        print tab * " ", '#include <map>'
+        print(COPYRIGHT)
+        print(tab * " ", '#include "' + allClass[0] + '.h"')
+        print(tab * " ", '#include "core/coreObjectTemplates.hpp"')
+        print(tab * " ", '#include <map>')
         custom = False
         namespaceStringVec = False
         for cl in allClass:
@@ -358,34 +383,35 @@ class createFile:
                 namespaceStringVec = True
 
         if custom:
-            print tab * " ", "#include <set>"
+            print(tab * " ", "#include <set>")
 
-        print
-        print tab * " ", 'using namespace std;'
-        print tab * " ", 'using namespace gridUnits;'
-        print tab * " ", 'using namespace ' + "::".join(namespace) + ";"
+        print()
+        print(tab * " ", 'using namespace std;')
+        print(tab * " ", 'using namespace units;')
+        print(tab * " ", 'using namespace ' + "::".join(namespace) + ";")
 
         if namespaceStringVec:
-            print tab * " ", 'using griddyn::stringVec;'
+            print(tab * " ", 'using griddyn::stringVec;')
 
-        print
+        print()
         #
         # create enum class
+        # i.e. enum class motorLoadParams {  PMOT, SCALE, };
+        #
         for i in range(len(allClass)):
             parameters = autogen[allClass[i]]['Parameters']
             HasSet = autogen[allClass[i]]['HasSet']
             HasGet = autogen[allClass[i]]['HasGet']
             if HasSet or HasGet:
                 if len(parameters) != 0:
-                    print tab * " ", "enum class " + allClass[i] + "Params { ",
-                    for param in parameters.keys():
-                        print param + ",",
-                    print"};"
-                print
+                    print(tab * " ", "enum class " + allClass[i] + "Params { ", end=' ')
+                    for param in list(parameters.keys()):
+                        print(param + ",", end=' ')
+                    print("};")
+                print()
 
         #
-        # create map pairs.
-        #
+        # create map pairs, and all custom parameters
         allcustomLocNum = []
         allcustomLocFlags = []
         allcustomLocString = []
@@ -399,66 +425,69 @@ class createFile:
                 HasSetCustomFlags = autogenCl['HasSetFlagCustomParam']
                 HasGetCustomFlags = autogenCl['HasGetFlagCustomParam']
 
+                # Create CustomParamGET function
                 if(HasGetCustomParam):
                     GetCustomParam = autogen[allClass[i]]['GetCustomParam']
                     if(len(GetCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomParamGet" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomParamGet" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(GetCustomParam.keys()):
                             allcustomLocNum.append(GetCustomParam[param].replace('"', '').replace(',', ''))
-                            print GetCustomParam[param],
-                        print "};"
+                            print(GetCustomParam[param], end=' ')
+                        print("};")
 
+                # Create CustomParamSet fucntion
                 if(HasSetCustomParam):
                     SetCustomParam = autogen[allClass[i]]['SetCustomParam']
                     if(len(SetCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomParamSet" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomParamSet" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(SetCustomParam.keys()):
                             allcustomLocNum.append(SetCustomParam[param].replace('"', '').replace(',', ''))
-                            print SetCustomParam[param],
-                        print "};"
-
+                            print(SetCustomParam[param], end=' ')
+                        print("};")
+                # Create CustomFlagGet function
                 if(HasGetCustomFlags):
                     GetFlagCustomParam = autogen[allClass[i]]['GetFlagCustomParam']
                     if(len(GetFlagCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomFlagGet" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomFlagGet" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(GetFlagCustomParam.keys()):
                             allcustomLocFlags.append(GetFlagCustomParam[param].replace('"', '').replace(',', ''))
-                            print GetFlagCustomParam[param],
-                        print "};"
-
+                            print(GetFlagCustomParam[param], end=' ')
+                        print("};")
+                # Create CustomFlagSet function
                 if(HasSetCustomFlags):
                     SetFlagCustomParam = autogen[allClass[i]]['SetFlagCustomParam']
                     if(len(SetFlagCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomFlagSet" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomFlagSet" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(SetFlagCustomParam.keys()):
                             allcustomLocFlags.append(SetFlagCustomParam[param].replace('"', '').replace(',', ''))
-                            print SetFlagCustomParam[param],
-                        print "};"
-
+                            print(SetFlagCustomParam[param], end=' ')
+                        print("};")
+                # Create CustomParamGetString function
                 if(HasGetStringParam):
                     GetStringCustomParam = autogen[allClass[i]]['GetStringCustomParam']
                     if(len(GetStringCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomParamGetString" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomParamGetString" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(GetStringCustomParam.keys()):
                             allcustomLocString.append(GetStringCustomParam[param].replace('"', '').replace(',', ''))
-                            print GetStringCustomParam[param],
-                        print "};"
-
+                            print(GetStringCustomParam[param], end=' ')
+                        print("};")
+                # Create CustomParamSetString function
                 if(HasSetStringParam):
                     SetStringCustomParam = autogen[allClass[i]]['SetStringCustomParam']
                     if(len(SetStringCustomParam) > 0):
-                        print tab * " ", "static const set<string> ",
-                        print "CustomParamSetString" + allClass[i] + "{",
+                        print(tab * " ", "static const set<string> ", end=' ')
+                        print("CustomParamSetString" + allClass[i] + "{", end=' ')
                         for (j, param) in enumerate(SetStringCustomParam.keys()):
                             allcustomLocString.append(SetStringCustomParam[param].replace('"', '').replace(',', ''))
-                            print SetStringCustomParam[param],
-                        print "};"
-                print
+                            print(SetStringCustomParam[param], end=' ')
+                        print("};")
+                print()
+        # We create the static constant for model parameter, flags and string
         for i in range(len(allClass)):
             parameters = autogen[allClass[i]]['Parameters']
             aliases = autogen[allClass[i]]['AliasParam']
@@ -480,44 +509,49 @@ class createFile:
                 self.printLocalParam("allowedFlags", Flags, allcustomLocFlags, aliasFlags, allClass[i])
                 self.printLocalParam("allowedStringParameters", stringParam,  allcustomLocString, {}, allClass[i])
 
-        print
+        print()
+        # Create the namespace found when parsing.
         for ns in namespace:
-            print tab * " ",
-            print "namespace {} ".format(ns), "{ "
+            print(tab * " ", end=' ')
+            print("namespace {} ".format(ns), "{ ")
             tab = tab + tabsize
 
         self.tab = tab
 
     def printLocalParam(self, name, paramList, customList, aliases, griddynClass):
         """
+        This function is used to create a "stringVec" for model_paramameter, flags and strings.
+        It will also create aliases.
         """
         tab = self.tab
 
-        if(len(paramList.keys()) != 0) or (len(customList) != 0):
-            print tab * " ", "static const stringVec " + name + griddynClass + "{",
+        if(len(list(paramList.keys())) != 0) or (len(customList) != 0):
+            print(tab * " ", "static const stringVec " + name + griddynClass + "{", end=' ')
             for i, param in enumerate(customList):
-                print "\"" + param.lower() + "\",",
+                print("\"" + param.lower() + "\",", end=' ')
                 if(i % 5) == 0 and i != 0:
-                    print
-                    print 38 * " ",
+                    print()
+                    print(38 * " ", end=' ')
             for i, param in enumerate(paramList.keys()):
-                if(param in aliases.keys()):
+                if(param in list(aliases.keys())):
                     for alias in aliases[param].split(','):
-                        print "\"" + alias.replace('"', '').lower().strip() + "\",",
+                        print("\"" + alias.replace('"', '').lower().strip() + "\",", end=' ')
                 if(i != len(paramList) - 1):
-                    print "\"" + param.lower() + "\",",
+                    print("\"" + param.lower() + "\",", end=' ')
                 else:
-                    print "\"" + param.lower() + "\" };"
+                    print("\"" + param.lower() + "\" };")
                 if(i % 5) == 0 and i != 0:
-                    print
-                    print 38 * " ",
-            if(len(paramList.keys()) == 0) and (len(customList) != 0):
-                print "};"
+                    print()
+                    print(38 * " ", end=' ')
+            if(len(list(paramList.keys())) == 0) and (len(customList) != 0):
+                print("};")
 
         self.tab = tab
 
     def printMapPair(self, name, paramList, aliases, griddynClass, local):
-        """CreateMap  parameter list.
+        """Create Map parameter list.
+                static const map<string, motorLoadParams> ParamsMapmotorLoad{
+                {"pmot", motorLoadParams::PMOT},... }
 
         Arguments:
             paramList {list of parameters} -- create map pairs.
@@ -530,13 +564,13 @@ class createFile:
             enumType = "int"
 
         if(len(paramList) == 0):
-            print tab * " "
-            print tab * " ", "static const map<string, " + enumType + "> " + mapName + "{};"
+            print(tab * " ")
+            print(tab * " ", "static const map<string, " + enumType + "> " + mapName + "{};")
 
         if(len(paramList) != 0):
 
-            print tab * " "
-            print tab * " ", "static const map<string, " + enumType + "> " + mapName + "{"
+            print(tab * " ")
+            print(tab * " ", "static const map<string, " + enumType + "> " + mapName + "{")
 
             for i, param in enumerate(paramList.keys()):
                 if local:
@@ -544,18 +578,19 @@ class createFile:
                 else:
                     value = paramList[param].split("::")[-2] + "::" + param
 
-                if(param in aliases.keys()):
+                if(param in list(aliases.keys())):
                     for alias in aliases[param].split(','):
-                        print tab * " ", "{\"" + alias.replace('"', '').lower().strip() + "\", " + value + "},"
+                        print(tab * " ", "{\"" + alias.replace('"', '').lower().strip() + "\", " + value + "},")
                 if(i != len(paramList) - 1):
-                    print tab * " ", "{\"" + param.lower() + "\", " + value + "},"
+                    print(tab * " ", "{\"" + param.lower() + "\", " + value + "},")
                 else:
-                    print tab * " ", "{\"" + param.lower() + "\", " + value + "}"
-            print tab * " ", "};"
+                    print(tab * " ", "{\"" + param.lower() + "\", " + value + "}")
+            print(tab * " ", "};")
         self.tab = tab
 
     def printSetFunction(self, autogen, allClass, parentClass):
         """
+        Create the Set function with custom parameters.
 
         Arguments:
             paramList {list} -- parameter list
@@ -569,70 +604,77 @@ class createFile:
             if HasSet:
 
                 Parameters = autogen[curClass]['Parameters']
-                stringKeys = autogen[curClass]['StringParam'].keys()
+                stringKeys = list(autogen[curClass]['StringParam'].keys())
                 stringParam = autogen[curClass]['StringParam']
                 HasSetCustomParam = autogen[curClass]['HasSetCustomParam']
                 mapName = "ParamsMap" + curClass
-
-                if(HasSetCustomParam):
-                    print tab * " ", "void " + curClass + "::custom_set(const string &param, double val, units_t unitType)"
-                    print tab * " ", "{"
-                    print tab * " ", "    return;"
-                    print tab * " ", "}"
-                    print tab * " ", "/* Is this a custom parameter? */"
-                    print tab * " ", "static bool " + curClass + "CustomSetCheck(const string & param)"
-                    print tab * " ", "{"
-                    tab = tab + tabsize
-                    print tab * " ", "return CustomParamSet" + curClass + ".find(param) != CustomParamSet" + curClass + ".end();"
-                    tab = tab - tabsize
-                    print tab * " ", "}"
-
-                print tab * " ", setFunction.format(curClass)
-                print tab * " ", "{"
-                tab = tab + tabsize
-                #
-                # Need to return custom parameter if it is in tthe Set
+                #  We have coustom parameters, so include ::custom_set()
                 #
                 if(HasSetCustomParam):
-                    print tab * " ", "if(" + curClass + "CustomSetCheck(param))"
-                    print tab * " ", "{"
+                    print(tab * " ", "void " + curClass + "::custom_set(const string &param, double val, units_t unitType)")
+                    print(tab * " ", "{")
+                    print(tab * " ", "    return;")
+                    print(tab * " ", "}")
+                    print(tab * " ", "/* Is this a custom parameter? */")
+                    print(tab * " ", "static bool " + curClass + "CustomSetCheck(const string & param)")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return custom_set(param, val, unitType);"
+                    print(tab * " ", "return CustomParamSet" + curClass + ".find(param) != CustomParamSet" + curClass + ".end();")
                     tab = tab - tabsize
-                    print tab * " ", "}"
-
-                print tab * " ", "auto it = " + mapName + ".find(param);"
-                print
-                print tab * " ", "if(it==" + mapName + ".end())"
-                print tab * " ", "{"
-                print tab * " ", "    " + parentClass[curClass][0] + "::set (param, val, unitType);"
-                print tab * " ", "}"
-                print tab * " ", "switch (it->second)"
-                print tab * " ", "{"
+                    print(tab * " ", "}")
+                # Start to write the Set function for this class
+                #
+                print(tab * " ", setFunction.format(curClass))
+                print(tab * " ", "{")
                 tab = tab + tabsize
+                #
+                # Need to return custom parameter if it is in the Set
+                # We call custom_set() defined just above this code.
+                #
+                if(HasSetCustomParam):
+                    print(tab * " ", "if(" + curClass + "CustomSetCheck(param))")
+                    print(tab * " ", "{")
+                    tab = tab + tabsize
+                    print(tab * " ", "return custom_set(param, val, unitType);")
+                    tab = tab - tabsize
+                    print(tab * " ", "}")
+                # Call parent set class if not found
+                #
+                print(tab * " ", "auto it = " + mapName + ".find(param);")
+                print()
+                print(tab * " ", "if(it==" + mapName + ".end())")
+                print(tab * " ", "{")
+                print(tab * " ", "    " + parentClass[curClass][0] + "::set (param, val, unitType);")
+                print(tab * " ", "}")
+                print(tab * " ", "switch (it->second)")
+                print(tab * " ", "{")
+                tab = tab + tabsize
+                # Set every parameters for this class
                 for (j, param) in enumerate(Parameters.keys()):
-                    print tab * " ", "case " + curClass + "Params::" + stringKeys[j].upper() + ":"
-                    print tab * " ", "    " + stringParam[param] + " = val;"
-                    print tab * " ", "    break;"
-                print tab * " ", "default:"
-                print tab * " ", "    " + parentClass[curClass][0] + "::set (param, val, unitType);"
+                    print(tab * " ", "case " + curClass + "Params::" + stringKeys[j].upper() + ":")
+                    print(tab * " ", "    " + stringParam[param] + " = val;")
+                    print(tab * " ", "    break;")
+                print(tab * " ", "default:")
+                print(tab * " ", "    " + parentClass[curClass][0] + "::set (param, val, unitType);")
 
-                print tab * " ", "    break;"
+                print(tab * " ", "    break;")
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
         self.tab = tab
 
     def printFooter(self, paramList):
         """
+        Just print  } to close all the open brackets.
+
         Arguments:
             paramList {list} -- [list of namespace]
         """
         tab = self.tab
         for i in range(len(paramList)):
             tab = tab - tabsize
-            print tab * " ", "}"
+            print(tab * " ", "}")
         self.tab = tab
 
     def printGetString(self, autogen, allClass, parentClass):
@@ -643,47 +685,50 @@ class createFile:
             curClass = allClass[i]
             HasGetCustomString = autogen[curClass]['HasGetStringCustomParam']
             HasGetString = autogen[curClass]['HasGetString']
-
+            # Handle customget() function first
+            #
             if(HasGetCustomString):
                 HasGetString = True
-                print tab * " ", "string " + curClass + "::custom_get(const string &param) const"
-                print tab * " ", "{"
-                print tab * " ", "    return \"\";"
-                print tab * " ", "}"
-                print tab * " ", "/* Is this a custom String? */"
-                print tab * " ", "static bool " + curClass + "CustomGetStringCheck(const string &param)"
-                print tab * " ", "{"
+                print(tab * " ", "string " + curClass + "::custom_get(const string &param) const")
+                print(tab * " ", "{")
+                print(tab * " ", "    return \"\";")
+                print(tab * " ", "}")
+                print(tab * " ", "/* Is this a custom String? */")
+                print(tab * " ", "static bool " + curClass + "CustomGetStringCheck(const string &param)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
-                print tab * " ", "return CustomParamGetString" + curClass + ".find(param) != CustomParamGetString" + curClass + ".end();"
+                print(tab * " ", "return CustomParamGetString" + curClass + ".find(param) != CustomParamGetString" + curClass + ".end();")
                 tab = tab - tabsize
-                print tab * " ", "}"
-
+                print(tab * " ", "}")
+            #
+            # We were asked to create getString()
+            #
             if(HasGetString):
-                print tab * " ", "string " + curClass + "::getString(const string &param) const"
-                print tab * " ", "{"
+                print(tab * " ", "string " + curClass + "::getString(const string &param) const")
+                print(tab * " ", "{")
                 tab = tab + tabsize
 
             if(HasGetCustomString):
-                print tab * " ", "if(" + curClass + "CustomGetStringCheck(param))"
-                print tab * " ", "{"
+                print(tab * " ", "if(" + curClass + "CustomGetStringCheck(param))")
+                print(tab * " ", "{")
                 tab = tab + tabsize
-                print tab * " ", "return " + curClass + "::custom_get(param);"
+                print(tab * " ", "return " + curClass + "::custom_get(param);")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print tab * " ", "else"
-                print tab * " ", "{"
+                print(tab * " ", "}")
+                print(tab * " ", "else")
+                print(tab * " ", "{")
                 tab = tab + tabsize
 
             if(HasGetString):
-                print tab * " ", "return " + parentClass[curClass][0] + "::getString(param);"
+                print(tab * " ", "return " + parentClass[curClass][0] + "::getString(param);")
 
             if(HasGetCustomString):
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
             if(HasGetString):
                 tab = tab - tabsize
-                print tab * " ", "}"
-            print
+                print(tab * " ", "}")
+            print()
 
     def printSetString(self, autogen, allClass, parentClass):
         """
@@ -695,42 +740,43 @@ class createFile:
             HasSetCustomString = autogen[curClass]['HasSetStringCustomParam']
             if(HasSetString):
                 if(HasSetCustomString):
-                    print tab * " ", "void " + curClass + "::custom_set(const string &param, const string &val)"
-                    print tab * " ", "{"
-                    print tab * " ", "    return;"
-                    print tab * " ", "}"
-                    print tab * " ", "/* Is this a custom String? */"
-                    print tab * " ", "static bool " + curClass + "CustomSetStringCheck(const string &param)"
-                    print tab * " ", "{"
+                    print(tab * " ", "void " + curClass + "::custom_set(const string &param, const string &val)")
+                    print(tab * " ", "{")
+                    print(tab * " ", "    return;")
+                    print(tab * " ", "}")
+                    print(tab * " ", "/* Is this a custom String? */")
+                    print(tab * " ", "static bool " + curClass + "CustomSetStringCheck(const string &param)")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return CustomParamSetString" + curClass + ".find(param) != CustomParamSetString" + curClass + ".end();"
+                    print(tab * " ", "return CustomParamSetString" + curClass + ".find(param) != CustomParamSetString" + curClass + ".end();")
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
 
-                print tab * " ", "void " + curClass + "::set(const string &param, const string &val)"
-                print tab * " ", "{"
+                print(tab * " ", "void " + curClass + "::set(const string &param, const string &val)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
                 if(HasSetCustomString):
-                    print tab * " ", "if(" + curClass + "CustomSetStringCheck(param))"
-                    print tab * " ", "{"
+                    print(tab * " ", "if(" + curClass + "CustomSetStringCheck(param))")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", curClass + "::custom_set(param, val);"
+                    print(tab * " ", curClass + "::custom_set(param, val);")
                     tab = tab - tabsize
-                    print tab * " ", "}"
-                    print tab * " ", "else"
-                    print tab * " ", "{"
+                    print(tab * " ", "}")
+                    print(tab * " ", "else")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                print tab * " ", parentClass[curClass][0] + "::set(param, val);"
+                print(tab * " ", parentClass[curClass][0] + "::set(param, val);")
 
                 if(HasSetCustomString):
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print
+                print(tab * " ", "}")
+                print()
 
     def printSetFlag(self, autogen, allClass, parentClass):
         """
+        We crate the function setFlag() for this class
         """
         tab = self.tab
 
@@ -743,63 +789,74 @@ class createFile:
             HasSetCustomFlags = autogen[curClass]['HasSetFlagCustomParam']
             HasSetFlag = autogen[curClass]['HasSetFlag']
             if HasSetFlag:
+                # We have custom flags so we need to create this function.
+                #
                 if(HasSetCustomFlags):
-                    print tab * " ", "void " + curClass + "::custom_setFlag(const string &flag, bool val)"
-                    print tab * " ", "{"
-                    print tab * " ", "    return;"
-                    print tab * " ", "}"
-                    print tab * " ", "/* Is this a custom flag? */"
-                    print tab * " ", "static bool " + curClass + "CustomSetFlagCheck(const string &flag)"
-                    print tab * " ", "{"
+                    print(tab * " ", "void " + curClass + "::custom_setFlag(const string &flag, bool val)")
+                    print(tab * " ", "{")
+                    print(tab * " ", "    return;")
+                    print(tab * " ", "}")
+                    print(tab * " ", "/* Is this a custom flag? */")
+                    print(tab * " ", "static bool " + curClass + "CustomSetFlagCheck(const string &flag)")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return CustomFlagSet" + curClass + ".find(flag) != CustomFlagSet" + curClass + ".end();"
+                    print(tab * " ", "return CustomFlagSet" + curClass + ".find(flag) != CustomFlagSet" + curClass + ".end();")
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
 
-                print tab * " ", "void " + curClass + "::setFlag(const string &flag, bool val)"
-                print tab * " ", "{"
+                # Create setFlag()
+                #
+                print(tab * " ", "void " + curClass + "::setFlag(const string &flag, bool val)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
 
+                # Call custom_setFlag() if we need to.
+                #
                 if(HasSetCustomFlags):
-                    print tab * " ", "if(" + curClass + "CustomSetFlagCheck(flag))"
-                    print tab * " ", "{"
+                    print(tab * " ", "if(" + curClass + "CustomSetFlagCheck(flag))")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", curClass + "::custom_setFlag(flag, val);"
+                    print(tab * " ", curClass + "::custom_setFlag(flag, val);")
                     tab = tab - tabsize
-                    print tab * " ", "}"
-
-                print tab * " ", "auto it = " + mapName + ".find(flag);"
-                print
-                print tab * " ", "if(it==" + mapName + ".end())"
-                print tab * " ", "{"
+                    print(tab * " ", "}")
+                # Call parent class if flag is not found
+                #
+                print(tab * " ", "auto it = " + mapName + ".find(flag);")
+                print()
+                print(tab * " ", "if(it==" + mapName + ".end())")
+                print(tab * " ", "{")
                 tab = tab + tabsize
                 if len(parentClass[curClass]) != 0:
-                    print tab * " ", parentClass[curClass][0] + "::setFlag(flag, val);"
+                    print(tab * " ", parentClass[curClass][0] + "::setFlag(flag, val);")
                 else:
-                    print tab * " ", "    return; /* No parent class to " + curClass + "*/"
+                    print(tab * " ", "    return; /* No parent class to " + curClass + "*/")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print tab * " ", "switch (it->second)"
-                print tab * " ", "{"
+                print(tab * " ", "}")
+                # Just print all the flags to set
+                # use opFlags.set() on each flags
+                #
+                print(tab * " ", "switch (it->second)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
                 for (j, flag) in enumerate(Flags.keys()):
-                    print tab * " ", "case " + flag + ": "
-                    print tab * " ", "    " + "opFlags.set(" + flag + ", val);"
-                    print tab * " ", "    break;"
-                print tab * " ", "default:"
+                    print(tab * " ", "case " + flag + ": ")
+                    print(tab * " ", "    " + "opFlags.set(" + flag + ", val);")
+                    print(tab * " ", "    break;")
+                print(tab * " ", "default:")
                 if len(parentClass[curClass]) != 0:
-                    print tab * " ", "    " + parentClass[curClass][0] + "::setFlag(flag, val);"
+                    print(tab * " ", "    " + parentClass[curClass][0] + "::setFlag(flag, val);")
                 else:
-                    print tab * " ", "    return; /* No parent class to " + curClass + "*/"
-                print tab * " ", "    break;"
+                    print(tab * " ", "    return; /* No parent class to " + curClass + "*/")
+                print(tab * " ", "    break;")
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print
+                print(tab * " ", "}")
+                print()
 
     def printGetFlag(self, autogen, allClass, parentClass):
         """
+        Create getFlag()
         """
         tab = self.tab
         for i in range(len(allClass)):
@@ -810,53 +867,64 @@ class createFile:
             HasGetCustomFlags = autogen[curClass]['HasGetFlagCustomParam']
             HasGetFlag = autogen[curClass]['HasGetFlag']
             if HasGetFlag:
+                # We have custom flags so we need to create this function.
+                #
                 if(HasGetCustomFlags):
-                    print tab * " ", "bool " + curClass + "::custom_getFlag(const string &flag) const"
-                    print tab * " ", "{"
-                    print tab * " ", "    return false;"
-                    print tab * " ", "}"
-                    print tab * " ", "/* Is this a custom flag? */"
-                    print tab * " ", "static bool " + curClass + "CustomGetFlagCheck(const string &flag)"
-                    print tab * " ", "{"
+                    print(tab * " ", "bool " + curClass + "::custom_getFlag(const string &flag) const")
+                    print(tab * " ", "{")
+                    print(tab * " ", "    return false;")
+                    print(tab * " ", "}")
+                    print(tab * " ", "/* Is this a custom flag? */")
+                    print(tab * " ", "static bool " + curClass + "CustomGetFlagCheck(const string &flag)")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return CustomFlagGet" + curClass + ".find(flag) != CustomFlagGet" + curClass + ".end();"
+                    print(tab * " ", "return CustomFlagGet" + curClass + ".find(flag) != CustomFlagGet" + curClass + ".end();")
                     tab = tab - tabsize
-                    print tab * " ", "}"
-
-                print tab * " ", "bool " + curClass + "::getFlag(const string &flag) const"
-                print tab * " ", "{"
+                    print(tab * " ", "}")
+                # Create getFlag()
+                #
+                print(tab * " ", "bool " + curClass + "::getFlag(const string &flag) const")
+                print(tab * " ", "{")
                 tab = tab + tabsize
+                # Call custom_getFlag() if we need to.
+                #
                 if(HasGetCustomFlags):
-                    print tab * " ", "if(" + curClass + "CustomGetFlagCheck(flag))"
-                    print tab * " ", "{"
+                    print(tab * " ", "if(" + curClass + "CustomGetFlagCheck(flag))")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return " + curClass + "::custom_getFlag(flag);"
+                    print(tab * " ", "return " + curClass + "::custom_getFlag(flag);")
                     tab = tab - tabsize
-                    print tab * " ", "}"
-
-                print tab * " ", "auto it = " + mapName + ".find(flag);"
-                print
-                print tab * " ", "if(it==" + mapName + ".end())"
-                print tab * " ", "{"
+                    print(tab * " ", "}")
+                # Call parent class if flag is not found
+                #
+                print(tab * " ", "auto it = " + mapName + ".find(flag);")
+                print()
+                print(tab * " ", "if(it==" + mapName + ".end())")
+                print(tab * " ", "{")
                 tab = tab + tabsize
-                print tab * " ", parentClass[curClass][0] + "::getFlag(flag);"
+                print(tab * " ", parentClass[curClass][0] + "::getFlag(flag);")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print tab * " ", "switch (it->second)"
-                print tab * " ", "{"
+                print(tab * " ", "}")
+                #
+                # Just return the flag status
+                # use opFlags.[<flag}] on each flags
+                #
+                print(tab * " ", "switch (it->second)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
                 for (j, flag) in enumerate(Flags.keys()):
-                    print tab * " ", "case " + flag + ": "
-                    print tab * " ", "    " + "return opFlags[" + flag + "];"
-                    print tab * " ", "    break;"
-                print tab * " ", "default:"
-                print tab * " ", "    return " + parentClass[curClass][0] + "::getFlag(flag);"
-                print tab * " ", "    break;"
+                    print(tab * " ", "case " + flag + ": ")
+                    print(tab * " ", "    " + "return opFlags[" + flag + "];")
+                    print(tab * " ", "    break;")
+                print(tab * " ", "default:")
+                print(tab * " ", "    return " + parentClass[curClass][0] + "::getFlag(flag);")
+                print(tab * " ", "    break;")
+                # Close function...
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print
+                print(tab * " ", "}")
+                print()
 
     def printGetFunction(self, autogen, allClass, parentClass):
         """
@@ -865,77 +933,82 @@ class createFile:
         for i in range(len(allClass)):
             curClass = allClass[i]
             Parameters = autogen[curClass]['Parameters']
-            stringKeys = autogen[curClass]['StringParam'].keys()
+            stringKeys = list(autogen[curClass]['StringParam'].keys())
             stringParam = autogen[curClass]['StringParam']
             HasGetCustomParam = autogen[curClass]['HasGetCustomParam']
             HasGet = autogen[curClass]['HasGet']
             mapName = "ParamsMap" + curClass
+            # Create the get() function
             if HasGet:
+                # There are not parameters, so just call the parent::get() function
                 if(len(Parameters) == 0 and not HasGetCustomParam):
-                    print tab * " ", getFunction.format(curClass)
-                    print tab * " ", "{"
+                    print(tab * " ", getFunction.format(curClass))
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return " + parentClass[curClass][0] + "::get(param, unitType);"
+                    print(tab * " ", "return " + parentClass[curClass][0] + "::get(param, unitType);")
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
                     continue
-
+                # We have custom parameters, create this function first
                 if(HasGetCustomParam):
-                    print tab * " ", "double " + curClass + "::custom_get(const string &param, units_t unitType) const"
-                    print tab * " ", "{"
-                    print tab * " ", "    return kNullVal;"
-                    print tab * " ", "}"
-                    print tab * " ", "/* Is this a custom parameter? */"
-                    print tab * " ", "static bool " + curClass + "CustomGetCheck(const string &param)"
-                    print tab * " ", "{"
+                    print(tab * " ", "double " + curClass + "::custom_get(const string &param, units_t unitType) const")
+                    print(tab * " ", "{")
+                    print(tab * " ", "    return kNullVal;")
+                    print(tab * " ", "}")
+                    print(tab * " ", "/* Is this a custom parameter? */")
+                    print(tab * " ", "static bool " + curClass + "CustomGetCheck(const string &param)")
+                    print(tab * " ", "{")
                     tab = tab + tabsize
-                    print tab * " ", "return CustomParamGet" + curClass + ".find(param) != CustomParamGet" + curClass + ".end();"
+                    print(tab * " ", "return CustomParamGet" + curClass + ".find(param) != CustomParamGet" + curClass + ".end();")
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
 
-                print tab * " ", getFunction.format(curClass)
-                print tab * " ", "{"
+                # Create get() {}
+                print(tab * " ", getFunction.format(curClass))
+                print(tab * " ", "{")
                 tab = tab + tabsize
-                print tab * " ", "double val = kNullVal;"
+                print(tab * " ", "double val = kNullVal;")
                 #
-                # Need to return custom parameter if it is in tthe GetSet
+                # Need to return custom parameter if it is in tthe Get
                 #
                 if(HasGetCustomParam):
-                    print tab * " ", "if(" + curClass + "CustomGetCheck(param)) {"
+                    print(tab * " ", "if(" + curClass + "CustomGetCheck(param)) {")
                     tab = tab + tabsize
-                    print tab * " ", "return custom_get(param, unitType);"
+                    print(tab * " ", "return custom_get(param, unitType);")
                     tab = tab - tabsize
-                    print tab * " ", "}"
+                    print(tab * " ", "}")
 
-                print tab * " ", "auto it = " + mapName + ".find(param);"
-                print
-
-                print tab * " ", "if(it == " + mapName + ".end())"
-                print tab * " ", "{"
-                print tab * " ", "    return  " + parentClass[curClass][0] + "::get(param, unitType);"
-                print tab * " ", "}"
-                print tab * " ", "switch (it->second)"
-                print tab * " ", "{"
+                print(tab * " ", "auto it = " + mapName + ".find(param);")
+                print()
+                # We did not find this parameter in the map, so call the paraent::get() method.
+                print(tab * " ", "if(it == " + mapName + ".end())")
+                print(tab * " ", "{")
+                print(tab * " ", "    return  " + parentClass[curClass][0] + "::get(param, unitType);")
+                print(tab * " ", "}")
+                print(tab * " ", "switch (it->second)")
+                print(tab * " ", "{")
                 tab = tab + tabsize
+                # Create each parameter and get value;
                 for (j, param) in enumerate(Parameters.keys()):
-                    print tab * " ", "case " + curClass + "Params::" + stringKeys[j].upper() + ":"
+                    print(tab * " ", "case " + curClass + "Params::" + stringKeys[j].upper() + ":")
                     if(param == "custom"):
-                        print tab * " ", "    val = custom_get(param, unitType);"
+                        print(tab * " ", "    val = custom_get(param, unitType);")
                     else:
-                        print tab * " ", "    val = " + Parameters[param].format(stringParam[param]) + ";"
-                    print tab * " ", "    break;"
-                print tab * " ", "default:"
+                        print(tab * " ", "    val = " + Parameters[param].format(stringParam[param]) + ";")
+                    print(tab * " ", "    break;")
+                print(tab * " ", "default:")
                 if len(parentClass[curClass]) != 0:
-                    print tab * " ", "    val = " + parentClass[curClass][0] + "::get(param, unitType);"
+                    print(tab * " ", "    val = " + parentClass[curClass][0] + "::get(param, unitType);")
                 else:
-                    print tab * " ", "/* No parent class to " + curClass + "*/"
-                print tab * " ", "    break;"
+                    print(tab * " ", "/* No parent class to " + curClass + "*/")
+                print(tab * " ", "    break;")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print tab * " ", "return val;"
+                print(tab * " ", "}")
+                # Return value for this parameter.
+                print(tab * " ", "return val;")
                 tab = tab - tabsize
-                print tab * " ", "}"
-                print
+                print(tab * " ", "}")
+                print()
 
     def printGetPString(self, autogen, allClass, parentClass):
         """
@@ -974,17 +1047,17 @@ class createFile:
                 flagSetName = "CustomFlagSet" + curClass
                 stringSetName = "CustomParamSetString" + curClass
 
-                print tab * " ", "void " + curClass + "::getParameterStrings (stringVec &pstr, paramStringType pstype) const"
-                print tab * " ", "{"
+                print(tab * " ", "void " + curClass + "::getParameterStrings (stringVec &pstr, paramStringType pstype) const")
+                print(tab * " ", "{")
                 tab = tab + tabsize
                 if parentClass[curClass] == []:
                     parentClass[curClass].append("coreObject")
 
-                print tab * " ", "getParamString <" + curClass + ", " + parentClass[curClass][0] + \
+                print(tab * " ", "getParamString <" + curClass + ", " + parentClass[curClass][0] + \
                             "> (this, pstr, allowedNumericalParameters" + curClass + ", allowedStringParameters" + \
-                            curClass + ", allowedFlags" + curClass + ", pstype);"
+                            curClass + ", allowedFlags" + curClass + ", pstype);")
                 tab = tab - tabsize
-                print tab * " ", "}"
+                print(tab * " ", "}")
 
 
 def main():
@@ -992,8 +1065,13 @@ def main():
     index = clang.cindex.Index.create()
     # myPath = os.path.dirname(sys.argv[1])
     myFilename = os.path.basename(sys.argv[1])
-    includes = "-I/software/griddyn/src/griddyn -I/software/griddyn/src/" + \
-        "-I/software/griddyn/src/utilities -I/software/griddyn/gridDyn"
+
+    # This will need to be changed depending on where you start the program.
+    # Clang will compile your headers up to a certain point, so you need to
+    # tell it where they are located.
+    #
+    includes = "-I../../src/griddyn -I../../src/" + \
+        "-I../../src/utilities -I../../gridDyn"
     includes = includes.split()
     myFileParse = Parse()
     # dump_children(index.parse(sys.argv[1], args=includes + ["-std=c++14"]).cursor, myFilename)

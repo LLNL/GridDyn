@@ -15,7 +15,7 @@
 #include "griddyn/compiler-config.h"
 #include "utilities/zipUtilities.h"
 
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cstdarg>
 #include <map>
 #include <array>

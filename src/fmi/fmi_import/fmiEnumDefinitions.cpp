@@ -11,8 +11,8 @@
 */
 
 #include "fmiInfo.h"
-#include "utilities/stringOps.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/containers/mapOps.hpp"
 
 fmi_variability::fmi_variability(const std::string &vstring)
 {

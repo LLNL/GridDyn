@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDCONTROLBLOCKS_H_
-#define GRIDCONTROLBLOCKS_H_
+#pragma once
 
 #pragma once
 #include "gridSubModel.h"
@@ -56,13 +54,13 @@ class Block : public gridSubModel
     };
 
   protected:
-    parameter_t K = 1.0;  //!<  gain
-    parameter_t Omax = kBigNum;  //!< max output value
-    parameter_t Omin = -kBigNum;  //!< min output value
-    parameter_t rampMax = kBigNum;  //!< rate of change max value
-    parameter_t rampMin = -kBigNum;  //!< rate of change min value
-    parameter_t bias = 0.0;  //!< bias
-    parameter_t resetLevel = -0.001;  //!< the level below or above the max/min that the limiters should be removed
+    model_parameter K = 1.0;  //!<  gain
+    model_parameter Omax = kBigNum;  //!< max output value
+    model_parameter Omin = -kBigNum;  //!< min output value
+    model_parameter rampMax = kBigNum;  //!< rate of change max value
+    model_parameter rampMin = -kBigNum;  //!< rate of change min value
+    model_parameter bias = 0.0;  //!< bias
+    model_parameter resetLevel = -0.001;  //!< the level below or above the max/min that the limiters should be removed
     double prevInput = 0.0;  //!< variable to hold previous input values;
     count_t limiter_alg = 0;  //!< the number of algebraic states used by the limiters
     count_t limiter_diff = 0;  //!< the number of differential states used by the limiters
@@ -99,8 +97,8 @@ class Block : public gridSubModel
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
 
@@ -243,5 +241,3 @@ class Block : public gridSubModel
 std::unique_ptr<Block> make_block (const std::string &blockstr);
 
 }  // namespace griddyn
-
-#endif  // GRIDCONTROLBLOCKS_H_

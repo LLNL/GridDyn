@@ -15,7 +15,7 @@
 #include "../Generator.h"
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cmath>
 namespace griddyn
 {
@@ -101,7 +101,8 @@ void GenModel3::algebraicUpdate (const IOdata &inputs,
 {
     auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
-    solve2x2 (Rs, (Xq), -(Xdp), Rs, -Vd + E, Loc.diffStateLoc[2] - Vq, Loc.destLoc[0], Loc.destLoc[1]);
+    gmlc::utilities::solve2x2(Rs, (Xq), -(Xdp), Rs, -Vd + E, Loc.diffStateLoc[2] - Vq, Loc.destLoc[0],
+                              Loc.destLoc[1]);
     m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }
 
@@ -234,7 +235,7 @@ void GenModel3::set (const std::string &param, const std::string &val)
     return GenModelClassical::set (param, val);
 }
 
-void GenModel3::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModel3::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "x")
     {

@@ -26,8 +26,8 @@ block implementing \f$H(S)=\frac{K s}{1+T_1 s} \frac{1}{1+T_2 s}\f$
 class filteredDerivativeBlock : public Block
 {
   protected:
-    parameter_t m_T1 = 0.1;  //!< delay time constant for the derivative filtering operation
-    parameter_t m_T2 = 0.1;  //!< filter on the derivative of block 1
+    model_parameter m_T1 = 0.1;  //!< delay time constant for the derivative filtering operation
+    model_parameter m_T2 = 0.1;  //!< filter on the derivative of block 1
   public:
     //!< default constructor
     explicit filteredDerivativeBlock (const std::string &objName = "filtDerivBlock_#");
@@ -46,7 +46,7 @@ class filteredDerivativeBlock : public Block
   public:
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
     virtual void blockDerivative (double input,

@@ -9,13 +9,12 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef FMI_WRAPPER_H_
-#define FMI_WRAPPER_H_
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <string>
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
 #include "griddyn/gridComponent.h"
@@ -81,7 +80,9 @@ class fmiWrapper : public BaseObj
 	/** function to help match the IO of the fmi to the IO of the component*/
     void setupFmiIo ()
     {
-        using namespace stringOps;
+        using namespace gmlc::utilities::stringOps;
+		using namespace gmlc::utilities;
+
         auto ostrings = fmisub->getOutputNames ();
         auto istrings = fmisub->getInputNames ();
 
@@ -263,7 +264,8 @@ class fmiWrapper : public BaseObj
 
     void set (const std::string &param, const std::string &val) override
     {
-        using namespace stringOps;
+        using namespace gmlc::utilities;
+		using namespace gmlc::utilities::stringOps;
         auto param2 = convertToLowerCase (param);
         if ((param2 == "fmu") || (param2 == "fmu_dir") || (param2 == "file"))
         {
@@ -357,7 +359,7 @@ class fmiWrapper : public BaseObj
             BaseObj::set (param, val);
         }
     }
-    void set (const std::string &param, double val, gridUnits::units_t unitType) override
+    void set (const std::string &param, double val, units::unit unitType) override
     {
         bool valid = false;
         try
@@ -429,4 +431,3 @@ class fmiWrapper : public BaseObj
 };
 } //namespace fmi
 } //namespace griddyn
-#endif

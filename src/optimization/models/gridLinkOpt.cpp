@@ -18,7 +18,7 @@
 #include "gridBusOpt.h"
 #include "griddyn/Link.h"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <utility>
@@ -27,7 +27,7 @@ namespace griddyn
 {
 static optObjectFactory<gridLinkOpt, Link> opLink ("basic", "link");
 
-using namespace gridUnits;
+using namespace units;
 
 gridLinkOpt::gridLinkOpt (const std::string &objName) : gridOptObject (objName) {}
 
@@ -198,7 +198,7 @@ void gridLinkOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridLinkOpt::set (const std::string &param, double val, units_t unitType)
+void gridLinkOpt::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltagetolerance") || (param == "vtol"))
     {
@@ -281,7 +281,7 @@ gridOptObject *gridLinkOpt::getArea (index_t /*index*/) const
     return dynamic_cast<gridOptObject *> (getParent ());
 }
 
-double gridLinkOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridLinkOpt::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param[0] != '#')

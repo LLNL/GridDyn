@@ -25,14 +25,14 @@
 #include "grabberInterpreter.hpp"
 #include "objectGrabbers.h"
 #include "utilities/functionInterpreter.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
 #include <map>
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 gridGrabber::gridGrabber (const std::string &fld) { gridGrabber::updateField (fld); }
 gridGrabber::gridGrabber (const std::string &fld, coreObject *obj)
 {
@@ -123,10 +123,10 @@ double gridGrabber::grabData ()
     if (fptr)
     {
         val = fptr (cobj);
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             val =
-              unitConversion (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get ("basevoltage"));
+              convert (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get ("basevoltage"));
         }
     }
     else
@@ -143,13 +143,13 @@ void gridGrabber::grabVectorData (std::vector<double> &vdata)
     if ((loaded) && (vectorGrab))
     {
         fptrV (cobj, vdata);
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             auto localBasePower = cobj->get ("basepower");
             auto localBaseVoltage = cobj->get ("basevoltage");
             for (auto &v : vdata)
             {
-                v = unitConversion (v, inputUnits, outputUnits, localBasePower, localBaseVoltage);
+                v = convert (v, inputUnits, outputUnits, localBasePower, localBaseVoltage);
             }
         }
     }
@@ -198,7 +198,7 @@ void gridGrabber::makeDescription () const
     {
         desc = (cobj != nullptr) ? (cobj->getName () + ':' + field) : field;
 
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             desc += '(' + to_string (outputUnits) + ')';
         }

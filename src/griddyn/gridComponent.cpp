@@ -15,8 +15,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -25,6 +25,7 @@
 namespace griddyn
 {
 
+	using namespace gmlc::utilities;
 
 gridComponent::gridComponent (const std::string &objName) : coreObject (objName)
 {
@@ -656,14 +657,14 @@ void gridComponent::set (const std::string &param, const std::string &val)
 }
 
 auto hasParameterPath (const std::string &param) { return (param.find_last_of (":?") != std::string::npos); }
-bool gridComponent::subObjectSet (const std::string &param, double val, gridUnits::units_t unitType)
+bool gridComponent::subObjectSet (const std::string &param, double val, units::unit unitType)
 {
     if (hasParameterPath (param))
     {
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != gridUnits::units_t::defUnit)
+            if (pinfo.m_unitType != units::defunit)
             {
                 pinfo.m_obj->set (pinfo.m_field, val, pinfo.m_unitType);
             }
@@ -714,14 +715,14 @@ bool gridComponent::subObjectSet (const std::string &flag, bool val)
     return false;
 }
 
-double gridComponent::subObjectGet (const std::string &param, gridUnits::units_t unitType) const
+double gridComponent::subObjectGet (const std::string &param, units::unit unitType) const
 {
     if (hasParameterPath (param))
     {
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != gridUnits::units_t::defUnit)
+            if (pinfo.m_unitType != units::defunit)
             {
                 return pinfo.m_obj->get (pinfo.m_field, pinfo.m_unitType);
             }
@@ -732,7 +733,7 @@ double gridComponent::subObjectGet (const std::string &param, gridUnits::units_t
     return kNullVal;
 }
 
-void gridComponent::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridComponent::set (const std::string &param, double val, units::unit unitType)
 {
     if (opFlags[no_gridcomponent_set])
     {
@@ -784,17 +785,17 @@ void gridComponent::set (const std::string &param, double val, gridUnits::units_
 
     else if ((param == "basepower") || (param == "basemw") || (param == "basemva"))
     {
-        systemBasePower = gridUnits::unitConversion (val, unitType, gridUnits::MW);
+        systemBasePower = units::convert (val, unitType, units::MW);
         setAll ("all", "basepower", systemBasePower);
     }
     else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") || (param == "basev") ||
              (param == "bv") || (param == "base voltage"))
     {
-        localBaseVoltage = gridUnits::unitConversion (val, unitType, gridUnits::kV);
+        localBaseVoltage = units::convert (val, unitType, units::kV);
     }
     else if ((param == "basefreq") || (param == "basefrequency") || (param == "systembasefrequency"))
     {
-        systemBaseFrequency = gridUnits::unitConversionFreq (val, unitType, gridUnits::rps);
+        systemBaseFrequency = units::convert(val, unitType, units::rad/units::s);
         setAll ("all", "basefreq", systemBasePower);
     }
     else if (subObjectSet (param, val, unitType))
@@ -810,7 +811,7 @@ void gridComponent::set (const std::string &param, double val, gridUnits::units_
 void gridComponent::setAll (const std::string &type,
                             const std::string &param,
                             double val,
-                            gridUnits::units_t unitType)
+                            units::unit unitType)
 {
     if ((type == "all") || (type == "sub") || (type == "object"))
     {
@@ -821,12 +822,12 @@ void gridComponent::setAll (const std::string &type,
     }
 }
 
-double gridComponent::get (const std::string &param, gridUnits::units_t unitType) const
+double gridComponent::get (const std::string &param, units::unit unitType) const
 {
     double out = kNullVal;
     if (param == "basepower")
     {
-        out = gridUnits::unitConversion (systemBasePower, gridUnits::MVAR, unitType, systemBasePower);
+        out = units::convert (systemBasePower, units::MVAR, unitType, systemBasePower);
     }
     else if (param == "subobjectcount")
     {
@@ -834,11 +835,11 @@ double gridComponent::get (const std::string &param, gridUnits::units_t unitType
     }
     else if (param == "basefrequency")
     {
-        out = gridUnits::unitConversionFreq (systemBaseFrequency, gridUnits::rps, unitType);
+        out = units::convert (systemBaseFrequency, units::rad/units::s, unitType);
     }
     else if (param == "basevoltage")
     {
-        out = gridUnits::unitConversionFreq (localBaseVoltage, gridUnits::kV, unitType);
+        out = units::convert (localBaseVoltage, units::kV, unitType);
     }
     else if (param == "jacsize")
     {
@@ -893,7 +894,7 @@ double gridComponent::get (const std::string &param, gridUnits::units_t unitType
                 {
                     if (oname == param)
                     {
-                        return gridUnits::unitConversion (getOutput (ii), outputUnits (ii), unitType,
+                        return units::convert (getOutput (ii), outputUnits (ii), unitType,
                                                           systemBasePower);
                     }
                 }
@@ -1571,14 +1572,14 @@ static const std::vector<stringVec> outputNamesStr{
 
 const std::vector<stringVec> &gridComponent::outputNames () const { return outputNamesStr; }
 
-gridUnits::units_t gridComponent::inputUnits (index_t /*inputNum*/) const
+units::unit gridComponent::inputUnits (index_t /*inputNum*/) const
 {  // just return the default unit
-    return gridUnits::defUnit;
+    return units::defunit;
 }
 
-gridUnits::units_t gridComponent::outputUnits (index_t /*outputNum*/) const
+units::unit gridComponent::outputUnits (index_t /*outputNum*/) const
 {  // just return the default unit
-    return gridUnits::defUnit;
+    return units::defunit;
 }
 
 index_t gridComponent::findIndex (const std::string &field, const solverMode &sMode) const

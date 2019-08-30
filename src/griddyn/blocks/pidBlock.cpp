@@ -13,7 +13,7 @@
 #include "pidBlock.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 namespace griddyn
 {
 namespace blocks
@@ -246,7 +246,7 @@ index_t pidBlock::findIndex (const std::string &field, const solverMode &sMode) 
 
 // set parameters
 void pidBlock::set (const std::string &param, const std::string &val) { Block::set (param, val); }
-void pidBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void pidBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "p") || (param == "proportional"))
     {

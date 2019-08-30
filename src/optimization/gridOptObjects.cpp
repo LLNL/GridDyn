@@ -12,7 +12,7 @@
 
 #include "gridOptObjects.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cstdio>
 #include <iostream>
 
@@ -236,7 +236,7 @@ void gridOptObject::set (const std::string &param, const std::string &val)
 {
     if (param == "status")
     {
-        auto v2 = convertToLowerCase (val);
+        auto v2 = gmlc::utilities::convertToLowerCase (val);
         if (val == "out")
         {
             if (isEnabled ())
@@ -262,7 +262,7 @@ void gridOptObject::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridOptObject::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridOptObject::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "#")
     {
@@ -292,97 +292,97 @@ void gridOptObject::getObjName (stringVec &objNames, const optimMode &oMode, con
     // angle variables
     if (static_cast<count_t> (objNames.size ()) < os.total.aSize + os.aOffset + 1)
     {
-        objNames.resize (os.total.aSize + os.aOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.aSize) + os.aOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.aSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.aOffset + bb] = getName () + ":angle_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.aOffset) + bb] = getName () + ":angle_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.aOffset + bb] = prefix + "::" + getName () + ":angle_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.aOffset) + bb] = prefix + "::" + getName () + ":angle_" + std::to_string (bb);
         }
     }
     // voltage variables
     if (static_cast<count_t> (objNames.size ()) < os.total.vSize + os.vOffset + 1)
     {
-        objNames.resize (os.total.vSize + os.vOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.vSize) + os.vOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.vSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.vOffset + bb] = getName () + ":voltage_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.vOffset) + bb] = getName () + ":voltage_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.vOffset + bb] = prefix + "::" + getName () + ":voltage_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.vOffset) + bb] = prefix + "::" + getName () + ":voltage_" + std::to_string (bb);
         }
     }
     // real power variables
     if (static_cast<count_t> (objNames.size ()) < os.total.genSize + os.gOffset + 1)
     {
-        objNames.resize (os.total.genSize + os.gOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.genSize) + os.gOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.genSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.gOffset + bb] = getName () + ":power_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.gOffset) + bb] = getName () + ":power_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.gOffset + bb] = prefix + "::" + getName () + ":power_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.gOffset) + bb] = prefix + "::" + getName () + ":power_" + std::to_string (bb);
         }
     }
     // angle variables
     if (static_cast<count_t> (objNames.size ()) < os.total.qSize + os.qOffset + 1)
     {
-        objNames.resize (os.total.qSize + os.qOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.qSize) + os.qOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.qSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.qOffset + bb] = getName () + ":reactive_power_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.qOffset) + bb] = getName () + ":reactive_power_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.qOffset + bb] = prefix + "::" + getName () + ":reactive_power_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.qOffset) + bb] = prefix + "::" + getName () + ":reactive_power_" + std::to_string (bb);
         }
     }
     // other continuous variables
     if (static_cast<count_t> (objNames.size ()) < os.total.contSize + os.contOffset + 1)
     {
-        objNames.resize (os.total.contSize + os.contOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.contSize) + os.contOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.contSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.contOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.contOffset) + bb] = getName () + ":continuous_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.contOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.contOffset) + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
         }
     }
     // integer variables
     if (static_cast<count_t> (objNames.size ()) < os.total.intSize + os.intOffset + 1)
     {
-        objNames.resize (os.total.intSize + os.intOffset + 1);
+        objNames.resize (static_cast<size_t>(os.total.intSize) + os.intOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.intSize; ++bb)
     {
         if (prefix.empty ())
         {
-            objNames[os.intOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.intOffset) + bb] = getName () + ":continuous_" + std::to_string (bb);
         }
         else
         {
-            objNames[os.intOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
+            objNames[static_cast<size_t>(os.intOffset) + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
         }
     }
 }

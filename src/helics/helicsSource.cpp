@@ -16,8 +16,8 @@
 #include "helics/helicsCoordinator.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -115,7 +115,7 @@ void helicsSource::updateA (coreTime time)
         }
     }
 
-    double newVal = unitConversion (cval * scaleFactor, inputUnits, outputUnits, systemBasePower);
+    double newVal = convert (cval * scaleFactor, inputUnits, outputUnits, systemBasePower);
     if (opFlags[use_ramp])
     {
         if (opFlags[predictive_ramp])  // ramp uses the previous change to guess into the future
@@ -207,18 +207,18 @@ void helicsSource::set (const std::string &param, const std::string &val)
     }
     else if ((param == "input_units") || (param == "inunits") || (param == "inputunits"))
     {
-        inputUnits = gridUnits::getUnits (val);
+        inputUnits = units::unit_cast_from_string (val);
         updateSubscription ();
     }
     else if ((param == "output_units") || (param == "outunits") || (param == "outputunits"))
     {
-        outputUnits = gridUnits::getUnits (val);
+        outputUnits = units::unit_cast_from_string (val);
         updateSubscription ();
     }
     else if (param == "units")
     {
-        auto uval = gridUnits::getUnits (val);
-        if (uval == gridUnits::defUnit)
+        auto uval = units::unit_cast_from_string (val);
+        if (!units::is_valid(uval))
         {
             if (val != "default")
             {
@@ -236,7 +236,7 @@ void helicsSource::set (const std::string &param, const std::string &val)
     }
 }
 
-void helicsSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void helicsSource::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "scalefactor") || (param == "scaling"))
     {
@@ -269,7 +269,7 @@ void helicsSource::updateSubscription ()
             {
                 coord_->updateSubscription (valueIndex, valKey, inputUnits);
             }
-            coord_->setDefault (valueIndex, gridUnits::unitConversion (m_output / scaleFactor, outputUnits,
+            coord_->setDefault (valueIndex, convert (m_output / scaleFactor, outputUnits,
                                                                        inputUnits, systemBasePower));
         }
     }

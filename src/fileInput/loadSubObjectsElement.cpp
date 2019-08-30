@@ -98,7 +98,7 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, co
     element->moveToFirstChild ();
     while (element->isValid ())
     {
-        auto fieldName = convertToLowerCase (element->getName ());
+        auto fieldName = gmlc::utilities::convertToLowerCase (element->getName ());
         if ((fieldName == "bus") || (fieldName == "area"))
         {
             element->moveToNextSibling ();

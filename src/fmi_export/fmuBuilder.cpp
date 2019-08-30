@@ -18,7 +18,7 @@
 #include "griddyn/gridDynSimulation.h"
 #include "loadFMIExportObjects.h"
 #include "tinyxml2/tinyxml2.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/zipUtilities.h"
 #include <iostream>
 #include <set>
@@ -122,7 +122,7 @@ void fmuBuilder::MakeFmu(const std::string &fmuLocation)
     create_directory(resource_dir);
 
     path sourcefile = getSim()->sourceFile;
-    auto ext = convertToLowerCase(sourcefile.extension().string());
+    auto ext = gmlc::utilities::convertToLowerCase(sourcefile.extension().string());
     if (ext[0] == '.')
     {
         ext.erase(0, 1);

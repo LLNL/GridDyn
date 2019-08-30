@@ -20,13 +20,15 @@
 #include "../gridBus.h"
 #include "../relays/sensor.h"
 #include "stateGrabber.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"
 #include "utilities/matrixDataTranslate.hpp"
 #include <algorithm>
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber>
   sgInterpret ([](const std::string &fld, coreObject *obj) { return std::make_unique<stateGrabber> (fld, obj); });
 
@@ -121,7 +123,7 @@ void stateGrabber::updateField (const std::string &fld)
     }
 }
 
-using namespace gridUnits;
+using namespace units;
 
 /** map of all the alternate strings that can be used*/
 static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"},
@@ -213,11 +215,11 @@ static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"
 
 // clang-format off
 static const std::map<std::string, fstateobjectPair> objectFunctions{
-  {"connected", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isConnected ());}, defUnit}},
-  {"enabled", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isEnabled ());}, defUnit}},
-{"armed", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isArmed ());}, defUnit}},
-{"output", {FUNCTION_SIGNATURE{return obj->getOutput (noInputs, sD, sMode, 0);}, defUnit}},
-{"deriv",{FUNCTION_SIGNATURE { return obj->getDoutdt (noInputs, sD, sMode, 0); }, defUnit}}
+  {"connected", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isConnected ());}, defunit}},
+  {"enabled", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isEnabled ());}, defunit}},
+{"armed", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isArmed ());}, defunit}},
+{"output", {FUNCTION_SIGNATURE{return obj->getOutput (noInputs, sD, sMode, 0);}, defunit}},
+{"deriv",{FUNCTION_SIGNATURE { return obj->getDoutdt (noInputs, sD, sMode, 0); }, defunit}}
 };
 
 static const std::map<std::string, fstateobjectPair> busFunctions{
@@ -330,7 +332,7 @@ static const std::map<std::string, fstateobjectPair> linkFunctions{
    {FUNCTION_SIGNATURE_OBJ_ONLY{
      return static_cast<double> (((!static_cast<Link *> (obj)->checkFlag (Link::switch1_open_flag)) ||
                                   (!static_cast<Link *> (obj)->checkFlag (Link::switch2_open_flag))) &&
-                                 (static_cast<Link *> (obj)->isEnabled ()));}, defUnit}},
+                                 (static_cast<Link *> (obj)->isEnabled ()));}, defunit}},
 };
 
 // clang-format on

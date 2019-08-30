@@ -23,7 +23,7 @@ namespace griddyn
 {
 namespace loads
 {
-using namespace gridUnits;
+using namespace units;
 
 // setup the load object factories
 static typeFactory<motorLoad> mlf1 ("load", stringVec{"motor", "motor1"});
@@ -169,7 +169,7 @@ void motorLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void motorLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad::set (const std::string &param, double val, units::unit unitType)
 {
     bool slipCheck = false;
 
@@ -181,7 +181,7 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
             H = val;
             break;
         case 'p':
-            Pmot = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Pmot = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             if (mBase < 0)
             {
                 mBase = Pmot * systemBasePower;
@@ -247,11 +247,11 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
         }
         else if ((param == "base") || (param == "mbase") || (param == "rating"))
         {
-            mBase = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
+            mBase = convert (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         }
         else if (param == "Vcontrol")
         {
-            Vcontrol = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+            Vcontrol = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
             slipCheck = true;
         }
         else

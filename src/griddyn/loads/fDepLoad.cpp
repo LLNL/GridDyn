@@ -14,7 +14,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cmath>
 namespace griddyn
 {
@@ -49,7 +49,7 @@ void fDepLoad::set (const std::string &param, const std::string &val)
 {
     if (param == "loadtype")
     {
-        auto vtype = convertToLowerCase (val);
+        auto vtype = gmlc::utilities::convertToLowerCase(val);
         if (vtype == "fluorescent")
         {
             alphaP = 1.2;
@@ -106,7 +106,7 @@ void fDepLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void fDepLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fDepLoad::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "betap")
     {

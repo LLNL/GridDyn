@@ -13,7 +13,7 @@
 #include "parameterOperator.h"
 #include "../gridComponent.h"
 #include "core/objectInterpreter.h"
-#include "utilities/string_viewOps.h"
+#include "gmlc/utilities/string_viewOps.h"
 
 namespace griddyn
 {
@@ -86,12 +86,13 @@ void parameterOperator::checkField () {}
 
 std::unique_ptr<parameterOperator> make_parameterOperator (const std::string &param, gridComponent *rootObject)
 {
-    using namespace utilities::string_viewOps;
+    using namespace gmlc::utilities::string_viewOps;
+	using gmlc::utilities::string_view;
 
-    utilities::string_view paramS (param);
+    string_view paramS (param);
     auto renameloc = paramS.find (" as ");  // spaces are important
                                             // extract out a rename
-    utilities::string_view rname;
+    string_view rname;
     if (renameloc != std::string::npos)
     {
         rname = trim (paramS.substr (renameloc + 4));

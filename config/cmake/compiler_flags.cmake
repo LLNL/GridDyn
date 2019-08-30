@@ -178,6 +178,21 @@ else(UNIX)
     endif(MINGW)
 endif(UNIX)
 
+
+show_variable(
+    COMPILER_OPTIMIZATION_LEVEL
+    STRING
+    "set the optimization level for the compiler (not implemented yet)"
+    "normal"
+)
+
+set(optimization_levels normal;high;machine;full)
+
+set_property(
+    CACHE COMPILER_OPTIMIZATION_LEVEL
+    PROPERTY STRINGS ${optimization_levels}
+)
+
 # -------------------------------------------------------------
 # Check and set latest CXX Standard supported by compiler
 # -------------------------------------------------------------

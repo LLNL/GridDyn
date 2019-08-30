@@ -13,7 +13,7 @@
 #pragma once
 
 #include "../utilities/indexTypes.hpp"
-#include "../utilities/timeRepresentation.hpp"
+#include "gmlc/utilities/timeRepresentation.hpp"
 
 #include <string>
 #include <type_traits>
@@ -52,7 +52,9 @@ enum class print_level : int
     trace = 6,  //!< trace level printing
 };
 
+/// a type used for an id code of an object
 using id_type_t = std::int64_t;
+
 constexpr auto invalid_id_value = std::numeric_limits<id_type_t>::min ();
 using coreTime = TimeRepresentation<count_time<9>>;
 using stringVec = std::vector<std::string>;

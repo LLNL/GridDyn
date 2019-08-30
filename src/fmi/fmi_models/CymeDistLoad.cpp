@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "json/reader.h"
 #include "json/value.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <fstream>
 #include <iostream>
 
@@ -48,7 +48,7 @@ void CymeDistLoadME::set(const std::string &param, const std::string &val)
     }
 }
 
-void CymeDistLoadME::set(const std::string &param, double val, gridUnits::units_t unitType)
+void CymeDistLoadME::set(const std::string &param, double val, units::unit unitType)
 {
     if ((param == "configindex") || (param == "config"))
     {

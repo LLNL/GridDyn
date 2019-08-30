@@ -17,7 +17,7 @@
 #include "../gridBus.h"
 #include "otherGenModels.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -208,7 +208,7 @@ void GenModel::ioPartialDerivatives (const IOdata &inputs,
 
 // set parameters
 void GenModel::set (const std::string &param, const std::string &val) { return gridSubModel::set (param, val); }
-void GenModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModel::set (const std::string &param, double val, units::unit unitType)
 {
     if (param.length () == 1)
     {

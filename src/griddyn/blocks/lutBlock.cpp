@@ -13,9 +13,9 @@
 #include "lutBlock.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/timeSeries.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/TimeSeries.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <utility>
 
 namespace griddyn
@@ -85,6 +85,7 @@ void lutBlock::blockJacobianElements (double input,
 // set parameters
 void lutBlock::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if (param == "lut")
     {
         auto v2 = str2vector (val, -kBigNum, ";,:");
@@ -131,7 +132,7 @@ void lutBlock::set (const std::string &param, const std::string &val)
     }
 }
 
-void lutBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void lutBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if (param[0] == '#')
     {
@@ -167,7 +168,7 @@ double lutBlock::computeValue (double input)
         auto lower = std::lower_bound (lut.begin () + lindex, lut.end (), std::make_pair (input, 0.0));
         auto upper = lower;
         ++upper;
-        lindex = upper - lut.begin ();
+        lindex = static_cast<int>(upper - lut.begin ());
         vlower = lower->first;
         vupper = upper->first;
         m = (upper->second - lower->second) / (vupper - vlower);

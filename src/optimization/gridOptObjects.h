@@ -46,7 +46,7 @@ class gridOptObject : public coreObject
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     /** set the offsets of an object for a particular optimization mode.
     @param newOffsets the offset set to use.
     @param oMode the optimization mode to use.

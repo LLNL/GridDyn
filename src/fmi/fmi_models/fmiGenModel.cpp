@@ -15,7 +15,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "fmiMESubModel.h"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 namespace griddyn
@@ -53,7 +53,7 @@ void fmiGenModel::set(const std::string &param, const std::string &val)
 	}
 }
 
-void fmiGenModel::set(const std::string &param, double val, gridUnits::units_t unitType)
+void fmiGenModel::set(const std::string &param, double val, units::unit unitType)
 {
 	if (param.empty())
 	{

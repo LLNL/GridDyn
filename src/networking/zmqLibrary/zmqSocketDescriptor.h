@@ -17,9 +17,7 @@ Lawrence Livermore National Laboratory, operated by Lawrence Livermore National 
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef ZMQ_SOCKET_DESCRIPTOR_H_
-#define ZMQ_SOCKET_DESCRIPTOR_H_
+#pragma once
 
 #include "../cppzmq/zmq_addon.hpp"
 #include <functional>
@@ -60,4 +58,3 @@ class zmqSocketDescriptor
 };
 
 }  // namespace zmqlib
-#endif

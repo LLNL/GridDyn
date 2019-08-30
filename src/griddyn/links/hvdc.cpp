@@ -19,14 +19,14 @@
 #include "acdcConverter.h"
 #include "dcLink.h"
 #include "../primary/dcBus.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
 namespace links
 {
-using namespace gridUnits;
+using namespace units;
 
 static typeFactory<hvdc> gf ("link", stringVec{"hvdc"});
 
@@ -101,7 +101,7 @@ void hvdc::set (const std::string &param, const std::string &val)
     }
 }
 
-void hvdc::set (const std::string &param, double val, units_t unitType)
+void hvdc::set (const std::string &param, double val, unit unitType)
 {
     if (param == "r")
     {
@@ -143,7 +143,7 @@ void hvdc::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double hvdc::get (const std::string &param, units_t unitType) const
+double hvdc::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param == "#")

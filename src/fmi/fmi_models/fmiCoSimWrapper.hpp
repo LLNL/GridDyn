@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef FMI_COSIMWRAPPER_H_
-#define FMI_COSIMWRAPPER_H_
+#pragma once
 
 #include "fmiWrapper.hpp"
 #include "../fmi_models/fmiCoSimSubModel.h"
@@ -112,4 +110,4 @@ class fmiCoSimWrapper : public fmiWrapper<fmiCoSimSubModel, BaseObj>
 };
 } //namespace fmi
 } //namespace griddyn
-#endif
+

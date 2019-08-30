@@ -18,12 +18,14 @@
 #include "core/objectInterpreter.h"
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
-#include "utilities/stringOps.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/TimeSeries.hpp"
 #include <cmath>
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static classFactory<collector> collFac ("collector");
 
 static childClassFactory<Recorder, collector>
@@ -499,7 +501,7 @@ void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
                 fldGrabbers[0]->gain *= gdRI.gain;
                 fldGrabbers[0]->bias *= gdRI.gain;
                 fldGrabbers[0]->bias += gdRI.bias;
-                if (gdRI.outputUnits != gridUnits::defUnit)
+                if (gdRI.outputUnits != units::defunit)
                 {
                     fldGrabbers[0]->outputUnits = gdRI.outputUnits;
                 }

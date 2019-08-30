@@ -9,14 +9,11 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _GRID_COMMUNICATOR__
-#define _GRID_COMMUNICATOR__
 #pragma once
 
 #include "core/coreDefinitions.hpp"
 #include "core/helperObject.h"
-#include "utilities/simpleQueue.hpp"
+#include "gmlc/containers/SimpleQueue.hpp"
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -107,11 +104,11 @@ class Communicator : public griddyn::helperObject, public std::enable_shared_fro
     rxMessageCallback_t m_rxCallbackMessage;  //!< call back action from parent object
     griddyn::coreTime lastPingSend = griddyn::timeZero;  //!< the time last ping was sent
     griddyn::coreTime lastReplyRX = griddyn::timeZero;  //!< the time the last response was received
-    SimpleQueue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>>
+    gmlc::containers::SimpleQueue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>>
       messageQueue;  //!< the message queue storing source and message
 };
 
 std::unique_ptr<Communicator>
 makeCommunicator (const std::string &commType, const std::string &commName, const std::uint64_t id);
 }  // namespace griddyn
-#endif
+

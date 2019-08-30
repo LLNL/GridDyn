@@ -15,9 +15,9 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "rampLimiter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/string_viewConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/string_viewConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "valueLimiter.h"
 
 namespace griddyn
@@ -827,7 +827,7 @@ void Block::setFlag (const std::string &flag, bool val)
 
 // set parameters
 void Block::set (const std::string &param, const std::string &val) { gridSubModel::set (param, val); }
-void Block::set (const std::string &param, double val, gridUnits::units_t unitType)
+void Block::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
 
@@ -890,7 +890,7 @@ void Block::set (const std::string &param, double val, gridUnits::units_t unitTy
     }
 }
 
-double Block::get (const std::string &param, gridUnits::units_t unitType) const
+double Block::get (const std::string &param, units::unit unitType) const
 {
     if (param == "maxstepsize")
     {
@@ -953,7 +953,8 @@ stringVec Block::localStateNames () const
 
 std::unique_ptr<Block> make_block (const std::string &blockstr)
 {
-    using namespace utilities::string_viewOps;
+    using namespace gmlc::utilities::string_viewOps;
+	using namespace gmlc::utilities;
     using namespace blocks;
 
     string_view blockstrv (blockstr);

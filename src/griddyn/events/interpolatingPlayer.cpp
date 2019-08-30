@@ -12,7 +12,7 @@
 
 #include "interpolatingPlayer.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "core/coreExceptions.h"
 #include <sstream>
@@ -181,9 +181,9 @@ std::string interpolatingPlayer::to_string()
 			ss << " | ";
 		}
 		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
+		if (unitType != units::defunit)
 		{
-			ss << '(' << gridUnits::to_string(unitType) << ')';
+			ss << '(' << units::to_string(unitType) << ')';
 		}
 		ss << " = " << value;
 		if (Npts > 0)
@@ -197,9 +197,9 @@ std::string interpolatingPlayer::to_string()
 	else
 	{
 		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
+		if (unitType != units::defunit)
 		{
-			ss << '(' << gridUnits::to_string(unitType) << ')';
+			ss << '(' << units::to_string(unitType) << ')';
 		}
 		ss << " = {" << eFile;
 		if (column > 0)

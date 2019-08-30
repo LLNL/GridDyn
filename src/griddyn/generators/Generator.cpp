@@ -19,8 +19,8 @@
 #include "core/objectInterpreter.h"
 #include "utilities/OperatingBoundary.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "variableGenerator.h"
 
 //#include <set>
@@ -44,7 +44,7 @@ static typeFactory<Generator> gf ("generator", stringVec{"basic", "simple", "pfl
 static childTypeFactory<DynamicGenerator, Generator>
   dgf ("generator", stringVec{"dynamic", "spinning"}, "dynamic");
 static childTypeFactory<variableGenerator, Generator> vgf ("generator", stringVec{"variable", "renewable"});
-using namespace gridUnits;
+using namespace units;
 
 std::atomic<count_t> Generator::genCount (0);
 // default bus object
@@ -235,7 +235,7 @@ void Generator::setState (coreTime time,
     if (isDynamic (sMode))
     {
         Pset += dPdt * (time - prevTime);
-        Pset = valLimit (Pset, Pmin, Pmax);
+        Pset = gmlc::utilities::valLimit(Pset, Pmin, Pmax);
     }
     else if (stateSize (sMode) > 0)
     {
@@ -378,7 +378,7 @@ void Generator::set (const std::string &param, const std::string &val)
     }
 }
 
-double Generator::get (const std::string &param, units_t unitType) const
+double Generator::get (const std::string &param, unit unitType) const
 {
     double ret = kNullVal;
     if (param == "vcontrolfrac")
@@ -395,29 +395,29 @@ double Generator::get (const std::string &param, units_t unitType) const
     }
     else if (param == "pset")
     {
-        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "pmax")
     {
-        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "pmin")
     {
-        ret = unitConversion (getPmin (), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (getPmin (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmax")
     {
-        ret = unitConversion (getQmax (), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (getQmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        ret = unitConversion (getQmin (), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (getQmin (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (auto fptr = getObjectFunction (this, param).first)
     {
         auto unit = getObjectFunction (this, param).second;
         coreObject *tobj = const_cast<Generator *> (this);
-        ret = unitConversion (fptr (tobj), unit, unitType, systemBasePower, localBaseVoltage);
+        ret = convert (fptr (tobj), unit, unitType, systemBasePower, localBaseVoltage);
     }
     else
     {
@@ -553,17 +553,17 @@ void Generator::setFlag (const std::string &flag, bool val)
     }
 }
 
-void Generator::set (const std::string &param, double val, units_t unitType)
+void Generator::set (const std::string &param, double val, unit unitType)
 {
     if (param.length () == 1)
     {
         switch (param[0])
         {
         case 'p':
-            P = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            P = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             break;
         case 'q':
-            Q = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            Q = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             break;
         case 'r':
             m_Rs = val;
@@ -580,23 +580,23 @@ void Generator::set (const std::string &param, double val, units_t unitType)
 
     if (param == "pset")
     {
-        Pset = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pset = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if ((param == "p+") || (param == "adjustment"))
     {
-        generationAdjust (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
+        generationAdjust (convert (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if (param == "qmax")
     {
-        Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qbias")
     {
-        Qbias = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qbias = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "xs")
     {
@@ -608,20 +608,20 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "vref") || (param == "vtarget"))
     {
-        m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        m_Vtarget = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if ((param == "rating") || (param == "base") || (param == "mbase"))
     {
-        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
+        machineBasePower = convert (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         opFlags.set (independent_machine_base);
     }
     else if (param == "dpdt")
     {
-        dPdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        dPdt = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "dqdt")
     {
-        dQdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        dQdt = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
 
     else if (param == "participation")
@@ -634,10 +634,10 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0)
         {
-            machineBasePower = unitConversionPower (Pmax, puMW, MW, systemBasePower);
+            machineBasePower = convert(Pmax, puMW, MW, systemBasePower);
         }
         if (bounds)
         {
@@ -646,7 +646,7 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (bounds)
         {
             bounds->setValidRange (Pmin, Pmax);

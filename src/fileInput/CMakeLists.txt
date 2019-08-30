@@ -85,15 +85,8 @@ source_group("general" FILES ${reader_sources})
 
 set_target_properties(fileInput PROPERTIES FOLDER libraries)
 
-install(
-    TARGETS fileInput
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${fileInput_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fileInput
-    COMPONENT headers
-)
+#install(
+#    FILES ${fileInput_headers}
+#    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fileInput
+#    COMPONENT headers
+#)

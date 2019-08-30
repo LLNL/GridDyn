@@ -13,9 +13,9 @@
 #include "fileInput.h"
 #include "readerHelper.h"
 
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -23,6 +23,8 @@
 namespace griddyn
 {
 
+	using namespace gmlc::utilities;
+	
 void loadMFile (coreObject *parentObject, const std::string &fileName, const basicReaderInfo &bri)
 {
     std::ifstream infile (fileName.c_str (), std::ios::in);
@@ -133,9 +135,10 @@ bool readMatlabArray (const std::string &Name, const std::string &text, mArray &
 
 void readMatlabArray (const std::string &text, size_t start, mArray &matA)
 {
-	using namespace utilities::string_viewOps;
+	using namespace gmlc::utilities::string_viewOps;
+	using gmlc::utilities::string_view;
 
-	utilities::string_view svtext = text;
+	string_view svtext = text;
     size_t A = text.find_first_of ('[', start);
     size_t B = text.find_first_of (']', A);
     auto Adat = svtext.substr (A + 1, B - A);
@@ -144,10 +147,10 @@ void readMatlabArray (const std::string &text, size_t start, mArray &matA)
     std::vector<double> M;
     size_t D = 0;
     size_t C = Adat.find_first_of ("];");
-    while (C != utilities::string_view::npos)
+    while (C != string_view::npos)
     {
         auto line = Adat.substr (D, C - D);
-        utilities::string_viewOps::trimString (line);
+        string_viewOps::trimString (line);
         if (line.empty ())
         {
             D = C + 1;

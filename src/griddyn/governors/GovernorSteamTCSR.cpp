@@ -137,7 +137,7 @@ index_t GovernorSteamTCSR::findIndex (const std::string &field, const solverMode
 // set parameters
 void GovernorSteamTCSR::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 
-void GovernorSteamTCSR::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GovernorSteamTCSR::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     if (param == "k")

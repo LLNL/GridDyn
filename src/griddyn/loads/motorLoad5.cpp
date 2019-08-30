@@ -15,14 +15,14 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactory.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <iostream>
 namespace griddyn
 {
 namespace loads
 {
-using namespace gridUnits;
+using namespace units;
 
 // setup the load object factories
 
@@ -86,7 +86,7 @@ void motorLoad5::converge ()
 
     double Vr = -V * Vcontrol * sin (theta);
     double Vm = V * Vcontrol * cos (theta);
-    solve2x2 (Vr, Vm, Vm, -Vr, getP (), Qtest, ir, im);
+    gmlc::utilities::solve2x2(Vr, Vm, Vm, -Vr, getP(), Qtest, ir, im);
     double err = 10;
     int ccnt = 0;
     double fbs = slip * systemBaseFrequency;
@@ -96,7 +96,8 @@ void motorLoad5::converge ()
     {
         double erp = Vr - r * ir + xp * im;
         double emp = Vm - r * im - xp * ir;
-        solve2x2 (fbs, -1.0 / T0pp, 1.0 / T0pp, fbs, fbs * erp - erp / T0pp + (xp - xpp) / T0pp * ir,
+        gmlc::utilities::solve2x2(fbs, -1.0 / T0pp, 1.0 / T0pp, fbs,
+                                  fbs * erp - erp / T0pp + (xp - xpp) / T0pp * ir,
                   fbs * emp - emp / T0pp + (xp - xpp) / T0pp * im, er, em);
 
         double slipp = (er + (x0 - xp) * im) / T0p / systemBaseFrequency / em;
@@ -205,7 +206,7 @@ void motorLoad5::set (const std::string &param, const std::string &val)
     }
 }
 
-void motorLoad5::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad5::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "r2")
     {
@@ -354,7 +355,8 @@ void motorLoad5::updateCurrents (const IOdata &inputs, const stateData &sD, cons
     vr = -V * Vcontrol * sin (theta);
     vm = V * Vcontrol * cos (theta);
 
-    solve2x2 (r, -xpp, xpp, r, vr - Loc.diffStateLoc[3], vm - Loc.diffStateLoc[4], Loc.destLoc[0], Loc.destLoc[1]);
+    gmlc::utilities::solve2x2(r, -xpp, xpp, r, vr - Loc.diffStateLoc[3], vm - Loc.diffStateLoc[4], Loc.destLoc[0],
+                              Loc.destLoc[1]);
 }
 
 void motorLoad5::derivative (const IOdata & /*inputs*/,

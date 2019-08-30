@@ -9,14 +9,12 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYN_COLLECTOR_H_
-#define GRIDDYN_COLLECTOR_H_
+#pragma once
 
 #include "../events/eventInterface.hpp"
 #include "core/helperObject.h"
 #include "core/objectOperatorInterface.hpp"
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include <memory>
 /** @file
 @brief define a classes and information related to data retrieval in griddyn
@@ -34,7 +32,7 @@ class gridGrabberInfo
     index_t offset = kNullLocation;  //!< the offset to use to numerically pick off the state
     double gain = 1.0;  //!< a multiplier factor for the results
     double bias = 0.0;  //!< a shift factor of the results
-    gridUnits::units_t outputUnits = gridUnits::defUnit;  //!< which units to output the data
+    units::unit outputUnits = units::defunit;  //!< which units to output the data
   public:
     gridGrabberInfo () = default;
 };
@@ -187,4 +185,4 @@ class collector : public helperObject, public eventInterface, public objectOpera
 std::unique_ptr<collector> makeCollector (const std::string &type, const std::string &name = "");
 
 }  // namespace griddyn
-#endif
+
