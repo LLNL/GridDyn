@@ -12,6 +12,17 @@ Building off of prior efforts in grid simulation, GridDyn was designed to meet t
    :caption: Basics
 
    getting_started
+   griddyn_components
+   xml_input_format
+   design_philosophy
+   development_notes
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   cmake_options
+   object_attributes
 
 .. toctree::
    :maxdepth: 2
