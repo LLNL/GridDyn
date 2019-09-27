@@ -210,9 +210,9 @@ Zero argument mathematical expressions
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========   =======
+========   ============================================================================
 function   details
-========   =======
+========   ============================================================================
 inf()      results in a large number between 0 and 1
 nan()      uses nan("0")
 pi()       pi
@@ -220,16 +220,16 @@ rand()     produces a uniform random number between 0 and 1
 randn()    produces a normal random number with mean 0 and standard deviation of 1.0
 randexp()  produces a random number from an exponential distribution with a mean of 1.0
 randlogn() produces a random number from a log normal distribution
-========== =======
+========== ============================================================================
 
 One argument mathematical expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========   =======
+========   ===============================================
 function   details
-========   =======
+========   ===============================================
 sin(x)     sine of x
 cos(x)     cosine of x
 tan(x)     tangent of x
@@ -255,16 +255,16 @@ trunc(x)   the integer portion of x
 none(x)    return x
 dec(x)     the decimal portion of x *trunc(x)+dec(x)=x*
 randexp(x) an exponential random variable with a mean of x
-========== =======
+========== ===============================================
 
 Two argument mathematical expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========      =======
+========      ===================================================================================
 function      details
-========      =======
+========      ===================================================================================
 atan2(x,y)    the 4 quadrant arctangent function
 pow(x,y)      evaluates :math:`x^y`
 plus(x,y)     evaluates *x+y*
@@ -283,7 +283,7 @@ randn(x,y)    returns a random number from a normal distribution with mean x and
 randexp(x,y)  returns a random number from an exponential distribution with mean x and variance y
 randlogn(x,y) returns a random number from a log normal distribution with mean x and variance y
 randint(x,y)  returns a uniformly distributed random integer between x and y inclusive of x and y
-============= =======
+============= ===================================================================================
 
 ---------------------
 Component Description

@@ -15,14 +15,14 @@ In many cases the default units will be described in [] at the beginning of the 
 default and the unit that is assumed if no units are given to the set command. All the set functions cascade to parent classes which
 are identified in the table captions.
 
+..
+    .. _reference_gridCoreObject_setprops:
 
-.. _reference_gridCoreObject_setprops:
-
-.. csv-table:: gridCoreObject
-   :file: inputTables/gridCoreObjects_setProps.csv
-   :header: "string(s)", "type", "default", "description"
-   :widths: "auto"
-   
-   "updateperiod, period", "number", "1e+48", "the update period"
-   "updaterate, rate", "number", "0", ""
-   "nextupdatetime", "number", "1e+48", "the next scheduled update"
+    .. csv-table:: gridCoreObject
+        :file: inputTables/gridCoreObjects_setProps.csv
+        :header: "string(s)", "type", "default", "description"
+        :widths: "auto"
+        
+        "updateperiod, period", "number", "1e+48", "the update period"
+        "updaterate, rate", "number", "0", ""
+        "nextupdatetime", "number", "1e+48", "the next scheduled update"
