@@ -210,80 +210,80 @@ Zero argument mathematical expressions
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========   ============================================================================
-function   details
-========   ============================================================================
-inf()      results in a large number between 0 and 1
-nan()      uses nan("0")
-pi()       pi
-rand()     produces a uniform random number between 0 and 1
-randn()    produces a normal random number with mean 0 and standard deviation of 1.0
-randexp()  produces a random number from an exponential distribution with a mean of 1.0
-randlogn() produces a random number from a log normal distribution
-========== ============================================================================
+==========  ============================================================================
+function    details
+==========  ============================================================================
+inf()       results in a large number between 0 and 1
+nan()       uses nan("0")
+pi()        pi
+rand()      produces a uniform random number between 0 and 1
+randn()     produces a normal random number with mean 0 and standard deviation of 1.0
+randexp()   produces a random number from an exponential distribution with a mean of 1.0
+randlogn()  produces a random number from a log normal distribution
+==========  ============================================================================
 
 One argument mathematical expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========   ===============================================
-function   details
-========   ===============================================
-sin(x)     sine of x
-cos(x)     cosine of x
-tan(x)     tangent of x
-sinh(x)    hyperbolic sine of x
-cosh(x)    hyperbolic cosine of x
-tanh(x)    hyperbolic tangent of x
-abs(x)     absolute value of x
-sign(x)    return 1.0 if x>0 and -1.0 if x<0 and 0 if x==0
-asin(x)    arcsin of x
-acos(x)    arccosine of x
-atan(x)    arctangent of x
-sqrt(x)    the square root of x
-cbrt(x)    the cube root of x
-log(x)     the natural logarithm of x *log(exp(x))=x*
-exp(x)     the exponential function :math:`e^x`
-log10(x)   the base 10 logarithm of x
-log2(x)    the base 2 logarithm of x
-exp2(x)    evaluates :math:`2^x`
-ceil(x)    the smallest integer value such that ceil(x)>=x
-floor(x)   the largest integer value such that floor(x)<=x
-round(x)   the nearest integer value to x
-trunc(x)   the integer portion of x
-none(x)    return x
-dec(x)     the decimal portion of x *trunc(x)+dec(x)=x*
-randexp(x) an exponential random variable with a mean of x
-========== ===============================================
+==========  ===============================================
+function    details
+==========  ===============================================
+sin(x)      sine of x
+cos(x)      cosine of x
+tan(x)      tangent of x
+sinh(x)     hyperbolic sine of x
+cosh(x)     hyperbolic cosine of x
+tanh(x)     hyperbolic tangent of x
+abs(x)      absolute value of x
+sign(x)     return 1.0 if x>0 and -1.0 if x<0 and 0 if x==0
+asin(x)     arcsin of x
+acos(x)     arccosine of x
+atan(x)     arctangent of x
+sqrt(x)     the square root of x
+cbrt(x)     the cube root of x
+log(x)      the natural logarithm of x *log(exp(x))=x*
+exp(x)      the exponential function :math:`e^x`
+log10(x)    the base 10 logarithm of x
+log2(x)     the base 2 logarithm of x
+exp2(x)     evaluates :math:`2^x`
+ceil(x)     the smallest integer value such that ceil(x)>=x
+floor(x)    the largest integer value such that floor(x)<=x
+round(x)    the nearest integer value to x
+trunc(x)    the integer portion of x
+none(x)     return x
+dec(x)      the decimal portion of x *trunc(x)+dec(x)=x*
+randexp(x)  an exponential random variable with a mean of x
+==========  ===============================================
 
 Two argument mathematical expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. tabularcolumns:: |l|p{11cm}|
 
-========      ===================================================================================
-function      details
-========      ===================================================================================
-atan2(x,y)    the 4 quadrant arctangent function
-pow(x,y)      evaluates :math:`x^y`
-plus(x,y)     evaluates *x+y*
-add(x,y)      evaluates *x+y*
-minus(x,y)    evaluates *x-y*
-subtract(x,y) evaluates *x-y*
-mult(x,y)     evaluates *x\*y*
-product(x,y)  evaluates *x\*y*
-div(x,y)      evaluates *x/y*
-max(x,y)      returns the greater of x or y
-min(x,y)      returns the lesser of x or y
-mod(x,y)      return the modulus of x and y e.g. mod(5,3)=2
-hypot(x,y)    evaluates :math:`sqrt{x^2+y^2}`
-rand(x,y)     return a random number between x and y
-randn(x,y)    returns a random number from a normal distribution with mean x and variance y
-randexp(x,y)  returns a random number from an exponential distribution with mean x and variance y
-randlogn(x,y) returns a random number from a log normal distribution with mean x and variance y
-randint(x,y)  returns a uniformly distributed random integer between x and y inclusive of x and y
-============= ===================================================================================
+=============  ===================================================================================
+function       details
+=============  ===================================================================================
+atan2(x,y)     the 4 quadrant arctangent function
+pow(x,y)       evaluates :math:`x^y`
+plus(x,y)      evaluates *x+y*
+add(x,y)       evaluates *x+y*
+minus(x,y)     evaluates *x-y*
+subtract(x,y)  evaluates *x-y*
+mult(x,y)      evaluates *x\*y*
+product(x,y)   evaluates *x\*y*
+div(x,y)       evaluates *x/y*
+max(x,y)       returns the greater of x or y
+min(x,y)       returns the lesser of x or y
+mod(x,y)       return the modulus of x and y e.g. mod(5,3)=2
+hypot(x,y)     evaluates :math:`sqrt{x^2+y^2}`
+rand(x,y)      return a random number between x and y
+randn(x,y)     returns a random number from a normal distribution with mean x and variance y
+randexp(x,y)   returns a random number from an exponential distribution with mean x and variance y
+randlogn(x,y)  returns a random number from a log normal distribution with mean x and variance y
+randint(x,y)   returns a uniformly distributed random integer between x and y inclusive of x and y
+=============  ===================================================================================
 
 ---------------------
 Component Description
