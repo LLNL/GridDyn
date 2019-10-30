@@ -17,7 +17,6 @@ set(
     ThreePhaseFunctions.cpp
     matrixOps.cpp
     functionInterpreter.cpp
-    workQueue.cpp
     zipUtilities.cpp
     matrixCreation.cpp
     logger.cpp
@@ -48,7 +47,6 @@ set(
     matrixDataFilter.hpp
     matrixDataCustomWriteOnly.hpp
     functionInterpreter.h
-    workQueue.h
     zipUtilities.h
     valuePredictor.hpp
     matrixCreation.h
@@ -59,30 +57,14 @@ set(
 )
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
+set(SKIP_INSTALL_LIBRARIES ON)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJEECT_BINARY_DIR}/Zlib EXCLUDE_FROM_ALL)
 
-include(buildZlib)
-include(buildMiniZip)
 
-# ------------------------------------------------------------
-# building zlib
-# ------------------------------------------------------------
-set(ZLIB_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
+add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Minizip ${PROJECT_BINARY_DIR}/Minizip EXCLUDE_FROM_ALL)
 
-if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
-    build_zlib()
-endif()
-include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
 
-# ------------------------------------------------------------
-# building minizip
-# ------------------------------------------------------------
-set(ZLIB_INCLUDES ${AUTOBUILD_INSTALL_PATH}/include)
-if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
-    build_minizip()
-endif()
-include(${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
-
-target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib gmlc_utilities griddyn_base)
+target_link_libraries(utilities PUBLIC minizip::minizip zlib gmlc_utilities griddyn_base)
 set_target_properties(utilities PROPERTIES FOLDER libraries)
 
 if(ENABLE_64_BIT_INDEXING)
@@ -92,8 +74,3 @@ if(UNSIGNED_INDEXING)
     target_compile_definitions(utilities PUBLIC -DUNSIGNED_INDEXING)
 endif(UNSIGNED_INDEXING)
 
-install(
-    FILES ${utilities_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/utilities
-    COMPONENT headers
-)

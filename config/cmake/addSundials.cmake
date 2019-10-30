@@ -67,8 +67,6 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunnonlinsolfixedpoint_static
 	sundials_sunnonlinsolnewton_static
 	sundials_nvecmanyvector_static
-	
-	sundials_sunlinsolklu_static
 )
 set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 

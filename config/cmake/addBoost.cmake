@@ -34,6 +34,8 @@ mark_as_advanced(USE_BOOST_STATIC_LIBS)
 if (MSVC)
 
 set (boost_versions
+boost_1_72_0
+boost_1_71_0
 boost_1_70_0
 boost_1_69_0
 boost_1_68_0
@@ -53,6 +55,8 @@ C:/boost
 C:/local
 C:/local/boost
 C:/Libraries
+"C:/Program Files/boost"
+C:/ProgramData/chocolatey/lib
 D:
 D:/boost
 D:/local

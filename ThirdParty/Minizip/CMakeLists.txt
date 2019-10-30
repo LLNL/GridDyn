@@ -1,40 +1,23 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
-project(minizip C)
+project(minizip LANGUAGES C VERSION 2.0)
 
 set(BUILD_SHARED_LIBS OFF)
 
 cmake_minimum_required(VERSION 3.5)
 cmake_policy(VERSION 3.5)
 
-if (EXISTS ${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
-include (${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
+if (TARGET zlib::zlib)
+	set(ZLIB_LINK zlib::zlib)
+elseif (EXISTS ${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
+    include (${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
+	set(ZLIB_LINK zlib::zlib)
 
 else()
-find_package(ZLIB)
+    find_package(ZLIB)
+    set(ZLIB_LINK zlib::zlib)
 endif()
 
-if(CMAKE_HOST_APPLE)
-set(PLATFORM __APPLE__)
-elseif(CMAKE_HOST_UNIX)
-set(PLATFORM unix)
-elseif(CMAKE_HOST_WIN32)
-set(PLATFORM _WIN32)
-else(CMAKE_HOST_APPLE)
-message(FATAL_ERROR "Not supported Platform")
-endif(CMAKE_HOST_APPLE)
-
-add_definitions(-D${PLATFORM})
-
-if(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-endif()
-
-if(MSVC)
-  add_definitions(/wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456 -D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
-
-include_directories(${ZLIB_LOCATION}/include)
 set(SOURCES
   argv.c
   ioapi.c
@@ -69,12 +52,36 @@ set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
 add_library(minizip ${SOURCES} ${HEADERS})
+add_library(minizip::minizip ALIAS minizip)
 
+if(CMAKE_HOST_APPLE)
+set(PLATFORM __APPLE__)
+elseif(CMAKE_HOST_UNIX)
+set(PLATFORM unix)
+elseif(CMAKE_HOST_WIN32)
+set(PLATFORM _WIN32)
+else(CMAKE_HOST_APPLE)
+message(FATAL_ERROR "Not supported Platform")
+endif(CMAKE_HOST_APPLE)
 
+target_compile_definitions(minizip PRIVATE -D${PLATFORM})
+
+if(CMAKE_COMPILER_IS_GNUCC)
+  target_compile_definitions(minizip PUBLIC "-std=c99")
+endif()
+
+if(MSVC)
+ target_compile_definitions(minizip PRIVATE /wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456 -D_CRT_SECURE_NO_WARNINGS)
+endif(MSVC)
+
+target_link_libraries(minizip PRIVATE ${ZLIB_LINK})
+
+if (NOT SKIP_INSTALL_LIBRARIES)
 	install(TARGETS minizip EXPORT minizip-targets
        LIBRARY DESTINATION lib
        ARCHIVE DESTINATION lib
 	)
 
-install (EXPORT minizip-targets NAMESPACE minizip:: DESTINATION cmake/)
-INSTALL(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/minizip)
+	install (EXPORT minizip-targets NAMESPACE minizip:: DESTINATION cmake/)
+	INSTALL(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/minizip)
+endif()
