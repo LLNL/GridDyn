@@ -15,145 +15,150 @@
 
 namespace griddyn
 {
-
 static const solverOffsets nullOffsets{};
 
-offsetTable::offsetTable () noexcept : offsetContainer (DEFAULT_OFFSET_CONTAINER_SIZE)
+offsetTable::offsetTable() noexcept : offsetContainer(DEFAULT_OFFSET_CONTAINER_SIZE)
 {
     // most simulations use the first 1 and powerflow(2) and likely dynamic
     // DAE(3) and often 4 and 5 for dynamic partitioned
 #if DEFAULT_OFFSET_CONTAINER_SIZE == 0
-    offsetContainer.resize (1);
+    offsetContainer.resize(1);
 #endif
     offsetContainer[0].sMode = cLocalSolverMode;
 }
 
-bool offsetTable::isLoaded (const solverMode &sMode) const
+bool offsetTable::isLoaded(const solverMode &sMode) const
 {
-    return (isValidIndex (sMode.offsetIndex)) &&
+    return (isValidIndex(sMode.offsetIndex)) &&
            ((offsetContainer[sMode.offsetIndex].stateLoaded) && (offsetContainer[sMode.offsetIndex].rootsLoaded) &&
             (offsetContainer[sMode.offsetIndex].jacobianLoaded));
 }
 
-bool offsetTable::isStateCountLoaded (const solverMode &sMode) const
+bool offsetTable::isStateCountLoaded(const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].stateLoaded;
+    return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].stateLoaded;
 }
 
-bool offsetTable::isRootCountLoaded (const solverMode &sMode) const
+bool offsetTable::isRootCountLoaded(const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].rootsLoaded;
+    return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].rootsLoaded;
 }
 
-bool offsetTable::isJacobianCountLoaded (const solverMode &sMode) const
+bool offsetTable::isJacobianCountLoaded(const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].jacobianLoaded;
+    return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].jacobianLoaded;
 }
 
-solverOffsets &offsetTable::getOffsets (const solverMode &sMode)
+solverOffsets &offsetTable::getOffsets(const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
         offsetContainer[sMode.offsetIndex].sMode = sMode;
     }
     return offsetContainer[sMode.offsetIndex];
 }
 
-const solverOffsets &offsetTable::getOffsets (const solverMode &sMode) const
+const solverOffsets &offsetTable::getOffsets(const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex] : nullOffsets;
+    return isValidIndex(sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex] : nullOffsets;
 }
 
-void offsetTable::setOffsets (const solverOffsets &newOffsets, const solverMode &sMode)
+void offsetTable::setOffsets(const solverOffsets &newOffsets, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
-    offsetContainer[sMode.offsetIndex].setOffsets (newOffsets);
+    offsetContainer[sMode.offsetIndex].setOffsets(newOffsets);
 }
 
-void offsetTable::setOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
-    offsetContainer[sMode.offsetIndex].setOffset (newOffset);
+    offsetContainer[sMode.offsetIndex].setOffset(newOffset);
 }
 
-void offsetTable::setAlgOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setAlgOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
     offsetContainer[sMode.offsetIndex].algOffset = newOffset;
 }
 
-void offsetTable::setDiffOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setDiffOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
     offsetContainer[sMode.offsetIndex].diffOffset = newOffset;
 }
 
-void offsetTable::setVOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setVOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
     offsetContainer[sMode.offsetIndex].vOffset = newOffset;
 }
 
-void offsetTable::setAOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setAOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
     offsetContainer[sMode.offsetIndex].aOffset = newOffset;
 }
 
-void offsetTable::setRootOffset (index_t newOffset, const solverMode &sMode)
+void offsetTable::setRootOffset(index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
-        offsetContainer.resize (sMode.offsetIndex + 1);
+        offsetContainer.resize(sMode.offsetIndex + 1);
     }
     offsetContainer[sMode.offsetIndex].sMode = sMode;
     offsetContainer[sMode.offsetIndex].rootOffset = newOffset;
 }
 
-index_t offsetTable::maxIndex (const solverMode &sMode) const
+index_t offsetTable::maxIndex(const solverMode &sMode) const
 {
-    if (!isValidIndex (sMode.offsetIndex))
+    if (!isValidIndex(sMode.offsetIndex))
     {
         return 0;
     }
     auto so = offsetContainer[sMode.offsetIndex];
-    index_t mx;
-    if (isDynamic (sMode))
+    index_t mx = 0;
+    if (isDynamic(sMode))
     {
-        mx = so.diffOffset + so.total.diffSize;
-        if (so.algOffset + so.total.algSize > mx)
+        if (so.total.diffSize > 0)
+        {
+            mx = so.diffOffset + so.total.diffSize;
+        }
+        if (so.total.algSize > 0 && so.algOffset + so.total.algSize > mx)
         {
             mx = so.algOffset + so.total.algSize;
         }
     }
     else
     {
-        mx = so.algOffset + so.total.algSize;
+        if (so.total.algSize > 0)
+        {
+            mx = so.algOffset + so.total.algSize;
+        }
     }
     if ((so.vOffset != kNullLocation) && (so.vOffset + so.total.vSize > mx))
     {
@@ -166,19 +171,19 @@ index_t offsetTable::maxIndex (const solverMode &sMode) const
     return mx;
 }
 
-void offsetTable::getLocations (const solverMode &sMode, Lp *Loc) const
+void offsetTable::getLocations(const solverMode &sMode, Lp *Loc) const
 {
     Loc->algOffset = offsetContainer[sMode.offsetIndex].algOffset;
     Loc->diffOffset = offsetContainer[sMode.offsetIndex].diffOffset;
 }
 
-void offsetTable::unload (bool dynamic_only)
+void offsetTable::unload(bool dynamic_only)
 {
     if (dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            if (isDynamic (so.sMode))
+            if (isDynamic(so.sMode))
             {
                 so.stateLoaded = false;
                 so.rootsLoaded = false;
@@ -201,13 +206,13 @@ void offsetTable::unload (bool dynamic_only)
     }
 }
 
-void offsetTable::stateUnload (bool dynamic_only)
+void offsetTable::stateUnload(bool dynamic_only)
 {
     if (dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            if (isDynamic (so.sMode))
+            if (isDynamic(so.sMode))
             {
                 so.stateLoaded = false;
                 so.diffOffset = kNullLocation;
@@ -226,13 +231,13 @@ void offsetTable::stateUnload (bool dynamic_only)
     }
 }
 
-void offsetTable::rootUnload (bool dynamic_only)
+void offsetTable::rootUnload(bool dynamic_only)
 {
     if (dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            if (isDynamic (so.sMode))
+            if (isDynamic(so.sMode))
             {
                 so.rootsLoaded = false;
             }
@@ -246,13 +251,13 @@ void offsetTable::rootUnload (bool dynamic_only)
         }
     }
 }
-void offsetTable::JacobianUnload (bool dynamic_only)
+void offsetTable::JacobianUnload(bool dynamic_only)
 {
     if (dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            if (isDynamic (so.sMode))
+            if (isDynamic(so.sMode))
             {
                 so.jacobianLoaded = false;
             }
@@ -267,15 +272,15 @@ void offsetTable::JacobianUnload (bool dynamic_only)
     }
 }
 
-void offsetTable::localUpdateAll (bool dynamic_only)
+void offsetTable::localUpdateAll(bool dynamic_only)
 {
     if (dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            if (isDynamic (so.sMode))
+            if (isDynamic(so.sMode))
             {
-                auto &lc = local ();
+                auto &lc = local();
                 so.total.algRoots = so.local.algRoots = lc.local.algRoots;
                 so.total.diffRoots = so.local.diffRoots = lc.local.diffRoots;
                 so.total.jacSize = so.local.jacSize = lc.local.jacSize;
@@ -288,17 +293,17 @@ void offsetTable::localUpdateAll (bool dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            so.local = local ().local;
-            so.localLoadAll (true);
+            so.local = local().local;
+            so.localLoadAll(true);
         }
     }
 }
-const solverMode &offsetTable::getSolverMode (index_t index) const
+const solverMode &offsetTable::getSolverMode(index_t index) const
 {
-    return isValidIndex (index) ? offsetContainer[index].sMode : cEmptySolverMode;
+    return isValidIndex(index) ? offsetContainer[index].sMode : cEmptySolverMode;
 }
 
-const solverMode &offsetTable::find (const solverMode &tMode) const
+const solverMode &offsetTable::find(const solverMode &tMode) const
 {
     for (auto &so : offsetContainer)
     {
@@ -332,29 +337,29 @@ const solverMode &offsetTable::find (const solverMode &tMode) const
     return cEmptySolverMode;
 }
 
-Lp offsetTable::getLocations (const stateData &sD,
-                              double dest[],
-                              const solverMode &sMode,
-                              const gridComponent *comp) const
+Lp offsetTable::getLocations(const stateData &sD,
+                             double dest[],
+                             const solverMode &sMode,
+                             const gridComponent *comp) const
 {
-    Lp Loc = getLocations (sD, sMode, comp);
-    if ((sMode.local) || (sD.empty ()))
+    Lp Loc = getLocations(sD, sMode, comp);
+    if ((sMode.local) || (sD.empty()))
     {
         Loc.destLoc =
-          (dest == nullptr) ? const_cast<double *> (comp->m_state.data ()) + offsetContainer[0].algOffset : dest;
+          (dest == nullptr) ? const_cast<double *>(comp->m_state.data()) + offsetContainer[0].algOffset : dest;
         Loc.destDiffLoc = Loc.destLoc + Loc.algSize;
     }
-    else if (isDAE (sMode))
+    else if (isDAE(sMode))
     {
         Loc.destLoc = dest + Loc.algOffset;
         Loc.destDiffLoc = dest + Loc.diffOffset;
     }
-    else if (hasAlgebraic (sMode))
+    else if (hasAlgebraic(sMode))
     {
         Loc.destLoc = dest + Loc.algOffset;
         Loc.destDiffLoc = nullptr;
     }
-    else if (hasDifferential (sMode))
+    else if (hasDifferential(sMode))
     {
         Loc.destDiffLoc = dest + Loc.diffOffset;
         Loc.destLoc = nullptr;
@@ -362,25 +367,25 @@ Lp offsetTable::getLocations (const stateData &sD,
     else
     {
         Loc.destLoc =
-          (dest == nullptr) ? const_cast<double *> (comp->m_state.data ()) + offsetContainer[0].algOffset : dest;
+          (dest == nullptr) ? const_cast<double *>(comp->m_state.data()) + offsetContainer[0].algOffset : dest;
         Loc.destDiffLoc = Loc.destLoc + Loc.algSize;
     }
     return Loc;
 }
 
-Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, const gridComponent *comp) const
+Lp offsetTable::getLocations(const stateData &sD, const solverMode &sMode, const gridComponent *comp) const
 {
     Lp Loc;
     Loc.algOffset = offsetContainer[sMode.offsetIndex].algOffset;
     Loc.diffOffset = offsetContainer[sMode.offsetIndex].diffOffset;
     Loc.diffSize = offsetContainer[sMode.offsetIndex].total.diffSize;
     Loc.algSize = offsetContainer[sMode.offsetIndex].total.algSize;
-    if ((sMode.local) || (sD.empty ()))
+    if ((sMode.local) || (sD.empty()))
     {
         Loc.time = comp->prevTime;
-        Loc.algStateLoc = comp->m_state.data ();
-        Loc.diffStateLoc = comp->m_state.data () + Loc.algSize;
-        Loc.dstateLoc = comp->m_dstate_dt.data () + Loc.algSize;
+        Loc.algStateLoc = comp->m_state.data();
+        Loc.diffStateLoc = comp->m_state.data() + Loc.algSize;
+        Loc.dstateLoc = comp->m_dstate_dt.data() + Loc.algSize;
         if (Loc.algOffset == kNullLocation)
         {
             Loc.algOffset = 0;
@@ -390,14 +395,14 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
             Loc.diffOffset = Loc.algSize;
         }
     }
-    else if (isDAE (sMode))
+    else if (isDAE(sMode))
     {
         Loc.time = sD.time;
         Loc.algStateLoc = sD.state + Loc.algOffset;
         Loc.diffStateLoc = sD.state + Loc.diffOffset;
         Loc.dstateLoc = sD.dstate_dt + Loc.diffOffset;
     }
-    else if (hasAlgebraic (sMode))
+    else if (hasAlgebraic(sMode))
     {
         Loc.time = sD.time;
         if (sD.state != nullptr)
@@ -408,7 +413,7 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
         {
             Loc.algStateLoc = sD.algState + Loc.algOffset;
         }
-        if ((isDynamic (sMode)) && (sD.pairIndex != kNullLocation))
+        if ((isDynamic(sMode)) && (sD.pairIndex != kNullLocation))
         {
             if (sD.diffState != nullptr)
             {
@@ -430,12 +435,12 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
         }
         else
         {
-            Loc.diffStateLoc = comp->m_state.data () + offsetContainer[0].diffOffset;
-            Loc.dstateLoc = comp->m_dstate_dt.data () + offsetContainer[0].diffOffset;
+            Loc.diffStateLoc = comp->m_state.data() + offsetContainer[0].diffOffset;
+            Loc.dstateLoc = comp->m_dstate_dt.data() + offsetContainer[0].diffOffset;
         }
         Loc.destDiffLoc = nullptr;
     }
-    else if (hasDifferential (sMode))
+    else if (hasDifferential(sMode))
     {
         Loc.time = sD.time;
         if (sD.state != nullptr)
@@ -464,16 +469,16 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
         }
         else
         {
-            Loc.algStateLoc = comp->m_state.data () + offsetContainer[0].algOffset;
+            Loc.algStateLoc = comp->m_state.data() + offsetContainer[0].algOffset;
         }
         Loc.destLoc = nullptr;
     }
     else
     {
         Loc.time = comp->prevTime;
-        Loc.algStateLoc = comp->m_state.data ();
-        Loc.diffStateLoc = comp->m_state.data () + Loc.algSize;
-        Loc.dstateLoc = comp->m_dstate_dt.data () + Loc.algSize;
+        Loc.algStateLoc = comp->m_state.data();
+        Loc.diffStateLoc = comp->m_state.data() + Loc.algSize;
+        Loc.dstateLoc = comp->m_dstate_dt.data() + Loc.algSize;
         if (Loc.algOffset == kNullLocation)
         {
             Loc.algOffset = 0;
@@ -486,4 +491,4 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
     return Loc;
 }
 
-} // namespace griddyn
+}  // namespace griddyn

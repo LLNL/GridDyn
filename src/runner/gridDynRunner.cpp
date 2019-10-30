@@ -20,10 +20,10 @@
 #include "core/objectInterpreter.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput/fileInput.h"
+#include "gmlc/utilities/stringOps.h"
 #include "griddyn/events/Event.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
-#include "gmlc/utilities/stringOps.h"
 #include "utilities/workQueue.h"
 
 #include "CLI11/CLI11.hpp"
@@ -277,8 +277,7 @@ int GriddynRunner::loadCommandArgument(readerInfo &ri, bool allowUnrecognized)
     {
         if (argc_val > 0)
         {
-           
-                execPath = argv_vals[0];
+            execPath = argv_vals[0];
             app->parse(argc_val, argv_vals);
         }
         else
@@ -417,7 +416,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
 
     // group callback to setup state file
     savestateGroup->callback([this, ssdata]() {
-        m_gds->set("stateFile", ssdata->second);
+        m_gds->set("statefile", ssdata->second);
         if (ssdata->first > 0)
         {
             m_gds->set("state_record_period", ssdata->first);
