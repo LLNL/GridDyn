@@ -515,6 +515,7 @@ endif(GRIDDYN_ENABLE_CODE_COVERAGE_TEST)
 # message(STATUS ${CMAKE_CXX_FLAGS})
 set(CONFIGURE_TARGET_LOCATION ${GRIDDYN_BINARY_DIR}/griddyn_generated_includes/griddyn/)
 include(configGenerator)
+target_include_directories(griddyn_base INTERFACE $<BUILD_INTERFACE:${GRIDDYN_BINARY_DIR}/griddyn_generated_includes/>)
 
 
 # ------------------------------------------------------------

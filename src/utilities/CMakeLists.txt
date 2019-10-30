@@ -64,9 +64,10 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJEECT_BIN
 add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Minizip ${PROJECT_BINARY_DIR}/Minizip EXCLUDE_FROM_ALL)
 
 
-target_link_libraries(utilities PUBLIC minizip::minizip zlib gmlc_utilities griddyn_base)
-set_target_properties(utilities PROPERTIES FOLDER libraries)
+target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib gmlc_utilities griddyn_base)
 
+set_target_properties(utilities PROPERTIES FOLDER libraries)
+set_target_properties(minizip zlib PROPERTIES FOLDER Extern)
 if(ENABLE_64_BIT_INDEXING)
     target_compile_definitions(utilities PUBLIC -DENABLE_64_BIT_INDEXING)
 endif(ENABLE_64_BIT_INDEXING)

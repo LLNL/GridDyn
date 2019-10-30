@@ -20,11 +20,11 @@
 #include "core/objectInterpreter.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput/fileInput.h"
+#include "gmlc/containers/WorkQueue.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "griddyn/events/Event.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
-#include "utilities/workQueue.h"
 
 #include "CLI11/CLI11.hpp"
 #include <boost/filesystem.hpp>

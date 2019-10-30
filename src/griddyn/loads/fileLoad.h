@@ -30,7 +30,7 @@ class fileLoad : public rampLoad
 
   protected:
     std::string fileName_;  //!< the name of the file
-    gmlc::utilities::timeSeriesMulti<double, coreTime> schedLoad;  //!< time series containing the load information
+    gmlc::utilities::TimeSeriesMulti<double, coreTime> schedLoad;  //!< time series containing the load information
     units::unit inputUnits = units::defunit;
     double scaleFactor = 1.0;  //!< scaling factor on the load
     index_t currIndex = 0;  //!< the current index on timeSeries
@@ -39,24 +39,22 @@ class fileLoad : public rampLoad
     std::vector<int> columnkey;
 
   public:
-    explicit fileLoad (const std::string &objName = "fileLoad_$");
-    fileLoad (const std::string &objName, std::string fileName);
-    coreObject *clone (coreObject *obj = nullptr) const override;
-    virtual void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override;
+    explicit fileLoad(const std::string &objName = "fileLoad_$");
+    fileLoad(const std::string &objName, std::string fileName);
+    coreObject *clone(coreObject *obj = nullptr) const override;
+    virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
-    virtual void updateA (coreTime time) override;
+    virtual void updateA(coreTime time) override;
 
-    virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
+    virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 
-    virtual void setFlag (const std::string &flag, bool val = true) override;
-    virtual void set (const std::string &param, const std::string &val) override;
-    virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+    virtual void setFlag(const std::string &flag, bool val = true) override;
+    virtual void set(const std::string &param, const std::string &val) override;
+    virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
   private:
-    count_t loadFile ();
-    int columnCode (const std::string &ldc);
+    count_t loadFile();
+    int columnCode(const std::string &ldc);
 };
 }  // namespace loads
 }  // namespace griddyn
-

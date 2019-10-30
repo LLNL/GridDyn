@@ -577,9 +577,9 @@ target_link_libraries(griddyn PUBLIC coreObjects)
 
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
 target_link_libraries(griddyn PUBLIC coupling_static_lib)
-if(ENABLE_KLU)
+if(GRIDDYN_ENABLE_KLU)
     target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
-endif(ENABLE_KLU)
+endif(GRIDDYN_ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})
@@ -602,10 +602,10 @@ source_group("solvers" FILES ${solver_sources})
 # create a griddyn-config.h file for program options
 configure_file(
     ${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in
-    ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h
+    ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
 )
 install(
-    FILES ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h
+    FILES ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
     COMPONENT headers
 )

@@ -44,7 +44,6 @@ add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 set_target_properties (helicsLib PROPERTIES FOLDER libraries)
 
 message(STATUS "helics include ${HELICS_INCLUDE_DIR}")
-message(STATUS "helics libraries ${HELICS_STATIC_LIBRARY}")
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
 
@@ -80,7 +79,7 @@ target_compile_definitions(
     helicsLib PUBLIC -DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}"
 )
 
-target_link_libraries(helicsLib PUBLIC HELICS::helics_apps runner)
+target_link_libraries(helicsLib PUBLIC HELICS::helics-shared runner)
 
 list (APPEND optional_library_key_headers helics/helicsLibrary.h)
 list (APPEND optional_library_functions loadHELICSLibrary)

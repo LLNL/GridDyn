@@ -69,7 +69,7 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
                ${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 
 
 #============================================================================
@@ -142,7 +142,8 @@ set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
-
+target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
     target_compile_definitions(zlib PRIVATE -D_CRT_SECURE_NO_DEPRECATE)
