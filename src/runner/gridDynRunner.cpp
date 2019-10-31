@@ -20,11 +20,11 @@
 #include "core/objectInterpreter.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput/fileInput.h"
-#include "gmlc/containers/WorkQueue.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "griddyn/events/Event.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
+#include "utilities/GlobalWorkQueue.hpp"
 
 #include "CLI11/CLI11.hpp"
 #include <boost/filesystem.hpp>
@@ -465,7 +465,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
       ->multi_option_policy(CLI::MultiOptionPolicy::TakeLast);
     ptr
       ->add_option_function<int>(
-        "--threads,-j", [](int val) { workQueue::instance(val); },
+        "--threads,-j", [](int val) { griddyn::getGlobalWorkQueue(val); },
         "specify the number of worker threads to use if multithreading is enabled")
       ->check(CLI::PositiveNumber);
 

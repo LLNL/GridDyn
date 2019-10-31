@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE (test_gain_block)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3;
+    TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile (recname);
     BOOST_REQUIRE (ts3.size () >= 15);
     BOOST_CHECK_CLOSE (ts3.data (0, 5) * 5, ts3.data (1, 5), 0.000001);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE (block_test2)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3 (recname);
+    TimeSeriesMulti<> ts3 (recname);
 
     BOOST_CHECK_CLOSE (ts3.data (0, 5) * 5, ts3.data (1, 5), 0.001);
     BOOST_CHECK_CLOSE (ts3.data (0, 280) * 5, ts3.data (1, 280), 0.001);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE (block_test3)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3 (recname);
+    TimeSeriesMulti<> ts3 (recname);
     // ts3.loadBinaryFile(recname);
 
     BOOST_CHECK_SMALL (ts3.data (1, 5), 0.00001);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE (block_test4)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3;
+    TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile (recname);
 
     BOOST_CHECK_CLOSE (ts3.data (1, 5), -0.5, 0.01);
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE (block_test5)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3;
+    TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile (recname);
 
     BOOST_CHECK_SMALL (ts3.data (1, 5), 0.0001);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE (block_test6)
     requireState (gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3 (recname);
+    TimeSeriesMulti<> ts3 (recname);
     // ts3.loadBinaryFile(recname);
 
     BOOST_CHECK_CLOSE (ts3.data (1, 5), 1.0, 0.01);
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE (deadband_block_test)
     BOOST_REQUIRE_GT (double(gds->getSimulationTime()), 7.9);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3;
+    TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile (recname);
 
     auto mx =
@@ -294,7 +294,7 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_block_test, data::
     }
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti<> ts3;
+    TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile (recname);
     std::vector<double> df (ts3.size ());
     compareVec (ts3[1], ts3[2], df);

@@ -12,15 +12,16 @@
 
 #include "helicsCoordinator.h"
 #include "helics/application_api.hpp"
+#include "helics/application_api/typeOperations.hpp"
 #include "helics/helicsEvent.h"
 
+#include "gmlc/containers/mapOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
 #include "griddyn/comms/commMessage.h"
 #include "griddyn/comms/communicationsCore.h"
 #include "griddyn/events/eventAdapters.h"
 #include "griddyn/gridDynSimulation.h"
-#include "gmlc/utilities/stringConversion.h"
 #include <algorithm>
-#include "gmlc/containers/mapOps.hpp"
 
 namespace griddyn
 {
@@ -76,7 +77,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate()
     }
     catch (const helics::RegistrationFailure &e)
     {
-        LOG_WARNING("failed to register as HELICS federate");
+        LOG_WARNING(std::string("failed to register as HELICS federate:") + e.what());
         return nullptr;
     }
     vFed_ = dynamic_cast<helics::ValueFederate *>(cfed.get());
@@ -89,8 +90,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate()
     {
         if (p.unitType != units::defunit)
         {
-            pubs_[ii] =
-              helics::Publication(helics::GLOBAL, vFed_, p.name, p.type, to_string(p.unitType));
+            pubs_[ii] = helics::Publication(helics::GLOBAL, vFed_, p.name, p.type, to_string(p.unitType));
         }
         else
         {
@@ -126,10 +126,11 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate()
         ++ii;
     }
     // register a callback for handling messages from endpoints
-    mFed_->setMessageNotificationCallback ([this](helics::Endpoint &ep, helics::Time t) { this->receiveMessage (ep, t); });
+    mFed_->setMessageNotificationCallback(
+      [this](helics::Endpoint &ep, helics::Time t) { this->receiveMessage(ep, t); });
 
-    fed->enterInitializingMode ();
-    LOG_SUMMARY ("entered HELICS initializing Mode");
+    fed->enterInitializingMode();
+    LOG_SUMMARY("entered HELICS initializing Mode");
     for (auto evnt : events)
     {
         if (evnt->initNeeded())
@@ -206,23 +207,23 @@ void helicsCoordinator::set(const std::string &param, double val, units::unit un
     }
 }
 
-void helicsCoordinator::receiveMessage (helics::Endpoint &ep, helics::Time t)
+void helicsCoordinator::receiveMessage(helics::Endpoint &ep, helics::Time t)
 {
-    auto payload = ep.getMessage ()->to_string ();
+    auto payload = ep.getMessage()->to_string();
     std::shared_ptr<griddyn::commMessage> msg;
-    msg->from_string (payload);
+    msg->from_string(payload);
 
-    auto event = std::make_unique<griddyn::functionEventAdapter> ([this, msg, &ep]() {
-        communicationsCore::instance ()->send (0, ep.getName (), std::move(msg));
+    auto event = std::make_unique<griddyn::functionEventAdapter>([this, msg, &ep]() {
+        communicationsCore::instance()->send(0, ep.getName(), std::move(msg));
         return griddyn::change_code::no_change;
     });
 
     // convert helics::Time to griddynTime
     event->m_nextTime = t;
-    gridDynSimulation::getInstance ()->add (std::shared_ptr<griddyn::eventAdapter> (std::move(event)));
+    gridDynSimulation::getInstance()->add(std::shared_ptr<griddyn::eventAdapter>(std::move(event)));
 }
 
-void helicsCoordinator::sendMessage (int32_t index, const char *data, count_t size)
+void helicsCoordinator::sendMessage(int32_t index, const char *data, count_t size)
 {
     if (isValidIndex(index, epts_))
     {
@@ -282,8 +283,7 @@ helics::Endpoint *helicsCoordinator::getEndpointPointer(int32_t index)
     return nullptr;
 }
 
-int32_t
-helicsCoordinator::addPublication(const std::string &pubName, helics::data_type type, units::unit unitType)
+int32_t helicsCoordinator::addPublication(const std::string &pubName, helics::data_type type, units::unit unitType)
 {
     PubInfo p;
     p.name = pubName;

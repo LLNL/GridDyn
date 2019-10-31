@@ -23,6 +23,7 @@ set(
 	loggerCore.cpp
     matrixDataSparse.cpp
     OperatingBoundary.cpp
+	GlobalWorkQueue.cpp
 )
 
 set(
@@ -54,6 +55,7 @@ set(
     logger.h
 	loggerCore.hpp
     OperatingBoundary.h
+	GlobalWorkQueue.hpp
 )
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})

@@ -13,40 +13,40 @@
 
 #include "compiler-config.h"
 
-#cmakedefine ENABLE_MPI
+#cmakedefine GRIDDYN_ENABLE_MPI
 
-#cmakedefine ENABLE_OPENMP
-#cmakedefine ENABLE_OPENMP_SUNDIALS
-#cmakedefine ENABLE_OPENMP_GRIDDYN
+#cmakedefine GRIDDYN_ENABLE_OPENMP
+#cmakedefine GRIDDYN_ENABLE_OPENMP_SUNDIALS
+#cmakedefine GRIDDYN_ENABLE_OPENMP_GRIDDYN
 
-#cmakedefine ENABLE_KLU
+#cmakedefine GRIDDYN_ENABLE_KLU
 
-#cmakedefine ENABLE_FMI
-#cmakedefine ENABLE_FMI_EXPORT
+#cmakedefine GRIDDYN_ENABLE_FMI
+#cmakedefine GRIDDYN_ENABLE_FMI_EXPORT
 
-#cmakedefine ENABLE_FSKIT
+#cmakedefine GRIDDYN_ENABLE_FSKIT
 
-#cmakedefine ENABLE_OPTIMIZATION_LIBRARY
+#cmakedefine GRIDDYN_ENABLE_OPTIMIZATION_LIBRARY
 
-#cmakedefine ENABLE_EXPERIMENTAL_TEST_CASES
+#cmakedefine GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 
 #cmakedefine LOAD_CVODE
 
 #cmakedefine LOAD_ARKODE
 
-#cmakedefine ENABLE_GRIDDYN_LOGGING
-#cmakedefine ENABLE_GRIDDYN_TRACE_LOGGING
-#cmakedefine ENABLE_GRIDDYN_DEBUG_LOGGING
+#cmakedefine GRIDDYN_ENABLE_LOGGING
+#cmakedefine GRIDDYN_ENABLE_TRACE_LOGGING
+#cmakedefine GRIDDYN_ENABLE_DEBUG_LOGGING
 
-#cmakedefine ENABLE_EXTRA_MODELS
+#cmakedefine GRIDDYN_ENABLE_EXTRA_MODELS
 
 #cmakedefine YAML_FOUND
 
-#cmakedefine ENABLE_HELICS_EXECUTABLE
+#cmakedefine GRIDDYN_ENABLE_HELICS_EXECUTABLE
 
-#cmakedefine ENABLE_DIME
-#cmakedefine ENABLE_TCP
-#cmakedefine ENABLE_ZMQ
+#cmakedefine GRIDDYN_ENABLE_DIME
+#cmakedefine GRIDDYN_ENABLE_TCP
+#cmakedefine GRIDDYN_ENABLE_ZMQ
 
 #cmakedefine BOOST_STATIC
 

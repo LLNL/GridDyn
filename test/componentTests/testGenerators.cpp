@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE (gen_test_isoc)
     gds->run ();
 
     std::string recname = std::string (GEN_TEST_DIRECTORY "datafile.dat");
-    timeSeriesMulti<> ts3 (recname);
+    TimeSeriesMulti<> ts3 (recname);
     BOOST_REQUIRE (ts3.size () > 30);
     BOOST_CHECK (ts3.data (0, 30) < 0.995);
     BOOST_CHECK (ts3[0].back () > 1.0);

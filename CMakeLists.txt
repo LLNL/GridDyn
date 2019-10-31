@@ -605,20 +605,20 @@ endif()
 # ------------------------------------------------------------
 # finding MPI
 # ------------------------------------------------------------
-if(ENABLE_MPI)
+if(GRIDDYN_ENABLE_MPI)
     include(addMPI)
     if(TARGET MPI::MPI_C)
         target_link_libraries(griddyn_base INTERFACE MPI::MPI_C)
     else()
         message(FATAL_ERROR "unable to include MPI")
     endif()
-endif(ENABLE_MPI)
+endif(GRIDDYN_ENABLE_MPI)
 
 
 # ------------------------------------------------------------
 # Find (and test) the KLU libraries
 # ------------------------------------------------------------
-if(ENABLE_KLU)
+if(GRIDDYN_ENABLE_KLU)
     include(addKLU_targets)
 endif()
 
@@ -824,23 +824,23 @@ message(STATUS "key files ${KEY_LIBRARY_FILES}")
 # ------------------------------------------------------------
 # Enable clang analysis and formatting tools
 # ------------------------------------------------------------
-if(ENABLE_CLANG_TOOLS)
+if(GRIDDYN_ENABLE_CLANG_TOOLS)
     include(clang-cxx-dev-tools)
-endif(ENABLE_CLANG_TOOLS)
+endif(GRIDDYN_ENABLE_CLANG_TOOLS)
 
 # TODO this should be under tests/
 # ------------------------------------------------------------
 # Enable testCore construction?
 # ------------------------------------------------------------
-if(ENABLE_GRIDDYN_TESTS)
+if(GRIDDYN_BUILD_TESTS AND BUILD_TESTING)
     # message(STATUS "otcf:${optional_component_test_files}")
     add_subdirectory(test)
-    if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
+    if(GRIDDYN_BUILD_C_SHARED_LIBRARY)
         add_subdirectory(test/testSharedLibrary)
     endif()
     enable_testing()
     # add_test(NAME gridDynTest COMMAND testCore)
-endif(ENABLE_GRIDDYN_TESTS)
+endif()
 
 set(
     GRIDDYN_CMAKECONFIG_INSTALL_DIR
