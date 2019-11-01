@@ -79,7 +79,7 @@ target_compile_definitions(
     helicsLib PUBLIC -DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}"
 )
 
-target_link_libraries(helicsLib PUBLIC HELICS::helics-shared runner)
+target_link_libraries(helicsLib PUBLIC HELICS::helics-apps-shared runner)
 
 list (APPEND optional_library_key_headers helics/helicsLibrary.h)
 list (APPEND optional_library_functions loadHELICSLibrary)

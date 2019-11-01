@@ -51,7 +51,6 @@ set(
     libraryTests/testJsonReader.cpp
     libraryTests/testReaderInfo.cpp
     libraryTests/testMatrixData.cpp
-    libraryTests/testWorkQueue.cpp
     libraryTests/testZipUtilities.cpp
     libraryTests/testOperatingBounds.cpp
     libraryTests/testValuePredictors.cpp
