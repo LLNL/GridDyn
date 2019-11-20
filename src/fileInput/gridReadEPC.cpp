@@ -809,153 +809,144 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
     }
 }
 
-void epcReadSwitchShunt (loads::svd* /*ld*/, string_view /*line*/, double /*base*/)
+//#svd data[1253]            id  ------------long_id_------------  st ty --no-- - reg_name       
+// ar zone      g      b  min_c  max_c  vband   bmin   bmax  date_in date_out pid N
+// own part1 own part2 own part3 own part4
+void epcReadSwitchShunt (loads::svd *ld, string_view line, double /*base*/)
 {
-    assert (unimplemented);
-    /*
-    auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
+	auto strvec = splitlineBracket(line, " ", default_bracket_chars, delimiter_compression::on);
+	auto sz = strvec.size();
+	// get the load index and name
+	std::string prefix = ld->getParent()->getName() + "_svd";
 
-    auto mode = numeric_conversion<int> (strvec[1], 0);
-    auto high = numeric_conversion<double> (strvec[12], 0.0);
-    auto low = numeric_conversion<double> (strvec[13], 0.0);
-    // get the controlled bus
-    auto cbus = numeric_conversion<int> (strvec[4], -1);
+	auto long_id = trim(removeQuotes(strvec[1]));
+	if (!long_id.empty())
+	{
+		ld->setDescription(long_id.to_string());
+	}
 
-    if (cbus < 0)
-    {
-        trimString(strvec[4]);
-        if (strvec[4] == "I")
-        {
-            cbus = index;
-        }
-        else if (strvec[4].empty())
-        {
-            cbus = index;
-        }
-        else
-        {
-            rbus = static_cast<gridBus *> (parentObject->find(strvec[4]));
-            if (rbus != nullptr)
-            {
-                cbus = rbus->getUserID();
-            }
-        }
-    }
-    else if (cbus == 0)
-    {
-        cbus = index;
-    }
-    else
-    {
-        rbus = busList[cbus];
-    }
+	ld->setName(prefix);
 
-    switch (mode)
-    {
-    case 0:
-        ld->set("mode", "manual");
-        break;
-    case 1:
-        ld->set("mode", "stepped");
-        ld->set("vmax", high);
-        ld->set("vmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
+	int offset = 2;
+	while (strvec[offset] != ":")
+	{
+		++offset;
+	}
+	// get the status
+	int status = toIntSimple(strvec[offset+1]);
+	if (status == 0)
+	{
+		ld->disable();
+	}
+	// skip the area and zone information for now
 
-        temp = numeric_conversion<double>(strvec[5], 0.0);
-        if (temp > 0)
-        {
-            ld->set("participation", temp / 100.0);
-        }
-        break;
-    case 2:
-        ld->set("mode", "cont");
-        ld->set("vmax", high);
-        ld->set("vmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
-        temp = numeric_conversion<double>(strvec[5], 0.0);
-        if (temp > 0)
-        {
-            ld->set("participation", temp / 100.0);
-        }
-        break;
-    case 3:
-        ld->set("mode", "stepped");
-        ld->set("control", "reactive");
-        ld->set("qmax", high);
-        ld->set("qmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
-        break;
-    case 4:
-        ld->set("mode", "stepped");
-        ld->set("control", "reactive");
-        ld->set("qmax", high);
-        ld->set("qmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
-        // TODO: PT load target object note:unusual condition
-        break;
-    case 5:
-        ld->set("mode", "stepped");
-        ld->set("control", "reactive");
-        ld->set("qmax", high);
-        ld->set("qmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
-        break;
-    case 6:
-        ld->set("mode", "stepped");
-        ld->set("control", "reactive");
-        ld->set("qmax", high);
-        ld->set("qmin", low);
-        if (cbus != static_cast<int> (index))
-        {
-            ld->setControlBus(rbus);
-        }
-        // TODO: PT load target object note:unusual condition
-        break;
-    default:
-        ld->set("mode", "manual");
-        break;
-    }
-    // load the switched shunt blocks
-    int start = 7;
-    if (opt.version <= 27)
-    {
-        start = 5;
-    }
+	auto cbus = numeric_conversion<int>(strvec[offset+3], -1);
+	gridBus *rbus = nullptr;
+	if (cbus <= 0)
+	{
+		rbus = static_cast<gridBus *>(ld->getParent());
+	}
+	else
+	{
+		rbus = static_cast<gridBus *>(ld->getRoot()->find(std::string("#") + std::to_string(cbus)));
+	}
+	int mode= toIntSimple(strvec[offset + 2]);
+	double high;
+	double low;
+	int bsize = 6;
+	switch (mode)
+	{
+	case 0:
+		ld->set("mode", "manual");
+		bsize = 4;
+		break;
+	case 1:
+		ld->set("mode", "stepped");
+		//ld->set("vmax", high);
+		//ld->set("vmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
 
-    size_t ksize = strvec.size() - 1;
-    for (size_t kk = start + 1; kk < ksize; kk += 2)
-    {
-        auto cnt = numeric_conversion<int>(strvec[kk], 0);
-        auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
-        if ((cnt > 0) && (block != 0.0))
-        {
-            ld->addBlock(cnt, -block, MVAR);
-        }
-        else
-        {
-            break;
-        }
-    }
-    // set the initial value
-    auto initVal = numeric_conversion<double>(strvec[start], 0.0);
+		break;
+	case 2:
+		bsize = 4;
+		ld->set("mode", "cont");
+	//	ld->set("vmax", high);
+	//	ld->set("vmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
+		break;
+	case 3:
+		ld->set("mode", "stepped");
+		ld->set("control", "reactive");
+	//	ld->set("qmax", high);
+	//	ld->set("qmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
+		break;
+	case 4:
+		ld->set("mode", "stepped");
+		ld->set("control", "reactive");
+		high = numeric_conversion<double>(strvec[sz-5], 0.0);
+		low = numeric_conversion<double>(strvec[sz-6], 0.0);
+		ld->set("qmax", high);
+		ld->set("qmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
+		// TODO: PT load target object note:unusual condition
+		break;
+	case 5:
+		ld->set("mode", "stepped");
+		ld->set("control", "reactive");
+	//	ld->set("qmax", high);
+	//	ld->set("qmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
+		break;
+	case 6:
+		ld->set("mode", "stepped");
+		ld->set("control", "reactive");
+	//	ld->set("qmax", high);
+	//	ld->set("qmin", low);
+		if (rbus != nullptr)
+		{
+			ld->setControlBus(rbus);
+		}
+		// TODO: PT load target object note:unusual condition
+		break;
+	default:
+		ld->set("mode", "manual");
+		break;
+	}
+	// load the switched shunt blocks
+	
+	for (size_t kk = offset + 26; kk < sz-bsize; kk += 2)
+	{
+		auto cnt = numeric_conversion<int>(strvec[kk], 0);
+		auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
+		if ((cnt > 0) && (block != 0.0))
+		{
+			ld->addBlock(cnt, -block, pu);
+		}
+		else
+		{
+			break;
+		}
+	}
+	// set the initial value
+	auto initVal = numeric_conversion<double>(strvec[offset+8], 0.0);
 
-    ld->set("yq", -initVal, MVAR);
-    */
+	ld->set("yq", -initVal, pu);
 }
 //#generator data  [XXX]    id   ------------long_id_------------    st ---no--     reg_name       prf  qrf  ar
 // zone   pgen   pmax   pmin   qgen   qmax   qmin   mbase   cmp_r cmp_x gen_r gen_x           hbus
