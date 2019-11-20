@@ -66,8 +66,6 @@ class motorLoad : public Load
   public:
     virtual void set(const std::string &param, const std::string &val) override;
 
-    AUTOGEN_GET
-
     virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void setState(coreTime time,
