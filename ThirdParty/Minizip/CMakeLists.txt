@@ -64,14 +64,14 @@ else(CMAKE_HOST_APPLE)
 message(FATAL_ERROR "Not supported Platform")
 endif(CMAKE_HOST_APPLE)
 
-target_compile_definitions(minizip PRIVATE -D${PLATFORM})
+target_compile_definitions(minizip PRIVATE ${PLATFORM})
 
 if(CMAKE_COMPILER_IS_GNUCC)
-  target_compile_definitions(minizip PUBLIC "-std=c99")
+  target_compile_options(minizip PRIVATE "-std=c99")
 endif()
 
 if(MSVC)
- target_compile_definitions(minizip PRIVATE /wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456 -D_CRT_SECURE_NO_WARNINGS)
+ target_compile_options(minizip PRIVATE /wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456 -D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
 target_link_libraries(minizip PRIVATE ${ZLIB_LINK})

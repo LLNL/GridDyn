@@ -2,7 +2,7 @@
 """C++ code generation
 
 This module uses the clang compiler to generate setter/getter for each
-parameter with "parameter_t" type.
+parameter with "model_parameter" type.
 
 "clang" parse the "input.h" file to find all the parameter_t type.
 
@@ -98,14 +98,13 @@ class Parse:
             if(str(c.location).find(str(fn)) != -1):
                 #
                 # we can read a line directly in the source file.
-                # using c.location.file.name and openening the file.
+                # using c.location.file.name and opening the file.
                 # Sometimes clang tell me where is the line in the file,
                 # So I extract it from "contents" and parse it manually.
                 #
                 filename = c.location.file.name
                 with open(filename, 'r') as fh:
                     contents = fh.read()
-
                 # print c.kind, c.spelling, c.type.spelling, c.access_specifier
                 # if c.kic.kinnd == clang.cindex.CursorKind.FIELD_DECL and
                 # (c.type.spelling.find('parameter_t') != -1):
@@ -168,9 +167,11 @@ class Parse:
                     # Set the appropriate autogen value.
                     declaration = contents[c.extent.start.offset:c.extent.end.offset]
                     autogen = self.autogen[self.currentClass]
+                    print('<<'+declaration+'>>')
                     if declaration == GET:
                         autogen['HasGet'] = True
                         self.autogen['HasMacro'] = True
+                        print("AAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
                     elif declaration == SET:
                         autogen['HasSet'] = True

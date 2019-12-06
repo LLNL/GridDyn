@@ -60,7 +60,7 @@ set(
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
 set(SKIP_INSTALL_LIBRARIES ON)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJEECT_BINARY_DIR}/Zlib EXCLUDE_FROM_ALL)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJECT_BINARY_DIR}/Zlib EXCLUDE_FROM_ALL)
 
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Minizip ${PROJECT_BINARY_DIR}/Minizip EXCLUDE_FROM_ALL)

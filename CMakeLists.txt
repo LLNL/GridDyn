@@ -93,28 +93,26 @@ if(POLICY CMP0079)
 # ------------------------------------------------------------
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if(WIN32)
-        if(MSYS)
-            set(
-                CMAKE_INSTALL_PREFIX
-                "/usr/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
-                CACHE PATH "default install path"
-                FORCE
+        if(MSVC)
+            set(CMAKE_INSTALL_PREFIX
+                "C:/local/helics_${HELICS_VERSION_UNDERSCORE}/"
+                CACHE PATH "default install path" FORCE
             )
-		elif (CYGWIN)
-			set(
-                CMAKE_INSTALL_PREFIX
-                "/usr/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
-                CACHE PATH "default install path"
-                FORCE
+        elseif(MINGW AND NOT MSYS)
+            set(CMAKE_INSTALL_PREFIX
+                "C:/local/helics_${HELICS_VERSION_UNDERSCORE}/"
+                CACHE PATH "default install path" FORCE
             )
-        else()
-            set(
-                CMAKE_INSTALL_PREFIX
-                "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
-                CACHE PATH "default install path"
-                FORCE
+        elseif(MSYS)
+            # use CMAKE_OBJCOPY here since it is somewhat less likely to be overwridden
+            # by users rather than the compiler
+            get_filename_component(path_bin ${CMAKE_OBJCOPY} DIRECTORY)
+            get_filename_component(path_install ${path_bin} DIRECTORY)
+            set(CMAKE_INSTALL_PREFIX
+                ${path_install}
+                CACHE PATH "default install path" FORCE
             )
-        endif()
+        endif(MSVC)
     endif(WIN32)
 endif()
 
@@ -764,8 +762,6 @@ add_library(GRIDDYN::units ALIAS units-static)
 # -----------------------------------------------------------------------------
 # create utilities target
 # -----------------------------------------------------------------------------
-set(GMLC_UTILITIES_OBJECT_LIB OFF CACHE INTERNAL "")
-set(GMLC_UTILITIES_STATIC_LIB ON CACHE INTERNAL "")
 set(GMLC_UTILITIES_INSTALL OFF CACHE INTERNAL "")
 add_subdirectory(ThirdParty/utilities)
 
@@ -774,6 +770,8 @@ hide_variable(GMLC_UTILITIES_INCLUDE_BOOST)
 hide_variable(GMLC_UTILITIES_USE_BOOST_SPIRIT)
 hide_variable(GMLC_UTILITIES_WITH_CMAKE_PACKAGE)
 
+hide_variable(GMLC_UTILITIES_OBJECT_LIB)
+hide_variable(GMLC_UTILITIES_STATIC_LIB)
 
     add_library(GridDyn::utilities ALIAS gmlc_utilities)
     set_target_properties(gmlc_utilities PROPERTIES FOLDER Extern)
