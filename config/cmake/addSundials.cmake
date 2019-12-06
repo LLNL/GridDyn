@@ -60,7 +60,7 @@ else() # cmake <3.11
   #          https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
   #          ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
   #      )
-    endif()
+   # endif()
 
 endif()
 

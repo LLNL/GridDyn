@@ -589,10 +589,6 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/concurrency/gmlc/concurrency/Tri
 	submod_update(ThirdParty/concurrency)
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/sundials/include/ida/ida.h")
-	submod_update(extern/sundials)
-endif()
-
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/utilities/gmlc/utilities/demangle.hpp")
 	submod_update(ThirdParty/utilities)
 endif()
