@@ -55,12 +55,26 @@ endif()
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "Suppressing benchmark's tests")
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE INTERNAL "" )
-
+set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON CACHE INTERNAL "")
+set(BENCHMARK_ENABLE_ASSEMBLY_TESTS OFF CACHE INTERNAL "")
+# tell google benchmarks to use std regex since we only compile on compilers with std regex
+set(HAVE_STD_REGEX ON CACHE INTERNAL "" )
+set(HAVE_POSIX_REGEX OFF CACHE INTERNAL "" )
+set(HAVE_GNU_POSIX_REGEX OFF CACHE INTERNAL "" )
 add_subdirectory(${${gbName}_SOURCE_DIR} ${${gbName}_BINARY_DIR} EXCLUDE_FROM_ALL)
 
 # Target must already exist
-macro(add_benchmark TESTNAME)
+macro(add_benchmark_with_main TESTNAME)
     target_link_libraries(${TESTNAME} PUBLIC benchmark benchmark_main Threads::Threads)
+    if(WIN32)
+        target_link_libraries(${TESTNAME} PUBLIC shlwapi)
+    endif()
+    set_target_properties(${TESTNAME} PROPERTIES FOLDER "benchmarks")
+
+endmacro()
+
+macro(add_benchmark TESTNAME)
+    target_link_libraries(${TESTNAME} PUBLIC benchmark Threads::Threads)
     if(WIN32)
         target_link_libraries(${TESTNAME} PUBLIC shlwapi)
     endif()
@@ -77,8 +91,8 @@ hide_variable(BENCHMARK_USE_LIBCXX)
 hide_variable(LIBRT)
 
 set_target_properties(benchmark benchmark_main PROPERTIES FOLDER "Extern")
-target_compile_options(benchmark_main PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/wd4244>)
-target_compile_options(benchmark PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/wd4244>)
+target_compile_options(benchmark_main PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/wd4244 /wd4800>)
+target_compile_options(benchmark PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/wd4244 /wd4800>)
 
 if(MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
     target_compile_definitions(benchmark PUBLIC

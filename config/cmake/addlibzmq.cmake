@@ -11,7 +11,7 @@
 # This file is used to add libzmq to a project
 #
 
-if(HELICS_USE_ZMQ_STATIC_LIBRARY)
+if(${PROJECT_NAME}_USE_ZMQ_STATIC_LIBRARY)
     set(zmq_static_build ON)
     set(zmq_shared_build OFF)
 else()
@@ -20,9 +20,9 @@ else()
 endif()
 
 if(MINGW)
-    set(HELICS_LIBZMQ_VERSION v4.3.1)
+    set(${PROJECT_NAME}_LIBZMQ_VERSION v4.3.1)
 else()
-    set(HELICS_LIBZMQ_VERSION v4.3.2)
+    set(${PROJECT_NAME}_LIBZMQ_VERSION v4.3.2)
 endif()
 
 string(TOLOWER "libzmq" lcName)
@@ -38,7 +38,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
     fetchcontent_declare(
         libzmq
         GIT_REPOSITORY https://github.com/zeromq/libzmq.git
-        GIT_TAG ${HELICS_LIBZMQ_VERSION}
+        GIT_TAG ${${PROJECT_NAME}_LIBZMQ_VERSION}
     )
 
     fetchcontent_getproperties(libzmq)
@@ -50,7 +50,8 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
         # this section to be removed at the next release of ZMQ for now we need to
         # download the file in master as the one in the release doesn't work
         file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
-             ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old)
+             ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
+        )
         file(
             DOWNLOAD
             https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
@@ -73,7 +74,7 @@ else() # CMake <3.11
         GIT_URL
         https://github.com/zeromq/libzmq.git
         GIT_TAG
-        ${HELICS_LIBZMQ_VERSION}
+        ${${PROJECT_NAME}_LIBZMQ_VERSION}
         DIRECTORY
         ${PROJECT_BINARY_DIR}/_deps
     )
@@ -82,7 +83,8 @@ else() # CMake <3.11
 
     if(NOT EXISTS ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old)
         file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
-             ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old)
+             ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
+        )
         file(
             DOWNLOAD
             https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
@@ -94,20 +96,52 @@ endif()
 
 # Set custom variables, policies, etc. ...
 
-set(ZMQ_BUILD_TESTS OFF CACHE INTERNAL "")
-set(ENABLE_CURVE OFF CACHE INTERNAL "")
-set(ENABLE_DRAFTS OFF CACHE INTERNAL "")
-set(WITH_DOCS OFF CACHE INTERNAL "")
-set(HELICS_ZMQ_LOCAL_BUILD ON CACHE INTERNAL "")
-set(LIBZMQ_PEDANTIC OFF CACHE INTERNAL "")
-set(WITH_PERF_TOOL OFF CACHE INTERNAL "")
-set(ENABLE_CPACK OFF CACHE INTERNAL "")
-set(BUILD_STATIC ${zmq_static_build} CACHE INTERNAL "")
-set(BUILD_SHARED ${zmq_shared_build} CACHE INTERNAL "")
-set(ENABLE_CPACK OFF CACHE INTERNAL "")
+set(ZMQ_BUILD_TESTS
+    OFF
+    CACHE INTERNAL ""
+)
+set(ENABLE_CURVE
+    OFF
+    CACHE INTERNAL ""
+)
+set(ENABLE_DRAFTS
+    OFF
+    CACHE INTERNAL ""
+)
+set(WITH_DOCS
+    OFF
+    CACHE INTERNAL ""
+)
+set(${PROJECT_NAME}_ZMQ_LOCAL_BUILD
+    ON
+    CACHE INTERNAL ""
+)
+set(LIBZMQ_PEDANTIC
+    OFF
+    CACHE INTERNAL ""
+)
+set(WITH_PERF_TOOL
+    OFF
+    CACHE INTERNAL ""
+)
+set(ENABLE_CPACK
+    OFF
+    CACHE INTERNAL ""
+)
+set(BUILD_STATIC
+    ${zmq_static_build}
+    CACHE INTERNAL ""
+)
+set(BUILD_SHARED
+    ${zmq_shared_build}
+    CACHE INTERNAL ""
+)
+set(ENABLE_CPACK
+    OFF
+    CACHE INTERNAL ""
+)
 
-set(
-    ZEROMQ_CMAKECONFIG_INSTALL_DIR
+set(ZEROMQ_CMAKECONFIG_INSTALL_DIR
     ${CMAKE_INSTALL_LIBDIR}/cmake/ZeroMQ
     CACHE INTERNAL ""
 )
@@ -119,11 +153,10 @@ add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR} EXCLUDE_FROM_AL
 
 set(ZeroMQ_FOUND TRUE)
 
-if(HELICS_USE_ZMQ_STATIC_LIBRARY)
+if(${PROJECT_NAME}_USE_ZMQ_STATIC_LIBRARY)
     set_target_properties(libzmq-static PROPERTIES FOLDER "Extern")
     target_compile_options(
-        libzmq-static
-        PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fPIC>
+        libzmq-static PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fPIC>
     )
 
 else()
@@ -150,32 +183,55 @@ hide_variable(ENABLE_INTRINSICS)
 
 hide_variable(ZMQ_WIN32_WINNT)
 
-if(HELICS_USE_ZMQ_STATIC_LIBRARY)
+if(${PROJECT_NAME}_USE_ZMQ_STATIC_LIBRARY)
     set(zmq_target_output "libzmq-static")
 else()
     set(zmq_target_output "libzmq")
 endif()
 
-if(HELICS_BUILD_CXX_SHARED_LIB OR NOT HELICS_DISABLE_STATIC_LIB_INSTALL)
+if(${PROJECT_NAME}_BUILD_CXX_SHARED_LIB OR NOT ${PROJECT_NAME}_DISABLE_C_SHARED_LIB)
 
-	if(NOT HELICS_USE_ZMQ_STATIC_LIBRARY)
-		install(
-			FILES $<TARGET_FILE:${zmq_target_output}>
-			DESTINATION ${CMAKE_INSTALL_BINDIR}
-			COMPONENT libs
-		)
-		if(MSVC AND NOT EMBEDDED_DEBUG_INFO AND NOT HELICS_BINARY_ONLY_INSTALL )
-		install(
-            FILES $<TARGET_PDB_FILE:${zmq_target_output}>
-            DESTINATION ${CMAKE_INSTALL_BINDIR}
-            OPTIONAL
-            COMPONENT libs
+    if(NOT ${PROJECT_NAME}_USE_ZMQ_STATIC_LIBRARY)
+        set_target_properties(${zmq_target_output} PROPERTIES PUBLIC_HEADER "")
+        if(NOT CMAKE_VERSION VERSION_LESS "3.13")
+            install(
+                TARGETS ${zmq_target_output}
+                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                FRAMEWORK DESTINATION "Library/Frameworks"
+            )
+        elseif(WIN32)
+            install(
+                FILES $<TARGET_FILE:${zmq_target_output}>
+                DESTINATION ${CMAKE_INSTALL_BINDIR}
+                COMPONENT libs
+            )
+        else()
+            message(
+                WARNING
+                    "Update to CMake 3.13+ or enable the ${PROJECT_NAME}_USE_ZMQ_STATIC_LIBRARY CMake option to install when using ZMQ as a subproject"
+            )
+        endif()
+        if(MSVC
+           AND NOT EMBEDDED_DEBUG_INFO
+           AND NOT ${PROJECT_NAME}_BINARY_ONLY_INSTALL
         )
-		endif()
-	endif()
-    install(
-        FILES $<TARGET_LINKER_FILE:${zmq_target_output}>
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT libs
-    )
+            install(
+                FILES $<TARGET_PDB_FILE:${zmq_target_output}>
+                DESTINATION ${CMAKE_INSTALL_BINDIR}
+                OPTIONAL
+                COMPONENT libs
+            )
+        endif()
+        if(MSVC AND NOT ${PROJECT_NAME}_BINARY_ONLY_INSTALL)
+            install(
+                FILES $<TARGET_LINKER_FILE:${zmq_target_output}>
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                COMPONENT libs
+            )
+        endif()
+
+    endif()
+
 endif()

@@ -1,4 +1,69 @@
 
+set(sundials_version v5.0.0)
+
+if(NOT CMAKE_VERSION VERSION_LESS 3.11)
+    include(FetchContent)
+
+    fetchcontent_declare(
+        sundials
+        GIT_REPOSITORY https://github.com/LLNL/sundials.git
+        GIT_TAG ${sundials_version}
+    )
+
+    fetchcontent_getproperties(sundials)
+
+    if(NOT ${gbName}_POPULATED)
+        # Fetch the content using previously declared details
+        fetchcontent_populate(sundials)
+        
+        # this section to be removed at the next release of ZMQ for now we need to
+        # download the file in master as the one in the release doesn't work
+      #  file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+      #       ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
+      #  )
+      #  file(
+      #      DOWNLOAD
+      #      https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
+      #      ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+      #  )
+
+    endif()
+
+    hide_variable(FETCHCONTENT_SOURCE_DIR_SUNDIALS)
+    hide_variable(FETCHCONTENT_UPDATES_DISCONNECTED_SUNDIALS)
+
+else() # cmake <3.11
+
+    # create the directory first
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/_deps)
+
+    include(GitUtils)
+    git_clone(
+        PROJECT_NAME
+        sundials
+        GIT_URL
+        https://github.com/LLNL/sundials.git
+        GIT_TAG
+        ${sundials_version}
+        DIRECTORY
+        ${PROJECT_BINARY_DIR}/_deps
+    )
+
+    set(${gbName}_BINARY_DIR ${PROJECT_BINARY_DIR}/_deps/${gbName}-build)
+    
+  #   if(NOT EXISTS ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old)
+  #      file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+  #           ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
+  #      )
+  #      file(
+  #          DOWNLOAD
+  #          https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
+  #          ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+  #      )
+    endif()
+
+endif()
+
 set(BUILD_CVODES OFF CACHE INTERNAL "")
 set(BUILD_IDAS OFF CACHE INTERNAL "")
 set(BUILD_IDA ON CACHE INTERNAL "")
@@ -15,7 +80,7 @@ if (GRIDDYN_ENABLE_OPENMP_SUNDIALS)
 set(OPENMP_ENABLE ON CACHE INTERNAL "")
 endif(GRIDDYN_ENABLE_OPENMP_SUNDIALS)
 
-if (GRIDDYN_ENABLE_KLU)
+if (NOT GRIDDYN_ENABLE_KLU)
         set(KLU_ENABLE ON CACHE INTERNAL "")
         get_target_property(SuiteSparse_DIRECT_INCLUDE_DIR SuiteSparse::klu INTERFACE_INCLUDE_DIRECTORIES)
         find_path (SUNDIALS_KLU_INCLUDE_PATH klu.h
@@ -41,7 +106,7 @@ if (GRIDDYN_ENABLE_KLU)
         set(KLU_ENABLE OFF CACHE INTERNAL "")
     endif()
 
-add_subdirectory(extern/sundials)
+add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
 
 add_library(sundials_all INTERFACE)
 target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/sundials/include>)

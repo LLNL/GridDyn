@@ -230,7 +230,7 @@ option(
 
 option(
     GRIDDYN_ENABLE_KLU
-    "Option to disable KLU (not recommended [slow]; prefer to turn on AUTOBUILD_KLU)"
+    "Option to disable KLU (not recommended [slow]; prefer to turn on GRIDDYN_SUITESPARSE_FORCE_SUBPROJECT)"
     ON
 )
 
@@ -618,8 +618,9 @@ endif(GRIDDYN_ENABLE_MPI)
 # ------------------------------------------------------------
 # Find (and test) the KLU libraries
 # ------------------------------------------------------------
+
 if(GRIDDYN_ENABLE_KLU)
-    include(addKLU_targets)
+    include(addKLU)
 endif()
 
 # ------------------------------------------------------------
@@ -631,36 +632,36 @@ include(addSundials)
 # Enable HELICS executable
 # ------------------------------------------------------------
 # The order needs to be this -> ZMQ -> addHELICS due to knowledge dependencies
-if(ENABLE_HELICS_EXECUTABLE)
+if(GRIDDYN_ENABLE_HELICS_EXECUTABLE)
     show_variable(
         HELICS_INSTALL_PATH
         PATH
         "path to the helics installation"
         "${PROJECT_BINARY_DIR}/libs"
     )
-else(ENABLE_HELICS_EXECUTABLE)
+else(GRIDDYN_ENABLE_HELICS_EXECUTABLE)
     hide_variable(HELICS_INSTALL_PATH)
-endif(ENABLE_HELICS_EXECUTABLE)
+endif(GRIDDYN_ENABLE_HELICS_EXECUTABLE)
 
 # ------------------------------------------------------------
 # Enable ZMQ interfacing
 # ------------------------------------------------------------
-if(ENABLE_DIME)
+if(GRIDDYN_ENABLE_DIME)
     set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
-endif(ENABLE_DIME)
+endif(GRIDDYN_ENABLE_DIME)
 
 hide_variable(ZMQ_NEEDED)
 
 # If ZMQ library is enabled try to locate it and link against it
 cmake_dependent_option(
-    ENABLE_ZMQ
+    GRIDDYN_ENABLE_ZMQ
     "Enable ZMQ networking library"
     OFF
     "NOT ZMQ_NEEDED"
     OFF
 )
 
-if(ENABLE_ZMQ OR ZMQ_NEEDED)
+if(GRIDDYN_ENABLE_ZMQ OR ZMQ_NEEDED)
     include(addZeroMQ)
     if(NOT ZeroMQ_FOUND)
         message(SEND_ERROR "unable to locate zmq library")

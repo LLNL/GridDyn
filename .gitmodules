@@ -1,6 +1,3 @@
-[submodule "extern/sundials"]
-	path = extern/sundials
-	url = ../../LLNL/sundials.git
 [submodule "ThirdParty/fmtlib"]
 	path = ThirdParty/fmtlib
 	url = https://github.com/fmtlib/fmt.git
