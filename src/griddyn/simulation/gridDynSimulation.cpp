@@ -45,7 +45,7 @@ count_t searchForGridlabDobject (const coreObject *obj);
 gridDynSimulation::gridDynSimulation (const std::string &objName) : gridSimulation (objName), controlFlags (0ll)
 {
 // defaults
-#ifndef ENABLE_KLU
+#ifndef GRIDDYN_ENABLE_KLU
     controlFlags.set (dense_solver);
 #endif
 }

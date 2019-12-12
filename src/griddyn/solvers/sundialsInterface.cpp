@@ -14,14 +14,14 @@
 
 #include "idaInterface.h"
 #include "kinsolInterface.h"
-#ifdef LOAD_CVODE
+#ifdef GRIDDYN_LOAD_CVODE
 #include "cvodeInterface.h"
 #endif
-#ifdef LOAD_ARKODE
+#ifdef GRIDDYN_LOAD_ARKODE
 #include "arkodeInterface.h"
 #endif
 
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -43,12 +43,12 @@ namespace solvers
 {
 static childClassFactory<kinsolInterface, SolverInterface> kinFactory (stringVec{"kinsol", "algebraic"});
 static childClassFactory<idaInterface, SolverInterface> idaFactory (stringVec{"ida", "dae", "dynamic"});
-#ifdef LOAD_CVODE
+#ifdef GRIDDYN_LOAD_CVODE
 static childClassFactory<cvodeInterface, SolverInterface>
   cvodeFactory (stringVec{"cvode", "dyndiff", "differential"});
 #endif
 
-#ifdef LOAD_ARKODE
+#ifdef GRIDDYN_LOAD_ARKODE
 static childClassFactory<arkodeInterface, SolverInterface> arkodeFactory (stringVec{"arkode"});
 #endif
 
@@ -121,12 +121,12 @@ void sundialsInterface::cloneTo (SolverInterface *si, bool fullCopy) const
     ai->maxNNZ = maxNNZ;
     if ((fullCopy) && (flags[allocated_flag]))
     {
-        auto tols = NVECTOR_DATA (use_omp, abstols);
-        std::copy (tols, tols + svsize, NVECTOR_DATA (use_omp, ai->abstols));
-        auto cons = NVECTOR_DATA (use_omp, consData);
-        std::copy (cons, cons + svsize, NVECTOR_DATA (use_omp, ai->consData));
-        auto sc = NVECTOR_DATA (use_omp, scale);
-        std::copy (sc, sc + svsize, NVECTOR_DATA (use_omp, ai->scale));
+        auto tols = nvecdata(use_omp, abstols);
+        std::copy (tols, tols + svsize, nvecdata(use_omp, ai->abstols));
+        auto cons = nvecdata(use_omp, consData);
+        std::copy (cons, cons + svsize, nvecdata(use_omp, ai->consData));
+        auto sc = nvecdata(use_omp, scale);
+        std::copy (sc, sc + svsize, nvecdata(use_omp, ai->scale));
     }
 }
 
@@ -208,31 +208,31 @@ void sundialsInterface::setMaxNonZeros (count_t nonZeroCount)
 
 double *sundialsInterface::state_data () noexcept
 {
-    return (state != nullptr) ? NVECTOR_DATA (use_omp, state) : nullptr;
+    return nvecdata(use_omp, state);
 }
 double *sundialsInterface::deriv_data () noexcept
 {
-    return (dstate_dt != nullptr) ? NVECTOR_DATA (use_omp, dstate_dt) : nullptr;
+    return nvecdata(use_omp, dstate_dt);
 }
 
 const double *sundialsInterface::state_data () const noexcept
 {
-    return (state != nullptr) ? NVECTOR_DATA (use_omp, state) : nullptr;
+    return nvecdata(use_omp, state);
 }
 
 const double *sundialsInterface::deriv_data () const noexcept
 {
-    return (dstate_dt != nullptr) ? NVECTOR_DATA (use_omp, dstate_dt) : nullptr;
+    return nvecdata(use_omp, dstate_dt);
 }
 // output solver stats
 
 double *sundialsInterface::type_data () noexcept
 {
-    return (types != nullptr) ? NVECTOR_DATA (use_omp, types) : nullptr;
+    return nvecdata(use_omp, types);
 }
 const double *sundialsInterface::type_data () const noexcept
 {
-    return (types != nullptr) ? NVECTOR_DATA (use_omp, types) : nullptr;
+    return nvecdata(use_omp, types);
 }
 
 double sundialsInterface::get (const std::string &param) const
@@ -246,7 +246,7 @@ double sundialsInterface::get (const std::string &param) const
 
 void sundialsInterface::KLUReInit (sparse_reinit_modes sparseReInitModes)
 {
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
     if (flags[dense_flag])
     {
         return;
@@ -413,8 +413,8 @@ int sundialsJac (realtype time,
         {
             matrixDataFilter<double> filterAd (*(a1));
             filterAd.addFilter (sd->maskElements);
-            sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         (dstate_dt != nullptr) ? NVECTOR_DATA (sd->use_omp, dstate_dt) : nullptr,
+            sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state),
+				nvecdata(sd->use_omp, dstate_dt),
                                          filterAd, cj, sd->mode);
             for (auto &v : sd->maskElements)
             {
@@ -423,8 +423,8 @@ int sundialsJac (realtype time,
         }
         else
         {
-            sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         (dstate_dt != nullptr) ? NVECTOR_DATA (sd->use_omp, dstate_dt) : nullptr,
+            sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state),
+				nvecdata(sd->use_omp, dstate_dt),
                                          *a1, cj, sd->mode);
         }
 
@@ -458,8 +458,8 @@ int sundialsJac (realtype time,
         {
             matrixDataFilter<double> filterAd (*a1);
             filterAd.addFilter (sd->maskElements);
-            sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         NVECTOR_DATA (sd->use_omp, dstate_dt), filterAd, cj, sd->mode);
+            sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state),
+				nvecdata(sd->use_omp, dstate_dt), filterAd, cj, sd->mode);
             for (auto &v : sd->maskElements)
             {
                 a1->assign (v, v, 1.0);
@@ -467,8 +467,8 @@ int sundialsJac (realtype time,
         }
         else
         {
-            sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         NVECTOR_DATA (sd->use_omp, dstate_dt), *a1, cj, sd->mode);
+            sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state),
+				nvecdata(sd->use_omp, dstate_dt), *a1, cj, sd->mode);
         }
 
         sd->jacCallCount++;
@@ -483,7 +483,7 @@ int sundialsJac (realtype time,
 /*
 matrixDataSparse<double> &a1 = sd->a1;
 
-sd->m_gds->jacobianFunction (time, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj,
+sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state), nvecdata(sd->use_omp, dstate_dt), a1,cj,
 sd->mode);
 a1.sortIndexCol ();
 if (sd->flags[useMask_flag])

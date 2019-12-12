@@ -44,7 +44,7 @@ cmake_dependent_advanced_option(${PROJECT_NAME}_USE_SUITESPARSE_STATIC_LIBRARY "
 if(${PROJECT_NAME}_USE_SYSTEM_SUITESPARSE_ONLY)
     find_package(KLU)
     set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD OFF CACHE INTERNAL "")
-elseif(${PROJECT_NAME}_SUITESPARSE_FORCE_SUBPROJECT)
+elseif(${PROJECT_NAME}_SUITESPARSE_FORCE_SUBPROJECT OR ${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD)
     include(addlibSuiteSparse)
 else()
 
@@ -105,13 +105,4 @@ else()
 
 endif() # ${PROJECT_NAME}_USE_SYSTEM_SUTIESPARSE_ONLY
 hide_variable(SuiteSparse_DIR)
-
-if(WIN32)
-    if(TARGET libzmq)
-        install(
-            FILES $<TARGET_FILE:libzmq>
-            DESTINATION ${CMAKE_INSTALL_BINDIR}
-            COMPONENT Runtime
-        )
-    endif()
-endif()
+hide_variable(KLU_DIR)

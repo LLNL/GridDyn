@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_SUNDIALS_H_
-#define _MATRIX_DATA_SUNDIALS_H_
 #pragma once
 #include "sunmatrix/sunmatrix_dense.h"
 #include "sunmatrix/sunmatrix_sparse.h"
@@ -130,4 +128,3 @@ std::unique_ptr<matrixData<double>> makeSundialsMatrixData (SUNMatrix J);
 
 }  // namespace solvers
 }  // namespace griddyn
-#endif

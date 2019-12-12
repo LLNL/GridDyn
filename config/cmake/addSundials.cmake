@@ -18,13 +18,13 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
         
         # this section to be removed at the next release of ZMQ for now we need to
         # download the file in master as the one in the release doesn't work
-      #  file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
-      #       ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
+      #  file(RENAME ${sundials_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+      #       ${sundials_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
       #  )
       #  file(
       #      DOWNLOAD
       #      https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
-      #      ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
+      #      ${sundials_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
       #  )
 
     endif()
@@ -50,19 +50,18 @@ else() # cmake <3.11
     )
 
     set(${gbName}_BINARY_DIR ${PROJECT_BINARY_DIR}/_deps/${gbName}-build)
-    
-  #   if(NOT EXISTS ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old)
-  #      file(RENAME ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
-  #           ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in.old
-  #      )
-  #      file(
-  #          DOWNLOAD
-  #          https://raw.githubusercontent.com/zeromq/libzmq/master/builds/cmake/ZeroMQConfig.cmake.in
-  #          ${${lcName}_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
-  #      )
-   # endif()
 
 endif()
+
+if(NOT EXISTS ${sundials_SOURCE_DIR}/config/SundialsKLU.old)
+     file(RENAME ${sundials_SOURCE_DIR}/config/SundialsKLU.cmake
+            ${sundials_SOURCE_DIR}/config/SundialsKLU.old
+       )
+file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/SundialsKLU.cmake
+              DESTINATION
+             ${sundials_SOURCE_DIR}/config
+             )
+ endif()
 
 set(BUILD_CVODES OFF CACHE INTERNAL "")
 set(BUILD_IDAS OFF CACHE INTERNAL "")
@@ -80,37 +79,17 @@ if (GRIDDYN_ENABLE_OPENMP_SUNDIALS)
 set(OPENMP_ENABLE ON CACHE INTERNAL "")
 endif(GRIDDYN_ENABLE_OPENMP_SUNDIALS)
 
-if (NOT GRIDDYN_ENABLE_KLU)
+if (GRIDDYN_ENABLE_KLU)
         set(KLU_ENABLE ON CACHE INTERNAL "")
-        get_target_property(SuiteSparse_DIRECT_INCLUDE_DIR SuiteSparse::klu INTERFACE_INCLUDE_DIRECTORIES)
-        find_path (SUNDIALS_KLU_INCLUDE_PATH klu.h
-            HINTS ${SuiteSparse_DIRECT_INCLUDE_DIR}
-            PATH_SUFFIXES suitesparse)
-        set(KLU_INCLUDE_DIR "${SUNDIALS_KLU_INCLUDE_PATH}" CACHE INTERNAL "")
-
-        get_target_property(_klu_configs SuiteSparse::klu IMPORTED_CONFIGURATIONS)
-        if(_klu_configs)
-
-            set(klu_config "RELEASE")
-            if(NOT "RELEASE" IN_LIST _klu_configs)
-                    list(GET _klu_configs 0 klu_config)
-            endif()
-
-            get_target_property(KLU_LIBRARY_FILE SuiteSparse::klu IMPORTED_LOCATION_${klu_config})
-        else()
-            get_target_property(KLU_LIBRARY_FILE SuiteSparse::klu IMPORTED_LOCATION)
-        endif()
-        get_filename_component(SUNDIALS_KLU_LIBRARY_DIR_NAME ${KLU_LIBRARY_FILE} DIRECTORY)
-        set(KLU_LIBRARY_DIR ${SUNDIALS_KLU_LIBRARY_DIR_NAME} CACHE INTERNAL "")
     else()
         set(KLU_ENABLE OFF CACHE INTERNAL "")
     endif()
 
-add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+add_subdirectory(${sundials_SOURCE_DIR} ${sundials_BINARY_DIR})
 
 add_library(sundials_all INTERFACE)
-target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/sundials/include>)
-target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/extern/sundials/include>)
+target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_SOURCE_DIR}/include>)
+target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_BINARY_DIR}/include>)
 add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
 
 set(SUNDIALS_LIBRARIES
@@ -135,12 +114,19 @@ set(SUNDIALS_LIBRARIES
 )
 set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
+
+
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
 
 if (TARGET sundials_nvecopenmp_static )
    set_target_properties ( sundials_nvecopenmp_static PROPERTIES FOLDER sundials)
 
    target_link_libraries(sundials_all INTERFACE sundials_nvecopenmp_static)
+endif()
+
+if (TARGET sundials_sunlinsolklu_static)
+    set_target_properties (sundials_sunlinsolklu_static PROPERTIES FOLDER sundials)
+    target_link_libraries(sundials_all INTERFACE sundials_sunlinsolklu_static)
 endif()
 
 if (MSVC)
