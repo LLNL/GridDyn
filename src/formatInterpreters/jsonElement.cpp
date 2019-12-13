@@ -14,7 +14,7 @@
 
 static const std::string nullStr = std::string("");
 
-jsonElement::jsonElement(Json::Value vElement, std::string newName)
+jsonElement::jsonElement(Json_gd::Value vElement, std::string newName)
     : name(std::move(newName)), element(std::move(vElement))
 {
     elementIndex = 0;
@@ -32,7 +32,7 @@ jsonElement::jsonElement(Json::Value vElement, std::string newName)
 
 void jsonElement::clear()
 {
-    element = Json::nullValue;
+    element = Json_gd::nullValue;
     elementIndex = 0;
     arrayIndex = 0;
     arraytype = false;
