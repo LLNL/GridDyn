@@ -21,7 +21,7 @@
 #ifndef GRIDDYN_EXPORT_C_H_
 #define GRIDDYN_EXPORT_C_H_
 
-#include "griddyn_shared_export.h"
+#define GRIDDYN_EXPORT
 
 #ifdef __cplusplus
 extern "C"
