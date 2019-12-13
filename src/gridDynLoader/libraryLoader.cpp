@@ -23,6 +23,8 @@
 #include "fmiGDinfo.h"
 #endif
 
+namespace griddyn
+{
 void loadLibraries()
 {
 #ifdef ENABLE_FMI
@@ -33,3 +35,4 @@ void loadLibraries()
 	loadExtraModels("");
 #endif
 }
+} // namespace griddyn
