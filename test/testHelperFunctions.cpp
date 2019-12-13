@@ -15,6 +15,7 @@
 #include "griddyn/simulation/diagnostics.h"
 #include <iostream>
 #include <cmath>
+#undef BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
 
 using namespace griddyn;
