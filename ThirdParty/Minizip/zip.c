@@ -157,7 +157,7 @@ typedef struct
     ZPOS64_T totalUncompressedData;
 #ifndef NOCRYPT
     unsigned long keys[3];     /* keys defining the pseudo-random sequence */
-    const unsigned long* pcrc_32_tab;
+    const z_crc_t* pcrc_32_tab;
     int crypt_header_size;
 #endif
 } curfile64_info;
@@ -526,8 +526,8 @@ local ZPOS64_T zip64local_SearchCentralDir(const zlib_filefunc64_32_def* pzlib_f
         break;
       }
 
-      if (uPosFound!=0)
-        break;
+    if (uPosFound!=0)
+      break;
   }
   TRYFREE(buf);
   return uPosFound;

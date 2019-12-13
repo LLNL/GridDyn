@@ -61,7 +61,7 @@
 
 #include "zip.h"
 
-#include "argv.h"
+#include "minizip/argv.h"
 
 #ifdef _WIN32
         #define USEWIN32IOAPI
@@ -103,7 +103,7 @@ uLong filetime(f, tmzip, dt)
   return ret;
 }
 #else
-#ifdef unix || __APPLE__
+#if defined(unix) || defined(__APPLE__)
 uLong filetime(f, tmzip, dt)
     char *f;               /* name of file to get info on */
     tm_zip *tmzip;         /* return value: access, modific. and creation times */
@@ -241,7 +241,7 @@ int isLargeFile(const char* filename)
 
   if(pFile != NULL)
   {
-    int n = FSEEKO_FUNC(pFile, 0, SEEK_END);
+    FSEEKO_FUNC(pFile, 0, SEEK_END);
     pos = FTELLO_FUNC(pFile);
 
                 minizip_printf("File : %s is %lld bytes\n", filename, pos);
@@ -420,7 +420,7 @@ int minizip_main(argc,argv)
                 zi.dosDate = 0;
                 zi.internal_fa = 0;
                 zi.external_fa = 0;
-                filetime(filenameinzip,&zi.tmz_date,&zi.dosDate);
+                filetime((char*)filenameinzip,&zi.tmz_date,&zi.dosDate);
 
 /*
                 err = zipOpenNewFileInZip(zf,filenameinzip,&zi,
@@ -542,7 +542,6 @@ int minizip(argc,argv)
     int argc;
     const char **argv;
 {
-    int i;
     int rv;
     char **new_argv;
 
