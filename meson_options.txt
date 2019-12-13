@@ -1,0 +1,8 @@
+option('GRIDDYN_ENABLE_KLU', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_LOGGING', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_TRACE_LOGGING', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_DEBUG_LOGGING', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_EXTRA_MODELS', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_FMI', type : 'boolean', value : true)
+option('GRIDDYN_ENABLE_OPENMP', type : 'boolean', value : true)
+option('HAVE_SHARED_TIMED_MUTEX', type : 'boolean', value : true)

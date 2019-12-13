@@ -1,16 +1,24 @@
-project('griddyn', ['c', 'cpp'], version : '0.9.x', default_options: ['cpp_std=c++17', 'b_sanitize=address'])
+project('griddyn', ['c', 'cpp'], version : '0.9.x', default_options: ['cpp_std=c++17'])
 
 subdir('ThirdParty')
 
 griddyn_conf = configuration_data({
-        'GRIDDYN_DATE' : 'September 2019',
-        'GRIDDYN_VERSION_BUILD' : 'v1',
-        'GRIDDYN_VERSION_MAJOR' : '1',
-        'GRIDDYN_VERSION_MINOR' : '0',
-        'GRIDDYN_VERSION_PATCH' : '0',
-        'GRIDDYN_VERSION_STRING' : 'v1',
-        'GRIDDYN_VERSION_STRING_SHORT' : 'v1',
-        'ENABLE_KLU' : '1',
+        'GRIDDYN_DATE' : 'December 2019',
+        'GRIDDYN_VERSION_BUILD' : 'meson',
+        'GRIDDYN_VERSION_MAJOR' : '0',
+        'GRIDDYN_VERSION_MINOR' : '9',
+        'GRIDDYN_VERSION_PATCH' : '2',
+        'GRIDDYN_VERSION_STRING' : '0.9.2-helics_updates_meson (dirty)',
+        'GRIDDYN_VERSION_STRING_SHORT' : '0.9.2',
+
+        'GRIDDYN_ENABLE_KLU' : get_option('GRIDDYN_ENABLE_KLU'),
+        'GRIDDYN_ENABLE_LOGGING' : get_option('GRIDDYN_ENABLE_LOGGING'),
+        'GRIDDYN_ENABLE_TRACE_LOGGING' : get_option('GRIDDYN_ENABLE_TRACE_LOGGING'),
+        'GRIDDYN_ENABLE_DEBUG_LOGGING' : get_option('GRIDDYN_ENABLE_DEBUG_LOGGING'),
+        'GRIDDYN_ENABLE_EXTRA_MODELS' : get_option('GRIDDYN_ENABLE_EXTRA_MODELS'),
+        'GRIDDYN_ENABLE_FMI' : get_option('GRIDDYN_ENABLE_FMI'),
+        'GRIDDYN_ENABLE_OPENMP' : get_option('GRIDDYN_ENABLE_OPENMP'),
+        'HAVE_SHARED_TIMED_MUTEX' : get_option('HAVE_SHARED_TIMED_MUTEX'),
     })
 
 subdir('griddyn')
