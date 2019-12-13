@@ -13,7 +13,7 @@
 
 #include "core/coreOwningPtr.hpp"
 #include "units/units.hpp"
-#include <extra_includes/variant.hpp>
+#include <variant>
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,7 +22,7 @@ namespace griddyn
 {
 class coreObject;
 /** define a variant type for the different types of properties that may be set*/
-using property_type = mpark::variant<double, std::pair<double, units::unit>, int, bool, std::string>;
+using property_type = std::variant<double, std::pair<double, units::unit>, int, bool, std::string>;
 
 /** class for temporarily holding object properties if the object has delayed initialization or something to that
 effect
@@ -73,19 +73,19 @@ class propertyBuffer
             switch (prop.second.index ())
             {
             case 0:
-                obj->set (prop.first, mpark::get<double> (prop.second));
+                obj->set (prop.first, std::get<double> (prop.second));
                 break;
             case 1:
-                obj->set (prop.first, mpark::get<std::pair<double, units::unit>> (prop.second).first);
+                obj->set (prop.first, std::get<std::pair<double, units::unit>> (prop.second).first);
                 break;
             case 2:
-                obj->set (prop.first, mpark::get<int> (prop.second));
+                obj->set (prop.first, std::get<int> (prop.second));
                 break;
             case 3:
-                obj->setFlag (prop.first, mpark::get<bool> (prop.second));
+                obj->setFlag (prop.first, std::get<bool> (prop.second));
                 break;
             case 4:
-                obj->set (prop.first, mpark::get<std::string> (prop.second));
+                obj->set (prop.first, std::get<std::string> (prop.second));
                 break;
             }
         }
