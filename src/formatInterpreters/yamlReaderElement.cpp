@@ -11,12 +11,13 @@
 */
 
 #include "yamlReaderElement.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "yamlElement.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
 
+using gmlc::utilities::numeric_conversionComplete;
 static const std::string nullStr = std::string ("");
 
 yamlReaderElement::yamlReaderElement () {}
