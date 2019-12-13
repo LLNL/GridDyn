@@ -23,9 +23,8 @@
 
 class GhostSwingBus
 {
-
-private:
 public:
+    GhostSwingBus();
 };
 
 #endif /* GHOSTSWINGBUS_H_ */
