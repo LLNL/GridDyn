@@ -63,10 +63,37 @@ file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/SundialsKLU.cmake
              )
  endif()
 
+option(${PROJECT_NAME}_ENABLE_IDA ON "Enable IDA for use in the computation")
+option(${PROJECT_NAME}_ENABLE_CVODE ON "Enable Cvode for use in the computation")
+option(${PROJECT_NAME}_ENABLE_ARKODE ON "Enable arkode for use in the computation")
+option(${PROJECT_NAME}_ENABLE_KINSOL ON "Enable kinsol for use in the computation")
+
 set(BUILD_CVODES OFF CACHE INTERNAL "")
 set(BUILD_IDAS OFF CACHE INTERNAL "")
+
+if (${PROJECT_NAME}_ENABLE_IDA)
 set(BUILD_IDA ON CACHE INTERNAL "")
+else ()
+set(BUILD_IDA OFF CACHE INTERNAL "")
+endif()
+
+if (${PROJECT_NAME}_ENABLE_KINSOL)
 set(BUILD_KINSOL ON CACHE INTERNAL "")
+else ()
+set(BUILD_KINSOL OFF CACHE INTERNAL "")
+endif()
+
+if (${PROJECT_NAME}_ENABLE_CVODE)
+set(BUILD_CVODE ON CACHE INTERNAL "")
+else ()
+set(BUILD_CVODE OFF CACHE INTERNAL "")
+endif()
+
+if (${PROJECT_NAME}_ENABLE_ARKODE)
+set(BUILD_ARKODE ON CACHE INTERNAL "")
+else ()
+set(BUILD_ARKODE OFF CACHE INTERNAL "")
+endif()
 
 set(EXAMPLES_ENABLE_C OFF CACHE INTERNAL "")
 set(EXAMPLES_ENABLE_CXX OFF CACHE INTERNAL "")
@@ -75,11 +102,11 @@ set(SUNDIALS_INDEX_SIZE 32 CACHE INTERNAL "")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 set(BUILD_STATIC_LIBS ON CACHE INTERNAL "")
 
-if (GRIDDYN_ENABLE_OPENMP_SUNDIALS)
-set(OPENMP_ENABLE ON CACHE INTERNAL "")
-endif(GRIDDYN_ENABLE_OPENMP_SUNDIALS)
+if (${PROJECT_NAME}_ENABLE_OPENMP_SUNDIALS)
+   set(OPENMP_ENABLE ON CACHE INTERNAL "")
+endif(${PROJECT_NAME}_ENABLE_OPENMP_SUNDIALS)
 
-if (GRIDDYN_ENABLE_KLU)
+if (${PROJECT_NAME}_ENABLE_KLU)
         set(KLU_ENABLE ON CACHE INTERNAL "")
     else()
         set(KLU_ENABLE OFF CACHE INTERNAL "")
@@ -93,8 +120,6 @@ target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_B
 add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
 
 set(SUNDIALS_LIBRARIES
-	sundials_arkode_static
-	sundials_cvode_static
 	sundials_ida_static
 	sundials_kinsol_static
 	sundials_nvecserial_static
@@ -112,9 +137,17 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunnonlinsolnewton_static
 	sundials_nvecmanyvector_static
 )
+
+
 set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
+if (${PROJECT_NAME}_ENABLE_CVODE)
+    list(APPEND SUNDIALS_LIBRARIES sundials_cvode_static)
+endif()
 
+if (${PROJECT_NAME}_ENABLE_ARKODE)
+    list(APPEND SUNDIALS_LIBRARIES sundials_arkode_static)
+endif()
 
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
 

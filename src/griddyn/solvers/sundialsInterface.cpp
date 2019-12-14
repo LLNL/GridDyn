@@ -14,10 +14,10 @@
 
 #include "idaInterface.h"
 #include "kinsolInterface.h"
-#ifdef GRIDDYN_LOAD_CVODE
+#ifdef GRIDDYN_ENABLE_CVODE
 #include "cvodeInterface.h"
 #endif
-#ifdef GRIDDYN_LOAD_ARKODE
+#ifdef GRIDDYN_ENABLE_ARKODE
 #include "arkodeInterface.h"
 #endif
 
@@ -43,12 +43,12 @@ namespace solvers
 {
 static childClassFactory<kinsolInterface, SolverInterface> kinFactory (stringVec{"kinsol", "algebraic"});
 static childClassFactory<idaInterface, SolverInterface> idaFactory (stringVec{"ida", "dae", "dynamic"});
-#ifdef GRIDDYN_LOAD_CVODE
+#ifdef GRIDDYN_ENABLE_CVODE
 static childClassFactory<cvodeInterface, SolverInterface>
   cvodeFactory (stringVec{"cvode", "dyndiff", "differential"});
 #endif
 
-#ifdef GRIDDYN_LOAD_ARKODE
+#ifdef GRIDDYN_ENABLE_ARKODE
 static childClassFactory<arkodeInterface, SolverInterface> arkodeFactory (stringVec{"arkode"});
 #endif
 

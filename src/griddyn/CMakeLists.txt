@@ -311,7 +311,7 @@ set(
     solvers/basicOdeSolver.cpp
 )
 
-if(LOAD_CVODE)
+if(GRIDDYN_ENABLE_CVODE)
     list(
         APPEND
             solver_sources solvers/cvodeInterface.cpp solvers/cvodeInterface.h
@@ -319,16 +319,16 @@ if(LOAD_CVODE)
 
     list(APPEND solver_headers solvers/cvodeInterface.h)
 
-endif(LOAD_CVODE)
+endif(GRIDDYN_ENABLE_CVODE)
 
-if(LOAD_ARKODE)
+if(GRIDDYN_ENABLE_ARKODE)
     list(
         APPEND
             solver_sources solvers/arkodeInterface.cpp solvers/arkodeInterface.h
     )
 
     list(APPEND solver_headers solvers/arkodeInterface.h)
-endif(LOAD_ARKODE)
+endif(GRIDDYN_ENABLE_ARKODE)
 
 set(
     core_headers
