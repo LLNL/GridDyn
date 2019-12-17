@@ -580,9 +580,11 @@ target_link_libraries(griddyn PUBLIC coupling_static_lib)
 if(GRIDDYN_ENABLE_KLU)
 	if (GRIDDYN_SUITESPARSE_LOCAL_BUILD)
 		target_link_libraries(griddyn PUBLIC klu)
+        target_include_directories(griddyn PRIVATE ${KLU_INCLUDE_DIR})
 	else()
 		target_link_libraries(griddyn PUBLIC Suitesparse::klu)
 	endif()
+    
 endif(GRIDDYN_ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})

@@ -65,7 +65,7 @@ file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/SundialsKLU.cmake
 
 option(${PROJECT_NAME}_ENABLE_IDA ON "Enable IDA for use in the computation")
 option(${PROJECT_NAME}_ENABLE_CVODE ON "Enable Cvode for use in the computation")
-option(${PROJECT_NAME}_ENABLE_ARKODE ON "Enable arkode for use in the computation")
+option(${PROJECT_NAME}_ENABLE_ARKODE OFF "Enable arkode for use in the computation")
 option(${PROJECT_NAME}_ENABLE_KINSOL ON "Enable kinsol for use in the computation")
 
 set(BUILD_CVODES OFF CACHE INTERNAL "")
