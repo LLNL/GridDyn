@@ -13,7 +13,7 @@
 
 
 #include "libraryLoader.h"
-#include "griddyn-config.h"
+#include "griddyn/griddyn-config.h"
 
 #ifdef ENABLE_EXTRA_MODELS
 #include "extraModels.h"
