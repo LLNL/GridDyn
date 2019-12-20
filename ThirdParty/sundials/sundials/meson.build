@@ -23,4 +23,6 @@ sundials_config_file = configure_file(
     input : '../sundials-3.1.1/include/sundials/sundials_config.in',
     output : 'sundials_config.h',
     format : 'cmake@',
-    configuration : sundials_config)
+    configuration : sundials_config,
+    install : true,
+    install_dir : 'include/sundials')

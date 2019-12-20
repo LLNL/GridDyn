@@ -1,6 +1,8 @@
 # TODO: use internal zlib
 zlib_dep = dependency('zlib')
 
+
+minizip_inc = include_directories('Minizip')
 minizip_lib = library('minizip', [
         'Minizip/minizip.c',
         'Minizip/miniunz.c',
@@ -9,14 +11,14 @@ minizip_lib = library('minizip', [
         'Minizip/unzip.c',
         'Minizip/argv.c',
     ],
-    dependencies : zlib_dep)
-
-minizip_inc = include_directories('Minizip')
+    dependencies : zlib_dep,
+    install : true)
 minizip_dep = declare_dependency(link_with : minizip_lib, include_directories : minizip_inc)
 
 jsoncpp_inc = include_directories('json')
 jsoncpp_lib = library('jsoncpp',
-    'json/jsoncpp.cpp')
+    'json/jsoncpp.cpp',
+    install : true)
 jsoncpp_dep = declare_dependency(link_with : jsoncpp_lib, include_directories : jsoncpp_inc)
 
 toml_inc = include_directories('toml')
@@ -31,7 +33,8 @@ ticpp_lib = library('ticpp', [
         'ticpp/tinyxmlparser.cpp',
     ],
     cpp_args : '-DTIXML_USE_TICPP',
-    include_directories : include_directories(['ticpp/ticpp', 'ticpp']))
+    include_directories : include_directories(['ticpp/ticpp', 'ticpp']),
+    install : true)
 ticpp_dep = declare_dependency(link_with : ticpp_lib, include_directories : ticpp_inc)
 
 inih_inc = include_directories('inih')
@@ -40,7 +43,8 @@ inih_dep = declare_dependency(include_directories : inih_inc)
 tinyxml2_inc = include_directories('tinyxml2')
 tinyxml2_lib = library('tinyxml2',
     'tinyxml2/tinyxml2.cpp',
-    include_directories : include_directories('tinyxml2/tinyxml2'))
+    include_directories : include_directories('tinyxml2/tinyxml2'),
+    install : true)
 tinyxml2_dep = declare_dependency(link_with : tinyxml2_lib, include_directories : tinyxml2_inc)
 
 cereal_inc = include_directories('cereal')
@@ -77,7 +81,8 @@ yaml_cpp_lib = library('yaml_cpp', [
         'yaml-cpp/src/stream.cpp',
         'yaml-cpp/src/tag.cpp',
     ],
-    include_directories : yaml_cpp_inc)
+    include_directories : yaml_cpp_inc,
+    install : true)
 yaml_cpp_dep = declare_dependency(link_with : yaml_cpp_lib, include_directories : yaml_cpp_inc)
 
 zmq_dep = dependency('libzmq')
@@ -101,7 +106,8 @@ ss_lib = library('suitesparse', [
         'SuiteSparse/SuiteSparse-5.3.0/SuiteSparse_config/SuiteSparse_config.c',
     ],
     include_directories : ss_inc,
-    dependencies : m_lib)
+    dependencies : m_lib,
+    install : true)
 ss_dep = declare_dependency(include_directories : ss_inc, link_with : ss_lib)
 
 amd_inc = include_directories('SuiteSparse/SuiteSparse-5.3.0/AMD/Include')
@@ -127,7 +133,8 @@ foreach type, define : type_options
         dependencies : [
             ss_dep,
             m_lib
-        ])
+        ],
+        install : true)
     amd_libs += [amd_lib]
 endforeach
 amd_dep = declare_dependency(
@@ -145,7 +152,8 @@ foreach type, define : type_options
         dependencies : [
             ss_dep,
             m_lib
-        ])
+        ],
+        install : true)
     colamd_libs += [colamd_lib]
 endforeach
 colamd_dep = declare_dependency(include_directories : colamd_inc, link_with : colamd_libs)
@@ -160,7 +168,8 @@ foreach type, define : type_options
         ],
         c_args : define,
         include_directories : btf_inc,
-        dependencies : ss_dep)
+        dependencies : ss_dep,
+        install : true)
     btf_libs += [btf_lib]
 endforeach
 btf_dep = declare_dependency(include_directories : btf_inc, link_with : btf_libs)
@@ -194,7 +203,8 @@ foreach type, define : type_options
             colamd_dep,
             btf_dep,
             m_lib,
-        ])
+        ],
+        install : true)
     klu_libs += [klu_lib]
 endforeach
 klu_dep = declare_dependency(
@@ -240,7 +250,8 @@ sundials_lib = library('sundials', [
         m_lib,
         klu_dep,
     ],
-    include_directories : [ sundials_inc, sundials_config_file_inc ])
+    include_directories : [ sundials_inc, sundials_config_file_inc ],
+    install : true)
 
 sundials_dep = declare_dependency(
     link_with : [
@@ -259,15 +270,19 @@ gmlc_lib = library('gmlc', [
         'utilities/gmlc/utilities/stringConversion.cpp',
         'utilities/gmlc/utilities/string_viewOps.cpp',
         'utilities/gmlc/utilities/vectorOps.cpp',
-    ])
+    ],
+    install : true)
 gmlc_dep = declare_dependency(include_directories : gmlc_inc, link_with : gmlc_lib)
 
 units_inc = include_directories('units')
 units_lib = library('units', [
         'units/units/units.cpp',
         'units/units/commodities.cpp',
-    ])
+    ],
+    install : true)
 units_dep = declare_dependency(include_directories : units_inc, link_with : units_lib)
 
 cli11_inc = include_directories('cli11')
 cli11_dep = declare_dependency(include_directories : cli11_inc)
+
+subdir('headers')

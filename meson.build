@@ -27,7 +27,6 @@ griddyn_config_inc = include_directories('.')
 boost_dep = dependency('boost', modules : [
         'system',
         'unit_test_framework',
-        'stacktrace_backtrace',
         'filesystem',
     ])
 cc = meson.get_compiler('c')
@@ -58,8 +57,10 @@ griddyn_utility_lib = library('griddyn_utility', [
         boost_dep,
         fs_lib,
         gmlc_dep,
+        threads_dep,
     ],
-    include_directories : [griddyn_config_inc, griddyn_utility_inc])
+    include_directories : [ griddyn_config_inc, griddyn_utility_inc ],
+    install : true)
 griddyn_utility_dep = declare_dependency(link_with : griddyn_utility_lib, include_directories : griddyn_utility_inc)
 
 griddyn_format_interpreter_inc = include_directories('src/formatInterpreters')
@@ -85,7 +86,8 @@ griddyn_format_interpreter_lib = library('griddyn_format_interpreter', [
         yaml_cpp_dep,
         gmlc_dep,
     ],
-    include_directories : griddyn_format_interpreter_inc)
+    include_directories : griddyn_format_interpreter_inc,
+    install : true)
 griddyn_format_interpreter_dep = declare_dependency(link_with : griddyn_format_interpreter_lib, include_directories : griddyn_format_interpreter_inc)
 
 griddyn_core_lib = library('griddyn_core', [
@@ -103,7 +105,8 @@ griddyn_core_lib = library('griddyn_core', [
         griddyn_utility_dep,
         gmlc_dep,
         units_dep,
-    ])
+    ],
+    install : true)
 griddyn_core_dep = declare_dependency(
     link_with : griddyn_core_lib,
     include_directories : griddyn_core_inc,
@@ -116,7 +119,8 @@ griddyn_core_dep = declare_dependency(
 griddyn_coupling_lib = library('griddyn_coupling', [
         'src/coupling/GhostSwingBus.cpp',
         'src/coupling/GhostSwingBusManager.cpp',
-    ])
+    ],
+    install : true)
 griddyn_coupling_dep = declare_dependency(
     link_with : griddyn_coupling_lib)
 
@@ -294,7 +298,8 @@ griddyn_lib = library('griddyn', [
         dl_lib,
         gmlc_dep,
         units_dep,
-    ])
+    ],
+    install : true)
 griddyn_dep = declare_dependency(
     link_with : griddyn_lib,
     include_directories : griddyn_inc,
@@ -352,7 +357,8 @@ griddyn_file_input_lib = library('griddyn_file_input',
         fs_lib,
         gmlc_dep,
         units_dep,
-    ])
+    ],
+    install : true)
 griddyn_file_input_dep = declare_dependency(
     link_with : griddyn_file_input_lib,
     include_directories : griddyn_file_input_inc,
@@ -367,7 +373,9 @@ griddyn_runner_lib = library('griddyn_runner', [
         boost_dep,
         griddyn_file_input_dep,
         griddyn_coupling_dep,
-    ])
+        threads_dep,
+    ],
+    install : true)
 griddyn_runner_dep = declare_dependency(link_with : griddyn_runner_lib)
 
 griddyn_shared_inc = include_directories('src/griddyn_shared')
@@ -381,12 +389,14 @@ griddyn_shared_lib = library('griddyn_shared', [
         griddyn_dep,
         griddyn_runner_dep,
         griddyn_file_input_dep,
-    ])
+    ],
+    install : true)
 griddyn_shared_dep = declare_dependency(link_with : griddyn_shared_lib, include_directories : griddyn_shared_inc)
 
 griddyn_loader_lib = library('griddyn_loader', [
         'src/gridDynLoader/libraryLoader.cpp'
-    ])
+    ],
+    install : true)
 griddyn_loader_dep = declare_dependency(link_with : griddyn_loader_lib)
 
 griddyn_main = executable('griddyn.exe',
@@ -395,6 +405,20 @@ griddyn_main = executable('griddyn.exe',
         griddyn_dep,
         griddyn_runner_dep,
         griddyn_loader_dep,
+    ],
+    install : true)
+
+subdir('headers')
+
+pkg_config = import('pkgconfig')
+pkg_config.generate(
+    libraries : griddyn_lib,
+    name : 'libgriddyn',
+    filebase : 'griddyn',
+    description : 'griddyn',
+    subdirs : [
+        '.',
+        'griddyn'
     ])
 
 subdir('test')
