@@ -338,15 +338,15 @@ class childTypeFactory : public typeFactory<Btype>
         return new Ntype ();
     }
 
-    virtual void prepObjects (count_t count, coreObject *obj) override
+    virtual void prepObjects (count_t objectCount, coreObject *obj) override
     {
         if (!preparedObjects)
         {
-            preparedObjects = std::make_unique<objectPrepper<Ntype>> (count, obj);
+            preparedObjects = std::make_unique<objectPrepper<Ntype>> (objectCount, obj);
         }
         else
         {
-            preparedObjects->prepObjects (count, obj);
+            preparedObjects->prepObjects (objectCount, obj);
         }
     }
     virtual count_t remainingPrepped () const override

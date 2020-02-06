@@ -40,7 +40,6 @@
 
 namespace griddyn
 {
-using namespace units;
 using gmlc::utilities::convertToLowerCase;
 
 void savePowerFlow (gridDynSimulation *gds, const std::string &fileName)
@@ -88,6 +87,7 @@ void savePowerFlow (gridDynSimulation *gds, const std::string &fileName)
 
 void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
 {
+	using namespace units;
     FILE *fp = fopen (fileName.c_str (), "w");
     if (fp == nullptr)
     {
@@ -99,7 +99,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
                  "name\",\"voltage(pu)\",\"angle(deg)\",\"Pgen(MW)\",\"Qgen(MW)\",\"Pload(MW)\",\"Qload(MW)\","
                  "\"Plink(MW)\",\"Qlink(MW)\"\n");
     Area *Area = gds->getArea (0);
-    index_t mm = 0;
+    index_t mmm = 0;
     while (Area != nullptr)
     {
         index_t nn = 0;
@@ -116,8 +116,8 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
             ++nn;
             bus = Area->getBus (nn);
         }
-        ++mm;
-        Area = gds->getArea (mm);
+        ++mmm;
+        Area = gds->getArea (mmm);
     }
 
     index_t nn = 0;
@@ -140,6 +140,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
 
 void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
 {
+	using namespace units;
     FILE *fp = fopen (fileName.c_str (), "w");
     if (fp == nullptr)
     {
@@ -156,7 +157,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
     Area *Area = gds->getArea (0);
     gridBus *bus;
     index_t nn = 0;
-    index_t mm = 0;
+    index_t mmm = 0;
     while (Area != nullptr)
     {
         nn = 0;
@@ -174,8 +175,8 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
             ++nn;
             bus = Area->getBus (nn);
         }
-        ++mm;
-        Area = gds->getArea (mm);
+        ++mmm;
+        Area = gds->getArea (mmm);
     }
 
     nn = 0;
@@ -195,6 +196,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
     fprintf (fp, "===============LINE INFORMATION=====================\n");
     fprintf (fp, "Area#\tLine #\tLine Name\t\t\t\t\tfrom\tto\t\tP1_2\t\tQ1_2\t\tP2_1\t\tQ2_1\t\tLoss\n");
     Link *lnk;
+	mmm = 0;
     Area = gds->getArea (0);
     while (Area != nullptr)
     {
@@ -212,10 +214,10 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
             ++nn;
             lnk = Area->getLink (nn);
         }
-        ++mm;
-        Area = gds->getArea (mm);
+        ++mmm;
+        Area = gds->getArea (mmm);
     }
-
+	
     nn = 0;
     lnk = gds->getLink (nn);
     while (lnk != nullptr)
@@ -232,7 +234,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
 
     fprintf (fp, "===============AREA INFORMATION=====================\n");
     fprintf (fp, "Area#\tArea Name\t\t\t\tGen Real\t Gen Reactive\t Load Real\t Load Reactive\t Loss\t Export\n");
-
+	mmm = 0;
     Area = gds->getArea (0);
     while (Area != nullptr)
     {
@@ -241,8 +243,8 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
                  Area->getGenerationReactive () * basePower, Area->getLoadReal () * basePower,
                  Area->getLoadReactive () * basePower, Area->getLoss () * basePower, -99999.0);
 
-        ++mm;
-        Area = gds->getArea (mm);
+        ++mmm;
+        Area = gds->getArea (mmm);
     }
 
     fprintf (fp, "%d\t\t\"%-20s\"\t %7.2f\t %7.2f\t %7.2f\t %7.2f\t %7.2f\t %7.2f\n", 1, gds->getName ().c_str (),
