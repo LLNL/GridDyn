@@ -95,8 +95,8 @@ class objectPrepper
     bool useBlock;
 
   public:
-    objectPrepper (count_t count, coreObject *example) { prepObjects (count, example); }
-    void prepObjects (count_t count, coreObject *example)
+    objectPrepper (count_t objCount, coreObject *example) { prepObjects (objCount, example); }
+    void prepObjects (count_t objCount, coreObject *example)
     {
         auto root = example->getRoot ();
         useBlock = true;
@@ -107,11 +107,11 @@ class objectPrepper
                 root->add (obptr.get ());
             }
         }
-        if (remaining () < count)
+        if (remaining () < objCount)
         {
             if ((obptr) && (obptr->remaining () > 0))
             {
-                targetprepped = count - obptr->remaining ();
+                targetprepped = objCount - obptr->remaining ();
             }
             else
             {
@@ -257,15 +257,15 @@ class typeFactory : public objectFactory
         return new Ntype ();
     }
 
-    virtual void prepObjects (count_t count, coreObject *obj) override
+    virtual void prepObjects (count_t objectCount, coreObject *obj) override
     {
         if (!preparedObjects)
         {
-            preparedObjects = std::make_unique<objectPrepper<Ntype>> (count, obj);
+            preparedObjects = std::make_unique<objectPrepper<Ntype>> (objectCount, obj);
         }
         else
         {
-            preparedObjects->prepObjects (count, obj);
+            preparedObjects->prepObjects (objectCount, obj);
         }
     }
     virtual count_t remainingPrepped () const override

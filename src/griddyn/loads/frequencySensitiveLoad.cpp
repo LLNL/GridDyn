@@ -174,16 +174,16 @@ frequencySensitiveLoad::getReactivePower (const IOdata &inputs, const stateData 
     return Qr + Qr * (freq - 1.0) * M;
 }
 
-double frequencySensitiveLoad::getRealPower (const double V) const
+double frequencySensitiveLoad::getRealPower (double voltage) const
 {
-    double Pr = subLoad->getRealPower (V);
+    double Pr = subLoad->getRealPower (voltage);
     double freq = bus->getFreq ();
     return Pr + Pr * (freq - 1.0) * M;
 }
 
-double frequencySensitiveLoad::getReactivePower (double V) const
+double frequencySensitiveLoad::getReactivePower (double voltage) const
 {
-    double Qr = subLoad->getReactivePower (V);
+    double Qr = subLoad->getReactivePower (voltage);
     double freq = bus->getFreq ();
     return Qr + Qr * (freq - 1.0) * M;
 }

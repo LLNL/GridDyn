@@ -1,5 +1,5 @@
 
-set(sundials_version v5.0.0)
+set(sundials_version v5.1.0)
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.11)
     include(FetchContent)
@@ -49,7 +49,7 @@ else() # cmake <3.11
         ${PROJECT_BINARY_DIR}/_deps
     )
 
-    set(${gbName}_BINARY_DIR ${PROJECT_BINARY_DIR}/_deps/${gbName}-build)
+    set(sundials_BINARY_DIR ${PROJECT_BINARY_DIR}/_deps/sundials-build)
 
 endif()
 
@@ -63,10 +63,10 @@ file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/SundialsKLU.cmake
              )
  endif()
 
-option(${PROJECT_NAME}_ENABLE_IDA ON "Enable IDA for use in the computation")
-option(${PROJECT_NAME}_ENABLE_CVODE ON "Enable Cvode for use in the computation")
-option(${PROJECT_NAME}_ENABLE_ARKODE OFF "Enable arkode for use in the computation")
-option(${PROJECT_NAME}_ENABLE_KINSOL ON "Enable kinsol for use in the computation")
+option(${PROJECT_NAME}_ENABLE_IDA "Enable IDA for use in the computation" ON)
+option(${PROJECT_NAME}_ENABLE_CVODE "Enable Cvode for use in the computation" ON)
+option(${PROJECT_NAME}_ENABLE_ARKODE "Enable arkode for use in the computation" OFF)
+option(${PROJECT_NAME}_ENABLE_KINSOL "Enable kinsol for use in the computation" ON)
 
 set(BUILD_CVODES OFF CACHE INTERNAL "")
 set(BUILD_IDAS OFF CACHE INTERNAL "")
@@ -120,8 +120,6 @@ target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_B
 add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
 
 set(SUNDIALS_LIBRARIES
-	sundials_ida_static
-	sundials_kinsol_static
 	sundials_nvecserial_static
 	sundials_sunlinsolband_static
 	sundials_sunlinsoldense_static
@@ -140,6 +138,15 @@ set(SUNDIALS_LIBRARIES
 
 
 set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
+
+if (${PROJECT_NAME}_ENABLE_IDA)
+    list(APPEND SUNDIALS_LIBRARIES  sundials_ida_static)
+endif()
+
+if (${PROJECT_NAME}_ENABLE_KINSOL)
+    list(APPEND SUNDIALS_LIBRARIES  sundials_kinsol_static)
+endif()
+
 
 if (${PROJECT_NAME}_ENABLE_CVODE)
     list(APPEND SUNDIALS_LIBRARIES sundials_cvode_static)

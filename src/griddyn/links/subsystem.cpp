@@ -150,14 +150,14 @@ void subsystem::converge (coreTime time,
     subarea.converge (time, state, dstate_dt, sMode, mode, tol);
 }
 
-void subsystem::resize (count_t count)
+void subsystem::resize (count_t newSize)
 {
-    m_terminals = count;
-    terminalBus.resize (count);
-    terminalLink.resize (count);
-    Pout.resize (count, 0);
-    Qout.resize (count, 0);
-    cterm.resize (count);
+    m_terminals = newSize;
+    terminalBus.resize (newSize);
+    terminalLink.resize (newSize);
+    Pout.resize (newSize, 0);
+    Qout.resize (newSize, 0);
+    cterm.resize (newSize);
 }
 
 // set properties

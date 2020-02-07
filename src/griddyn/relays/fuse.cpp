@@ -309,10 +309,10 @@ void fuse::jacobianElements(const IOdata & /*inputs*/,
 
         double I = getConditionValue(0, sD, sMode);
 
-        double V = bus->getVoltage(sD, sMode);
+        double voltage = bus->getVoltage(sD, sMode);
 
-        double S = std::hypot(out[PoutLocation], out[QoutLocation]);
-        double temp = 1.0 / (S * V);
+        double apparentPower = std::hypot(out[PoutLocation], out[QoutLocation]);
+        double temp = 1.0 / (apparentPower * voltage);
         double dIdP = out[PoutLocation] * temp;
         double dIdQ = out[QoutLocation] * temp;
         d.scaleRow(PoutLocation, dIdP);
@@ -321,7 +321,7 @@ void fuse::jacobianElements(const IOdata & /*inputs*/,
         auto offset = offsets.getDiffOffset(sMode);
         d.translateRow(PoutLocation, offset);
         d.translateRow(QoutLocation, offset);
-        d.assignCheck(offset, Voffset, -S / (V * V));
+        d.assignCheck(offset, Voffset, -apparentPower / (voltage * voltage));
 
         d.scaleRow(offset, 2.0 * I);
 

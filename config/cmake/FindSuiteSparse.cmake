@@ -76,6 +76,9 @@ if(SuiteSparse_VERBOSE)
 	message(STATUS "Start to FindSuiteSparse.cmake :")
 endif()
 
+if (NOT SuiteSparseNameSpace)
+    set(SuiteSparseNameSpace SuiteSparse)
+endif()
 
 ## set the LIB POSTFIX to find in right directory according to what kind of compiler we use (32/64bits)
 ## July 2017 git commit 1618fd1 made so only Linux/BSD/GNU installs to lib/lib64, others use lib; this remains to avoid breaking older installs
@@ -283,28 +286,28 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			endif ()
 		else()
 			list(APPEND SuiteSparse_LIBRARIES	optimized "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}" debug "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}")
-			if (TARGET SuiteSparse::${suitesparseCompLC})
+			if (TARGET ${SuiteSparseNameSpace}::${suitesparseCompLC})
 			else()
-				add_library(SuiteSparse::${suitesparseCompLC} STATIC IMPORTED)
+				add_library(${SuiteSparseNameSpace}::${suitesparseCompLC} STATIC IMPORTED)
 				if(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE AND SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
-					set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-					set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+					set_property(TARGET ${SuiteSparseNameSpace}::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+					set_property(TARGET ${SuiteSparseNameSpace}::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 				endif()
 			endif()
 			if(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE AND NOT SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
-				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+				set_target_properties(${SuiteSparseNameSpace}::${suitesparseCompLC} PROPERTIES
 					IMPORTED_LINK_INTERFACE_LANGUAGES "C"
 					IMPORTED_LOCATION "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
 				)
 			else()
-				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+				set_target_properties(${SuiteSparseNameSpace}::${suitesparseCompLC} PROPERTIES
 					IMPORTED_LINK_INTERFACE_LANGUAGES "C"
 					IMPORTED_LOCATION_RELEASE "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
 					IMPORTED_LOCATION_DEBUG "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}"
 				)
 			endif()
 			
-			list(APPEND SuiteSparse_ACTUAL_TARGETS "SuiteSparse::${suitesparseCompLC}")
+			list(APPEND SuiteSparse_ACTUAL_TARGETS "${SuiteSparseNameSpace}::${suitesparseCompLC}")
 		endif()
 		
 		## here we allow to find at least the include OR the lib dir and just warn if one of both missing
@@ -312,7 +315,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			set(SuiteSparse_${suitesparseCompUC}_FOUND OFF)
 		else()
 			set(SuiteSparse_${suitesparseCompUC}_FOUND ON)
-			set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+			set_target_properties(${SuiteSparseNameSpace}::${suitesparseCompLC} PROPERTIES
 				INTERFACE_INCLUDE_DIRECTORIES "${SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR}")
 		endif()
 		
@@ -344,8 +347,8 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			if(SuiteSparse_VERBOSE)
 				message(STATUS "      * SuiteSparse_${suitesparseCompUC}_DEFINITIONS = ${SuiteSparse_${suitesparseCompUC}_DEFINITIONS}")
 			endif()
-			if (TARGET SuiteSparse::${suitesparseCompLC})
-				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+			if (TARGET ${SuiteSparseNameSpace}::${suitesparseCompLC})
+				set_target_properties(${SuiteSparseNameSpace}::${suitesparseCompLC} PROPERTIES
 					INTERFACE_COMPILE_DEFINITIONS "NPARTITION")
 			endif()
 		endif()
@@ -439,8 +442,8 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 			mark_as_advanced(SuiteSparse_BLAS_DIR)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_BLAS_LIBRARY})
-		add_library(SuiteSparse::blas STATIC IMPORTED)
-		set_target_properties(SuiteSparse::blas PROPERTIES
+		add_library(${SuiteSparseNameSpace}::blas STATIC IMPORTED)
+		set_target_properties(${SuiteSparseNameSpace}::blas PROPERTIES
 			IMPORTED_LOCATION "${SuiteSparse_BLAS_LIBRARY}"
 		)
 		if (TARGET blas)
@@ -486,8 +489,8 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 			mark_as_advanced(SuiteSparse_LAPACK_DIR)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_LAPACK_LIBRARY})
-		add_library(SuiteSparse::lapack STATIC IMPORTED)
-		set_target_properties(SuiteSparse::lapack PROPERTIES
+		add_library(${SuiteSparseNameSpace}::lapack STATIC IMPORTED)
+		set_target_properties(${SuiteSparseNameSpace}::lapack PROPERTIES
 			IMPORTED_LOCATION "${SuiteSparse_LAPACK_LIBRARY}"
 		)
 		if (TARGET lapack)
@@ -602,103 +605,103 @@ ENDIF()
 
 ## now clean up the targets and create the linkages
 if (SuiteSparse_FOUND)
- if (TARGET SuiteSparse::amd)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::amd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::amd)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::amd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
-  if (TARGET SuiteSparse::btf)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::btf PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+  if (TARGET ${SuiteSparseNameSpace}::btf)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::btf PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::camd)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::camd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::camd)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::camd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::colamd)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::colamd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::colamd)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::colamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::ccolamd)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::ccolamd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::ccolamd)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::ccolamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::cholamd)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::cholamd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::suitesparseconfig;blas;lapack"
+ if (TARGET ${SuiteSparseNameSpace}::cholamd)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::cholamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::ccolamd;${SuiteSparseNameSpace}::suitesparseconfig;blas;lapack"
 	)
 	else()
-	set_target_properties(SuiteSparse::cholamd PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;blas;lapack")
+	set_target_properties(${SuiteSparseNameSpace}::cholamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::ccolamd;blas;lapack")
 	endif()
  endif()
  
- if (TARGET SuiteSparse::cxsparse)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::cxsparse PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::cxsparse)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::cxsparse PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::ldl)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::ldl PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+ if (TARGET ${SuiteSparseNameSpace}::ldl)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::ldl PROPERTIES
+		INTERFACE_LINK_LIBRARIES "S${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	endif()
  endif()
  
- if (TARGET SuiteSparse::klu)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::klu PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::colamd;SuiteSparse::btf;SuiteSparse::suitesparseconfig"
-	)
-	else()
-	set_target_properties(SuiteSparse::klu PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::colamd;SuiteSparse::btf")
-	endif()
- endif()
- 
- if (TARGET SuiteSparse::umfpack)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::umfpack PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::cholmod;SuiteSparse::suitesparseconfig;blas;lapack"
+ if (TARGET ${SuiteSparseNameSpace}::klu)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::klu PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::btf;${SuiteSparseNameSpace}::suitesparseconfig"
 	)
 	else()
-	set_target_properties(SuiteSparse::umfpack PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::cholmod;blas;lapack")
+	set_target_properties(${SuiteSparseNameSpace}::klu PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::btf")
 	endif()
  endif()
  
-  if (TARGET SuiteSparse::spqr)
-	if (TARGET SuiteSparse::suitesparseconfig)
-		set_target_properties(SuiteSparse::spqr PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::camd;SuiteSparse::ccolamd;SuiteSparse::cholmod;SuiteSparse::suitesparseconfig;blas;lapack"
+ if (TARGET ${SuiteSparseNameSpace}::umfpack)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::umfpack PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::ccolamd;${SuiteSparseNameSpace}::cholmod;${SuiteSparseNameSpace}::suitesparseconfig;blas;lapack"
 	)
 	else()
-	set_target_properties(SuiteSparse::spqr PROPERTIES
-		INTERFACE_LINK_LIBRARIES "SuiteSparse::camd;SuiteSparse::ccolamd;SuiteSparse::cholmod;blas;lapack")
+	set_target_properties(${SuiteSparseNameSpace}::umfpack PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::amd;${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::colamd;${SuiteSparseNameSpace}::ccolamd;${SuiteSparseNameSpace}::cholmod;blas;lapack")
+	endif()
+ endif()
+ 
+  if (TARGET ${SuiteSparseNameSpace}::spqr)
+	if (TARGET ${SuiteSparseNameSpace}::suitesparseconfig)
+		set_target_properties(${SuiteSparseNameSpace}::spqr PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::ccolamd;${SuiteSparseNameSpace}::cholmod;${SuiteSparseNameSpace}::suitesparseconfig;blas;lapack"
+	)
+	else()
+	set_target_properties(${SuiteSparseNameSpace}::spqr PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SuiteSparseNameSpace}::camd;${SuiteSparseNameSpace}::ccolamd;${SuiteSparseNameSpace}::cholmod;blas;lapack")
 	endif()
  endif()
 

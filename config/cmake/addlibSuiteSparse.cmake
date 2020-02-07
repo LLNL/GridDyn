@@ -111,11 +111,11 @@ endif()
 
 add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-set(KLU_FOUND ON CACHE INTERNAL "")
+set(SuiteSparse_FOUND ON CACHE INTERNAL "")
 
-set(KLU_LIBRARIES klu btf amd colamd suitesparseconfig)
+set(SuiteSparse_LIBRARIES klu btf amd colamd suitesparseconfig)
 
-set_target_properties(${KLU_LIBRARIES} PROPERTIES FOLDER "klu")
+set_target_properties(${SuiteSparse_LIBRARIES} PROPERTIES FOLDER "klu")
 
 # hide a bunch of local variables and options
 
