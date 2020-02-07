@@ -111,6 +111,7 @@ jobs:
             - libblas-dev
             - liblapacke-dev
             - liblapack-dev
+            - liblapack
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
@@ -128,6 +129,7 @@ jobs:
             - libblas-dev
             - liblapacke-dev
             - liblapack-dev
+            - liblapack
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
@@ -158,6 +160,7 @@ jobs:
             - libblas-dev
             - liblapacke-dev
             - liblapack-dev
+            - liblapack
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
         - USE_MPI=mpich
@@ -173,6 +176,7 @@ jobs:
             - clang-4.0
             - libblas-dev
             - liblapacke-dev
+            - liblapack
             - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
@@ -210,6 +214,7 @@ jobs:
             - clang-4.0
             - libblas-dev
             - liblapacke-dev
+            - liblapack
             - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
