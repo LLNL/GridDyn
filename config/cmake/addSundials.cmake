@@ -15,7 +15,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
     if(NOT ${gbName}_POPULATED)
         # Fetch the content using previously declared details
         fetchcontent_populate(sundials)
-        
+
         # this section to be removed at the next release of ZMQ for now we need to
         # download the file in master as the one in the release doesn't work
       #  file(RENAME ${sundials_SOURCE_DIR}/builds/cmake/ZeroMQConfig.cmake.in
@@ -117,7 +117,7 @@ add_subdirectory(${sundials_SOURCE_DIR} ${sundials_BINARY_DIR})
 add_library(sundials_all INTERFACE)
 target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_SOURCE_DIR}/include>)
 target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_BINARY_DIR}/include>)
-add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
+add_library(SUNDIALS::SUNDIALS ALIAS sundials_all)
 
 set(SUNDIALS_LIBRARIES
 	sundials_nvecserial_static
@@ -136,8 +136,13 @@ set(SUNDIALS_LIBRARIES
 	sundials_nvecmanyvector_static
 )
 
+if (${PROJECT_NAME}_ENABLE_IDA)
+    list(APPEND SUNDIALS_LIBRARIES sundials_ida_static)
+endif()
 
-set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
+if (${PROJECT_NAME}_ENABLE_KINSOL)
+    list(APPEND SUNDIALS_LIBRARIES sundials_kinsol_static)
+endif()
 
 if (${PROJECT_NAME}_ENABLE_IDA)
     list(APPEND SUNDIALS_LIBRARIES  sundials_ida_static)
@@ -155,6 +160,8 @@ endif()
 if (${PROJECT_NAME}_ENABLE_ARKODE)
     list(APPEND SUNDIALS_LIBRARIES sundials_arkode_static)
 endif()
+
+set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
 

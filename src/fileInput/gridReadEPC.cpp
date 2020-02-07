@@ -692,7 +692,7 @@ void epcReadDCBus (dcBus *bus, string_view line, double /*base*/, const basicRea
     auto vm = numeric_conversion<double> (strvec[7], 0.0);
     if (vm != 0)
     {
-        bus->set ("v", vm);
+        bus->set ("voltage", vm);
     }
 
     // auto area = numeric_conversion<int>(strvec[7], 0);
