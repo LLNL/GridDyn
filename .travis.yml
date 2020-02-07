@@ -30,6 +30,7 @@ _basic_env:
         - lcov
         - libblas-dev
         - liblapacke-dev
+        - liblapack-dev
 - &linux_base
   if: type != cron AND branch != coverity_scan
   os: linux
@@ -63,6 +64,7 @@ jobs:
             - g++-6
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
         coverity_scan:
           project:
             name: "LLNL/GridDyn"
@@ -93,6 +95,7 @@ jobs:
             - g++-6
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - CI_CMAKE_VERSION=3.12.0
@@ -107,6 +110,7 @@ jobs:
             - g++-4.9
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
@@ -123,6 +127,7 @@ jobs:
             - clang-3.5
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
@@ -152,6 +157,7 @@ jobs:
             - g++-5
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
         - USE_MPI=mpich
@@ -167,6 +173,7 @@ jobs:
             - clang-4.0
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
@@ -184,6 +191,7 @@ jobs:
             - clang-4.0
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
@@ -202,6 +210,7 @@ jobs:
             - clang-4.0
             - libblas-dev
             - liblapacke-dev
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
