@@ -93,9 +93,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-            - libblas-dev
-            - liblapacke-dev
-            - liblapack-dev
+            - libsuitesparse-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - CI_CMAKE_VERSION=3.12.0
@@ -111,7 +109,7 @@ jobs:
             - libblas-dev
             - liblapacke-dev
             - liblapack-dev
-            - liblapack
+            - liblapack3
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
@@ -129,7 +127,7 @@ jobs:
             - libblas-dev
             - liblapacke-dev
             - liblapack-dev
-            - liblapack
+            - liblapack3
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
