@@ -28,9 +28,7 @@ _basic_env:
         - g++-6
         - valgrind
         - lcov
-        - libblas-dev
-        - liblapacke-dev
-        - liblapack-dev
+        - libsuitesparse-dev
 - &linux_base
   if: type != cron AND branch != coverity_scan
   os: linux
@@ -62,9 +60,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-            - libblas-dev
-            - liblapacke-dev
-            - liblapack-dev
+            - libsuitesparse-dev
         coverity_scan:
           project:
             name: "LLNL/GridDyn"
@@ -244,7 +240,7 @@ before_script:
   - mkdir -p build && cd build
 
 script:
-  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
   - cmake --build . -- -j2
 
   # Setup counters for coverage
