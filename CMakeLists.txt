@@ -461,8 +461,6 @@ endif()
 set(
     BOOST_REQUIRED_LIBRARIES
     filesystem
-    system
- 
 )
 
 include(addBoost)

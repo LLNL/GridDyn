@@ -35,6 +35,7 @@ if (MSVC)
 
 set (boost_versions
 boost_1_72_0
+boost_1_72_0
 boost_1_71_0
 boost_1_70_0
 boost_1_69_0
