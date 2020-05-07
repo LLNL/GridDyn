@@ -5,6 +5,8 @@ aliases:
     name: setup_griddyn
     environment:
     command: |
+      apt update
+      apt install libboost-all-dev
       mkdir -p build
       cd build
       eval cmake .. ${CMAKE_FLAGS}

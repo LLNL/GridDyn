@@ -457,10 +457,13 @@ endif()
 # ------------------------------------------------------------
 # BOOST  find the boost libraries
 # ------------------------------------------------------------
-# TODO check if boost works (e.g. libstdc++ vs libc++)    unit_test_framework date_time
+# TODO check if boost works (e.g. libstdc++ vs libc++)
 set(
     BOOST_REQUIRED_LIBRARIES
     filesystem
+    system
+    unit_test_framework
+    date_time
 )
 
 include(addBoost)
