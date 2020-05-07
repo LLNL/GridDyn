@@ -1,5 +1,5 @@
 
-set(sundials_version v5.1.0)
+set(sundials_version v5.2.0)
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.11)
     include(FetchContent)
@@ -53,9 +53,9 @@ else() # cmake <3.11
 
 endif()
 
-if(NOT EXISTS ${sundials_SOURCE_DIR}/config/SundialsKLU.old)
+if(NOT EXISTS ${sundials_SOURCE_DIR}/config/SundialsKLUorig.cmake)
      file(RENAME ${sundials_SOURCE_DIR}/config/SundialsKLU.cmake
-            ${sundials_SOURCE_DIR}/config/SundialsKLU.old
+            ${sundials_SOURCE_DIR}/config/SundialsKLUorig.cmake
        )
 file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/SundialsKLU.cmake
               DESTINATION
