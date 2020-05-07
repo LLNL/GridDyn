@@ -152,7 +152,6 @@ if (${PROJECT_NAME}_ENABLE_KINSOL)
     list(APPEND SUNDIALS_LIBRARIES  sundials_kinsol_static)
 endif()
 
-
 if (${PROJECT_NAME}_ENABLE_CVODE)
     list(APPEND SUNDIALS_LIBRARIES sundials_cvode_static)
 endif()

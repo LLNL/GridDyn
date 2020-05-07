@@ -106,5 +106,10 @@ else()
     endif()
 
 endif() # ${PROJECT_NAME}_USE_SYSTEM_SUTIESPARSE_ONLY
+
+if (SuiteSparse_FOUND)
+    set(KLU_INCLUDE_DIR ${SuiteSparse_INCLUDE_DIRS})
+endif()
+
 hide_variable(SuiteSparse_DIR)
 hide_variable(KLU_DIR)

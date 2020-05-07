@@ -1,7 +1,1 @@
-if (WIN32)
 set(KLU_FOUND TRUE)
-elseif (GRIDDYN_SUITESPARSE_FORCE_SUBPROJECT)
-set(KLU_FOUND TRUE)
-else()
-include(SundialsKLUorig)
-endif()
