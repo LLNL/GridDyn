@@ -10,7 +10,7 @@ if(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
   # regular way.
-  set(Boost_NO_BOOST_CMAKE ON)
+ # set(Boost_NO_BOOST_CMAKE ON)
   set(Boost_USE_MULTITHREADED OFF)   # Needed if MT libraries not built
    option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
 else(UNIX)
