@@ -10,7 +10,7 @@ if(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
   # regular way.
- # set(Boost_NO_BOOST_CMAKE ON)
+  set(Boost_NO_BOOST_CMAKE ON)
   set(Boost_USE_MULTITHREADED OFF)   # Needed if MT libraries not built
    option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
 else(UNIX)
@@ -105,7 +105,7 @@ if (NOT BOOST_REQUIRED_LIBRARIES)
 	set(BOOST_REQUIRED_LIBRARIES unit_test_framework filesystem system date_time timer chrono)
 endif()
 
-# Minimum version of Boost required for building HELICS
+# Minimum version of Boost required for building GridDyn
 set(BOOST_MINIMUM_VERSION 1.58)
 set(Boost_USE_STATIC_LIBS   ${USE_BOOST_STATIC_LIBS})
 find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
