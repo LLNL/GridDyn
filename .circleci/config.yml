@@ -19,11 +19,20 @@ jobs:
     steps:
       - checkout
       - run: *setup_griddyn
+  build_gcc7:
+    docker:
+      - image: helics/buildenv:gcc7-builder
+    environment:
+      CMAKE_FLAGS: " -DGRIDDYN_BUILD_TESTS=ON "
+    steps:
+      - checkout
+      - run: *setup_griddyn
 
 workflows:
   version: 2
   griddyn_test:
     jobs:
       - build_gcc8
+      - build_gcc7
 
 
