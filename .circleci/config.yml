@@ -6,7 +6,7 @@ aliases:
     environment:
     command: |
       apt update
-      apt install libboost-all-dev
+      apt install -y libboost-all-dev
       mkdir -p build
       cd build
       eval cmake .. ${CMAKE_FLAGS}
