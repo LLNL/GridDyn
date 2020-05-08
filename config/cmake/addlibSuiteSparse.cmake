@@ -81,32 +81,58 @@ set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD
     ON
     CACHE INTERNAL ""
 )
+set(KLU_INCLUDE_DIR "${${lcName}_SOURCE_DIR}/Suitesparse/KLU/Include" 
+					"${${lcName}_SOURCE_DIR}/Suitesparse/AMD/Include" 
+                    "${${lcName}_SOURCE_DIR}/Suitesparse/SuiteSparse_config" 
+					"${${lcName}_SOURCE_DIR}/Suitesparse/COLAMD/Include"
+					"${${lcName}_SOURCE_DIR}/Suitesparse/BTF/Include" 
+					CACHE INTERNAL "")
 
+if (NOT EXISTS ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake)
+    file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
+             ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake
+        )
+    file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/checkGetSuiteSparse-griddyn.cmake 
+              ${PROJECT_SOURCE_DIR}/config/cmake/CMakeLists-suitesparse.txt
+              DESTINATION
+             ${${lcName}_SOURCE_DIR})
+             
+     file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists.txt
+             ${${lcName}_SOURCE_DIR}/CMakeLists.old
+        )
+     file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-griddyn.cmake 
+             ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
+             )
+             
+       file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists-suitesparse.txt
+             ${${lcName}_SOURCE_DIR}/CMakeLists.txt
+             )
+endif()
 
 add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-set(KLU_FOUND TRUE)
+set(SuiteSparse_FOUND ON CACHE INTERNAL "")
 
-set(klu_libraries klu btf amd colamd suitesparseconfig)
+set(SuiteSparse_LIBRARIES klu btf amd colamd suitesparseconfig)
 
-set_target_properties(${klu_libraries} PROPERTIES FOLDER "klu")
+set_target_properties(${SuiteSparse_LIBRARIES} PROPERTIES FOLDER "klu")
 
 # hide a bunch of local variables and options
 
 
 if(${PROJECT_NAME}_USE_SUITESPARSE_STATIC_LIBRARY)
-    set(klu_target_output klu)
+    set(klu_primary_target klu)
 else()
-    set(klu_target_output klu)
+    set(klu_primary_target klu)
 endif()
 
 if(${PROJECT_NAME}_BUILD_CXX_SHARED_LIB OR NOT ${PROJECT_NAME}_DISABLE_C_SHARED_LIB)
 
     if(NOT ${PROJECT_NAME}_USE_SUITESPARSE_STATIC_LIBRARY)
-        set_target_properties(${klu_target_output} PROPERTIES PUBLIC_HEADER "")
+        set_target_properties(${klu_primary_target} PROPERTIES PUBLIC_HEADER "")
         #[[ if(NOT CMAKE_VERSION VERSION_LESS "3.13")
             install(
-                TARGETS ${klu_target_output}
+                TARGETS ${klu_primary_target}
                 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -114,7 +140,7 @@ if(${PROJECT_NAME}_BUILD_CXX_SHARED_LIB OR NOT ${PROJECT_NAME}_DISABLE_C_SHARED_
             )
         elseif(WIN32)
             install(
-                FILES $<TARGET_FILE:${klu_target_output}>
+                FILES $<TARGET_FILE:${klu_primary_target}>
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT libs
             )
@@ -129,7 +155,7 @@ if(${PROJECT_NAME}_BUILD_CXX_SHARED_LIB OR NOT ${PROJECT_NAME}_DISABLE_C_SHARED_
            AND NOT ${PROJECT_NAME}_BINARY_ONLY_INSTALL
         )
             install(
-                FILES $<TARGET_PDB_FILE:${klu_target_output}>
+                FILES $<TARGET_PDB_FILE:${klu_primary_target}>
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 OPTIONAL
                 COMPONENT libs
@@ -137,7 +163,7 @@ if(${PROJECT_NAME}_BUILD_CXX_SHARED_LIB OR NOT ${PROJECT_NAME}_DISABLE_C_SHARED_
         endif()
         if(MSVC AND NOT ${PROJECT_NAME}_BINARY_ONLY_INSTALL)
             install(
-                FILES $<TARGET_LINKER_FILE:${klu_target_output}>
+                FILES $<TARGET_LINKER_FILE:${klu_primary_target}>
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 COMPONENT libs
             )

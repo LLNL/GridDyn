@@ -142,28 +142,28 @@ void Link::pFlowCheck (std::vector<violation> &Violation_vector)
     double mva = std::max (getCurrent (0), getCurrent (1));
     if (mva > ratingA)
     {
-        violation V (getName (), MVA_EXCEED_RATING_A);
-        V.level = mva;
-        V.limit = ratingA;
-        V.percentViolation = (mva - ratingA) / ratingA * 100;
-        Violation_vector.push_back (V);
+        violation viol (getName (), MVA_EXCEED_RATING_A);
+        viol.level = mva;
+		viol.limit = ratingA;
+		viol.percentViolation = (mva - ratingA) / ratingA * 100;
+        Violation_vector.push_back (viol);
     }
     if (mva > ratingB)
     {
-        violation V (getName (), MVA_EXCEED_RATING_B);
+        violation viol(getName (), MVA_EXCEED_RATING_B);
 
-        V.level = mva;
-        V.limit = ratingB;
-        V.percentViolation = (mva - ratingB) / ratingB * 100;
-        Violation_vector.push_back (V);
+		viol.level = mva;
+		viol.limit = ratingB;
+		viol.percentViolation = (mva - ratingB) / ratingB * 100;
+        Violation_vector.push_back (viol);
     }
     if (mva > Erating)
     {
-        violation V (getName (), MVA_EXCEED_ERATING);
-        V.level = mva;
-        V.limit = Erating;
-        V.percentViolation = (mva - Erating) / Erating * 100;
-        Violation_vector.push_back (V);
+        violation viol(getName (), MVA_EXCEED_ERATING);
+		viol.level = mva;
+		viol.limit = Erating;
+		viol.percentViolation = (mva - Erating) / Erating * 100;
+        Violation_vector.push_back (viol);
     }
 }
 
@@ -658,10 +658,10 @@ double Link::getBusAngle (id_type_t busId) const
 {
     if (busId < 500_ind)
     {
-        auto B = getBus (static_cast<index_t>(busId));
-        if (B != nullptr)
+        auto bus = getBus (static_cast<index_t>(busId));
+        if (bus != nullptr)
         {
-            return B->getAngle ();
+            return bus->getAngle ();
         }
     }
     // these are special cases for getting opposite angles as called by the attached buses
@@ -702,10 +702,10 @@ double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_
         return (B2 != nullptr) ? B2->getAngle (sD, sMode) : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus (static_cast<index_t>(busId));
-    if (B != nullptr)
+    auto bus = getBus (static_cast<index_t>(busId));
+    if (bus != nullptr)
     {
-        return B->getAngle (sD, sMode);
+        return bus->getAngle (sD, sMode);
     }
     return kNullVal;
 }

@@ -11,12 +11,12 @@
 #-----------------------------------------------------------------------------
 # - Find KLU library.
 #
-# This module finds if Fskit is installed and determines where the
+# This module finds if KLU and other suitesparse libraries are installed and determines where the
 # include files and libraries are.  This code sets the following variables:
-#  KLU_FOUND         = Fskit was found
+#  KLU_FOUND         = KLU was found
 #  KLU_LIBRARY_DIR   = path to where libraries can be found
 #  KLU_INCLUDE_DIR   = path to where header files can be found
-#  KLU_LIBRARIES     = link libraries for Fskit
+#  KLU_LIBRARIES     = link libraries for KLU
 #-----------------------------------------------------------------------------
 
 include(FindPackageHandleStandardArgs)
@@ -88,8 +88,16 @@ if (KLU_DIR)
                 if(KLU_LIB)
                     list(APPEND KLU_LIBRARIES ${KLU_LIB})
                 else(KLU_LIB)
-                    message(FATAL_ERROR "Could not find required KLU library : ${TEST_LIB}")
+                   find_library(KLU_LIB
+                    NAMES ${TEST_LIB} lib${TEST_LIB}
+                    )
+                    if(KLU_LIB)
+                        list(APPEND KLU_LIBRARIES ${KLU_LIB})
+                    else(KLU_LIB)
+                        message(FATAL_ERROR "Could not find required KLU library : ${TEST_LIB}")
+                    endif(KLU_LIB)
                 endif(KLU_LIB)
+                
             endif(KLU_LIB)
         endif(KLU_LIB)
         message(STATUS "KLU_LIB=${KLU_LIB}")

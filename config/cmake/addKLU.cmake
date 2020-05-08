@@ -37,14 +37,16 @@ cmake_dependent_advanced_option(
     OFF
 )
 
+set(SuiteSparseNameSpace Suitesparse)
+
 cmake_dependent_advanced_option(${PROJECT_NAME}_USE_SUITESPARSE_STATIC_LIBRARY "use the suitesparse static library" OFF  "NOT ${PROJECT_NAME}_USE_SYSTEM_SUITESPARSE_ONLY"
         OFF)
 
-
+set (SUITESPARSE_COMPONENTS klu btf amd colamd suitesparseconfig)
 if(${PROJECT_NAME}_USE_SYSTEM_SUITESPARSE_ONLY)
-    find_package(KLU)
+    find_package(SuiteSparse COMPONENTS ${SUITESPARSE_COMPONENTS})
     set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD OFF CACHE INTERNAL "")
-elseif(${PROJECT_NAME}_SUITESPARSE_FORCE_SUBPROJECT)
+elseif(${PROJECT_NAME}_SUITESPARSE_FORCE_SUBPROJECT OR ${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD)
     include(addlibSuiteSparse)
 else()
 
@@ -56,7 +58,7 @@ else()
 
     if(WIN32 AND NOT MSYS)
         find_package(
-            KLU
+            SuiteSparse
             QUIET
             HINTS
             ${SuiteSparse_INSTALL_PATH}
@@ -66,7 +68,7 @@ else()
         )
     else()
         find_package(
-            KLU
+            SuiteSparse
             QUIET
             HINTS
             ${SuiteSparse_INSTALL_PATH}
@@ -80,9 +82,9 @@ else()
         )
     endif()
 
-    if(NOT KLU_FOUND)
-        find_package(KLU)
-        if(NOT KLU_FOUND)
+    if(NOT SuiteSparse_FOUND)
+        find_package(SuiteSparse COMPONENTS ${SUITESPARSE_COMPONENTS})
+        if(NOT SuiteSparse_FOUND)
             if(${PROJECT_NAME}_SUITESPARSE_SUBPROJECT)
                 include(addlibSuiteSparse)
             else()
@@ -104,14 +106,10 @@ else()
     endif()
 
 endif() # ${PROJECT_NAME}_USE_SYSTEM_SUTIESPARSE_ONLY
-hide_variable(SuiteSparse_DIR)
 
-if(WIN32)
-    if(TARGET libzmq)
-        install(
-            FILES $<TARGET_FILE:libzmq>
-            DESTINATION ${CMAKE_INSTALL_BINDIR}
-            COMPONENT Runtime
-        )
-    endif()
+if (SuiteSparse_FOUND)
+    set(KLU_INCLUDE_DIR ${SuiteSparse_INCLUDE_DIRS})
 endif()
+
+hide_variable(SuiteSparse_DIR)
+hide_variable(KLU_DIR)

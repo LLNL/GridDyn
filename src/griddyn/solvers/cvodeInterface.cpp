@@ -16,13 +16,13 @@
 
 #include "../gridDynSimulation.h"
 #include "../simulation/gridDynSimulationFileOps.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cvode/cvode.h>
 #include <cvode/cvode_direct.h>
 
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -114,7 +114,7 @@ void cvodeInterface::allocate (count_t stateCount, count_t numRoots)
     {
         CVodeFree (&(solverMem));
     }
-    solverMem = CVodeCreate (CV_ADAMS, CV_FUNCTIONAL);
+    solverMem = CVodeCreate (CV_ADAMS);
     check_flag (solverMem, "CVodeCreate", 0);
 
     sundialsInterface::allocate (stateCount, numRoots);
@@ -198,7 +198,7 @@ double cvodeInterface::get (const std::string &param) const
     }
     else if (param == "jac calls")
     {
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
 //	CVodeCVodeSlsGetNumJacEvals(solverMem, &val);
 #else
         CVodeDlsGetNumJacEvals (solverMem, &val);
@@ -361,7 +361,7 @@ void cvodeInterface::initialize (coreTime time0)
     retval = CVodeSetMaxNumSteps (solverMem, max_iterations);
     check_flag (&retval, "CVodeSetMaxNumSteps", 1);
 
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix (svsize, svsize);
@@ -478,7 +478,7 @@ void cvodeInterface::loadMaskElements ()
     std::vector<double> mStates (svsize, 0.0);
     m_gds->getVoltageStates (mStates.data (), mode);
     m_gds->getAngleStates (mStates.data (), mode);
-    maskElements = vecFindgt<double, index_t> (mStates, 0.5);
+    maskElements = gmlc::utilities::vecFindgt<double, index_t> (mStates, 0.5);
     tempState.resize (svsize);
     double *lstate = NV_DATA_S (state);
     for (auto &v : maskElements)

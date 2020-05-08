@@ -30,7 +30,7 @@ static childClassFactoryArg<basicSolver, SolverInterface, basicSolver::mode_t>
   basicFactoryG(stringVec{"basic", "gauss"}, basicSolver::mode_t::gauss);
 static childClassFactoryArg<basicSolver, SolverInterface, basicSolver::mode_t>
   basicFactoryGS(stringVec{"gs", "gauss-seidel"}, basicSolver::mode_t::gauss_seidel);
-#ifdef LOAD_CVODE
+#ifdef GRIDYN_ENABLE_CVODE
 static childClassFactory<basicOdeSolver, SolverInterface> basicOdeFactory(stringVec{"basicode", "euler"});
 #else
 // if cvode is not available this becomes the default differential solver

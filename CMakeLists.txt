@@ -165,7 +165,7 @@ else(GRIDDYN_WITH_CMAKE_PACKAGE)
 endif(GRIDDYN_WITH_CMAKE_PACKAGE)
 
 option(
-    ENABLE_FMI_EXPORT
+    GRIDDYN_ENABLE_FMI_EXPORT
     "Enable construction of a binary fmi shared library for GridDyn"
     OFF
 )

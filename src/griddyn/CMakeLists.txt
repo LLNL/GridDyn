@@ -311,7 +311,7 @@ set(
     solvers/basicOdeSolver.cpp
 )
 
-if(LOAD_CVODE)
+if(GRIDDYN_ENABLE_CVODE)
     list(
         APPEND
             solver_sources solvers/cvodeInterface.cpp solvers/cvodeInterface.h
@@ -319,16 +319,16 @@ if(LOAD_CVODE)
 
     list(APPEND solver_headers solvers/cvodeInterface.h)
 
-endif(LOAD_CVODE)
+endif(GRIDDYN_ENABLE_CVODE)
 
-if(LOAD_ARKODE)
+if(GRIDDYN_ENABLE_ARKODE)
     list(
         APPEND
             solver_sources solvers/arkodeInterface.cpp solvers/arkodeInterface.h
     )
 
     list(APPEND solver_headers solvers/arkodeInterface.h)
-endif(LOAD_ARKODE)
+endif(GRIDDYN_ENABLE_ARKODE)
 
 set(
     core_headers
@@ -580,9 +580,11 @@ target_link_libraries(griddyn PUBLIC coupling_static_lib)
 if(GRIDDYN_ENABLE_KLU)
 	if (GRIDDYN_SUITESPARSE_LOCAL_BUILD)
 		target_link_libraries(griddyn PUBLIC klu)
+        target_include_directories(griddyn PRIVATE ${KLU_INCLUDE_DIR})
 	else()
 		target_link_libraries(griddyn PUBLIC Suitesparse::klu)
 	endif()
+    
 endif(GRIDDYN_ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})

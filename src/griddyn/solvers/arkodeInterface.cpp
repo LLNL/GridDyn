@@ -16,13 +16,13 @@
 
 #include "../gridDynSimulation.h"
 #include "../simulation/gridDynSimulationFileOps.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <arkode/arkode.h>
-#include <arkode/arkode_direct.h>
+#include <arkode/arkode_arkstep.h>
 
-#ifdef ENABLE_KLU
+#ifdef GRIDDYN_ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 

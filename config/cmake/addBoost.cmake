@@ -35,6 +35,7 @@ if (MSVC)
 
 set (boost_versions
 boost_1_72_0
+boost_1_72_0
 boost_1_71_0
 boost_1_70_0
 boost_1_69_0
@@ -104,7 +105,7 @@ if (NOT BOOST_REQUIRED_LIBRARIES)
 	set(BOOST_REQUIRED_LIBRARIES unit_test_framework filesystem system date_time timer chrono)
 endif()
 
-# Minimum version of Boost required for building HELICS
+# Minimum version of Boost required for building GridDyn
 set(BOOST_MINIMUM_VERSION 1.58)
 set(Boost_USE_STATIC_LIBS   ${USE_BOOST_STATIC_LIBS})
 find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
