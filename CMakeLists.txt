@@ -27,6 +27,10 @@ if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
 
+if (POLICY CMP0079)
+cmake_policy(SET CMP0079 NEW)
+endif()
+
 # project name
 project(GRIDDYN VERSION 0.9.2)
 
