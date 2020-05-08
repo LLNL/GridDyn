@@ -9,6 +9,13 @@ aliases:
       cd build
       eval cmake .. ${CMAKE_FLAGS}
       make -j 4
+      
+  - &run_griddyn_tests
+    name: run_griddyn_tests
+    command: |
+       /root/project/scripts/run-circleci-tests.sh
+       RESULT=$?
+       exit $RESULT
 
 jobs:
   build_gcc8:
@@ -19,6 +26,7 @@ jobs:
     steps:
       - checkout
       - run: *setup_griddyn
+      - run: *run_griddyn_tests
   build_gcc7:
     docker:
       - image: helics/buildenv:gcc7-builder
@@ -27,6 +35,7 @@ jobs:
     steps:
       - checkout
       - run: *setup_griddyn
+      - run: *run_griddyn_tests
 
 workflows:
   version: 2
