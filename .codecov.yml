@@ -1,12 +1,12 @@
 codecov:
   notify:
-    require_ci_to_pass: yes
+    require_ci_to_pass: no
+  branch: develop
 
 coverage:
   precision: 2
   round: down
-  range: "70...100"
-
+  range: "30...95"
   status:
     project: yes
     patch: yes
@@ -27,4 +27,11 @@ comment:
 
 ignore:
   - "ThirdParty"
+  - "examples"
   - "test"
+  - "interfaces"
+  - "src/helics/core/mpi"
+  - "**/logger.*"
+  - "**/loggerCore.*"
+  - "**/zmqHelper.*"
+  - "src/helics/shared_api_library/internal/api_objects.h"

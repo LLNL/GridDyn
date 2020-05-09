@@ -17,4 +17,4 @@ exclude_paths:
   - swig/**/*
   - scripts/**/*
   - src/zmqlib/cppzmq/*
-
+  - scripts/*

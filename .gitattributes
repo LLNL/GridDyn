@@ -1,2 +1,19 @@
-test/test_files/* linguist-vendored
-ThirdParty/* linguist-vendored
+* text=input
+
+*.bat text eol=crlf
+*.md text eol=lf
+*.json text eol=lf
+*.player text eol=lf
+
+*.jpg binary
+*.png binary
+*.mat binary
+
+*.cpp  diff=cpp
+*.hpp  diff=cpp
+*.c    diff=cpp
+*.h    diff=cpp
+*.py   diff=python
+*.java diff=java
+*.m    diff=matlab
+*.cs   diff=csharp
