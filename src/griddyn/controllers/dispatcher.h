@@ -17,13 +17,11 @@
 #include "../gridSubModel.h"
 #include <vector>
 
-namespace griddyn
-{
+namespace griddyn {
 class Area;
 class scheduler;
 
-class dispatcher : public coreObject
-{
+class dispatcher: public coreObject {
   public:
   protected:
     double totalDispatch;
@@ -32,33 +30,33 @@ class dispatcher : public coreObject
     double dispatchTime;
     unsigned int schedCount;
 
-    std::vector<scheduler *> schedList;
+    std::vector<scheduler*> schedList;
 
   public:
-    dispatcher (const std::string &objName = "dispatcher_#");
+    dispatcher(const std::string& objName = "dispatcher_#");
 
-    virtual ~dispatcher ();
-    virtual coreObject *clone (coreObject *obj = nullptr) const override;
-    void moveSchedulers (dispatcher *dis);
-    virtual double initialize (coreTime time0, double dispatch);
+    virtual ~dispatcher();
+    virtual coreObject* clone(coreObject* obj = nullptr) const override;
+    void moveSchedulers(dispatcher* dis);
+    virtual double initialize(coreTime time0, double dispatch);
 
-    virtual double updateP (coreTime time, double required, double targetTime);
-    virtual double testP (coreTime time, double required, double targetTime);
-    double currentValue () { return totalDispatch; }
+    virtual double updateP(coreTime time, double required, double targetTime);
+    virtual double testP(coreTime time, double required, double targetTime);
+    double currentValue() { return totalDispatch; }
 
-    virtual void add (coreObject *obj) override;
-    virtual void add (scheduler *sched);
-    virtual void remove (coreObject *obj) override;
-    virtual void remove (scheduler *sched);
+    virtual void add(coreObject* obj) override;
+    virtual void add(scheduler* sched);
+    virtual void remove(coreObject* obj) override;
+    virtual void remove(scheduler* sched);
 
-    virtual void set (const std::string &param, const std::string &val) override;
+    virtual void set(const std::string& param, const std::string& val) override;
     virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+        set(const std::string& param, double val, units::unit unitType = units::defunit) override;
 
-    virtual void checkGen ();
+    virtual void checkGen();
 
   protected:
-    virtual void dispatch (double level);
+    virtual void dispatch(double level);
 };
 
 }  // namespace griddyn

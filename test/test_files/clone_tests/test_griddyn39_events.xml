@@ -22,16 +22,16 @@
       <load name="load4">
          <P>5</P>
          <Q>1.840</Q>
-	 <event>@1|P=10</event>
-	 <event>@1|Q=4</event>
-	 <event>@2|P=12</event>
-	 <event>@2|Q=5</event>
-	 <event>@3|P=14</event>
-	 <event>@3|Q=6</event>
+     <event>@1|P=10</event>
+     <event>@1|Q=4</event>
+     <event>@2|P=12</event>
+     <event>@2|Q=5</event>
+     <event>@3|P=14</event>
+     <event>@3|Q=6</event>
       </load>
       <relay>
-	<cutoutvoltage>0.9</cutoutvoltage>
-	<flag>powerflow_check</flag>
+    <cutoutvoltage>0.9</cutoutvoltage>
+    <flag>powerflow_check</flag>
       </relay>
    </bus>
    <bus name="bus5">

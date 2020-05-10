@@ -18,15 +18,20 @@
 #include "griddyn/measurement/collector.h"
 #include <cmath>
 #include <cstdio>
+
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 // test case for coreObject object
 
 #define RECORDER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/recorder_tests/"
-static const std::string collector_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/recorder_tests/");
+static const std::string collector_test_directory =
+    std::string(GRIDDYN_TEST_DIRECTORY "/recorder_tests/");
 
-BOOST_FIXTURE_TEST_SUITE(recorder_tests, gridDynSimulationTestFixture, *boost::unit_test::label("quick"))
+BOOST_FIXTURE_TEST_SUITE(recorder_tests,
+                         gridDynSimulationTestFixture,
+                         *boost::unit_test::label("quick"))
 using namespace griddyn;
 using namespace gmlc::utilities;
 
@@ -38,8 +43,7 @@ BOOST_AUTO_TEST_CASE(tsMulti_tests)
     std::vector<double> val(10);
     ts2.setCols(1);
     double t = 0.0;
-    for (int kk = 0; kk < 10; ++kk)
-    {
+    for (int kk = 0; kk < 10; ++kk) {
         ts2.addData(t, 4.5);
         tv[kk] = t;
         val[kk] = 4.5;
@@ -64,8 +68,7 @@ BOOST_AUTO_TEST_CASE(file_save_tests)
 {
     TimeSeriesMulti<> ts2(1);
     double t = 0.0;
-    for (int kk = 0; kk < 10; ++kk)
-    {
+    for (int kk = 0; kk < 10; ++kk) {
         ts2.addData(t, 4.5);
         t = t + 1.0;
     }
@@ -93,8 +96,7 @@ BOOST_AUTO_TEST_CASE(file_save_tests2)
     std::vector<double> vt{4.5, 5.5, 6.5, 7.5};
 
     double t = 0.0;
-    for (int kk = 0; kk < 30; ++kk)
-    {
+    for (int kk = 0; kk < 30; ++kk) {
         ts2.addData(t, vt);
         t = t + 1.0;
     }
@@ -528,14 +530,13 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
 
     size_t diffc = 0;
     BOOST_REQUIRE((tsA.size() - 1) * 4 == (tsB.size() - 1));
-    for (decltype(tsA.size()) ii = 1; ii < tsA.size(); ++ii)
-    {
+    for (decltype(tsA.size()) ii = 1; ii < tsA.size(); ++ii) {
         for (decltype(tsA.columns()) jj = 0; jj < tsA.columns(); ++jj)
             if (std::abs(tsA.data(jj, ii) - tsB.data(jj, 4 * ii)) >
                 1e-4)  // TODO:: this is still small but bigger than it really should be
             {
-                //  printf("%d,%d t=%f,diff=%f\n", jj, ii, static_cast<double>(tsA.time()[ii]), tsA.data(jj, ii) -
-                //  tsB.data(jj, 4 * ii));
+                //  printf("%d,%d t=%f,diff=%f\n", jj, ii, static_cast<double>(tsA.time()[ii]),
+                //  tsA.data(jj, ii) - tsB.data(jj, 4 * ii));
                 ++diffc;
             }
     }

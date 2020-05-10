@@ -5,15 +5,15 @@
       <type>SLK</type>
       <angle>0</angle>
       <voltage>1.04</voltage>
-	  <if condition="query(gencount)==0">
+      <if condition="query(gencount)==0">
       <generator name="gen1">
           <P>0.7160</P>
       </generator>
-	  </if>
-	   <if condition="query(gencount)==0">
+      </if>
+       <if condition="query(gencount)==0">
       <generator name="gen2">
           <P>0.7160</P>
       </generator>
-	  </if>
+      </if>
    </bus>
 </griddyn>

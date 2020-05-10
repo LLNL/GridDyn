@@ -10,7 +10,6 @@
  * LLNS Copyright End
  */
 #pragma once
-namespace griddyn
-{
-void loadZMQLibrary ();
+namespace griddyn {
+void loadZMQLibrary();
 }  // namespace griddyn

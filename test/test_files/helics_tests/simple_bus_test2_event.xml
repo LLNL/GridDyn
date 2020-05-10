@@ -4,7 +4,7 @@
       <type>infinite</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	</bus>
+    </bus>
 <bus name="loadbus">
      <load name="load2">
        <yp>1.500</yp>
@@ -26,8 +26,8 @@
      <element>1</element>
    </event>
    <helics>
-	<coretype>zmq</coretype>
-	<period>2</period>
+    <coretype>zmq</coretype>
+    <period>2</period>
    </helics>
    <collector type="helics" period=6>
    <field>bus1:voltage as mag1</field>

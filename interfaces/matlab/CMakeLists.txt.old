@@ -21,9 +21,9 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${MEX_FILE}")
 
 # Install the generated front-end to ${MATLAB_PREFIX}
 install(DIRECTORY ${CMAKE_SWIG_OUTDIR}/+griddyn DESTINATION lib/matlab)
-install(FILES  ${CMAKE_SWIG_OUTDIR}/SwigGet.m 
-   ${CMAKE_SWIG_OUTDIR}/SwigMem.m  
-   ${CMAKE_SWIG_OUTDIR}/SwigRef.m 
+install(FILES  ${CMAKE_SWIG_OUTDIR}/SwigGet.m
+   ${CMAKE_SWIG_OUTDIR}/SwigMem.m
+   ${CMAKE_SWIG_OUTDIR}/SwigRef.m
    DESTINATION  lib/matlab
    )
 
@@ -56,5 +56,3 @@ set_target_properties(griddynMATLAB
                )
 install(TARGETS griddynMATLAB DESTINATION lib/matlab)
 install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.mexa64 DESTINATION  lib/matlab )
-
-

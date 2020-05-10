@@ -23,7 +23,7 @@ for ii=1:size(cls.variables,1)
                 fprintf('class %s field %s not matching %s\n',cls.name,vname,cln.cinfo{pp,2});
             end
             break;
-        end  
+        end
     end
     if (fnd==false)
         cloc=strfind(cls.name,'Count');  % to ignore counters

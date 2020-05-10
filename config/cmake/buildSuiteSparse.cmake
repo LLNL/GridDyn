@@ -1,4 +1,4 @@
-# This function is used to force a build on a dependant project at cmake configuration phase.
+# This function is used to force a build on a dependent project at cmake configuration phase.
 #
 
 function (build_suitesparse install_path)
@@ -40,7 +40,7 @@ ExternalProject_Add(suitesparse
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
-		-DLAPACK_DIR=${PROJECT_BINARY_DIR}/Download/suitesparse/lapack_windows/x64
+        -DLAPACK_DIR=${PROJECT_BINARY_DIR}/Download/suitesparse/lapack_windows/x64
         -DBUILD_SHARED_LIBS=${USE_KLU_SHARED}
         -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
         \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"

@@ -2,9 +2,10 @@
 Copyright (C) 2017, Battelle Memorial Institute
 All rights reserved.
 
-This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute;
-the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence
-Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle
+Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for
+Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence
+Livermore National Security, LLC.
 */
 /*
  * LLNS Copyright Start
@@ -19,6 +20,7 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
  */
 
 #include "zmqHelper.h"
+
 #include "../cppzmq/zmq.hpp"
 #include <cctype>
 #include <map>
@@ -42,34 +44,40 @@ pull = ZMQ_PULL,
     */
 
 /* *INDENT-OFF* */
-namespace zmqlib
-{
-static const std::map<std::string, zmq::socket_type> socketMap{
-  {"req", socket_type::req},       {"request", socket_type::req},   {"rep", socket_type::rep},
-  {"reply", socket_type::rep},     {"dealer", socket_type::dealer}, {"router", socket_type::router},
-  {"pub", socket_type::pub},       {"publish", socket_type::pub},   {"sub", socket_type::sub},
-  {"subscribe", socket_type::sub}, {"xpub", socket_type::xpub},     {"xsub", socket_type::xsub},
-  {"push", socket_type::push},     {"pull", socket_type::pull},     {"pair", socket_type::pair},
-  {"stream", socket_type::stream}};
+namespace zmqlib {
+static const std::map<std::string, zmq::socket_type> socketMap{{"req", socket_type::req},
+                                                               {"request", socket_type::req},
+                                                               {"rep", socket_type::rep},
+                                                               {"reply", socket_type::rep},
+                                                               {"dealer", socket_type::dealer},
+                                                               {"router", socket_type::router},
+                                                               {"pub", socket_type::pub},
+                                                               {"publish", socket_type::pub},
+                                                               {"sub", socket_type::sub},
+                                                               {"subscribe", socket_type::sub},
+                                                               {"xpub", socket_type::xpub},
+                                                               {"xsub", socket_type::xsub},
+                                                               {"push", socket_type::push},
+                                                               {"pull", socket_type::pull},
+                                                               {"pair", socket_type::pair},
+                                                               {"stream", socket_type::stream}};
 /* *INDENT-ON* */
 
-socket_type socketTypeFromString (const std::string &socketType)
+socket_type socketTypeFromString(const std::string& socketType)
 {
-    auto fnd = socketMap.find (socketType);
-    if (fnd != socketMap.end ())
-    {
+    auto fnd = socketMap.find(socketType);
+    if (fnd != socketMap.end()) {
         return fnd->second;
     }
 
     /* try making it lower case*/
-    std::string lowerCase (socketType);
-    std::transform (socketType.cbegin (), socketType.cend (), lowerCase.begin (), ::tolower);
-    fnd = socketMap.find (lowerCase);
-    if (fnd != socketMap.end ())
-    {
+    std::string lowerCase(socketType);
+    std::transform(socketType.cbegin(), socketType.cend(), lowerCase.begin(), ::tolower);
+    fnd = socketMap.find(lowerCase);
+    if (fnd != socketMap.end()) {
         return fnd->second;
     }
-    assert (false);  // NEED to make this a throw operation instead once exceptions are integrated
+    assert(false);  // NEED to make this a throw operation instead once exceptions are integrated
     return socket_type::req;
 }
 

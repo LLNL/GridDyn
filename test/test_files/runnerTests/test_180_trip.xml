@@ -2,13 +2,13 @@
 <!--xml file to test matdyn execution-->
 <griddyn name="test1" version="0.0.1">
    <library>
-	<sensor name="lineSensor" flags="comm_enabled">
-		<flags>direct_io</flags>
-		<input>current</input>
-		<input>voltage</input>
-		<commtype>fskit</commtype>
-		<outputnames>current, voltage</outputnames>
-	</sensor>
+    <sensor name="lineSensor" flags="comm_enabled">
+        <flags>direct_io</flags>
+        <input>current</input>
+        <input>voltage</input>
+        <commtype>fskit</commtype>
+        <outputnames>current, voltage</outputnames>
+    </sensor>
    </library>
 
 
@@ -17,36 +17,36 @@
 
 
    <relay flags="comm_enabled" name="76_82_1" target="LINK#74">
-	   <commtype>fskit</commtype>
-	   <terminal>1</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>1</terminal>
+       <type>control</type>
    </relay>
    <relay flags="comm_enabled" name="76_82_2" target="LINK#75">
-	   <commtype>fskit</commtype>
-	   <terminal>1</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>1</terminal>
+       <type>control</type>
    </relay>
    <relay flags="comm_enabled" name="76_82_3" target="LINK#76">
-	   <commtype>fskit</commtype>
-	   <terminal>1</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>1</terminal>
+       <type>control</type>
    </relay>
 
    <relay flags="comm_enabled" name="86_180" target="LINK#198">
-	   <commtype>fskit</commtype>
-	   <terminal>2</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>2</terminal>
+       <type>control</type>
    </relay>
 
    <relay flags="comm_enabled" name="454" target="LINK#135">
-	   <commtype>fskit</commtype>
-	   <terminal>2</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>2</terminal>
+       <type>control</type>
    </relay>
    <relay flags="comm_enabled" name="455" target="LINK#136">
-	   <commtype>fskit</commtype>
-	   <terminal>2</terminal>
-	   <type>control</type>
+       <commtype>fskit</commtype>
+       <terminal>2</terminal>
+       <type>control</type>
    </relay>
 
    <sensor terminal=1 ref="lineSensor" commname="Sensor_1" target="LINK#10"/>
@@ -54,22 +54,22 @@
 
 
    <event>
-	   <target>LINK#228</target>
-	   <field>breaker1</field>
-	   <value>1</value>
-	   <time>2</time>
+       <target>LINK#228</target>
+       <field>breaker1</field>
+       <value>1</value>
+       <time>2</time>
    </event>
    <event>
-	   <target>LINK#231</target>
-	   <field>breaker1</field>
-	   <value>1</value>
-	   <time>2</time>
+       <target>LINK#231</target>
+       <field>breaker1</field>
+       <value>1</value>
+       <time>2</time>
    </event>
 
 
 
    <recorder field="auto" period=0.01>
-	   <file>dynfault.csv</file>
+       <file>dynfault.csv</file>
    </recorder>
    <timestart>0</timestart>
    <timestop>60</timestop>

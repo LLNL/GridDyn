@@ -20,7 +20,7 @@ open(vidObj);
 
 bound=0.033;
 for kk=97:401
-    
+
     F = scatteredInterpolant(xd,yd,adata(kk,:)','natural','none');
 vq = F(X,Y);
 figure(1);
@@ -32,7 +32,7 @@ set(s,'LineStyle','none','FaceAlpha',0.9);
  drawWECC('r');
  axis([-125,-102,31,max(lat),-bound,0.005,-bound,0.005]);
  axis square
- 
+
 writeVideo(vidObj, getframe(gcf));
 end
 

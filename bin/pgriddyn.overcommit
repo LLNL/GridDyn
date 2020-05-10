@@ -1,8 +1,8 @@
 #!/bin/bash
 # LLNS Copyright Start
 # Copyright (c) 2014, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -36,7 +36,7 @@ GRIDDYN_GRIDLABD_EXE=$GRIDDYN_BIN_DIR/gridlabd.bin
 export GLPATH=$GRIDDYN_DIR/lib/gridlabd:$GRIDDYN_DIR/share/gridlabd
 
 # Note: can set GRIDDYN_PROFILER in environment such as:
-# > export GRIDDYN_PROFILER="valgrind --leak-check=full" 
+# > export GRIDDYN_PROFILER="valgrind --leak-check=full"
 GRIDDYN_PROFILER=
 GRIDDYN_TIMER=
 
@@ -62,22 +62,22 @@ function mpirun-wrapper {
    numberOfMPITasks=$((numberOfGridLABDInstances + 1))
 
    echo "Number of MPI tasks : $numberOfMPITasks"
-   
+
    case $(uname -a) in
       *chaos*)
- 	 echo "0 $GRIDDYN_PROFILER $GRIDDYN_EXE $args" > mpirunner.$$.conf
-	 echo "1-$((numberOfMPITasks - 1)) $GRIDDYN_PROFILER $GRIDDYN_GRIDLABD_EXE --llnlmpi" >> mpirunner.$$.conf
- 	 $GRIDDYN_TIMER srun --overcommit --output="stdout.$$.%t" -n$((numberOfMPITasks)) --multi-prog mpirunner.$$.conf
-	 rm mpirunner.$$.conf
-    	 ;;
+      echo "0 $GRIDDYN_PROFILER $GRIDDYN_EXE $args" > mpirunner.$$.conf
+     echo "1-$((numberOfMPITasks - 1)) $GRIDDYN_PROFILER $GRIDDYN_GRIDLABD_EXE --llnlmpi" >> mpirunner.$$.conf
+      $GRIDDYN_TIMER srun --overcommit --output="stdout.$$.%t" -n$((numberOfMPITasks)) --multi-prog mpirunner.$$.conf
+     rm mpirunner.$$.conf
+         ;;
       *)
-	 mpirun --output-filename stdout.$$ \
-	    -np 1 $GRIDDYN_PROFILER $GRIDDYN_EXE $args \
- 	    : \
-  	    -np $((numberOfMPITasks - 1)) $GRIDDYN_PROFILER $GRIDDYN_GRIDLABD_EXE --llnlmpi
- 	 ;;
+     mpirun --output-filename stdout.$$ \
+        -np 1 $GRIDDYN_PROFILER $GRIDDYN_EXE $args \
+         : \
+          -np $((numberOfMPITasks - 1)) $GRIDDYN_PROFILER $GRIDDYN_GRIDLABD_EXE --llnlmpi
+      ;;
    esac
-   
+
 }
 
-mpirun-wrapper $* 
+mpirun-wrapper $*

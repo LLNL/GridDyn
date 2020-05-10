@@ -42,7 +42,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % title('Exciter field Voltage','FontSize',12);
 % ylabel('Field Voltage (pu)','FontSize',12);
 % xlabel('Time(s)','FontSize',12);
-% 
+%
 % figure(4);
 % hold off
 % plot(Tm2.time,Tm2.data(:,2),'b','LineWidth',3);
@@ -55,7 +55,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % legend('Bus 2', 'Bus 2 limit', 'Bus 3', 'Bus 3 limit','Location','Northwest');
 % xlabel('Time(s)','FontSize',12);
 % ylabel('Voltage (pu)');
-% 
+%
 % ltime=[5.15369,19.9104,35.2819,49.9056];
 % hold on;
 % for tt=ltime
@@ -69,7 +69,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % title('Bus Frequency','FontSize',12);
 % ylabel('Frequency (Hz)','FontSize',12);
 % xlabel('Time(s)','FontSize',12);
-% 
+%
 % figure(2);
 % plts=plot(Tm2.time,Tm2.data(:,13:16)*100,'LineWidth',3);
 % set(plts(2),'Color','k');
@@ -84,7 +84,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % title('Generator Frequency','FontSize',12);
 % ylabel('Frequency (Hz)','FontSize',12);
 % legend('Gen A', 'Gen B');
-% 
+%
 % xlabel('Time(s)','FontSize',12);
 % figure(5);
 % plts=plot(Tm2.time,-Tm2.data(:,9:10)*100,'LineWidth',3);
@@ -111,7 +111,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % title('Motor Slip');
 % xlabel('time(s)');
 % ylabel('slip (pu)');
-% 
+%
 % figure(2);
 % hold off;
 % plot(Tm2.time,Tm2.data(:,8:9),'LineWidth',3);
@@ -119,7 +119,7 @@ Tm2=timeSeries2('dynfault-load-drop.dat');
 % xlabel('time(s)');
 % ylabel('Load (pu)');
 % legend('Real','Reactive');
-% 
+%
 % figure(3);
 % hold off;
 % plot(Tm2.time,Tm2.data(:,1:2),'LineWidth',2);

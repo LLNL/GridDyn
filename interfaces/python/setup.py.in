@@ -72,6 +72,5 @@ setup(
     author="Denis Nadeau and Philip Top",
     ext_modules=[griddyn_module],
     py_modules=["griddyn"],
-	license='LLNL'
+    license='LLNL'
 )
-

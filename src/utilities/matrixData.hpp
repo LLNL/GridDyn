@@ -17,26 +17,25 @@
 
 /** @brief convenience structure for returning data
  */
-template <class ValueT>
-class matrixElement
-{
+template<class ValueT>
+class matrixElement {
   public:
     using value_t = ValueT;
 
     index_t row;  //!< row
     index_t col;  //!< column
     value_t data;  //!< value
-    matrixElement () = default;
-    matrixElement (index_t R, index_t C, value_t D) noexcept : row{R}, col{C}, data{std::move (D)} {}
+    matrixElement() = default;
+    matrixElement(index_t R, index_t C, value_t D) noexcept: row{R}, col{C}, data{std::move(D)} {}
 };
 
-template <class X>
-static bool compareRow (const matrixElement<X> &A, const matrixElement<X> &B)
+template<class X>
+static bool compareRow(const matrixElement<X>& A, const matrixElement<X>& B)
 {
     return (A.row < B.row) ? true : ((A.row > B.row) ? false : (A.col < B.col));
 }
-template <class X>
-static bool compareCol (const matrixElement<X> &A, const matrixElement<X> &B)
+template<class X>
+static bool compareCol(const matrixElement<X>& A, const matrixElement<X>& B)
 {
     return (A.col < B.col) ? true : ((A.col > B.col) ? false : (A.row < B.row));
 }
@@ -54,9 +53,8 @@ static bool compareCol (const matrixElement<X> &A, const matrixElement<X> &B)
  *  implementations. Specific implementations may define an iterator
  *  that may be more useful. individual classes
  */
-template <class ValueT = double>
-class matrixData
-{
+template<class ValueT = double>
+class matrixData {
   public:
     using value_t = ValueT;
 
@@ -65,33 +63,33 @@ class matrixData
      *  @param[in] rows  the initial row limit
      *  @param[in] cols the initial column limit
      */
-    explicit matrixData (index_t rows = kIndexMax, index_t cols = kIndexMax) noexcept : rowLim{rows}, colLim{cols}
+    explicit matrixData(index_t rows = kIndexMax, index_t cols = kIndexMax) noexcept:
+        rowLim{rows}, colLim{cols}
     {
     }
 
     /** @brief virtual destructor */
-    virtual ~matrixData () = default;
+    virtual ~matrixData() = default;
 
     /** @brief function to clear the data */
-    virtual void clear () = 0;
+    virtual void clear() = 0;
 
     /**
      *  @brief add a new Jacobian element
      *  @param[in] row,col the row  and column of the element
      *  @param[in] num the value of the element
      */
-    virtual void assign (index_t row, index_t col, value_t num) = 0;
+    virtual void assign(index_t row, index_t col, value_t num) = 0;
 
     /** @brief assign with a check on the row
      *  add a new Jacobian element if the arguments are valid (row<rowNum)
      *  @param[in] row,col the row and column of the element
      *  @param[in] num the value of the element
      */
-    void assignCheckRow (index_t row, index_t col, value_t num)
+    void assignCheckRow(index_t row, index_t col, value_t num)
     {
-        if (isValidIndex (row, rowLim))
-        {
-            assign (row, col, num);
+        if (isValidIndex(row, rowLim)) {
+            assign(row, col, num);
         }
     }
 
@@ -100,11 +98,10 @@ class matrixData
      *  @param[in] row,col the row  and column of the element
      *  @param[in] num the value of the element
      */
-    void assignCheckCol (index_t row, index_t col, value_t num)
+    void assignCheckCol(index_t row, index_t col, value_t num)
     {
-        if (isValidIndex (col, colLim))
-        {
-            assign (row, col, num);
+        if (isValidIndex(col, colLim)) {
+            assign(row, col, num);
         }
     }
 
@@ -118,11 +115,10 @@ class matrixData
      *  @param[in] col the column index in the matrix
      *  @param[in] num the value of the element
      */
-    void assignCheck (index_t row, index_t col, value_t num)
+    void assignCheck(index_t row, index_t col, value_t num)
     {
-        if ((isValidIndex (col, colLim)) && (isValidIndex (row, rowLim)))
-        {
-            assign (row, col, num);
+        if ((isValidIndex(col, colLim)) && (isValidIndex(row, rowLim))) {
+            assign(row, col, num);
         }
     }
 
@@ -130,12 +126,12 @@ class matrixData
      *  @brief get the maximum row number
      *  @return the max row value
      */
-    count_t rowLimit () const { return rowLim; };
+    count_t rowLimit() const { return rowLim; }
     /**
      *  @brief get the maximum row number
      *  @return the max col value
      */
-    count_t colLimit () const { return colLim; };
+    count_t colLimit() const { return colLim; }
 
   private:
     /**
@@ -143,7 +139,10 @@ class matrixData
      *  @param[rowLimit] the new rowLimit
      * @param[colLimit] the new colLimit
      */
-    virtual void limitUpdate (index_t newRowLimit, index_t newColLimit) { (void)(newRowLimit), void(newColLimit); }
+    virtual void limitUpdate(index_t newRowLimit, index_t newColLimit)
+    {
+        (void)(newRowLimit), void(newColLimit);
+    }
     /**
      *  @brief get the number of points
      *  @return the number of points
@@ -153,50 +152,50 @@ class matrixData
      *  @brief set the maximum row count
      *  @param[in] limit the new row limit
      */
-    void setRowLimit (index_t limit)
+    void setRowLimit(index_t limit)
     {
         rowLim = limit;
-        limitUpdate (rowLim, colLim);
+        limitUpdate(rowLim, colLim);
     };
     /**
      *  @brief set the maximum number of columns
      *  @param[in] limit the new column limit
      */
-    void setColLimit (index_t limit)
+    void setColLimit(index_t limit)
     {
         colLim = limit;
-        limitUpdate (rowLim, colLim);
+        limitUpdate(rowLim, colLim);
     };
 
-    virtual count_t size () const = 0;
+    virtual count_t size() const = 0;
     /**
      *  @brief get the current capacity
      *  @return the maximum number of points
      */
-    virtual count_t capacity () const = 0;
+    virtual count_t capacity() const = 0;
 
     /**
      *  @brief reserve space in the array for
      */
-    virtual void reserve (count_t /*maxNonZeros*/){};
+    virtual void reserve(count_t /*maxNonZeros*/){}
 
     /**
      *  @brief get the value at a specific location
      *  @param[in] rowN  the row number
      *  @param[in] colN  the column number
      */
-    virtual value_t at (index_t rowN, index_t colN) const = 0;
+    virtual value_t at(index_t rowN, index_t colN) const = 0;
 
     /**
      *  @brief get element at index N
      *  @param[in] N the element number to return
      *  @return the element corresponding to the index
      */
-    virtual matrixElement<value_t> element (index_t N) const = 0;
+    virtual matrixElement<value_t> element(index_t N) const = 0;
 
     /**  @brief change the matrixData to a compact sorted form
      */
-    virtual void compact ()
+    virtual void compact()
     {
         // many arrays would already be in compact form so this should
         // do nothing in the default case
@@ -204,7 +203,7 @@ class matrixData
 
     /**  @brief set the array to begin a sequence of retrievals
      */
-    virtual void start () { cur = 0; }
+    virtual void start() { cur = 0; }
     /**
      *  @brief gets the next data triple
      *
@@ -213,24 +212,23 @@ class matrixData
      *
      *  @return a triple with the row/col/val of the first element
      */
-    virtual matrixElement<value_t> next () { return element (cur++); }
+    virtual matrixElement<value_t> next() { return element(cur++); }
     /**
      *  @brief check if the data sequence is at its end
      *  @return true if there are more points to grab false if not
      */
-    virtual bool moreData () { return (cur < size ()); }
+    virtual bool moreData() { return (cur < size()); }
     /**
      *  @brief merge 2 matrixData structures together
      *  @param[in] a2 the matrixData to merge in
      */
-    virtual void merge (matrixData<value_t> &a2)
+    virtual void merge(matrixData<value_t>& a2)
     {
-        count_t count = a2.size ();
-        a2.start ();
-        for (index_t nn = 0; nn < count; ++nn)
-        {
-            auto tp = a2.next ();
-            assign (tp.row, tp.col, tp.data);
+        count_t count = a2.size();
+        a2.start();
+        for (index_t nn = 0; nn < count; ++nn) {
+            auto tp = a2.next();
+            assign(tp.row, tp.col, tp.data);
         }
     }
 
@@ -241,14 +239,13 @@ class matrixData
      *  @param[in] scale a double scaler for each of the elements in
      *  the second matrix;
      */
-    virtual void merge (matrixData<value_t> &a2, value_t scale)
+    virtual void merge(matrixData<value_t>& a2, value_t scale)
     {
-        count_t count = a2.size ();
-        a2.start ();
-        for (index_t nn = 0; nn < count; ++nn)
-        {
-            auto tp = a2.next ();
-            assign (tp.row, tp.col, tp.data * scale);
+        count_t count = a2.size();
+        a2.start();
+        for (index_t nn = 0; nn < count; ++nn) {
+            auto tp = a2.next();
+            assign(tp.row, tp.col, tp.data * scale);
         }
     }
     /**
@@ -257,16 +254,14 @@ class matrixData
      *  @param[in] origRow  the original row
      *  @param[in] newRow the new row Value
      */
-    virtual void copyTranslateRow (matrixData<value_t> &a2, index_t origRow, index_t newRow)
+    virtual void copyTranslateRow(matrixData<value_t>& a2, index_t origRow, index_t newRow)
     {
-        count_t count = a2.size ();
-        a2.start ();
-        for (index_t nn = 0; nn < count; ++nn)
-        {
-            auto nextElement = a2.next ();
-            if (nextElement.row == origRow)
-            {
-                assign (newRow, nextElement.col, nextElement.data);
+        count_t count = a2.size();
+        a2.start();
+        for (index_t nn = 0; nn < count; ++nn) {
+            auto nextElement = a2.next();
+            if (nextElement.row == origRow) {
+                assign(newRow, nextElement.col, nextElement.data);
             }
         }
     }
@@ -278,7 +273,7 @@ class matrixData
     index_t cur = 0;  //!< the current element location for a next operation
 
   private:
-    inline bool isValidIndex (index_t index, index_t imax)
+    inline bool isValidIndex(index_t index, index_t imax)
     {
 #ifdef UNSIGNED_INDEXING
         return (index < imax);

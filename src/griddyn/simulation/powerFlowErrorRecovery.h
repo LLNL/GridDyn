@@ -1,80 +1,77 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef POWER_FLOW_ERROR_RECOVERY_H_
 #define POWER_FLOW_ERROR_RECOVERY_H_
 
-
-
 #include <memory>
 
-namespace griddyn
-{
+namespace griddyn {
 class gridDynSimulation;
 class SolverInterface;
 
-/** @brief the purpose of this class is to try to recover a valid power flow solution after a solver failure*/
-class powerFlowErrorRecovery
-{
-public:
-  /** @brief enumeration describing possible return options
-  */
-  enum class recovery_return_codes
-  {
-    more_options,
-    out_of_options,
-  };
+/** @brief the purpose of this class is to try to recover a valid power flow solution after a solver
+ * failure*/
+class powerFlowErrorRecovery {
+  public:
+    /** @brief enumeration describing possible return options
+     */
+    enum class recovery_return_codes {
+        more_options,
+        out_of_options,
+    };
 
-  /** @brief constructor
+    /** @brief constructor
   @param[in] gds the gridDynSimulation object to work from
   @param[in] sd the SolverInterface object to work from
   */
-  powerFlowErrorRecovery (gridDynSimulation *gds, std::shared_ptr<SolverInterface> sd);
+    powerFlowErrorRecovery(gridDynSimulation* gds, std::shared_ptr<SolverInterface> sd);
 
-  /** @brief virtual destructor*/
-  virtual ~powerFlowErrorRecovery ();
+    /** @brief virtual destructor*/
+    virtual ~powerFlowErrorRecovery();
 
-  /** @brief attempt the various fixes in order
+    /** @brief attempt the various fixes in order
   @param[in] optional error code value
   @return recovery_return_codes::more_options if attemptFix can be called again without reset
-  recovery_return_codes::out_of_options if no more fix attemps are available
+  recovery_return_codes::out_of_options if no more fix attempts are available
   */
-  virtual recovery_return_codes attemptFix (int error_code = 0);
+    virtual recovery_return_codes attemptFix(int error_code = 0);
 
-  /** @brief reset the fix counter so it can try again*/
-  void reset ();
-  /** @brief update recovery mechanism to use a different solver
+    /** @brief reset the fix counter so it can try again*/
+    void reset();
+    /** @brief update recovery mechanism to use a different solver
   @param[in] sd the new solver Data object to use
   */
-  void updateInfo (std::shared_ptr<SolverInterface> sd);
+    void updateInfo(std::shared_ptr<SolverInterface> sd);
 
-  /** @brief return the number of attempts taken so far
+    /** @brief return the number of attempts taken so far
   @return the number of attempts
   */
-  int attempts () const;
-protected:
-  int attempt_number = 0;        //!< the current attempt number
-  gridDynSimulation *sim;        //!< the gridDynsimulation to work from
-  std::shared_ptr<SolverInterface> solver;       //!< the SolverInterface to use
+    int attempts() const;
 
-  bool powerFlowFix1 ();
-  bool powerFlowFix2 ();
-  bool powerFlowFix3 ();
-  bool powerFlowFix4 ();
-  bool powerFlowFix5 ();
+  protected:
+    int attempt_number = 0;  //!< the current attempt number
+    gridDynSimulation* sim;  //!< the gridDynsimulation to work from
+    std::shared_ptr<SolverInterface> solver;  //!< the SolverInterface to use
 
-  bool lowVoltageFix ();
+    bool powerFlowFix1();
+    bool powerFlowFix2();
+    bool powerFlowFix3();
+    bool powerFlowFix4();
+    bool powerFlowFix5();
+
+    bool lowVoltageFix();
 };
 
-}//namespace griddyn
+}  // namespace griddyn
 
 #endif

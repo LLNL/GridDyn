@@ -5,7 +5,7 @@ x need note somewhere for KLU license
 x see if you can wait to request admin privileges after clicking install or
   not requiring admin privileges at all
 x doxygen documentation system (html documentation)
-	- can build doxy config file in cmake
+    - can build doxy config file in cmake
 x sync version numbers with those in CMakeLists
 x read about cross-OS installer options (alternatives to NSIS)
 

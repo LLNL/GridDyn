@@ -27,33 +27,36 @@ def is_start(line):
 
     # return whether a begins with b
     def match_beginning(a, b):
-        return a[:len(b)] == b
+        return a[: len(b)] == b
 
     flag = True
-    flag = flag and match_beginning(line, '/')
-    flag = flag and line.split(' ')[1] == 'warning:'
+    flag = flag and match_beginning(line, "/")
+    flag = flag and line.split(" ")[1] == "warning:"
     return flag
+
 
 class Chunk(object):
     """Representation of a specific clang-format warning"""
 
     # Regex to parse the warning line of a given message
     # 'FILE:NUM:NUM: WARN STRING [TYPE]'
-    FILE = r'(\S+)'
-    NUM = r'(\d+)'
-    WARN = r'warning:'
-    STRING = r'(.+)'
-    TYPE = r'(\S+)'
+    FILE = r"(\S+)"
+    NUM = r"(\d+)"
+    WARN = r"warning:"
+    STRING = r"(.+)"
+    TYPE = r"(\S+)"
 
-    REGEX = re.compile('{}:{}:{}: {} {} \[{}\]'.format(
-    #                    1  2  3      4    5
-        FILE,
-        NUM,
-        NUM,
-        WARN,
-        STRING,
-        TYPE
-    ))
+    REGEX = re.compile(
+        "{}:{}:{}: {} {} \[{}\]".format(
+            #                    1  2  3      4    5
+            FILE,
+            NUM,
+            NUM,
+            WARN,
+            STRING,
+            TYPE,
+        )
+    )
 
     def __init__(self, lines):
         """Construct a chunk given all of its lines
@@ -61,7 +64,7 @@ class Chunk(object):
         lines: list of strings, where lines[0] satisfies is_start
         """
         header = lines[0]
-        assert (is_start(header)), 'First line of chunk not an actual header'
+        assert is_start(header), "First line of chunk not an actual header"
         parse = Chunk.REGEX.match(header)
         self._file_name = parse.group(1)
         self._line_num = parse.group(2)
@@ -70,7 +73,7 @@ class Chunk(object):
         self._guideline = parse.group(5)
 
         # delete final newline
-        self.original = '\n'.join(lines)[:-1]
+        self.original = "\n".join(lines)[:-1]
 
     @property
     def file_name(self):
@@ -105,19 +108,13 @@ class Chunk(object):
     def __hash__(self):
         # TODO this probably shouldn't take line_num into account
         # drop everything in the path before 'GridDyn'
-        filename = self.file_name.split('/')
-        index = filename.index('GridDyn')
-        filename = '/'.join(filename[index:])
-        return hash((
-            filename,
-            self.line_num,
-            self.position,
-            self.warning,
-            self.guideline
-        ))
+        filename = self.file_name.split("/")
+        index = filename.index("GridDyn")
+        filename = "/".join(filename[index:])
+        return hash((filename, self.line_num, self.position, self.warning, self.guideline))
 
     def __str__(self):
-        return '{}:{} [{}]'.format(self.file_name, self.line_num, self.guideline)
+        return "{}:{} [{}]".format(self.file_name, self.line_num, self.guideline)
 
     def __repr__(self):
-        return '<{}>'.format(str(self))
+        return "<{}>".format(str(self))

@@ -41,7 +41,7 @@
                   description="measurement of power at a bus"
                   causality="output" variability="continuous">
   </ScalarVariable>
- 
+
 </ModelVariables>
 
 <!-- TODO Philip: fill in ModelStructure if necessary (section 2.2.8). Not
