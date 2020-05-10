@@ -38,11 +38,11 @@ constexpr index_t kInvalidLocation(std::numeric_limits<index_t>::max() - 1);
 constexpr index_t kIndexMax(std::numeric_limits<index_t>::max());
 constexpr count_t kCountMax(std::numeric_limits<count_t>::max());
 
-constexpr index_t operator"" _ind(unsigned long long val)
+constexpr index_t operator"" _ind(unsigned long long val) // NOLINT
 {
     return index_t(val);
 }
-constexpr count_t operator"" _cnt(unsigned long long val)
+constexpr count_t operator"" _cnt(unsigned long long val) // NOLINT
 {
     return count_t(val);
 }

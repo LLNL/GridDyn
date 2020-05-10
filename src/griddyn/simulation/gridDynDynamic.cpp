@@ -671,16 +671,17 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         checkNetwork(network_check_type::simplified);
     }
     if ((opFlags[state_change_flag]) ||
-        (change == change_code::state_count_change))  // we changed object states so we have to do a
-                                                      // full reset
+        (change == change_code::state_count_change)) 
     {
+        // we changed object states so we have to do a full reset
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
             return true;
         }
         reInitDyn(sMode);
     } else if ((opFlags[object_change_flag]) ||
-               (change == change_code::object_change))  // the object count changed
+               (change == change_code::object_change)) 
     {
+        // the object count changed
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
             return true;
         }
@@ -701,8 +702,9 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         dynData->sparseReInit(SolverInterface::sparse_reinit_modes::resize);
     } else if (opFlags[root_change_flag]) {
         handleRootChange(sMode, dynData);
-    } else  // mode ==0
+    } else  
     {
+        // mode ==0
         opFlags &= RESET_CHANGE_FLAG_MASK;
         return false;
     }
@@ -757,9 +759,10 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
     retval =
         dynData->calcIC(currentTime, probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
 
-    if (retval == -22)  // this is bad initial conditions TODO:: map this to Solver ERROR codes not
-                        // Sundials ERROR codes
+    if (retval == -22) 
     {
+        // this is bad initial conditions TODO:: map this to Solver ERROR codes not
+        // Sundials ERROR codes
         converge(currentTime,
                  dynData->state_data(),
                  dynData->deriv_data(),
@@ -974,7 +977,7 @@ int gridDynSimulation::reInitDyn(const solverMode& sMode)
 #endif
 
 #if DEBUG_RESID > 0
-const static double resid_print_tol = 1e-6;
+static constexpr double resid_print_tol = 1e-6;
 #endif
 // IDA nonlinear function evaluation
 int gridDynSimulation::residualFunction(coreTime time,

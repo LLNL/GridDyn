@@ -30,7 +30,7 @@
 #include <iostream>
 
 namespace griddyn {
-const static bool unimplemented = false;
+static constexpr bool unimplemented = false;
 
 using namespace units;
 using namespace gmlc::utilities::string_viewOps;
