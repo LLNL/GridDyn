@@ -18,7 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 // testP case for coreObject object
 
 #define TADJ_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/adj_tests/"

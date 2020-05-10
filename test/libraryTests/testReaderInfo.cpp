@@ -18,7 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 static const std::string xmlTestDirectory(GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 using namespace griddyn;

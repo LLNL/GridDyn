@@ -19,7 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 static const std::string elementReaderTestDirectory(GRIDDYN_TEST_DIRECTORY
                                                     "/element_reader_tests/");

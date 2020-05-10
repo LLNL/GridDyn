@@ -174,7 +174,7 @@ void commMessage::fromByteArray(const char* data, size_t buffer_size)
     try {
         load(ia);
     }
-    catch (const cereal::Exception& ce) {
+    catch (const cereal::Exception& ) {
         m_messageType = unknownMessageType;
     }
 }

@@ -17,7 +17,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 

@@ -19,7 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 BOOST_FIXTURE_TEST_SUITE(simulation_tests, gridDynSimulationTestFixture)
 

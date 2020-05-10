@@ -227,10 +227,10 @@ void DynamicGenerator::dynObjectInitializeB(const IOdata& inputs,
     IOdata inputArgs(4);
     IOdata localDesiredOutput(4);
 
-    double V = inputs[voltageInLocation];
+    double voltage = inputs[voltageInLocation];
     double theta = inputs[angleInLocation];
 
-    inputArgs[voltageInLocation] = V;
+    inputArgs[voltageInLocation] = voltage;
     inputArgs[angleInLocation] = theta;
     inputArgs[genModelPmechInLocation] = kNullVal;
     inputArgs[genModelEftInLocation] = kNullVal;
@@ -251,7 +251,7 @@ void DynamicGenerator::dynObjectInitializeB(const IOdata& inputs,
     }
 
     if ((ext != nullptr) && (ext->isEnabled())) {
-        inputArgs[voltageInLocation] = V;
+        inputArgs[voltageInLocation] = voltage;
         inputArgs[angleInLocation] = theta;
         inputArgs[exciterPmechInLocation] = m_Pmech;
 

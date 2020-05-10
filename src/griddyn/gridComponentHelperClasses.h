@@ -188,9 +188,9 @@ enum init_control_flags {
 /** @brief get the lower 32 bits of a flag variable*
 @param[in] flags the 64 bit flags to get the lower half from
 */
-inline std::uint32_t lower_flags(unsigned long long flags)
+inline std::uint32_t lower_flags(std::uint64_t flags)
 {
-    return static_cast<std::uint32_t>(flags & static_cast<unsigned long long>(0xFFFFFFFF));
+    return static_cast<std::uint32_t>(flags & static_cast<std::uint64_t>(0xFFFFFFFF));
 }
 
 /** @ brief get the lower 32 bits of 64 bit bitset*
@@ -198,8 +198,7 @@ inline std::uint32_t lower_flags(unsigned long long flags)
 */
 inline std::uint32_t lower_flags(std::bitset<64> flags)
 {
-    return static_cast<std::uint32_t>(flags.to_ullong() &
-                                      static_cast<unsigned long long>(0xFFFFFFFF));
+    return static_cast<std::uint32_t>(flags.to_ullong() & static_cast<std::uint64_t>(0xFFFFFFFF));
 }
 
 #define RESET_CHANGE_FLAG_MASK (0xFFFFFFFF00FFFFFF)  // macro to change flag masks
@@ -298,10 +297,10 @@ class stateSizes {
     /** reset just the sizes related to states to 0*/
     void stateReset();
     /** reset the root counter and  sizes to 0*/
-    void rootReset() { algRoots = diffRoots = 0; };
+    void rootReset() { algRoots = diffRoots = 0; }
 
     /** reset the Jacobian counter and  sizes to 0*/
-    void JacobianReset() { jacSize = 0; };
+    void JacobianReset() { jacSize = 0; }
     /** add another stateSizes object to this one
     @param[in] arg the stateSizes object to combine*/
     void add(const stateSizes& arg);
@@ -411,7 +410,7 @@ class solverOffsets {
     */
     void setOffset(index_t newOffset);
 
-    void setLoaded() { stateLoaded = jacobianLoaded = rootsLoaded = true; };
+    void setLoaded() { stateLoaded = jacobianLoaded = rootsLoaded = true; }
     void setLoaded(bool dynOnly)
     {
         stateLoaded = (!dynOnly) ? stateLoaded : true;

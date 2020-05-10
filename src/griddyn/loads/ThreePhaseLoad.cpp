@@ -132,8 +132,8 @@ namespace loads {
                                    unitType,
                                    systemBasePower);
                 case 'v': {
-                    double V = bus->getVoltage();
-                    return convert(V, puV, unitType, systemBasePower, localBaseVoltage);
+                    return convert(
+                        bus->getVoltage(), puV, unitType, systemBasePower, localBaseVoltage);
                 }
                 case 'a': {
                     double A = getBaseAngle();

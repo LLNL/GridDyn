@@ -310,10 +310,10 @@ namespace loads {
     {
         auto offset = offsets.getDiffOffset(sMode);
         double slip = (!sD.empty()) ? sD.state[offset] : m_state[0];
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
 
         deriv[offset] =
-            (opFlags[stalled]) ? 0 : (0.5 / H * (mechPower(slip) - rPower(V * Vcontrol, slip)));
+            (opFlags[stalled]) ? 0 : (0.5 / H * (mechPower(slip) - rPower(voltage * Vcontrol, slip)));
     }
 
     void motorLoad::jacobianElements(const IOdata& inputs,
@@ -345,13 +345,13 @@ namespace loads {
         } else if (!opFlags[init_transient]) {
             int offset = offsets.getAlgOffset(sMode);
             double slip = sD.state[offset];
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
 
-            double t1 = rPower(V * Vcontrol, slip);
-            double t3 = rPower(V * Vcontrol, slip + cSmallDiff);
+            double t1 = rPower(voltage * Vcontrol, slip);
+            double t3 = rPower(voltage * Vcontrol, slip + cSmallDiff);
             md.assign(offset, offset, dmechds(slip) - (t3 - t1) / cSmallDiff);
 
-            md.assignCheck(offset, inputLocs[voltageInLocation], -2 * t1 / V);
+            md.assignCheck(offset, inputLocs[voltageInLocation], -2.0 * t1 / voltage);
         }
     }
 

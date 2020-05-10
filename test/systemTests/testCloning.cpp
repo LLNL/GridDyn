@@ -17,7 +17,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 // test case for coreObject object
 
 static const std::string clone_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/clone_tests/");

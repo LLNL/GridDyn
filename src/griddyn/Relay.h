@@ -355,7 +355,7 @@ class Relay: public gridPrimary, objectOperatorInterface {
             //!< TODO:PT account for this delay
         mcondTrig() = default;
         mcondTrig(index_t actNum, const IOlocs& conds, coreTime delTime = timeZero):
-            actionNum(actNum), multiConditions(conds), delayTime(delTime){};
+            actionNum(actNum), multiConditions(conds), delayTime(delTime){}
     };
     /** enumeration of relay flags*/
     // count_t numAlgRoots = 0;        //!< counter for the number of root finding operations related to the

@@ -16,7 +16,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 // test case for coreObject object
 
 BOOST_AUTO_TEST_SUITE(condition_tests, *boost::unit_test::label("quick"))

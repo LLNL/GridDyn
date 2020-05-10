@@ -79,9 +79,7 @@ namespace blocks {
                                  cLocalSolverMode,
                                  check_level_t::reversable_only);
             }
-        }
-
-        else {
+        }else {
             fieldSet.resize(1);
             if (limiter_alg > 0) {
                 Block::rootCheck(inputs,
@@ -509,9 +507,10 @@ namespace blocks {
             auto iret = Block::rootCheck(inputs, sD, sMode, check_level_t::reversable_only);
             ret = std::max(ret, iret);
         }
-        if (cstate != dbstate)  // we may run through multiple categories so we need to
-        // do this recursively
+        if (cstate != dbstate)  
         {
+            // we may run through multiple categories so we need to
+            // do this recursively
             auto iret = rootCheck(inputs, sD, sMode, check_level_t::reversable_only);
             ret = std::max(ret, iret);
         }

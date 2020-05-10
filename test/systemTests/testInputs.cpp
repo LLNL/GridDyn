@@ -26,7 +26,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 // test case for coreObject object
 
 #define INPUT_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/input_tests/"
