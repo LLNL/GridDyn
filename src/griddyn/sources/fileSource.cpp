@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fileSource.h"
 
@@ -52,10 +52,9 @@ namespace sources {
             index_t ii = 0;
             while (schedLoad.time(ii) < abstime0) {
                 ++ii;
-                if (ii >=
-                    static_cast<index_t>(
-                        schedLoad
-                            .size())) {  // this should never happen (time would need to get to a very very large number
+                if (ii >= static_cast<index_t>(
+                              schedLoad.size())) {  // this should never happen (time would need to
+                                                    // get to a very very large number
                     ii = schedLoad.size();
                     break;
                 }
@@ -143,7 +142,7 @@ namespace sources {
     int fileSource::loadFile()
     {
         auto stl = fileName_.length();
-        //TODO:: use filesystem library to check extension instead of this
+        // TODO:: use filesystem library to check extension instead of this
         if ((stl > 4) && ((fileName_[stl - 3] == 'c') || (fileName_[stl - 3] == 't'))) {
             schedLoad.loadTextFile(fileName_, m_column);
         } else {

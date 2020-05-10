@@ -200,8 +200,8 @@ namespace extra {
             return sensor::dynObjectInitializeA(time0, flags);
         }
 
-        if (updatePeriod >
-            kHalfBigNum) {  // set the period to the period of the simulation to at least 1/5 the winding time constant
+        if (updatePeriod > kHalfBigNum) {  // set the period to the period of the simulation to at
+                                           // least 1/5 the winding time constant
             double pstep = getRoot()->get("steptime");
             if (pstep < 0) {
                 pstep = 1.0;
@@ -335,10 +335,10 @@ namespace extra {
             iset[0] = 0;
             filterBlocks[1]->dynInitializeB(iset, iset, iset);
         }
-        return Relay::dynObjectInitializeB(
-            inputs,
-            desiredOutput,
-            fieldSet);  // skip over sensor::dynInitializeB since the filter blocks are initialized here.
+        return Relay::dynObjectInitializeB(inputs,
+                                           desiredOutput,
+                                           fieldSet);  // skip over sensor::dynInitializeB since the
+                                                       // filter blocks are initialized here.
     }
 
     void txThermalModel::updateA(coreTime time)
@@ -378,7 +378,8 @@ namespace extra {
             filterBlocks[0]->step(time, ambientTemp);
             filterBlocks[1]->step(time, 0);
         }
-        // printf("%f:%s A=%f to(%f)=%f hs(%f)=%f\n",time, name.c_str(), ambientTemp, DTtou+ambientTemp, o1, DTgu, o2);
+        // printf("%f:%s A=%f to(%f)=%f hs(%f)=%f\n",time, name.c_str(), ambientTemp,
+        // DTtou+ambientTemp, o1, DTgu, o2);
         Relay::updateA(time);
         prevTime = time;
     }

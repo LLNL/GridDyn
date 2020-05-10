@@ -155,4 +155,3 @@ class randomDistributionObject1<void>: public distributionObject {
 gridRandom::dist_type_t getDist(const std::string& dist_name);
 
 }  // namespace utilities
-

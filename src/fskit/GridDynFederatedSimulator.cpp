@@ -50,7 +50,7 @@ fskit::Time GriddynFederatedSimulator::CalculateLocalGrantedTime(void)
 
     griddyn::coreTime griddynNextEventTime = m_griddyn->getNextEvent();
 
-    //assert(griddynNextEventTime > m_currentGriddynTime);
+    // assert(griddynNextEventTime > m_currentGriddynTime);
 
     // Magic number that indicates there are no events on the event queue.
     if (griddynNextEventTime.getBaseTimeCode() == kBigNum) {
@@ -82,7 +82,7 @@ std::tuple<fskit::Time, bool> GriddynFederatedSimulator::TimeAdvancement(const f
     if (gdTime >= m_currentGriddynTime) {
         try {
             auto gdRetTime = m_griddyn->Step(gdTime);
-            //assert(gdRetTime <= gdTime);
+            // assert(gdRetTime <= gdTime);
             m_currentGriddynTime = gdRetTime;
             m_currentFskitTime = fskit::Time(gdRetTime.getBaseTimeCode());
 
@@ -92,7 +92,7 @@ std::tuple<fskit::Time, bool> GriddynFederatedSimulator::TimeAdvancement(const f
             {
                 // Next event time should now be larger than granted time
                 griddyn::coreTime griddynNextEventTime = m_griddyn->getNextEvent();
-                //assert(griddynNextEventTime > m_currentGriddynTime);
+                // assert(griddynNextEventTime > m_currentGriddynTime);
             }
         }
         catch (...) {

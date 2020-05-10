@@ -29,8 +29,8 @@ namespace fmi {
     template<class FMItype, class BaseObj>
     class fmiWrapper: public BaseObj {
       protected:
-        FMItype* fmisub =
-            nullptr;  //!< a pointer to an fmi submodel of some kind either FMIMESubModel or FMICoSimSubmodel
+        FMItype* fmisub = nullptr;  //!< a pointer to an fmi submodel of some kind either
+                                    //!< FMIMESubModel or FMICoSimSubmodel
         std::vector<std::string> inputNames_specified;  //!< storage for the specified input names
         std::vector<std::string> outputNames_specified;  //!< storage for the specified output names
 
@@ -56,9 +56,9 @@ namespace fmi {
         }
 
         /** function call to get a set of input string to use for the FMI inputs
-    @details this defaults to the regular input strings call but there are a few reasons that this could be
-    distinct from the general object input and output strings so a separate call is provided with the default to
-    the regular call
+    @details this defaults to the regular input strings call but there are a few reasons that this
+    could be distinct from the general object input and output strings so a separate call is
+    provided with the default to the regular call
     @return a reference to a vector of string vectors containing the potential names of the inputs
     */
         virtual const std::vector<stringVec>& fmiInputNames() const
@@ -67,9 +67,9 @@ namespace fmi {
         }
 
         /** function call to get a set of output strings to use for the FMI outputs
-    @details this defaults to the regular output strings call but there are a few reasons that this could be
-    distinct from the general object input and output strings so a separate call is provided with the default to
-    the regular call
+    @details this defaults to the regular output strings call but there are a few reasons that this
+    could be distinct from the general object input and output strings so a separate call is
+    provided with the default to the regular call
     @return a reference to a vector of string vectors containing the potential names of the inputs
     */
         virtual const std::vector<stringVec>& fmiOutputNames() const

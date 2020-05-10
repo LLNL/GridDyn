@@ -19,11 +19,10 @@
 
 /** @brief class implementation translation for another matrixData object
  most functions are just simple forwarding to the underlying matrixData object
-except the assign and at operator which basically means the matrixData can interact with a small subset of a bigger
-matrixData object
-though rowIndex, colIndex, and val will still return the original values.  The intent of this class is not to
-replace the interactions with another
-it is to act as a filter in cases where elements need to be added but the row needs a translation,  using it
+except the assign and at operator which basically means the matrixData can interact with a small
+subset of a bigger matrixData object though rowIndex, colIndex, and val will still return the
+original values.  The intent of this class is not to replace the interactions with another it is to
+act as a filter in cases where elements need to be added but the row needs a translation,  using it
 outside that purpose could lead to issues
 */
 template<int CT, class ValueT = double>
@@ -49,7 +48,8 @@ class matrixDataTranslate: public matrixDataContainer<ValueT> {
     void assign(index_t row, index_t col, ValueT num) override
     {
         // for this to work the assignment must be from a small number to some other index
-        // and we do automatic checking of the translation and if it isn't valid don't do the assignment
+        // and we do automatic checking of the translation and if it isn't valid don't do the
+        // assignment
         if (isValidRow(row)) {
             matrixDataContainer<ValueT>::md->assign(Trow[row], col, num);
         }

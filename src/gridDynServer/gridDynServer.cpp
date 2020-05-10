@@ -9,8 +9,8 @@ using namespace boost::posix_time;
 
 gridDynServer::gridDynServer()
 {
-    port = 4612;  //typical port number
-    ip_protocol = udp;  //use udp protocol as default
+    port = 4612;  // typical port number
+    ip_protocol = udp;  // use udp protocol as default
     timeBase = 1000000;
     intervalError = 0.0;
     tcpacc = NULL;
@@ -44,7 +44,7 @@ void gridDynServer::stop_server()
                 active_tcp_sessions[kk]->socket_.close();
             }
         }
-        //sleep for a little while to make sure everything is shutdown
+        // sleep for a little while to make sure everything is shutdown
         boost::this_thread::sleep(milliseconds(250));
     }
 }
@@ -80,11 +80,11 @@ void gridDynServer::start_server(boost::asio::io_service& ios)
         printf("\t\t|\t\tWelcome to PMU SERVER - UDP\t\t|\n");
         printf("\t\t|-------------------------------------------------------|\n");
 
-        //create a local endpoint and initialize a socket
+        // create a local endpoint and initialize a socket
         local_endpoint_udp = udp::endpoint(udp::v4(), port);
         udpsock = new pmu_udp_socket(ios, local_endpoint_udp);
 
-        //start to receive on this port
+        // start to receive on this port
         udpsock->socket_.async_receive_from(
             boost::asio::buffer(recv_buffer_),
             remote_endpoint_udp,
@@ -100,12 +100,12 @@ void gridDynServer::start_server(boost::asio::io_service& ios)
         printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");
         printf("\t\t|-------------------------------------------------------|\n");
 
-        //create a local endpoint and initialize a socket
+        // create a local endpoint and initialize a socket
         local_endpoint_tcp = tcp::endpoint(tcp::v4(), port);
         tcpacc = new pmu_tcp_acc(ios, local_endpoint_tcp);
 
         pmu_tcp_session* sess = new pmu_tcp_session(tcpacc->io_service_);
-        //start to accept connections on this socket
+        // start to accept connections on this socket
         session_lock.lock();
         sess->index = active_tcp_sessions.size();
         active_tcp_sessions.push_back(sess);
@@ -256,7 +256,7 @@ void gridDynServer::send_data()
                 skipped.resize(0);
             }
             session_lock.unlock();
-            if (data_sent == false)  //nobody to send data to
+            if (data_sent == false)  // nobody to send data to
             {
                 break;
             }
@@ -290,8 +290,8 @@ void gridDynServer::pmu_udp(const boost::system::error_code& error, std::size_t 
     }
 
     c = recv_buffer_[1];
-    c <<= 1;  //get rid of the undefined bit
-    c >>= 5;  //get rid of the version number
+    c <<= 1;  // get rid of the undefined bit
+    c >>= 5;  // get rid of the version number
 
     udpsock->socket_.async_receive_from(boost::asio::buffer(recv_buffer_),
                                         remote_endpoint_udp,
@@ -308,7 +308,7 @@ void gridDynServer::tcp_accept(pmu_tcp_session* active_session,
         Connection::Pointer newConn =
             Connection::create(acceptor.io_service());*/
     if (!error) {
-        //set up to read commands
+        // set up to read commands
         active_session->cstate = pmu_tcp_session::waiting;
         active_session->socket_.async_read_some(
             boost::asio::buffer(active_session->recv_buffer_),
@@ -317,7 +317,7 @@ void gridDynServer::tcp_accept(pmu_tcp_session* active_session,
                         active_session,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
-        //reset to accept connections on a new socket
+        // reset to accept connections on a new socket
         pmu_tcp_session* sess = new pmu_tcp_session(tcpacc->io_service_);
         session_lock.lock();
         sess->index = active_tcp_sessions.size();
@@ -353,8 +353,8 @@ void gridDynServer::pmu_tcp(pmu_tcp_session* active_session,
     }
 
     c = active_session->recv_buffer_[1];
-    c <<= 1;  //get rid of the undefined bit
-    c >>= 5;  //get rid of the version number
+    c <<= 1;  // get rid of the undefined bit
+    c >>= 5;  // get rid of the version number
 
     if (c == 0x04) /* Check if it is a command frame from PDC */
     {
@@ -430,9 +430,9 @@ void gridDynServer::pmu_tcp(pmu_tcp_session* active_session,
 
 void gridDynServer::initialize()
 {
-    //generate the appropriate sizes and place that field appropriately
+    // generate the appropriate sizes and place that field appropriately
 
-    //don't do anything with the data frame yet since that gets generated on the fly
+    // don't do anything with the data frame yet since that gets generated on the fly
 
     recv_buffer_.resize(65536, 0);
 }

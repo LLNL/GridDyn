@@ -44,8 +44,9 @@ class elementParseException: public std::exception {
     const char* what() const noexcept override { return estr.c_str(); }
 };
 
-/** @brief class for wrapping various document readers for use in the reader function for abstracting various file
- types readerElement is a abstract virtual class requiring an instantiation for implementation
+/** @brief class for wrapping various document readers for use in the reader function for
+ abstracting various file types readerElement is a abstract virtual class requiring an instantiation
+ for implementation
 */
 class readerElement {
   public:

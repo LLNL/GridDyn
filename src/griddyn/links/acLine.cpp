@@ -616,9 +616,8 @@ void acLine::outputPartialDerivatives(const IOdata& /*inputs*/,
                                       matrixData<double>& /*md*/,
                                       const solverMode& /*sMode*/)
 {
-    // there are theoretically 4 outputs for a standard ac line,  but no internal states therefore if this function
-    // is called from an external
-    // entity there are no output partial derivatives
+    // there are theoretically 4 outputs for a standard ac line,  but no internal states therefore
+    // if this function is called from an external entity there are no output partial derivatives
 }
 
 void acLine::outputPartialDerivatives(id_type_t busId,
@@ -725,8 +724,8 @@ void acLine::setState(coreTime time,
     prevTime = time;
     stateData sD(time, state, dstate_dt);
 
-    if (sMode.approx
-            [decoupled]) {  // recompute power with new state updates for the decoupled system
+    if (sMode.approx[decoupled]) {  // recompute power with new state updates for the decoupled
+                                    // system
         updateLocalCache(noInputs, sD, sMode);
         constLinkInfo = linkInfo;  // update the constant linkInfo
         constLinkComp = linkComp;

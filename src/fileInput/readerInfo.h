@@ -83,7 +83,8 @@ class readerInfo: public basicReaderInfo {
         customElements;  //!< custom objects
     scopeID currentScope = 0;  //!< identification of the current scope
     std::vector<std::tuple<scopeID, std::string, bool, std::string>>
-        scopedDefinitions;  // container for the scoped definitions so they can be removed when the scope changes
+        scopedDefinitions;  // container for the scoped definitions so they can be removed when the
+                            // scope changes
     std::vector<scopeID> directoryScope;  //!< the scope of the listed directories
     ignoreListType parameterIgnoreStrings;  //!< parameters to ignore
     coreObject* keyObj = nullptr;  //!< placeholder for storage of a keyObject
@@ -104,8 +105,8 @@ class readerInfo: public basicReaderInfo {
     bool addLibraryObject(coreObject* obj, std::vector<gridParameter>& pobjs);
     /** @brief  create an object based on a reference object in the library
     @param[in] objName  the name of the object in the library to find
-    @param[in] mobj set to nullptr to create a new object, if set the library object is cloned onto the given
-    object
+    @param[in] mobj set to nullptr to create a new object, if set the library object is cloned onto
+    the given object
     @return a pointer to the new object created/or cloned from the library object
     */
     coreObject* makeLibraryObject(const std::string& objName, coreObject* mobj);
@@ -155,15 +156,16 @@ class readerInfo: public basicReaderInfo {
     void replaceLockedDefinition(const std::string& def, const std::string& replacement);
 
     /** @brief  add a name translation
-     name translations are one to one translations of object names for declaring new names for convenience
+     name translations are one to one translations of object names for declaring new names for
+    convenience
     @param[in] def the object name needing translation
     @param[in] component the underlying component name usually one with a defined reader
     */
     void addTranslate(const std::string& def, const std::string& component);
 
     /** @brief  add a name translation with a specific type
-     name translations are one to one translations of object names for declaring new names for convenience and can
-    include a specific type of the component along with it
+     name translations are one to one translations of object names for declaring new names for
+    convenience and can include a specific type of the component along with it
     @param[in] def the object name needing translation
     @param[in] component the underlying component name usually one with a defined reader
     @param[in] type the type of the object to go along with the component
@@ -172,15 +174,16 @@ class readerInfo: public basicReaderInfo {
         addTranslate(const std::string& def, const std::string& component, const std::string& type);
 
     /** @brief  add a type specification associated with a component
-     name translations are one to one translations of object names for declaring new names for convenience
+     name translations are one to one translations of object names for declaring new names for
+    convenience
     @param[in] def the object name needing translation
     @param[in] type the type associated with a given definition
     */
     void addTranslateType(const std::string& def, const std::string& type);
 
     /** @brief  add a custom object to the reader Info
-     unlike library objects a pointer to the actual XML code is stored and reread to create an object allowing for
-    creation of complex XML structures as a library
+     unlike library objects a pointer to the actual XML code is stored and reread to create an
+    object allowing for creation of complex XML structures as a library
     @param[in] name the name of the custom object
     @param[in] element  a pointer to the xml element with the object creation information
       @param[in] nargs the number of arguments the custom element has
@@ -197,14 +200,15 @@ class readerInfo: public basicReaderInfo {
 
     /** @brief  retrieve a custom object
     @param[in] name the name of the supposed custom object
-    @return a pair with a shared pointer to the custom object and an integer representing the number or arguments
+    @return a pair with a shared pointer to the custom object and an integer representing the number
+    or arguments
     */
     const std::pair<std::shared_ptr<readerElement>, int>
         getCustomElement(const std::string& name) const;
 
     /** @brief check and translate a string for definitions
-     does a direct translation for any strings also interprets and translates to a string anything contained within
-    pairs of $
+     does a direct translation for any strings also interprets and translates to a string anything
+    contained within pairs of $
     @param[in] input  the input string to translate
     @return  the translated string
     */
@@ -222,8 +226,8 @@ class readerInfo: public basicReaderInfo {
 
     /** @brief check that a file parameter is valid
     @param[in,out] strVal  the file to check and output an updated file location
-    @param[in] extra_find if the file cannot be found on the first check, ignore the path information and check
-    again for just the fileName in known locations
+    @param[in] extra_find if the file cannot be found on the first check, ignore the path
+    information and check again for just the fileName in known locations
     @return true if the file was changed false otherwise
     */
     bool checkFileParam(std::string& strVal, bool extra_find = false);
@@ -233,7 +237,8 @@ class readerInfo: public basicReaderInfo {
     @return true if the file was changed false otherwise
     */
     bool checkDirectoryParam(std::string& strVal);
-    /** @brief get a container of all the strings which should be interpreted as blocks instead of parameters
+    /** @brief get a container of all the strings which should be interpreted as blocks instead of
+     * parameters
      */
     const ignoreListType& getIgnoreList() const;
 

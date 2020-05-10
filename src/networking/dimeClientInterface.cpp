@@ -105,9 +105,9 @@ void encodeVariableMessage(Json::Value& data, double val)
     response["result"] = val;
     response["success"] = true;
     data["args"] = response;
-    // response = { 'content': {'stdout': '', 'figures' : [], 'datadir' : '/tmp MatlabData/'}, 'result' : value,
-    // 'success' : True }     outgoing = { 'command': 'response', 'name' : self.name, 'meta' : {'var_name':
-    // var_name},
+    // response = { 'content': {'stdout': '', 'figures' : [], 'datadir' : '/tmp MatlabData/'},
+    // 'result' : value, 'success' : True }     outgoing = { 'command': 'response', 'name' :
+    // self.name, 'meta' : {'var_name': var_name},
     //'args' : self.matlab.json_encode(response) }
 }
 void dimeClientInterface::send_var(const std::string& varName,

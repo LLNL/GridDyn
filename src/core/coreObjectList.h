@@ -31,9 +31,8 @@ struct id {
 };
 struct uid {
 };
-// define a multi-index container based on the object id, which should be unique, and the name which also should be
-// unique, and the user id,
-// which isn't necessarily unique.
+// define a multi-index container based on the object id, which should be unique, and the name which
+// also should be unique, and the user id, which isn't necessarily unique.
 using objectIndex = multi_index_container<
     coreObject*,
     indexed_by<
@@ -43,7 +42,8 @@ using objectIndex = multi_index_container<
         ordered_non_unique<tag<uid>, const_mem_fun<coreObject, index_t, &coreObject::getUserID>>>>;
 
 /** @brief list class that facilitates adding or searching for pointers to griddyn by name or id
- * a list class that stores a list of the objects contained in an unordered map to facilitate searching for objects
+ * a list class that stores a list of the objects contained in an unordered map to facilitate
+ * searching for objects
  */
 class coreObjectList {
   private:

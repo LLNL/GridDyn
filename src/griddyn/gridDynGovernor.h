@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef GRIDDYNGOVERNOR_H_
 #define GRIDDYNGOVERNOR_H_
@@ -47,9 +47,9 @@ class Governor: public gridSubModel {
     double Pmin = -kBigNum;  //!< [pu] minimum turbine output
     double Pset = 0.0;  //!< [pu] Set point and initial Pm
     double Wref = -kBigNum;  //!<[rad]  reference frequency
-    double deadbandHigh = -kBigNum;  //!<upper threshold on the deadband;
-    double deadbandLow = kBigNum;  //!<lower threshold on the deadband;
-    double machineBasePower = 100.0;  //!<the machine base of the generator;
+    double deadbandHigh = -kBigNum;  //!< upper threshold on the deadband;
+    double deadbandLow = kBigNum;  //!< lower threshold on the deadband;
+    double machineBasePower = 100.0;  //!< the machine base of the generator;
     blocks::deadbandBlock dbb;  //!< block managing the deadband
     blocks::controlBlock cb;  //!< block managing the filtering functions on the frequency response
     blocks::delayBlock delay;  //!< block managing the throttle filter
@@ -93,9 +93,9 @@ class Governor: public gridSubModel {
                           const solverMode& sMode) override;
 
   protected:
-    //virtual void setTime(coreTime time){prevTime=time;};
+    // virtual void setTime(coreTime time){prevTime=time;};
 };
 
-}  //namespace griddyn
+}  // namespace griddyn
 
-#endif  //GRIDGOVERNOR_H_
+#endif  // GRIDGOVERNOR_H_

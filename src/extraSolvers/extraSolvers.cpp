@@ -31,10 +31,11 @@ void loadExtraSolvers(const std::string& subset)
         extraFactories.push_back(bfact);
 #endif
     }
-    //  auto b = std::make_shared<childTypeFactory<extra::txThermalModel, Relay>> ("relay", stringVec{"thermaltx"});
-    //extraFactories.push_back (b);
+    //  auto b = std::make_shared<childTypeFactory<extra::txThermalModel, Relay>> ("relay",
+    //  stringVec{"thermaltx"});
+    // extraFactories.push_back (b);
 
-    //auto c = std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>> ("relay", stringVec{"txaging", "txage"});
-    //extraFactories.push_back (c);
+    // auto c = std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>> ("relay",
+    // stringVec{"txaging", "txage"}); extraFactories.push_back (c);
 }
-}  //namespace griddyn
+}  // namespace griddyn

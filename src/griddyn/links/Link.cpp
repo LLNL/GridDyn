@@ -633,7 +633,8 @@ void Link::updateLocalCache()
 
 gridBus* Link::getBus(index_t busInd) const
 {
-    // for Links it is customary to refer to the buses as 1 and 2, but for indexing schemes they sometimes atart at
+    // for Links it is customary to refer to the buses as 1 and 2, but for indexing schemes they
+    // sometimes atart at
     // 0
     // so this function will return Bus 1 for indices <=1 and Bus if the index is 2.
     return ((busInd <= 1) || (busInd == B1->getID())) ?
@@ -703,8 +704,8 @@ double Link::getTotalImpedance(id_type_t busId) const
     using gmlc::utilities::signn;
     if (isBus2(busId, B2))  // from bus
     {
-        //  printf("id2 impedance=%f\n", signn(linkFlows.P2 + linkFlows.Q2)*(linkInfo.v2*linkInfo.v2) /
-        //  std::hypot(linkFlows.P2, linkFlows.Q2));
+        //  printf("id2 impedance=%f\n", signn(linkFlows.P2 +
+        //  linkFlows.Q2)*(linkInfo.v2*linkInfo.v2) / std::hypot(linkFlows.P2, linkFlows.Q2));
         double val = signn(linkFlows.P2 + linkFlows.Q2) * (linkInfo.v2 * linkInfo.v2) /
             std::hypot(linkFlows.P2, linkFlows.Q2);
         return (std::isnormal(val) ? val : kBigNum);

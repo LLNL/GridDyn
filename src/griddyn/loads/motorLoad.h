@@ -16,7 +16,7 @@
 namespace griddyn {
 namespace loads {
     /** @brief class defining operations and equations for an induction motor load
- */
+     */
     class motorLoad: public Load {
       public:
         /** @brief motor load flags*/
@@ -45,7 +45,7 @@ namespace loads {
         model_parameter mBase = -100;  //!< system machine base
         model_parameter Vcontrol =
             1.0;  //!< whether the motor has some voltage controls for tweaking power (basically
-            //!< a transformer attached motor
+        //!< a transformer attached motor
         model_parameter init_slip = -1.0;  //!< the initial slip of the motor
         model_parameter scale = 1.0;  //!< scaling factor for the motor
       public:

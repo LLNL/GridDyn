@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 #pragma once
 
 #include "griddyn/comms/Communicator.h"
@@ -53,5 +53,5 @@ namespace helicsLib {
         int32_t index = 0;
     };
 
-}  //namespace helicsLib
-}  //namespace griddyn
+}  // namespace helicsLib
+}  // namespace griddyn

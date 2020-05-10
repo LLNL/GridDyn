@@ -109,8 +109,8 @@ void loadSubObjects(std::shared_ptr<readerElement>& element,
             continue;
         }
 
-        if (fieldName ==
-            "local")  // shortcut to do more loading on the parent object most useful in loops to add
+        if (fieldName == "local")  // shortcut to do more loading on the parent object most useful
+                                   // in loops to add
         // stacked parameters and imports
         {
             loadElementInformation(parentObject, element, fieldName, ri, emptyIgnoreList);

@@ -62,8 +62,8 @@ class objectFactory {
     /** @brief destructor*/
     virtual ~objectFactory();
 };
-// component factory is a template class that inherits from cFactory to actually to the construction of a specific
-// object
+// component factory is a template class that inherits from cFactory to actually to the construction
+// of a specific object
 
 using cMap = std::map<std::string, objectFactory*>;
 
@@ -92,8 +92,9 @@ class componentFactory {
 
 // create a high level object factory for the coreObject class
 using fMap = std::map<std::string, std::shared_ptr<componentFactory>>;
-/** @brief central location for building objects and storing factories for making all the gridDyn component
- core object Factory class  intended to be a singleton it contains a map from strings to typeFactories
+/** @brief central location for building objects and storing factories for making all the gridDyn
+ component core object Factory class  intended to be a singleton it contains a map from strings to
+ typeFactories
 */
 class coreObjectFactory {
   public:
@@ -163,8 +164,8 @@ class coreObjectFactory {
                      count_t numObjects,
                      coreObject* obj);
 
-    /** @brief prepare a number of objects for use later so they can all be constructed at once of the default type
-    for a given container
+    /** @brief prepare a number of objects for use later so they can all be constructed at once of
+    the default type for a given container
     @param[in] component the category of Object to create
     @param[in] numObjects  the number of objects to preallocate
     @param[in] obj the object to reference as the owner responsible for deleting the container

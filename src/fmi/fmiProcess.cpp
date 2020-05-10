@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,7 +9,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // libraries
 
@@ -25,7 +25,7 @@
 #include <iostream>
 
 #define VERSION_STRING "FMIprocess version 0.1 2015-4-30"
-//using namespace boost;
+// using namespace boost;
 namespace po = boost::program_options;
 
 int argumentParser(int argc, char* argv[], po::variables_map& vm_map);
@@ -87,7 +87,7 @@ int argumentParser(int argc, char* argv[], po::variables_map& vm_map)
     po::options_description config("configuration");
     po::options_description hidden("hidden");
 
-    //input boost controls
+    // input boost controls
     cmd_only.add_options()("help", "produce help message")("config_file",
                                                            po::value<std::string>(),
                                                            "specify a config file to use")(
@@ -122,7 +122,7 @@ int argumentParser(int argc, char* argv[], po::variables_map& vm_map)
 
     // objects/pointers/variables/constants
 
-    //program options control
+    // program options control
     if (cmd_vm.count("help")) {
         std::cout << visible << '\n';
         return 1;

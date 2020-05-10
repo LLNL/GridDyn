@@ -43,8 +43,8 @@ using mArray = std::vector<std::vector<double>>;
 
 double interpretString(const std::string& command, readerInfo& ri);
 
-// NOTE:PT I am leaving these as size_t since they are part of file reading and text location types and spread
-// across multiple files
+// NOTE:PT I am leaving these as size_t since they are part of file reading and text location types
+// and spread across multiple files
 void readMatlabArray(const std::string& text, size_t start, mArray& matA);
 bool readMatlabArray(const std::string& Name, const std::string& text, mArray& matA);
 stringVec readMatlabCellArray(const std::string& text, size_t start);

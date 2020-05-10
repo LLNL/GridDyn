@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "LineSearch.h"
 
 #include <cmath>
@@ -39,7 +39,7 @@ namespace paradae {
             alpha = 2.0;
             it_int = 0;
 
-            //next_x=x-alpha*dx;
+            // next_x=x-alpha*dx;
             next_x = x;
             next_x.AXPBY(-alpha, 1.0, dx);
 
@@ -50,7 +50,7 @@ namespace paradae {
             pnext_residual = next_residual;
             while ((next_residual > residual || diff < 0) && it_int < max_iter_int) {
                 alpha *= 0.9;
-                //next_x=x-alpha*dx;
+                // next_x=x-alpha*dx;
                 next_x = x;
                 next_x.AXPBY(-alpha, 1.0, dx);
 

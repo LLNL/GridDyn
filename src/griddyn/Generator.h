@@ -21,16 +21,16 @@ class scheduler;
 class gridSubModel;
 /**
 @ brief class describing a generator unit
- a generator is a power production unit in GridDyn.  the base generator class implements methods set forth in the
-gridSecondary class and inherits from that class it has mechanics for dealing with the power flow solution modes of
-a generator with no dynamics
+ a generator is a power production unit in GridDyn.  the base generator class implements methods set
+forth in the gridSecondary class and inherits from that class it has mechanics for dealing with the
+power flow solution modes of a generator with no dynamics
 */
 class Generator: public gridSecondary {
   public:
     /** @brief flags for controlling operation of the generator*/
     enum generator_flags {
-        variable_generation =
-            object_flag1,  //!< flag indicating that the generator has uncontrolled variable generation
+        variable_generation = object_flag1,  //!< flag indicating that the generator has
+                                             //!< uncontrolled variable generation
         reserve_capable =
             object_flag2,  //!< flag indicating the generator can act as spinning reserve
         agc_capable = object_flag3,  //!< flag indicating the generator is capable of agc response
@@ -39,8 +39,8 @@ class Generator: public gridSecondary {
         //! rather than a fixed limit
         no_voltage_derate =
             object_flag5,  //!< flag turning off voltage derating for low voltage power flow
-        independent_machine_base =
-            object_flag6,  //!< flag indicating that the generator has a different machine base than the simulation
+        independent_machine_base = object_flag6,  //!< flag indicating that the generator has a
+                                                  //!< different machine base than the simulation
         at_limit = object_flag7,  //!< flag indicating the generator is operating at a limit
         indirect_voltage_control_level =
             object_flag8,  //!< flag indicating that the generator should perform

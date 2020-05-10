@@ -89,8 +89,8 @@ namespace fmi {
                 me->setTime(prevTime - 0.01);
 
                 if (opFlags[use_output_estimator]) {
-                    // if we require the use of output estimators flag that to the simulation and load the information
-                    // for the estimator
+                    // if we require the use of output estimators flag that to the simulation and
+                    // load the information for the estimator
                     alert(this, SINGLE_STEP_REQUIRED);
 
                     loadOutputJac();
@@ -117,8 +117,8 @@ namespace fmi {
             oEst.resize(m_outputSize);
             probeFMU();  // probe the fmu
             if (opFlags[use_output_estimator]) {
-                // if we require the use of output estimators flag that to the simulation and load the information for
-                // the estimator
+                // if we require the use of output estimators flag that to the simulation and load
+                // the information for the estimator
                 alert(this, SINGLE_STEP_REQUIRED);
                 loadOutputJac();
             }
@@ -787,8 +787,8 @@ namespace fmi {
         if (me->getCurrentMode() >= fmuMode::initializationMode) {
             // updateInfo(inputs, sD, sMode);
             me->getOutputs(out.data());
-            // printf("time=%f, out1 =%f, out 2=%f\n", static_cast<double>((!sD.empty()) ? sD.time : prevTime), out[0],
-            // out[1]);
+            // printf("time=%f, out1 =%f, out 2=%f\n", static_cast<double>((!sD.empty()) ? sD.time :
+            // prevTime), out[0], out[1]);
             if ((opFlags[use_output_estimator]) && (!sD.empty()) &&
                 (!opFlags[fixed_output_interval]) && (isDynamic(sMode))) {
                 for (index_t pp = 0; pp < m_outputSize; ++pp) {

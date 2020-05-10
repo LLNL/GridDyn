@@ -170,16 +170,17 @@ std::string readerInfo::checkDefines(const std::string& input)
                     rep = true;
                     break;  // break out of inner loop
                 }
-                // try a recursive interpretation of the string block to convert a numeric result back into a
-                // string
+                // try a recursive interpretation of the string block to convert a numeric result
+                // back into a string
                 double val = interpretString(temp, *this);
                 if (!std::isnan(val)) {
                     if (std::abs(trunc(val) - val) < 1e-9) {
-                        // out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) + out.substr
-                        // (pos2 + 1);
+                        // out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) +
+                        // out.substr (pos2 + 1);
                         out.replace(pos1, pos2 - pos1 + 1, std::to_string(static_cast<int>(val)));
                     } else {
-                        // out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 + 1);
+                        // out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 +
+                        // 1);
                         auto str = std::to_string(val);
                         while (str.back() == '0')  // remove trailing zeros
                         {

@@ -424,8 +424,8 @@ void fmiInfo::loadVariables(std::shared_ptr<readerElement>& rd)
             // this should be unusual but it is possible
             variableLookup[variables[kk].name] = kk;
         }
-        // this one may fail and that is ok since this is a secondary detection mechanism for purely lower case
-        // parameters and may not be needed
+        // this one may fail and that is ok since this is a secondary detection mechanism for purely
+        // lower case parameters and may not be needed
         variableLookup.emplace(convertToLowerCase(variables[kk].name), kk);
         switch (variables[kk].causality.value()) {
             case fmi_causality_type_t::parameter:

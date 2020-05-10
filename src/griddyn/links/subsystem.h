@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef GRID_SUBSYSTEM_H_
 #define GRID_SUBSYSTEM_H_
@@ -18,13 +18,14 @@
 
 namespace griddyn {
 /** @brief class defining a subsystem which is a set of components which link other components
- built on the link model a subsystem contains an area so the whole simulation can be contained in layers
+ built on the link model a subsystem contains an area so the whole simulation can be contained in
+ layers
 */
 class subsystem: public Link {
   public:
     enum subsystem_flags {
-        direct_connection =
-            object_flag5,  //!< flag indicating directly connected objects (skipping the terminal link structure)
+        direct_connection = object_flag5,  //!< flag indicating directly connected objects (skipping
+                                           //!< the terminal link structure)
     };
 
   protected:
@@ -37,8 +38,8 @@ class subsystem: public Link {
         terminalBus;  //!< list of buses which attach to the external terminal points
 
     Area subarea;  //!<  a container area
-    std::vector<double> Pout;  //!<vector of output powers on each of the terminals
-    std::vector<double> Qout;  //!<vector of output reactive powers on each of the terminals
+    std::vector<double> Pout;  //!< vector of output powers on each of the terminals
+    std::vector<double> Qout;  //!< vector of output reactive powers on each of the terminals
   public:
     /** @brief default constructor
   @param[in] terminals  the number of terminal the subsystem should have*/
@@ -52,7 +53,7 @@ class subsystem: public Link {
     // remove components
     virtual void remove(coreObject* obj) override;
 
-    //get component models
+    // get component models
     virtual gridBus* getBus(index_t num) const override;
     virtual Link* getLink(index_t num) const override;
     virtual Relay* getRelay(index_t num) const override;
@@ -62,7 +63,7 @@ class subsystem: public Link {
     virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
     virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
-    //dynInitializeB dynamics
+    // dynInitializeB dynamics
     virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
     virtual void timestep(coreTime time, const IOdata& inputs, const solverMode& sMode) override;
@@ -95,7 +96,7 @@ class subsystem: public Link {
                           const double state[],
                           const double dstate_dt[],
                           const solverMode& sMode) override;
-    //for identifying which variables are algebraic vs differential
+    // for identifying which variables are algebraic vs differential
     /** @brief do a local converge on the components in the area
    a wrapper around the area->converge function
   @param[in] time the time
@@ -117,9 +118,9 @@ class subsystem: public Link {
                                   const solverMode& sMode) override;
 
     virtual void reset(reset_levels level) override;
-    //root finding functions
+    // root finding functions
 
-    //grab information
+    // grab information
 
     /** @brief flag all the voltage states
   *@param[out] vStates a vector with a value of 1.0 for all voltage states and 0 otherwise
@@ -130,7 +131,7 @@ class subsystem: public Link {
     bool switchTest() const override;
     bool switchTest(index_t num) const override;
     void switchMode(index_t num, bool mode) override;
-    //is connected
+    // is connected
     virtual bool isConnected() const override;
 
     virtual int fixRealPower(double power,
@@ -159,9 +160,9 @@ class subsystem: public Link {
     virtual double getImagCurrent(id_type_t busId = invalid_id_value) const override;
 
     virtual double getRealPower(
-        id_type_t busId = invalid_id_value) const override;  //function to return the real flow in
+        id_type_t busId = invalid_id_value) const override;  // function to return the real flow in
     virtual double getReactivePower(id_type_t busId = invalid_id_value)
-        const override;  //function to return the reactive power in
+        const override;  // function to return the reactive power in
     virtual count_t terminalCount() const override { return m_terminals; }
     double getLoss() const override;
     double getReactiveLoss() const override;
@@ -169,7 +170,7 @@ class subsystem: public Link {
 
     // dynInitializeB power flow
 
-    //for computing all the Jacobian elements at once
+    // for computing all the Jacobian elements at once
     using Link::ioPartialDerivatives;
     virtual void ioPartialDerivatives(id_type_t busId,
                                       const stateData& sD,
@@ -182,13 +183,14 @@ class subsystem: public Link {
                                           matrixData<double>& md,
                                           const solverMode& sMode) override;
 
-    //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
+    // virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const
+    // solverMode &sMode);
     virtual IOdata getOutputs(const IOdata& inputs,
                               const stateData& sD,
                               const solverMode& sMode) const override;
     virtual IOdata
         getOutputs(id_type_t busId, const stateData& sD, const solverMode& sMode) const override;
-    //TODO:: PT add the other getOutput functions
+    // TODO:: PT add the other getOutput functions
   protected:
     /** @brief get a vector with pointers to all the buses
    wrapper around the corresponding area function
@@ -202,5 +204,5 @@ class subsystem: public Link {
     void resize(count_t count);
 };
 
-}  //namespace griddyn
+}  // namespace griddyn
 #endif

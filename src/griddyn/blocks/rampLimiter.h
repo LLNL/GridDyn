@@ -17,9 +17,9 @@
 #include <limits>
 namespace griddyn {
 namespace blocks {
-    /** class that limits the rate of change of a value between an upper and lower limit and maintains state of whether
- * it is clamping or not
- */
+    /** class that limits the rate of change of a value between an upper and lower limit and
+     * maintains state of whether it is clamping or not
+     */
     class rampLimiter {
       private:
         double minRamp = std::numeric_limits<double>::min();  //!< the minimum ramp
@@ -48,7 +48,8 @@ namespace blocks {
         /** actively change the state depending on the input*/
         void changeLimitActivation(double dIdt);
         /** get the output
-    @return if the limiter is clamping it will be at one of the limits, if it is not it will be the input*/
+    @return if the limiter is clamping it will be at one of the limits, if it is not it will be the
+    input*/
         double output(double dIdt) const;
         /** returns the time derivative of the output
     @param dIdt the time derivative of the input
@@ -59,7 +60,8 @@ namespace blocks {
         double DoutDin() const;
         /** perform the function without the knowledge of the state*
     @param dIdt the time derivative of the input
-    @return either dIdt or the ramp limits if dIdt is greater than the max or less than the min allowable ramp*/
+    @return either dIdt or the ramp limits if dIdt is greater than the max or less than the min
+    allowable ramp*/
         double clampOutputRamp(double dIdt) const;
     };
 }  // namespace blocks

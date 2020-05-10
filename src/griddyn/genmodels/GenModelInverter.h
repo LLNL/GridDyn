@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef GENMODELINVERTER_H_
 #define GENMODELINVERTER_H_
@@ -81,7 +81,7 @@ with very fast angle adjustments to keep the mechanical input power balanced
                                      const solverMode& sMode,
                                      double alpha) override;
         /** helper function to get omega and its state location
-    */
+         */
         virtual double getFreq(const stateData& sD,
                                const solverMode& sMode,
                                index_t* freqOffset = nullptr) const override;
@@ -123,6 +123,6 @@ with very fast angle adjustments to keep the mechanical input power balanced
         double b = (1.0 / 1.05);
     };
 
-}  //namespace genmodels
-}  //namespace griddyn
-#endif  //GRIDDYNGENMODEL_H_
+}  // namespace genmodels
+}  // namespace griddyn
+#endif  // GRIDDYNGENMODEL_H_

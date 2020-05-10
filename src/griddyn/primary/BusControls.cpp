@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "BusControls.h"
 
@@ -326,8 +326,8 @@ void BusControls::mergeBus(acBus* mbus)
     // bus with the lowest ID is the master
     if (controlledBus->getID() < mbus->getID()) {
         if (controlledBus->checkFlag(
-                acBus::bus_flags::
-                    slave_bus))  // if we are already a slave forward the merge to the master
+                acBus::bus_flags::slave_bus))  // if we are already a slave forward the merge to the
+                                               // master
         {
             masterBus->mergeBus(mbus);
         } else {
@@ -350,8 +350,8 @@ void BusControls::mergeBus(acBus* mbus)
     } else if (controlledBus->getID() > mbus->getID())  // mbus is now this buses master
     {
         if (controlledBus->checkFlag(
-                acBus::bus_flags::
-                    slave_bus))  // if we are already a slave forward the merge to the master
+                acBus::bus_flags::slave_bus))  // if we are already a slave forward the merge to the
+                                               // master
         {
             if (masterBus->getID() != mbus->getID()) {
                 masterBus->mergeBus(mbus);

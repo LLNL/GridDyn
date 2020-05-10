@@ -129,7 +129,8 @@ class gridOptObjectHolder: public coreObject {
     count_t remaining() const { return objCount - next; }
 };
 
-// opt factory is a template class that inherits from cFactory to actually to the construction of a specific object
+// opt factory is a template class that inherits from cFactory to actually to the construction of a
+// specific object
 template<class Ntype, class gdType>
 class optObjectFactory: public optFactory {
     static_assert(std::is_base_of<gridOptObject, Ntype>::value,

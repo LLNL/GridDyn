@@ -23,8 +23,8 @@ class gridCore;
 
 // TODO:: PT make more of the parameters protected
 /* class that grabs data from another object directly
-@details there is a target object and a functional object that actually can extract data from that object
-it also includes a gain and bias to do a linear shift and scale on the object
+@details there is a target object and a functional object that actually can extract data from that
+object it also includes a gain and bias to do a linear shift and scale on the object
 */
 class gridGrabber: public objectOperatorInterface {
   public:

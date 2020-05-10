@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef GRIDDYN_COMMUNICATIONS_CORE_
 #define GRIDDYN_COMMUNICATIONS_CORE_
@@ -28,7 +28,8 @@ typedef std::unordered_map<std::uint64_t, Communicator*> commMapID;
 
 #define SEND_SUCCESS (0)
 #define DESTINATION_NOT_FOUND (-1);
-/** communicationCore object represents a very basic communications router for internal use inside GridDyn
+/** communicationCore object represents a very basic communications router for internal use inside
+GridDyn
 @details it maintains a table and sends messages to the appropriate destination using callbacks
 */
 class communicationsCore {
@@ -74,5 +75,5 @@ class communicationsCore {
     commMapID m_idMap;  //!< map containing the id
     coreTime m_time = timeZero;  //!< current time of the communicator
 };
-}  //namespace griddyn
+}  // namespace griddyn
 #endif

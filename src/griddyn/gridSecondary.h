@@ -18,8 +18,8 @@ namespace griddyn {
 class gridBus;
 
 /** @brief base class for objects that can attach to a bus like Load and Generator
- *  gridSecondary class defines the interface for secondary objects which are nominally objects that hang directly
- *off a bus
+ *  gridSecondary class defines the interface for secondary objects which are nominally objects that
+ *hang directly off a bus
  **/
 class gridSecondary: public gridComponent {
   protected:
@@ -53,9 +53,9 @@ class gridSecondary: public gridComponent {
 
     /**
     *@brief get the real output power
-    @details  these are the main data output functions for secondary object.  The intention is to supply the
-    load/gen to the bus they may have other outputs but first and second are the real and reactive power negative
-    numbers indicate power generation
+    @details  these are the main data output functions for secondary object.  The intention is to
+    supply the load/gen to the bus they may have other outputs but first and second are the real and
+    reactive power negative numbers indicate power generation
     @param[in] inputs the inputs for the secondary object
     * @param[in] sD the current state data for the simulation
     * @param[in] sMode the mode the solver is in

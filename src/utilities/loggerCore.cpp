@@ -1,7 +1,7 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC.  See
-the top-level NOTICE for additional details. All rights reserved.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable
+Energy, LLC.  See the top-level NOTICE for additional details. All rights reserved.
 SPDX-License-Identifier: BSD-3-Clause
 */
 /*
@@ -112,7 +112,8 @@ void LoggingCore::processingLoop()
         if (msg.size() > 3) {
             if (msg.compare(0, 3, "!!>") == 0) {
                 if (msg.compare(3, 5, "flush") ==
-                    0) {  // any flush command we need flush the console, we may also need to flush a particular file
+                    0) {  // any flush command we need flush the console, we may also need to flush
+                          // a particular file
                     std::cout.flush();
                     if (index == -1) {
                         continue;
@@ -168,15 +169,15 @@ void LoggingCore::processingLoop()
  */
 std::map<std::string, std::shared_ptr<LoggerManager>> LoggerManager::loggers;
 
-/** we expect operations on core object that modify the map to be rare but we absolutely need them to be thread
-safe so we are going to use a lock that is entirely controlled by this file*/
+/** we expect operations on core object that modify the map to be rare but we absolutely need them
+to be thread safe so we are going to use a lock that is entirely controlled by this file*/
 static std::mutex loggerLock;
 
 std::shared_ptr<LoggerManager> LoggerManager::getLoggerManager(const std::string& loggerName)
 {
     std::lock_guard<std::mutex> loglock(
         loggerLock);  // just to ensure that nothing funny happens if you try to
-        // get a context while it is being constructed
+    // get a context while it is being constructed
     auto fnd = loggers.find(loggerName);
     if (fnd != loggers.end()) {
         return fnd->second;

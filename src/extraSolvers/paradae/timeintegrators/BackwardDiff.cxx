@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "BackwardDiff.h"
 
@@ -139,9 +139,10 @@ namespace paradae {
         bool success_solver, root_crossed = false, success_error_test = false;
         PVector px1;
         try {
-            //Newton newton(50000);
+            // Newton newton(50000);
             // Initial guess for the Newton solver is x1 or dx1 (depending on the choice of unknown)
-            // unless variable step is used, in that case we have the prediction computed in ComputeBDFCoeff
+            // unless variable step is used, in that case we have the prediction computed in
+            // ComputeBDFCoeff
             if (use_dx_as_unknown)
                 val.xnext.CopyData(val.dxnext);
             else if (do_varstep)
@@ -202,7 +203,7 @@ namespace paradae {
         if (do_varstep) {
             SVector correction(x1);
             correction.AXPBY(-Cprime, Cprime, x0predicted);
-            Real err = app.XNorm(correction, x1);  //err=correction.Norm2()/rtol/x1.Norm2();
+            Real err = app.XNorm(correction, x1);  // err=correction.Norm2()/rtol/x1.Norm2();
             err = max(err, 1e-10);
             refinement = pow(1.0 / 6.0 / err, 1.0 / Real(order + 1.0));
             refinement = 1.0 / refinement;
@@ -404,8 +405,10 @@ namespace paradae {
     }
 
     /*!
-  This method computes the coefficient of the variable-step BDF method. If all time steps are equal, this reduces to the initial constant step method. We can use fully variable coefficient (`bdf_fixedleading=false` and `varstep=false` and \f$\alpha_{q+1}=0\f$) or fixe leading coefficient (`bdf_fixedleading=true` or `varstep=true` and \f$\alpha_{q+1}\neq 0\f$)
-  \f[
+  This method computes the coefficient of the variable-step BDF method. If all time steps are equal,
+  this reduces to the initial constant step method. We can use fully variable coefficient
+  (`bdf_fixedleading=false` and `varstep=false` and \f$\alpha_{q+1}=0\f$) or fixe leading
+  coefficient (`bdf_fixedleading=true` or `varstep=true` and \f$\alpha_{q+1}\neq 0\f$) \f[
   h_n\,\dot{y}_{n}=\sum_{i=0}^q \alpha_i y_{n-i}+\alpha_{q+1}\dot{y}_{n-1}
   \f]
 */
@@ -549,7 +552,8 @@ namespace paradae {
 
         this->bdf->ComputeUnknown(dxnext, x, xprev, dxprev);
 
-        if (bdf->UseDxAsUnknown())  // WARNING : this is where the tricky x <-> dxnext is confusing...
+        if (bdf->UseDxAsUnknown())  // WARNING : this is where the tricky x <-> dxnext is
+                                    // confusing...
             equation->function(this->tn, dxnext, x, pstate, gx);
         else  // x is really x, dxnext is really dx
         {
@@ -564,7 +568,8 @@ namespace paradae {
                 abort();
             }
 
-            if (bdf->UseDxAsUnknown())  // WARNING : this is where the tricky x <-> dxnext is confusing...
+            if (bdf->UseDxAsUnknown())  // WARNING : this is where the tricky x <-> dxnext is
+                                        // confusing...
             {
                 equation->jacobian_ypcdy(this->tn, dxnext, x, pstate, 1.0 / pcoeff(0), *jacmat);
                 (*jacmat) *= pcoeff(0);
@@ -577,7 +582,7 @@ namespace paradae {
                 jacmat->Factorize();
             }
         }
-        //update_jacobian=true;
+        // update_jacobian=true;
     }
 }  // namespace paradae
 }  // namespace griddyn

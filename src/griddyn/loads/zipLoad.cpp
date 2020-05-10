@@ -430,8 +430,8 @@ double zipLoad::getr() const
         return 0.0;
     }
     std::complex<double> y(Yp, Yq);
-    auto z = 1.0 /
-        y;  // I would take a conjugate but it doesn't matter since we are only returning the real part
+    auto z = 1.0 / y;  // I would take a conjugate but it doesn't matter since we are only returning
+                       // the real part
     return z.real();
 }
 

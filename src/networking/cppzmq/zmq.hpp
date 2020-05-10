@@ -788,8 +788,8 @@ class monitor_t {
         std::string address(str, str + zmq_msg_size(&addrMsg));
         zmq_msg_close(&addrMsg);
 #else
-        // Bit of a hack, but all events in the zmq_event_t union have the same layout so this will work for all
-        // event types.
+        // Bit of a hack, but all events in the zmq_event_t union have the same layout so this will
+        // work for all event types.
         std::string address = event->data.connected.addr;
 #endif
 

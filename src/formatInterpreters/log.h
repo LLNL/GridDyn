@@ -183,6 +183,6 @@ static std::string NowTime()
     return result;
 }
 
-#endif  //WIN32
+#endif  // WIN32
 
 #endif  //__LOG_H__

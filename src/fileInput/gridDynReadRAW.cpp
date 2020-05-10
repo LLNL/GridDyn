@@ -640,8 +640,8 @@ void rawReadGen(Generator* gen, const std::string& line, basicReaderInfo& opt)
         double vp = gen->getParent()->get("vtarget");
         if (std::abs(vp - V) > 0.0001) {
             gen->set("vtarget", V);
-            // for raw files the bus doesn't necessarily set a control point it comes from the generator, so we
-            // have to set it here.
+            // for raw files the bus doesn't necessarily set a control point it comes from the
+            // generator, so we have to set it here.
             if (!opt.checkFlag(no_generator_bus_voltage_reset)) {
                 gen->getParent()->set("vtarget", V);
                 gen->getParent()->set("voltage", V);
@@ -727,8 +727,8 @@ auto generateBranchName(const stringVector& strvec,
 
     int ind2 = std::stoi(trim(strvec[1]));
 
-    // negative bus number indicates direction of measurement in PSS/E this is irrelevant in GridDyn since it can
-    // do both directions
+    // negative bus number indicates direction of measurement in PSS/E this is irrelevant in GridDyn
+    // since it can do both directions
     if (ind2 < 0) {
         // int tmp=ind1;
         ind2 = abs(ind2);
@@ -1160,8 +1160,8 @@ void rawReadSwitchedShunt(coreObject* parentObject,
 
     auto mode = numeric_conversion<int>(strvec[1], 0);
     int shift = 0;
-    //TODO:  this may not be totally correct right now
-    //VERSION 32 has some ambiguity in the interpretation
+    // TODO:  this may not be totally correct right now
+    // VERSION 32 has some ambiguity in the interpretation
     if (opt.version >= 32) {
         shift = 2;
     }

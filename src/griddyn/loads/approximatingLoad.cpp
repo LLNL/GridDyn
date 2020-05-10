@@ -194,7 +194,8 @@ namespace loads {
 
             case coupling_detail_t::triple: {
                 auto LV = run3ApproxB();
-                // printf("t=%f deltaP=%e deltaQ=%e deltaIr=%e deltaIq=%e deltaZr=%e deltaZq=%e\n", prevTime, P - LV[0], Q
+                // printf("t=%f deltaP=%e deltaQ=%e deltaIr=%e deltaIq=%e deltaZr=%e deltaZq=%e\n",
+                // prevTime, P - LV[0], Q
                 // - LV[1], Ir - LV[2], Iq - LV[3], Yp - LV[4], Yq - LV[5]);
 
                 setP(LV[0]);

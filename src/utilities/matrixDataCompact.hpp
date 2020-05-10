@@ -18,8 +18,8 @@
 #include <array>
 
 /** @brief class implementing a dense matrix geared for Jacobian entries
- this matrixData structure is intended to be for small dense matrices with a required fast value lookup
-and possibly lots of duplicate entries
+ this matrixData structure is intended to be for small dense matrices with a required fast value
+lookup and possibly lots of duplicate entries
 */
 template<count_t R, count_t C, class ValueT = double>
 class matrixDataCompact: public matrixData<ValueT> {

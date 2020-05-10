@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef GHOSTSWINGBUSMESSAGETYPES_H_
 #define GHOSTSWINGBUSMESSAGETYPES_H_
@@ -66,5 +66,5 @@ typedef struct {
     char arguments[PATH_MAX * 4];
 } CommandLineMessage;
 
-}  //namespace griddyn
+}  // namespace griddyn
 #endif

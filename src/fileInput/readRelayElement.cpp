@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "elementReaderTemplates.hpp"
 #include "griddyn/Area.h"
@@ -44,7 +44,8 @@ Relay* readRelayElement(std::shared_ptr<readerElement>& element,
     }
 
     std::string name = getElementField(element, "type", defMatchType);
-    if (name.empty()) {  // if the relay is a subobject of specific type of object then adjust the relay to match
+    if (name.empty()) {  // if the relay is a subobject of specific type of object then adjust the
+                         // relay to match
         std::string valType = gmlc::utilities::convertToLowerCase(element->getName());
         if (valType == relayComponentName) {
             name = getElementField(element, "ref", defMatchType);
@@ -110,4 +111,4 @@ Relay* readRelayElement(std::shared_ptr<readerElement>& element,
     return relay;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

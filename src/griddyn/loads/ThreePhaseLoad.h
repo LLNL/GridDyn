@@ -21,8 +21,8 @@ namespace loads {
         abc,
         pnz,
     };
-    /** Three phase load is a base object for supporting 3-phase constant power loads includes a few conversions to
-positive sequence values.
+    /** Three phase load is a base object for supporting 3-phase constant power loads includes a few
+conversions to positive sequence values.
 */
     class ThreePhaseLoad: public Load {
       public:

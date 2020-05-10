@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -260,7 +260,8 @@ BOOST_AUTO_TEST_CASE(test_pFlow_padjust)
     BOOST_CHECK_EQUAL(wc, 0);
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
     gds->getBusGenerationReal(P2);
-    // there should be 2 generators+ the swing bus that had their real power levels adjusted instead of just the swing bus
+    // there should be 2 generators+ the swing bus that had their real power levels adjusted instead
+    // of just the swing bus
     auto cnt = countDiffs(P2, P1, 0.0002);
     BOOST_CHECK_EQUAL(cnt, 3u);
 }
@@ -339,8 +340,8 @@ BOOST_AUTO_TEST_CASE(pflow_test_single_breaker)
 
     gds->run(5.0);
     BOOST_CHECK_GE(static_cast<double>(gds->getSimulationTime()), 5.0);
-    //gds->timestep(2.05,noInputs,cPflowSolverMode);
-    //runJacobianCheck(gds, cPflowSolverMode);
+    // gds->timestep(2.05,noInputs,cPflowSolverMode);
+    // runJacobianCheck(gds, cPflowSolverMode);
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 }
 static stringVec approx_modes{
@@ -398,13 +399,13 @@ BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture,
     requireState(gridDynSimulation::gridState_t::INITIALIZED);
     int errors;
     if (approx == "small_angle_decoupled") {
-        /*there is an initialization difference in this approximation due to the combination of decoupling
-        and the small angle approximation.  In decoupled modes the values from the voltages and angles are fixed
-        for the calculation of the decoupled quantities but are saved with the full trig calculation.  in the small
-        angle
-        approximation this is not done so there is a small error when evaluating the Jacobian right after the power
-        flow initialization
-        since the approximation has not yet been made.  All other modes and times do not have this issue*/
+        /*there is an initialization difference in this approximation due to the combination of
+        decoupling and the small angle approximation.  In decoupled modes the values from the
+        voltages and angles are fixed for the calculation of the decoupled quantities but are saved
+        with the full trig calculation.  in the small angle approximation this is not done so there
+        is a small error when evaluating the Jacobian right after the power flow initialization
+        since the approximation has not yet been made.  All other modes and times do not have this
+        issue*/
         errors = runJacobianCheck(gds, smode, 0.05, false);
     } else {
         errors = runJacobianCheck(gds, smode, false);

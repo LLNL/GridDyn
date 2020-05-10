@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef POWER_FLOW_ERROR_RECOVERY_H_
 #define POWER_FLOW_ERROR_RECOVERY_H_
@@ -19,11 +19,12 @@ namespace griddyn {
 class gridDynSimulation;
 class SolverInterface;
 
-/** @brief the purpose of this class is to try to recover a valid power flow solution after a solver failure*/
+/** @brief the purpose of this class is to try to recover a valid power flow solution after a solver
+ * failure*/
 class powerFlowErrorRecovery {
   public:
     /** @brief enumeration describing possible return options
-  */
+     */
     enum class recovery_return_codes {
         more_options,
         out_of_options,
@@ -71,6 +72,6 @@ class powerFlowErrorRecovery {
     bool lowVoltageFix();
 };
 
-}  //namespace griddyn
+}  // namespace griddyn
 
 #endif

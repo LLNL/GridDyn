@@ -22,15 +22,16 @@ namespace griddyn {
 class Block;
 
 /** @brief basic power system bus for a power grid simulation
-  The gridBus class provides the basic node in a power systems analysis.  It is a locational basis for voltages and
-angles.  For the power systems analysis the equations include a power balance equations \f[ f(V)=\sum Q_{load}+
-\sum Q_{gen}+ \sum Q_{link} \f] \f[ f(\theta)=\sum P_{load}+\sum P_{gen}+\sum P_{link} \f] Buses can have a number
-of different configurations SLK buses fix the voltage and angle,  PV buses fix the voltage and real power,  PQ
-buses have known real and reactive generation/load, afix buses fix the angle and reactive power.  there are
-different setting for power flow calculations and dynamic calculations.
+  The gridBus class provides the basic node in a power systems analysis.  It is a locational basis
+for voltages and angles.  For the power systems analysis the equations include a power balance
+equations \f[ f(V)=\sum Q_{load}+ \sum Q_{gen}+ \sum Q_{link} \f] \f[ f(\theta)=\sum P_{load}+\sum
+P_{gen}+\sum P_{link} \f] Buses can have a number of different configurations SLK buses fix the
+voltage and angle,  PV buses fix the voltage and real power,  PQ buses have known real and reactive
+generation/load, afix buses fix the angle and reactive power.  there are different setting for power
+flow calculations and dynamic calculations.
 
-Buses act as connection points for links to tie to other buses and gridSecondary components such as generators and
-loads.
+Buses act as connection points for links to tie to other buses and gridSecondary components such as
+generators and loads.
 
 */
 class acBus: public gridBus {
@@ -177,9 +178,10 @@ class acBus: public gridBus {
                             const solverMode& sMode) override;
 
     /** @brief  try to shift the states to something more consistent
-      called when the current states do not make a consistent condition,  calling converge will attempt to move
-    them to a more valid state mode controls how this is done  0- does a single iteration loop mode=1 tries to
-    iterate until convergence based on tol mode=2  tries harder mode=3 does it with voltage only
+      called when the current states do not make a consistent condition,  calling converge will
+    attempt to move them to a more valid state mode controls how this is done  0- does a single
+    iteration loop mode=1 tries to iterate until convergence based on tol mode=2  tries harder
+    mode=3 does it with voltage only
     @pararm[in] time  the time of the corresponding states
     @param[in,out]  state the states of the system at present and shifted to match the updates
     @param[in,out] dstate_dt  the derivatives of the state that get updated
@@ -194,9 +196,10 @@ class acBus: public gridBus {
                           converge_mode mode = converge_mode::high_error_only,
                           double tol = 0.01) override;
     /** @brief  try to shift the local states to something more valid
-      called when the current states do not make a consistent condition,  calling converge will attempt to move
-    them to a more valid state mode controls how this is done  0- does a single iteration loop mode=1 tries to
-    iterate until convergence based on tol mode=2  tries harder mode=3 does it with voltage only
+      called when the current states do not make a consistent condition,  calling converge will
+    attempt to move them to a more valid state mode controls how this is done  0- does a single
+    iteration loop mode=1 tries to iterate until convergence based on tol mode=2  tries harder
+    mode=3 does it with voltage only
     @param[in] sMode the solver mode matching the states
     @param[in] mode  the mode of the convergence
     @param[in] tol  the tolerance to converge to
@@ -232,14 +235,16 @@ class acBus: public gridBus {
     // for identifying which variables are algebraic vs differential
     virtual void getVariableType(double sdata[],
                                  const solverMode& sMode) override;  // only applicable in DAE
-        // mode
+    // mode
     virtual void getTols(double tols[], const solverMode& sMode) override;
     // dynamic simulation
     virtual stringVec localStateNames() const override;
 
     /** @brief find a link based on the bus desiring to be connected to
-    @param[in] makeSlack  flag indicating that the bus should be made a slack bus after propagating the power
-    @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr if none exists
+    @param[in] makeSlack  flag indicating that the bus should be made a slack bus after propagating
+    the power
+    @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr
+    if none exists
     */
     virtual int propogatePower(bool makeSlack = false) override;
 

@@ -391,8 +391,8 @@ void collector::add(const gridGrabberInfo& gdRI, coreObject* obj)
             for (const auto& fld : v) {
                 tempInfo.field = fld;
                 if (ccol >= 0) {
-                    /* this wouldn't work if the data was a vector grab, but in that case the recheck flag would be
-                     * activated and this information overridden*/
+                    /* this wouldn't work if the data was a vector grab, but in that case the
+                     * recheck flag would be activated and this information overridden*/
                     tempInfo.column = ccol++;  // post increment intended
                 }
                 add(tempInfo, obj);

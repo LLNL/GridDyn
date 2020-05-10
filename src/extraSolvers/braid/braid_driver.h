@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #ifndef braid_driver_h
 #define braid_driver_h
 
@@ -38,12 +38,12 @@ enum BDF_STRAT {
 typedef struct _braid_Vector_struct {
     // Shell part
     griddyn::paradae::SMultiVector tprev;
-    griddyn::paradae::SVector
-        state;  // JBS:  This "state" is I believe related either only to BDF or to root-finding.  Not a well named variable.
+    griddyn::paradae::SVector state;  // JBS:  This "state" is I believe related either only to BDF
+                                      // or to root-finding.  Not a well named variable.
 
     // Vector part (this part contains actual "state" information)
-    griddyn::paradae::SMultiVector
-        xprev; /*!< This is only a list of Vectors when multistepping, otherwise it's just one vector */
+    griddyn::paradae::SMultiVector xprev; /*!< This is only a list of Vectors when multistepping,
+                                             otherwise it's just one vector */
     griddyn::paradae::SVector dxprev;
 } my_Vector;
 
@@ -56,11 +56,11 @@ typedef struct _braid_App_struct {
     int size_x; /*!< Size of the problem */
     int size_state;
     BDF_STRAT bdf_strat;
-    //bool do_bdf_uniform;
-    //bool do_lowerorder; /*!< Do we lower the order of BDF method ? */
+    // bool do_bdf_uniform;
+    // bool do_lowerorder; /*!< Do we lower the order of BDF method ? */
     int lowered_by_level; /*!< Lowered by how much each level ? */
     int min_order;
-    //std::string do_interp;
+    // std::string do_interp;
     int nb_initial;
     griddyn::paradae::Real* grid_initial;
     griddyn::paradae::Real* braid_grid_initial;
@@ -130,6 +130,6 @@ namespace braid {
     int my_BufUnpack(braid_App app, void* buffer, braid_Vector* u_ptr, braid_BufferStatus bstatus);
     int my_TimeGrid(braid_App app, braid_Real* ta, braid_Int* ilower, braid_Int* iupper);
 
-}  //namespace braid
-}  //namespace griddyn
+}  // namespace braid
+}  // namespace griddyn
 #endif

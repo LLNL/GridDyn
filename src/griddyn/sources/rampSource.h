@@ -16,7 +16,7 @@
 namespace griddyn {
 namespace sources {
     /**@brief defines a ramping source
- */
+     */
     class rampSource: public Source {
       protected:
         model_parameter mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output

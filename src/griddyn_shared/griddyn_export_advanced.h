@@ -22,8 +22,8 @@ extern "C" {
 // object mathematical functions*/
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -31,8 +31,8 @@ extern "C" {
 GRIDDYN_EXPORT griddyn_status gridDynObject_stateSize(gridDynObject obj, solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -44,8 +44,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_guessState(gridDynObject obj,
                                                        solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -57,8 +57,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_setState(gridDynObject obj,
                                                      solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -68,8 +68,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_getStateVariableTypes(gridDynObject 
                                                                   solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -81,8 +81,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_residual(gridDynObject obj,
                                                      solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -94,8 +94,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_derivative(gridDynObject obj,
                                                        solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -108,8 +108,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_algebraicUpdate(gridDynObject obj,
                                                             solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -122,8 +122,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_jacobian(gridDynObject obj,
                                                      solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey
@@ -135,8 +135,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_ioPartialDerivatives(gridDynObject o
                                                                  solverKey key);
 
 /** get the statesize for an object
-    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects with subobject
-    using a key of 0 will generate an error code and not produce results
+    @details this function uses a solverKey.  0 can be used on objects with no subobjects on objects
+   with subobject using a key of 0 will generate an error code and not produce results
     @param[in] obj the object to query
     @param[in] key a solverKey obtained from ::gridDynSimulation_getSolverKey
     @return the state size of the object for a particular solverkey

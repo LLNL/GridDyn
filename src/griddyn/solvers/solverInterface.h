@@ -90,8 +90,8 @@ enum solver_flags : int {
 };
 /** @brief class defining the data related to a specific solver
  the SolverInterface class is the base class for solvers for the GridDyn power systems program
-a particular SolverInterface class will contain the interface and calls necessary to implement a particular solver
-methodology
+a particular SolverInterface class will contain the interface and calls necessary to implement a
+particular solver methodology
 */
 class SolverInterface: public helperObject {
   public:
@@ -281,7 +281,8 @@ class SolverInterface: public helperObject {
 
     /** @brief helper function to log specific solver stats
     @param[in] logLevel  the level of logging to display
-    @param[in] iconly  flag indicating that the logging should be for the initial condition calculation only
+    @param[in] iconly  flag indicating that the logging should be for the initial condition
+    calculation only
     */
     virtual void logSolverStats(print_level logLevel, bool iconly = false) const;
     /** @brief helper function to log error weight information
@@ -325,22 +326,25 @@ class SolverInterface: public helperObject {
 
     void setApproximation(const std::string& approx);
     /** @brief load up masks to the states
-      masks isolate specific values and don't let the solver alter them  for newton based solvers this implies
-    overriding specific information in the Jacobian calculations and the residual calculations
+      masks isolate specific values and don't let the solver alter them  for newton based solvers
+    this implies overriding specific information in the Jacobian calculations and the residual
+    calculations
     @param[in] msk  the indices of the state elements to fix
     */
     void setMaskElements(std::vector<index_t> msk);
 
     /** @brief add an index to the mask
-      masks isolate specific values and don't let the solver alter them  for newton based solvers this implies
-    overriding specific information in the Jacobian calculations and the residual calculations
+      masks isolate specific values and don't let the solver alter them  for newton based solvers
+    this implies overriding specific information in the Jacobian calculations and the residual
+    calculations
     @param[in] newMaskElement the index of the values to mask
     */
     void addMaskElement(index_t newMaskElement);
 
     /** @brief add several new elements to a mask
-      masks isolate specific values and don't let the solver alter them  for newton based solvers this implies
-    overriding specific information in the Jacobian calculations and the residual calculations
+      masks isolate specific values and don't let the solver alter them  for newton based solvers
+    this implies overriding specific information in the Jacobian calculations and the residual
+    calculations
     @param[in] newMsk  a vector of indices to add to an existing mask
     */
     void addMaskElements(const std::vector<index_t>& newMsk);

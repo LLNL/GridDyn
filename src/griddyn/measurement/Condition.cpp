@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "Condition.h"
 
@@ -184,8 +184,8 @@ void Condition::setConditionRHS(std::shared_ptr<grabberSet> valGrabber)
 void Condition::updateObject(coreObject* obj, object_update_mode mode)
 {
     // Update object may throw an error if it does everything is fine
-    // if it doesn't then B update may throw an error in which case we need to rollback A for exception safety
-    // this would be very unusual to occur.
+    // if it doesn't then B update may throw an error in which case we need to rollback A for
+    // exception safety this would be very unusual to occur.
     coreObject* keyObject = nullptr;
     if (conditionLHS) {
         keyObject = conditionLHS->getObject();

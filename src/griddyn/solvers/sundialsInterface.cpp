@@ -272,9 +272,8 @@ namespace solvers {
       for (int kk = 0; kk < sz; ++kk)
       {
           auto tp = *itel;
-          //      printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
-      a1->colIndex(kk));
-          if (tp.col > colval)
+          //      printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk),
+      a1->rowIndex(kk), a1->colIndex(kk)); if (tp.col > colval)
           {
               colval++;
               J->colptrs[colval] = kk;
@@ -290,7 +289,8 @@ namespace solvers {
             md.start();
             for (int kk = 0; kk < sz; ++kk) {
                 auto tp = md.next();
-                //      printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
+                //      printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk),
+                //      a1->rowIndex(kk),
                 // a1->colIndex(kk));
                 if (tp.row > indval) {
                     indval++;
@@ -429,10 +429,8 @@ namespace solvers {
 /*
 matrixDataSparse<double> &a1 = sd->a1;
 
-sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state), nvecdata(sd->use_omp, dstate_dt), a1,cj,
-sd->mode);
-a1.sortIndexCol ();
-if (sd->flags[useMask_flag])
+sd->m_gds->jacobianFunction (time, nvecdata(sd->use_omp, state), nvecdata(sd->use_omp, dstate_dt),
+a1,cj, sd->mode); a1.sortIndexCol (); if (sd->flags[useMask_flag])
 {
 for (auto &v : sd->maskElements)
 {

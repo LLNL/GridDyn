@@ -36,7 +36,8 @@ enum class jacobian_mode {
     computed,  //!< the Jacobian needs to be computed
 };
 
-/**class for grabbing a subset of fields directly from the state vector for performing certain calculations
+/**class for grabbing a subset of fields directly from the state vector for performing certain
+ * calculations
  */
 class stateGrabber: public objectOperatorInterface {
   public:

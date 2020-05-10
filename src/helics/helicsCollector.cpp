@@ -147,7 +147,8 @@ namespace helicsLib {
             auto commaLoc = val.find_first_of(',');
             complexPairs.emplace_back(trim(val.substr(0, commaLoc)),
                                       trim(val.substr(commaLoc + 1, asLoc - 1 - commaLoc)));
-            // helicsRegister::instance()->registerPublication(cnames.back(), helicsRegister::dataType::helicsComplex);
+            // helicsRegister::instance()->registerPublication(cnames.back(),
+            // helicsRegister::dataType::helicsComplex);
         } else if (param == "pubtype") {
             if (val == "vector") {
                 pubType = collectorPubType::as_vector;

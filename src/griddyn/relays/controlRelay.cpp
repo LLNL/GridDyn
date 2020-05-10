@@ -210,7 +210,8 @@ std::string commType;
                 if (actnum != kNullLocation) {
                     if ((!actions[actnum].executed) &&
                         (actions[actnum].triggerTime >
-                         actionDelay)) {  // can only cancel actions that have not executed and are not closer than the actionDelay
+                         actionDelay)) {  // can only cancel actions that have not executed and are
+                                          // not closer than the actionDelay
                         actions[actnum].executed = true;
                         auto gres = std::make_shared<commMessage>(cm::CANCEL_SUCCESS);
                         gres->getPayload<cm>()->m_actionID = m->m_actionID;

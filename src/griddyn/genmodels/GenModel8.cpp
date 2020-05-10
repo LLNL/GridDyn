@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "GenModel8.h"
 
@@ -287,5 +287,5 @@ namespace genmodels {
         genModel8Names{"id", "iq", "delta", "freq", "edp", "eqp", "edpp", "eqpp", "psid", "psiq"};
 
     stringVec GenModel8::localStateNames() const { return genModel8Names; }
-}  //namespace genmodels
-}  //namespace griddyn
+}  // namespace genmodels
+}  // namespace griddyn

@@ -44,7 +44,8 @@ typedef void* gridDynVectorQuery;
 /** typedef a gridDynEvent to a void * to represent an event in GridDyn*/
 typedef void* gridDynEvent;
 
-/** typedef * solverKey to a void * to represent a solverMode object for use in a number of functions*/
+/** typedef * solverKey to a void * to represent a solverMode object for use in a number of
+ * functions*/
 typedef void* solverKey;
 
 typedef enum {
@@ -78,9 +79,9 @@ typedef int griddyn_status;
 // the object hierarchy interface and object properties interface
 
 /** create an object in GridDyn
-    @details the function creates a an owning pointer to the object, as long as this owning pointer exists
-    the object exists,  if the object is added to the hierarchy and remains in operation the object will continue
-    to exist even if the gridDynObject representing it is freed
+    @details the function creates a an owning pointer to the object, as long as this owning pointer
+   exists the object exists,  if the object is added to the hierarchy and remains in operation the
+   object will continue to exist even if the gridDynObject representing it is freed
     @param[in] componentType  the component type of the object to create (bus, link, load, etc)
     @param[in] objectType  the specific type of the component to create
     @return a gridDynObject that represents the newly created object
@@ -111,7 +112,8 @@ GRIDDYN_EXPORT griddyn_status gridDynObject_add(gridDynObject parentObject,
 /** remove an object from another in the hierarchy
     @param[in] parentObject the object to which another is being added
     @param[in] objectToRemove  the object being removed
-    @return 0 if successful, non-zero otherwise success is defined as the object not being present in the parent
+    @return 0 if successful, non-zero otherwise success is defined as the object not being present
+   in the parent
     */
 GRIDDYN_EXPORT griddyn_status gridDynObject_remove(gridDynObject parentObject,
                                                    gridDynObject objectToRemove);
@@ -229,8 +231,8 @@ GRIDDYN_EXPORT gridDynObject gridDynObject_findByUserId(gridDynObject obj,
 GRIDDYN_EXPORT gridDynObject gridDynObject_getParent(gridDynObject obj);
 /** get a const char * to a string representing the componentType of the object
     @param[in] obj the object to query
-    @return a pointer to a type string.  The memory is managed internally and does not need to be freed the
-    pointers are to a fixed set of strings and should not be modified*/
+    @return a pointer to a type string.  The memory is managed internally and does not need to be
+   freed the pointers are to a fixed set of strings and should not be modified*/
 GRIDDYN_EXPORT const char* gridDynObject_getType(gridDynObject obj);
 
 // functions for the gridDyn Simulation
@@ -269,8 +271,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_initializeFromArgs(gridDynSimRef
 /** load a simulation file or add a file to the existing simulation
     @param[in] sim the simulation runner reference object
     @param[in] fileName the name of the file to load
-    @param[in] fileType the type of the file set to null string to enable automatic detection based on the
-    extension
+    @param[in] fileType the type of the file set to null string to enable automatic detection based
+   on the extension
     @return 0 if successful an error code otherwise
     */
 GRIDDYN_EXPORT griddyn_status gridDynSimulation_loadfile(gridDynSimReference sim,
@@ -278,9 +280,9 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_loadfile(gridDynSimReference sim
                                                          const char* fileType);
 
 /** add a command to the GridDyn Command queue
-    @details this is one of the main interfaces to get GridDyn to do all sorts of things and change how it does it
-    this includes scripting and execution order once a command queue is set up the run command will execute the
-    command queue
+    @details this is one of the main interfaces to get GridDyn to do all sorts of things and change
+   how it does it this includes scripting and execution order once a command queue is set up the run
+   command will execute the command queue
     @param[in] sim the simulation runner reference object
     @return 0 if successful an error code otherwise
     */
@@ -317,8 +319,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_reset(gridDynSimReference sim);
     */
 GRIDDYN_EXPORT double gridDynSimulation_getCurrentTime(gridDynSimReference sim);
 /** run the command queue of the simulation
-    @details if the command queue is empty it will try to run a dynamic simulation if the models are capable of
-    that otherwise it runs a power flow and stops
+    @details if the command queue is empty it will try to run a dynamic simulation if the models are
+   capable of that otherwise it runs a power flow and stops
     @param[in] sim the simulation runner reference object
     @return 0 if successful an error code otherwise
     */
@@ -338,8 +340,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_runTo(gridDynSimReference sim, d
 GRIDDYN_EXPORT griddyn_status gridDynSimulation_Step(gridDynSimReference sim);
 
 /** run the command queue of the simulation asynchronously
-    @details if the command queue is empty it will try to run a dynamic simulation if the models are capable of
-    that otherwise it runs a power flow and stops this function will return immediately
+    @details if the command queue is empty it will try to run a dynamic simulation if the models are
+   capable of that otherwise it runs a power flow and stops this function will return immediately
     @param[in] sim the simulation runner reference object
     @return 0 if successful an error code otherwise
     */
@@ -360,10 +362,12 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_runToAsync(gridDynSimReference s
 GRIDDYN_EXPORT griddyn_status gridDynSimulation_StepAsync(gridDynSimReference sim);
 /** query the status of a simulation
     @param[in] sim the simulation runner reference object
-    @return will return GRIDDYN_PENDING if an Async operation is ongoing, otherwise will return the execution state
+    @return will return GRIDDYN_PENDING if an Async operation is ongoing, otherwise will return the
+   execution state
     */
 GRIDDYN_EXPORT int gridDynSimulation_getStatus(gridDynSimReference sim);
-/** get an object reference for the simulation object that can be used in the gridDynDbject functions
+/** get an object reference for the simulation object that can be used in the gridDynDbject
+   functions
     @param[in] sim the simulation runner reference object
     @return a gridDynObject that can be used in the gridDynObject_* functions
     */
@@ -418,8 +422,8 @@ GRIDDYN_EXPORT int gridDynSimulation_getResults(gridDynSimReference sim,
     @param[in] time the simulation time to guess the state for
     @param[out] states memory to store the states must be at least the size returned by
     ::gridDynSimulation_stateSize
-    @param[out] dstate_dt memory to store the guess of the derivatives if the solver key points to a solver mode
-    with differential variables must be the same size as ::states
+    @param[out] dstate_dt memory to store the guess of the derivatives if the solver key points to a
+   solver mode with differential variables must be the same size as ::states
     @param[in] key the index of the solver to use (the value should be retrieved by
     ::gridDynSimulation_getSolverKey)
     @return 0 if successful an error code otherwise
@@ -435,8 +439,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_guessState(gridDynSimReference s
     @param[in] time the time relates to the states
     @param[in] states the state variables of the system must be of the size returned by
     ::gridDynSimulation_stateSize
-    @param[in] dstate_dt the time derivatives of the states can be nullptr if the solverkey references does not
-    have differential states
+    @param[in] dstate_dt the time derivatives of the states can be nullptr if the solverkey
+   references does not have differential states
     @param[in] key the index of the solver to use (the value should be retrieved by
     ::gridDynSimulation_getSolverKey)
     @return 0 if successful an error code otherwise
@@ -447,8 +451,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_setState(gridDynSimReference sim
                                                          const double* dstate_dt,
                                                          solverKey key);
 
-/** get the types(algebraic or differential) of all the variables in the simulation voltages and angle
-    variables are algebraic
+/** get the types(algebraic or differential) of all the variables in the simulation voltages and
+   angle variables are algebraic
     @param[in] sim the simulation runner reference object
     @param[out] types the types of the system 0 for differential variables 1 for algebraic
     @param[in] key the index of the solver to use (the value should be retrieved by
@@ -460,8 +464,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_getStateVariableTypes(gridDynSim
                                                                       solverKey key);
 
 /** compute the residual values for all states in the system
-    @details the residual function will result in all very small values if the states are self consistent
-    f(x,x')=0 if everything is correct
+    @details the residual function will result in all very small values if the states are self
+   consistent f(x,x')=0 if everything is correct
     @param[in] sim the simulation runner reference object
     @param[in] time the simulation to get the residual for
     @param[out] resid the memory location to store the results of the calculation
@@ -497,7 +501,8 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_derivative(gridDynSimReference s
     @param[in] sim the simulation runner reference object
     @param[out] update the memory location to store all the updates to the algebraic variables
     @param[in] states the state variables to use in computing the update
-    @param[in] alpha a update scaling parameter used in some cases where the update must be computed iteratively
+    @param[in] alpha a update scaling parameter used in some cases where the update must be computed
+   iteratively
     @param[in] key the index of the solver to use (the value should be retrieved by
     ::gridDynSimulation_getSolverKey)
     @return 0 if successful an error code otherwise
@@ -514,12 +519,12 @@ GRIDDYN_EXPORT griddyn_status gridDynSimulation_algebraicUpdate(gridDynSimRefere
     @param[in] time the time to use in the Jacobian computation
     @param[in] states the state variable values to use in the computation
     @param[in] dstate_dt the derivative information to use in the computation of the system Jacobian
-    @param[in] cj the constant of differentiation.  this is the number to use when the Jacobian depends on the
-    derivative of state
+    @param[in] cj the constant of differentiation.  this is the number to use when the Jacobian
+   depends on the derivative of state
     @param[in] key the index of the solver to use (the value should be retrieved by
     ::gridDynSimulation_getSolverKey)
-    @param[in] insert a function pointer to a callback that takes a row, a column and a value to define values on a
-    sparse matrix
+    @param[in] insert a function pointer to a callback that takes a row, a column and a value to
+   define values on a sparse matrix
     @return 0 if successful an error code otherwise
     */
 GRIDDYN_EXPORT griddyn_status gridDynSimulation_jacobian(gridDynSimReference sim,

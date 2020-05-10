@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -29,7 +29,8 @@ static childClassFactoryArg<fmi::fmiEvent, Event, fmi::fmiEvent::fmiEventType>
 static childClassFactoryArg<fmi::fmiEvent, Event, fmi::fmiEvent::fmiEventType>
     fmiParam(std::vector<std::string>{"fmiparam", "fmiparameter"},
              fmi::fmiEvent::fmiEventType::parameter);
-// static childClassFactory<dimeCommunicator, Communicator> dimeComm(std::vector<std::string>{"dime"});
+// static childClassFactory<dimeCommunicator, Communicator>
+// dimeComm(std::vector<std::string>{"dime"});
 
 static typeFactory<fmi::fmiCoordinator> coord("extra", std::vector<std::string>{"fmi", "fmicoord"});
 
@@ -44,4 +45,4 @@ void loadFmiExportReaderInfoDefinitions(readerInfo& ri)
     ri.addTranslate("fmioutput", "collector");
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

@@ -81,8 +81,8 @@ class solverMode {
     bool local = false;  //!< indicator if the solver uses local states
     bool extended_state = false;  //!< indicate if the solver uses extended states
     bool parameters = false;  //!< indicator if the solver uses parameters
-    std::bitset<32>
-        approx;  //!<  a bitset containing the approximation assumptions the solver wishes to be made
+    std::bitset<32> approx;  //!<  a bitset containing the approximation assumptions the solver
+                             //!<  wishes to be made
     //!(request not obligation)
     index_t offsetIndex = kNullLocation;  //!< index into an array of solverOffsets
     index_t pairedOffsetIndex =

@@ -48,7 +48,8 @@ int GriddynRunner::InitializeFromString(const std::string& cmdargs)
 {
     if (!m_gds) {
         m_gds = std::make_shared<gridDynSimulation>();
-        // gridDynSimulation::setInstance(m_gds.get());  // peer to gridDynSimulation::GetInstance ();
+        // gridDynSimulation::setInstance(m_gds.get());  // peer to gridDynSimulation::GetInstance
+        // ();
     }
     m_gds->log(nullptr, print_level::summary, "GridDyn version:" GRIDDYN_VERSION_STRING);
 
@@ -79,7 +80,8 @@ int GriddynRunner::Initialize(int argc, char* argv[], readerInfo& ri, bool allow
 {
     if (!m_gds) {
         m_gds = std::make_shared<gridDynSimulation>();
-        // gridDynSimulation::setInstance(m_gds.get());  // peer to gridDynSimulation::GetInstance ();
+        // gridDynSimulation::setInstance(m_gds.get());  // peer to gridDynSimulation::GetInstance
+        // ();
     }
     m_gds->log(nullptr, print_level::summary, "GridDyn version:" GRIDDYN_VERSION_STRING);
     // TODO:: do something different with this
@@ -404,7 +406,8 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
         ->transform(defineTransform)
         ->ignore_case()
         ->ignore_underscore();
-    //  ptr->add_option ("--jac-output", po::value<std::string> (), "powerflow Jacobian file output");
+    //  ptr->add_option ("--jac-output", po::value<std::string> (), "powerflow Jacobian file
+    //  output");
     ptr->add_flag_function(
            "--verbose{3},-v{3},--quiet{0},-q{0},--printlevel{2},--summary{1}",
            [this](int64_t val) {

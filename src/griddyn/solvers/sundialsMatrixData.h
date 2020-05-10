@@ -26,7 +26,7 @@ namespace solvers {
         SUNMatrix J = nullptr;  //!< the vector of tuples containing the data
       public:
         /** @brief compact constructor
-     */
+         */
         sundialsMatrixDataDense() = default;
         /** @brief alternate constructor defining the Dense matrix to fill
     @param[in] mat the dense SUNDIALS matrix*/
@@ -57,7 +57,7 @@ namespace solvers {
 
       public:
         /** @brief compact constructor
-     */
+         */
         sundialsMatrixDataSparseColumn() = default;
         /** @brief alternate constructor defining the Sparse matrix to fill*/
         explicit sundialsMatrixDataSparseColumn(SUNMatrix mat);
@@ -92,7 +92,7 @@ namespace solvers {
 
       public:
         /** @brief compact constructor
-     */
+         */
         sundialsMatrixDataSparseRow() = default;
         /** @brief alternate constructor defining the Sparse matrix to fill*/
         explicit sundialsMatrixDataSparseRow(SUNMatrix mat);

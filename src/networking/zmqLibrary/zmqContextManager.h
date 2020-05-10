@@ -2,9 +2,10 @@
 Copyright (C) 2017, Battelle Memorial Institute
 All rights reserved.
 
-This software was co-developed by Pacific Northwest National Laboratory, operated by the Battelle Memorial
-Institute; the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the
-Lawrence Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+This software was co-developed by Pacific Northwest National Laboratory, operated by the Battelle
+Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for
+Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence
+Livermore National Security, LLC.
 */
 
 /*
@@ -50,9 +51,10 @@ class zmqContextManager {
 
     static void closeContext(const std::string& contextName = "");
     /** tell the context to free the pointer and leak the memory on delete
-    @details You may ask why, well in windows systems when operating in a DLL if this context is closed after
-    certain other operations that happen when the DLL is unlinked bad things can happen, and since in nearly all
-    cases this happens at Shutdown leaking really doesn't matter that much
+    @details You may ask why, well in windows systems when operating in a DLL if this context is
+    closed after certain other operations that happen when the DLL is unlinked bad things can
+    happen, and since in nearly all cases this happens at Shutdown leaking really doesn't matter
+    that much
     @return true if the context was found and the flag set, false otherwise
     */
     static bool setContextToLeakOnDelete(const std::string& contextName = "");

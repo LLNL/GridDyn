@@ -393,9 +393,8 @@ static const std::map<std::string, operation_flags> user_settable_flags{
     {"sampled_only", no_dynamics},
 };
 
-// there isn't that many flags that we want to be user settable, most are controlled by the model so allowing them
-// to be set by an external function
-// might not be the best thing
+// there isn't that many flags that we want to be user settable, most are controlled by the model so
+// allowing them to be set by an external function might not be the best thing
 void gridComponent::setFlag(const std::string& flag, bool val)
 {
     auto ffind = user_settable_flags.find(flag);
@@ -1610,8 +1609,8 @@ void gridComponent::ioPartialDerivatives(const IOdata& /*inputs*/,
                                          const IOlocs& /*inputLocs*/,
                                          const solverMode& /*sMode*/)
 {
-    /* there is no way to determine partial derivatives of the output with respect to input in a default manner
-    therefore the default is no dependencies
+    /* there is no way to determine partial derivatives of the output with respect to input in a
+    default manner therefore the default is no dependencies
     */
 }
 

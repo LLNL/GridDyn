@@ -17,8 +17,9 @@
 #include <cstdint>
 namespace griddyn {
 namespace relays {
-    /** fuse implements a standard power system fuse which can blow on time or using and I^2t calculation
- */
+    /** fuse implements a standard power system fuse which can blow on time or using and I^2t
+     * calculation
+     */
     class fuse: public Relay {
       public:
         /** flags for fuses*/

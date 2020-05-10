@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "Event.h"
 #include "Player.h"
@@ -40,7 +40,7 @@ namespace events {
         interpPlay(std::vector<std::string>{"interpolating", "interp", "interpolated"});
     static childClassFactory<reversibleEvent, Event>
         revEvnt(std::vector<std::string>{"reversible", "undo", "rollback"});
-}  //namespace events
+}  // namespace events
 
 Event::Event(const std::string& eventName): helperObject(eventName), triggerTime(maxTime)
 {
@@ -101,8 +101,8 @@ bool Event::checkArmed()
 
 void Event::loadField(coreObject* searchObj, const std::string& newfield)
 {
-    auto renameloc = newfield.find(" as ");  //spaces are important
-        //extract out a rename
+    auto renameloc = newfield.find(" as ");  // spaces are important
+                                             // extract out a rename
 
     objInfo fdata;
     if (renameloc != std::string::npos) {
@@ -357,7 +357,8 @@ gridEventInfo::gridEventInfo(const std::string& eventString, coreObject* rootObj
     loadString(eventString, rootObj);
 }
 
-// @time1[,time2,time3,... + period] |[rootobj::obj1:]field(units) const = val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or
+// @time1[,time2,time3,... + period] |[rootobj::obj1:]field(units) const =
+// val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or
 // [rootobj::obj:]field(units) = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
 void gridEventInfo::loadString(const std::string& eventString, coreObject* rootObj)
 {
@@ -394,7 +395,7 @@ void gridEventInfo::loadString(const std::string& eventString, coreObject* rootO
     std::string vstring = objString.substr(posE + 1, std::string::npos);
     stringOps::trimString(vstring);
     objString = objString.substr(0, posE);
-    //break down the object specification
+    // break down the object specification
     objInfo fdata(objString, rootObj);
 
     targetObjs.push_back(fdata.m_obj);
@@ -402,7 +403,7 @@ void gridEventInfo::loadString(const std::string& eventString, coreObject* rootO
     fieldList.push_back(fdata.m_field);
 
     auto posFile = vstring.find_first_of('{');
-    if (posFile != std::string::npos) {  //now we get into file based event
+    if (posFile != std::string::npos) {  // now we get into file based event
         auto posEndFile = vstring.find_first_of('}', posFile);
         file = vstring.substr(posE + 1, posEndFile - posFile - 1);
 
@@ -478,4 +479,4 @@ std::unique_ptr<Event> make_event(gridEventInfo& gdEI, coreObject* rootObject)
     return ev;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

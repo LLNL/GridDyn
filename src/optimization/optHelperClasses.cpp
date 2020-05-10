@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -249,18 +249,20 @@ index_t optOffsetTable::getqOffset(const optimMode& oMode) const
 }
 
 /** get the locations for the data
-*@param[in] oMode the optimMode we are interested in
-*/
-//void getLocations (const stateData &sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent *comp);
+ *@param[in] oMode the optimMode we are interested in
+ */
+// void getLocations (const stateData &sD, double d[], const optimMode &oMode, Lp *Loc,
+// gridComponent *comp);
 /** get the locations for the data from a stateData pointer
-*@param[in] oMode the optimMode we are interested in
-*@return the angle offset
-*/
-//void getLocations (stateData *sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent *comp);
+ *@param[in] oMode the optimMode we are interested in
+ *@return the angle offset
+ */
+// void getLocations (stateData *sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent
+// *comp);
 /** get the locations offsets for the data
-*@param[in] oMode the optimMode we are interested in
-*@return the angle offset
-*/
-//void getLocations (const optimMode &oMode, Lp *Loc);
+ *@param[in] oMode the optimMode we are interested in
+ *@return the angle offset
+ */
+// void getLocations (const optimMode &oMode, Lp *Loc);
 
 }  // namespace griddyn

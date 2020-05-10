@@ -106,13 +106,15 @@ std::function<double(double, double)> get2ArgFunction(const std::string& functio
 */
 std::function<double(double, double, double)> get3ArgFunction(const std::string& functionName);
 
-/** @brief find a function with a single array as an argument and return the corresponding lambda function
+/** @brief find a function with a single array as an argument and return the corresponding lambda
+function
 @param[in] functionName the function name
 @return a std::Function implementing the appropriate function
 */
 std::function<double(const std::vector<double>&)> getArrayFunction(const std::string& functionName);
 
-/** @brief find a function with a two arrays as arguments and return the corresponding lambda function
+/** @brief find a function with a two arrays as arguments and return the corresponding lambda
+function
 @param[in] functionName the function name
 @return a std::Function implementing the appropriate function
 */

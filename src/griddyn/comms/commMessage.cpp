@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "commMessage.h"
 
@@ -174,7 +174,7 @@ void commMessage::fromByteArray(const char* data, size_t buffer_size)
     try {
         load(ia);
     }
-    catch (const cereal::Exception& ) {
+    catch (const cereal::Exception&) {
         m_messageType = unknownMessageType;
     }
 }
@@ -211,7 +211,8 @@ std::uint32_t getAlarmCode(const std::string& alarmStr)
 
 MessageTypeRegistry& MessageTypeRegistry::instance()
 {
-    // can't use make shared because the constructor is private  note it is static so only created once
+    // can't use make shared because the constructor is private  note it is static so only created
+    // once
     static MessageTypeRegistry registry;
     return registry;
 }
@@ -249,7 +250,8 @@ std::string MessageTypeRegistry::getTypeString(int32_t type) const
 
 corePayloadFactory& corePayloadFactory::instance()
 {
-    // can't use make shared because the constructor is private  note it is static so only created once
+    // can't use make shared because the constructor is private  note it is static so only created
+    // once
     static corePayloadFactory factory;
     return factory;
 }

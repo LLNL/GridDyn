@@ -36,13 +36,15 @@ typedef void gridPositionInfo;
 class helperObject;
 
 /** @brief      base class for a building simulation objects
- Base class for all main simulation objects class includes common properties for all objects such as name, updates
-and some common functionality that unifies all objects that are part of the simulation including object ownership,
-updates, set and get functions, search features, alert and logging functions
+ Base class for all main simulation objects class includes common properties for all objects such as
+name, updates and some common functionality that unifies all objects that are part of the simulation
+including object ownership, updates, set and get functions, search features, alert and logging
+functions
 **/
 class coreObject {
   private:
-    // this is used much more frequently than any other so it gets its own boolean at the beginning of the object
+    // this is used much more frequently than any other so it gets its own boolean at the beginning
+    // of the object
     bool enabled = true;  //!< enabled indicator
     bool updates_enabled = false;  //!< indicator that updates are enabled
   protected:
@@ -56,8 +58,8 @@ class coreObject {
     coreTime nextUpdateTime = maxTime;  //!<[s] the next scheduled update
     coreTime lastUpdateTime = negTime;  //!<[s] the last update time
     coreTime updatePeriod = maxTime;  //!<[s]the update period
-    coreTime updateDelay =
-        timeZero;  //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
+    coreTime updateDelay = timeZero;  //!<[s]the requested delay between updateA and
+                                      //!<updateB--requested is key here not guaranteed
   private:
     // these shouldn't generate false shareing as one is static
     static std::atomic<id_type_t> s_obcnt;  //!< the global object counter
@@ -65,20 +67,20 @@ class coreObject {
   public:
     index_t locIndex =
         kNullLocation;  //!< a lookup index for the object to reference parent location in storage
-        //!< arrays for use by containing objects no operational dependencies
+    //!< arrays for use by containing objects no operational dependencies
   private:
     id_type_t m_oid;  //!< a unique index for the object
     std::string name;  //!< the text name of the object
   public:
     /** @brief default constructor
     @param[in] objName the name of the object[optiona] default to "object_#"
-    the name can be followed by a few symbols see # appends the id, $ appends the userid, and @ appends the
-    locIndex
+    the name can be followed by a few symbols see # appends the id, $ appends the userid, and @
+    appends the locIndex
     */
     explicit coreObject(const std::string& objName = "object_#");
 
-    // don't allow copy constructors and equal operator as they would introduce all sorts of other complicated
-    // issues in the system
+    // don't allow copy constructors and equal operator as they would introduce all sorts of other
+    // complicated issues in the system
     coreObject(const coreObject&) = delete;
     void operator=(const coreObject& obj) = delete;
     /** @brief default destructor  so it can be overridden*/
@@ -150,7 +152,8 @@ class coreObject {
     /**
      * @brief remove an object from the calling object
      * @param[in] obj the object to remove
-     * @return value indicating success or failure 0 success -1 (object not found) -2(removal failure)
+     * @return value indicating success or failure 0 success -1 (object not found) -2(removal
+     * failure)
      */
     virtual void remove(coreObject* obj);
     /**
@@ -207,7 +210,8 @@ class coreObject {
                                      paramStringType pstype = paramStringType::all) const;
     /**
     * @brief update the object at a specific time
-  @ details if the object requires and A and B parts this is the A part the B part gets executed at a later time
+  @ details if the object requires and A and B parts this is the A part the B part gets executed at
+  a later time
     * @param[in] time the times to update the object to
     */
     virtual void updateA(coreTime time);
@@ -234,8 +238,8 @@ class coreObject {
      */
     std::int64_t getID() const noexcept { return m_oid; }
     /**
-     * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is higher than
-     * another object
+     * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is
+     * higher than another object
      */
     void makeNewOID();
 
@@ -349,12 +353,14 @@ inline bool compareNames(const coreObject* o1, const coreObject* o2)
 }
 
 /**
- * @brief general deletion function that checks the reference count and deletes the object if it is 0;
+ * @brief general deletion function that checks the reference count and deletes the object if it is
+ * 0;
  * @param[in] objToDelete the object to potentially delete
  */
 void removeReference(coreObject* objToDelete);
 /**
-* @brief general deletion function that checks the reference count and deletes the object if it is 0;
+* @brief general deletion function that checks the reference count and deletes the object if it is
+0;
 * if it is not deleted it check the parent and removes a reference to the parent in the object;
 * @param[in] objToDelete the object to potentially delete
 @param[in] parent the parent of the object

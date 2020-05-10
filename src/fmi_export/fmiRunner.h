@@ -29,8 +29,8 @@ it inherits from gridDynRunner and adds some extra features necessary for execut
 */
     class fmiRunner: public GriddynRunner {
       private:
-        coreOwningPtr<fmiCoordinator>
-            coord;  //!< the coordinator object for managing object that manage the fmi inputs and outputs
+        coreOwningPtr<fmiCoordinator> coord;  //!< the coordinator object for managing object that
+                                              //!< manage the fmi inputs and outputs
         std::bitset<7> loggingCategories;  //!< indicators of which logging categories to use
         bool runAsync_ = false;  //!< indicator that we should run asynchronously
         bool modelExchangeRunner =
@@ -42,7 +42,8 @@ it inherits from gridDynRunner and adds some extra features necessary for execut
     @param name the name of the runner
     @param resourceLocations the FMU resource location information
     @param function a set of helper function from the FMI master
-    @param ModelExchange set to true if this is instantiating a model exchange object (optional defaults to false)
+    @param ModelExchange set to true if this is instantiating a model exchange object (optional
+    defaults to false)
     */
         fmiRunner(const std::string& name,
                   const std::string& resourceLocations,

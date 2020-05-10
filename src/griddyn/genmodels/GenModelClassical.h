@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef GENMODELCLASSICAL_H_
 #define GENMODELCLASSICAL_H_
@@ -20,15 +20,15 @@ namespace genmodels {
     class GenModelClassical: public GenModel {
       public:
         /** @brief set of flags used by genModels for variations in computation
-    */
+         */
 
       protected:
         double H = 5.0;  //!< [pu] inertial constant
         double D = 0.04;  //!< [pu] damping
-        double Vd = 0;  //!<the computed d axis voltage
+        double Vd = 0;  //!< the computed d axis voltage
         double Vq = 0;  //!< the computed q axis voltage
-        double mp_Kw = 13.0;  //!<speed gain for the damping system
-        count_t seqId = 0;  //!<the sequence Id the voltages were computed for
+        double mp_Kw = 13.0;  //!< speed gain for the damping system
+        count_t seqId = 0;  //!< the sequence Id the voltages were computed for
       public:
         //!< @brief default constructor
         explicit GenModelClassical(const std::string& objName = "genModelClassic_#");
@@ -88,7 +88,7 @@ namespace genmodels {
                                      const solverMode& sMode,
                                      double alpha) override;
         /** helper function to get omega and its state location
-    */
+         */
         virtual double getFreq(const stateData& sD,
                                const solverMode& sMode,
                                index_t* freqOffset = nullptr) const override;
@@ -106,6 +106,6 @@ namespace genmodels {
                                            double X1);
     };
 
-}  //namespace genmodels
-}  //namespace griddyn
-#endif  //GENMODELCLASSICAL_H_
+}  // namespace genmodels
+}  // namespace griddyn
+#endif  // GENMODELCLASSICAL_H_

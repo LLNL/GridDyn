@@ -19,7 +19,8 @@
 #    include "Player.h"
 namespace griddyn {
 namespace events {
-    /** event player allowing a timeSeries of events to occur over numerous time points on a single object and field*/
+    /** event player allowing a timeSeries of events to occur over numerous time points on a single
+     * object and field*/
     class interpolatingPlayer: public Player {
       protected:
         std::string slopeField;  //!< the object field to trigger for a slope input

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // headers
 #include "zBreaker.h"
@@ -66,8 +66,8 @@ namespace links {
     }
     void zBreaker::switchMode(index_t /*num*/, bool mode)
     {
-        // TODO:PT: this shouldn't cause enable disable, I need to replace this with some of the checks for enabled
-        // disable
+        // TODO:PT: this shouldn't cause enable disable, I need to replace this with some of the
+        // checks for enabled disable
         if (mode == opFlags[switch1_open_flag]) {
             return;
         }

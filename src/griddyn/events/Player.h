@@ -18,10 +18,12 @@
 namespace griddyn {
 /** namespace to contain different event types that can be used in the griddyn system*/
 namespace events {
-    /** event player allowing a timeSeries of events to occur over numerous time points on a single object and field*/
+    /** event player allowing a timeSeries of events to occur over numerous time points on a single
+     * object and field*/
     class Player: public Event {
       protected:
-        // the bool is first to take advantage of the empty space in event there will still be a 3 byte gap
+        // the bool is first to take advantage of the empty space in event there will still be a 3
+        // byte gap
         bool loadFileProcess = false;  //!< flag indicating that the files need to be loaded yet
         coreTime period = maxTime;  //!< period of the player
         gmlc::utilities::TimeSeries<double, coreTime>

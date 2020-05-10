@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -273,8 +273,8 @@ namespace loads {
             auto offset = offsets.getAlgOffset(sMode);
             double slip = sD.state[offset];
             resid[offset] = mechPower(slip) - rPower(inputs[voltageInLocation], slip);
-            // printf("slip=%f mpower=%f, rPower=%f\n", slip, mechPower(slip), rPower(inputs[voltageInLocation],
-            // slip));
+            // printf("slip=%f mpower=%f, rPower=%f\n", slip, mechPower(slip),
+            // rPower(inputs[voltageInLocation], slip));
         }
     }
 
@@ -312,8 +312,9 @@ namespace loads {
         double slip = (!sD.empty()) ? sD.state[offset] : m_state[0];
         double voltage = inputs[voltageInLocation];
 
-        deriv[offset] =
-            (opFlags[stalled]) ? 0 : (0.5 / H * (mechPower(slip) - rPower(voltage * Vcontrol, slip)));
+        deriv[offset] = (opFlags[stalled]) ?
+            0 :
+            (0.5 / H * (mechPower(slip) - rPower(voltage * Vcontrol, slip)));
     }
 
     void motorLoad::jacobianElements(const IOdata& inputs,

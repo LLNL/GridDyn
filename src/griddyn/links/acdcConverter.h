@@ -23,9 +23,9 @@ namespace blocks {
 }  // namespace blocks
 
 namespace links {
-    /** class defines an object that converts operation between dc and ac, can act as a inverter, a rectifier or a
- * bidirectional mode
- */
+    /** class defines an object that converts operation between dc and ac, can act as a inverter, a
+     * rectifier or a bidirectional mode
+     */
     class acdcConverter: public Link {
       public:
         enum inverter_flags {
@@ -71,7 +71,8 @@ namespace links {
         virtual double getMaxTransfer() const override;
 
         // virtual void pFlowCheck (std::vector<violation> &Violation_vector);
-        // virtual void getVariableType (double sdata[], const solverMode &sMode);      //has no state variables
+        // virtual void getVariableType (double sdata[], const solverMode &sMode);      //has no
+        // state variables
         virtual void updateBus(gridBus* bus, index_t busnumber) override;
 
         virtual void updateLocalCache() override;

@@ -133,8 +133,8 @@ void loadPSAT(coreObject* parentObject, const std::string& filetext, const basic
     */
     // get the list of bus names
     bool nmfnd = false;
-    gridSimulation::
-        resetObjectCounters();  // reset all the object counters to 0 to make sure all the numbers
+    gridSimulation::resetObjectCounters();  // reset all the object counters to 0 to make sure all
+                                            // the numbers
     // match up
 
     stringVec Vnames;

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -516,7 +516,7 @@ BOOST_AUTO_TEST_CASE(test_query_if)
     gds = readSimXMLFile(fileName);
 
     auto bus = gds->getBus(0);
-    //This will show up as 2 or 0 if the conditions are not working properly
+    // This will show up as 2 or 0 if the conditions are not working properly
     BOOST_CHECK_EQUAL(bus->get("gencount"), 1);
 }
 

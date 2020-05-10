@@ -184,7 +184,7 @@ namespace helicsLib {
                             const std::string& eptName,
                             const std::string& type = std::string());
         /** set the target destination for an endpoint
-     */
+         */
         void setEndpointTarget(int32_t index, const std::string& target);
 
         template<class ValueType>

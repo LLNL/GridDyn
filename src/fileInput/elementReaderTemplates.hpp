@@ -176,12 +176,12 @@ COMPONENT* buildObject(std::shared_ptr<readerElement>& element,
             if (rtObj == nullptr) {
                 WARNPRINT(READER_WARN_IMPORTANT, "unknown " << component << " retype " << valType);
             } else {
-                // the reference count in the object needs to be incremented so we are in control of the object
-                // deletion,  the remove call will (most likely) call delete but in case it doesn't we still need
-                // access to it here to ensure it gets deleted by the call to remove ref,  otherwise we either run
-                // the risk of
-                // a memory leak or dereferencing an invalid pointer, so we just claim ownership for a short time
-                // to alleviate the issue.
+                // the reference count in the object needs to be incremented so we are in control of
+                // the object deletion,  the remove call will (most likely) call delete but in case
+                // it doesn't we still need access to it here to ensure it gets deleted by the call
+                // to remove ref,  otherwise we either run the risk of a memory leak or
+                // dereferencing an invalid pointer, so we just claim ownership for a short time to
+                // alleviate the issue.
                 mobj->clone(rtObj);
                 mobj->addOwningReference();
                 searchObject->remove(mobj);

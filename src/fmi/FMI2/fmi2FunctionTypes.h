@@ -16,13 +16,13 @@
                       fmiInstantiateModelTYPE , fmiInstantiateSlaveTYPE  -> fmiInstantiateTYPE
                       fmiFreeModelInstanceTYPE, fmiFreeSlaveInstanceTYPE -> fmiFreeInstanceTYPE
                       fmiEnterModelInitializationModeTYPE, fmiEnterSlaveInitializationModeTYPE ->
-   fmiEnterInitializationModeTYPE fmiExitModelInitializationModeTYPE , fmiExitSlaveInitializationModeTYPE  ->
-   fmiExitInitializationModeTYPE fmiTerminateModelTYPE , fmiTerminateSlaveTYPE  -> fmiTerminate fmiResetSlave ->
-   fmiReset (now also for ModelExchange and not only for CoSimulation) Functions renamed
-                      fmiUpdateDiscreteStatesTYPE -> fmiNewDiscreteStatesTYPE
-                    Renamed elements of the enumeration fmiEventInfo
-                      upcomingTimeEvent             -> nextEventTimeDefined // due to generic naming scheme:
-   varDefined + var newUpdateDiscreteStatesNeeded -> newDiscreteStatesNeeded;
+   fmiEnterInitializationModeTYPE fmiExitModelInitializationModeTYPE ,
+   fmiExitSlaveInitializationModeTYPE  -> fmiExitInitializationModeTYPE fmiTerminateModelTYPE ,
+   fmiTerminateSlaveTYPE  -> fmiTerminate fmiResetSlave -> fmiReset (now also for ModelExchange and
+   not only for CoSimulation) Functions renamed fmiUpdateDiscreteStatesTYPE ->
+   fmiNewDiscreteStatesTYPE Renamed elements of the enumeration fmiEventInfo upcomingTimeEvent ->
+   nextEventTimeDefined // due to generic naming scheme: varDefined + var
+   newUpdateDiscreteStatesNeeded -> newDiscreteStatesNeeded;
    - June 13, 2013: Changed type fmiEventInfo
                     Functions removed:
                        fmiInitializeModelTYPE
@@ -38,8 +38,8 @@
                        fmiEnterSlaveInitializationModeTYPE;
                        fmiExitSlaveInitializationModeTYPE;
    - Feb. 17, 2013: Added third argument to fmiCompletedIntegratorStepTYPE
-                    Changed function name "fmiTerminateType" to "fmiTerminateModelType" (due to #113)
-                    Changed function name "fmiGetNominalContinuousStateTYPE" to
+                    Changed function name "fmiTerminateType" to "fmiTerminateModelType" (due to
+   #113) Changed function name "fmiGetNominalContinuousStateTYPE" to
                                           "fmiGetNominalsOfContinuousStatesTYPE"
                     Removed fmiGetStateValueReferencesTYPE.
    - Nov. 14, 2011: First public Version

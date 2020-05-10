@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -138,10 +138,10 @@ std::string exeTestRunner::runCaptureOutput(const std::string& args) const
         return "invalid executable";
     }
     std::string rstr = exeString + " " + args + " > " + outFile;
-    //printf ("string %s\n", rstr.c_str ());
+    // printf ("string %s\n", rstr.c_str ());
     auto out = system(rstr.c_str());
 
-    //printf (" after system call string %s\n", rstr.c_str ());
+    // printf (" after system call string %s\n", rstr.c_str ());
     std::ifstream t(outFile);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     if (out != 0) {

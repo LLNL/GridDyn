@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "GenModel5type3.h"
 
@@ -193,10 +193,9 @@ namespace genmodels {
                           inputLocs[genModelEftInLocation],
                           drat / Tdop);  // exciter: Ef
 
-        // rvd[3] = systemBaseFrequency * (Vd + Rs * gm[0] + gmd[1] / systemBaseFrequency * gmd[4]) -
-        // gmp[3];
-        // rvd[4] = systemBaseFrequency * (Vq + Rs * gm[1] - gmd[2] / systemBaseFrequency * gmd[3]) -
-        // gmp[4];
+        // rvd[3] = systemBaseFrequency * (Vd + Rs * gm[0] + gmd[1] / systemBaseFrequency * gmd[4])
+        // - gmp[3]; rvd[4] = systemBaseFrequency * (Vq + Rs * gm[1] - gmd[2] / systemBaseFrequency
+        // * gmd[3]) - gmp[4];
 
         // psib and psiq
         if (hasAlgebraic(sMode)) {
@@ -228,5 +227,5 @@ namespace genmodels {
     static const stringVec genModel5type3Names{"id", "iq", "delta", "freq", "eqp", "psid", "psiq"};
 
     stringVec GenModel5type3::localStateNames() const { return genModel5type3Names; }
-}  //namespace genmodels
-}  //namespace griddyn
+}  // namespace genmodels
+}  // namespace griddyn

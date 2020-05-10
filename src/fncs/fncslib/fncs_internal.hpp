@@ -106,7 +106,7 @@ FNCS_EXPORT void start_logging();
 FNCS_EXPORT void replicate_logging(TLogLevel& level, FILE*& one, FILE*& two);
 
 /** Converts given time string, e.g., '1ms', into a fncs time value.
-     * Ignores the value; only converts the unit into a multiplier. */
+ * Ignores the value; only converts the unit into a multiplier. */
 FNCS_EXPORT fncs::time time_unit_to_multiplier(const string& value);
 
 /** Converts given time string, e.g., 1s, into a fncs time value. */

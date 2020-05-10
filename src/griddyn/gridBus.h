@@ -49,9 +49,9 @@ class busPowers {
 };
 
 /** @brief basic node in a power systems
-  This Bus class is primarily a base Class for other types of buses, but it can be instantiated it provides the
-basic management of subObjects and defines the interface.  It has no states and fixes the voltage and angle at
-whatever it gets set to
+  This Bus class is primarily a base Class for other types of buses, but it can be instantiated it
+provides the basic management of subObjects and defines the interface.  It has no states and fixes
+the voltage and angle at whatever it gets set to
 
 */
 class gridBus: public gridPrimary {
@@ -75,14 +75,14 @@ class gridBus: public gridPrimary {
         fixVoltage = 2,  //!< a bus that has a known voltage and computes theta
         dynSLK = 3  //!< a dynamic bus that knows both V and theta
     };
-    // network is left as a public parameter since it has no impact on the calculations but is useful for other
-    // object to define easily
+    // network is left as a public parameter since it has no impact on the calculations but is
+    // useful for other object to define easily
     int32_t Network = 0;  //!<  the network a bus belongs to for labeling purposes
   protected:
     busType type = busType::PQ;  //!< [busType] bus type: PV, PQ, or slack/swing
     dynBusType dynType =
         dynBusType::normal;  //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types
-        //! as for power flow but for dynamic simulations
+    //! as for power flow but for dynamic simulations
     // 2 byte gap here
     double angle = 0.0;  //!< [rad]     voltage angle
     double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
@@ -197,7 +197,8 @@ class gridBus: public gridPrimary {
                                  double update[],
                                  const solverMode& sMode,
                                  double alpha) override;
-    /** do an update on the voltage similar to the algebraic update function but only looking at voltage
+    /** do an update on the voltage similar to the algebraic update function but only looking at
+    voltage
     @param[in] sD the state data to update
     @param[out] update the location to place the computed update
     @param[in] sMode the solverMode associated with the state data
@@ -241,7 +242,8 @@ class gridBus: public gridPrimary {
     // find components
     /** @brief find a link based on the bus desiring to be connected to
     @param[in] bs  the bus we want to check for a connecting link
-    @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr if none exists
+    @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr
+    if none exists
     */
     Link* findLink(gridBus* bs) const;
     coreObject* find(const std::string& objName) const override;
@@ -270,7 +272,8 @@ class gridBus: public gridPrimary {
     /** @brief for obtaining the complete path to another object
      * @param target the object to search for
      * @param source the object from back up the path
-     * @return a vector of objects with the path information  (NOTE: not necessarily the shortest path)
+     * @return a vector of objects with the path information  (NOTE: not necessarily the shortest
+     *path)
      **/
     std::vector<gridComponent*> getDirectPath(gridComponent* target,
                                               gridComponent* source = nullptr);
@@ -304,7 +307,8 @@ class gridBus: public gridPrimary {
      **/
     double getGenerationReal() const { return S.genP; }
     /** @brief get the bus real generation as listed by the generators
-    @details this only makes a difference for buses which do some automatic calculations in the power flow
+    @details this only makes a difference for buses which do some automatic calculations in the
+    power flow
     * @return the bus real generation
     **/
     double getGenerationRealNominal() const;
@@ -313,7 +317,8 @@ class gridBus: public gridPrimary {
      **/
     double getGenerationReactive() const { return S.genQ; }
     /** @brief get the bus reactive generation as listed by the generators
-    @details this only makes a difference for buses which do some automatic calculations in the power flow
+    @details this only makes a difference for buses which do some automatic calculations in the
+    power flow
     * @return the bus real generation
     **/
     double getGenerationReactiveNominal() const;
@@ -358,7 +363,8 @@ class gridBus: public gridPrimary {
     virtual double getdPdf() const { return 0; }
     /**@brief boolean indicator if the bus has inertial generators or loads*/
     bool hasInertialAngle() const;
-    /** @brief get the tie error (may be deprecated in the future as this should be handled at an area level)
+    /** @brief get the tie error (may be deprecated in the future as this should be handled at an
+     *area level)
      * @return the tie error
      **/
     virtual double getTieError() const { return kNullVal; }
@@ -475,8 +481,8 @@ class gridBus: public gridPrimary {
 };
 
 /** @brief compare 2 buses
-  check a number of bus parameters to see if they match, probably not that useful of function any more ,but it was
-useful during development
+  check a number of bus parameters to see if they match, probably not that useful of function any
+more ,but it was useful during development
 @param[in] bus1  bus1
 @param[in] bus2 bus2
 @param[in] cmpLink  whether to compare links or not  (deep comparison of links)

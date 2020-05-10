@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef ZBREAKER_H_
 #define ZBREAKER_H_
@@ -18,12 +18,13 @@
 namespace griddyn {
 namespace links {
     /** @brief class that acts as a zero impedance tie
-used for implementing a bus-breaker model of a power system as well as creating slave buses and a few other types of linkages
+used for implementing a bus-breaker model of a power system as well as creating slave buses and a
+few other types of linkages
 */
     class zBreaker: public Link {
       protected:
-        bool&
-            merged;  //!< flag indicating that the buses have been merged using the extra bool in coreObject
+        bool& merged;  //!< flag indicating that the buses have been merged using the extra bool in
+                       //!< coreObject
       public:
         zBreaker(const std::string& objName = "zbreaker_$");
         virtual coreObject* clone(coreObject* obj = nullptr) const override;
@@ -65,6 +66,6 @@ used for implementing a bus-breaker model of a power system as well as creating 
         void unmerge();
     };
 
-}  //namespace links
-}  //namespace griddyn
+}  // namespace links
+}  // namespace griddyn
 #endif

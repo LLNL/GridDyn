@@ -18,7 +18,7 @@
 namespace griddyn {
 namespace solvers {
     /** @brief SolverInterface interfacing to the SUNDIALS arkode solver
- */
+     */
     class arkodeInterface: public sundialsInterface {
       public:
         count_t icCount =

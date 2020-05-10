@@ -1,15 +1,16 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "fncsLoad.h"
 
@@ -49,7 +50,7 @@ void fncsLoad::pFlowObjectInitializeA(coreTime time0, unsigned long flags)
 void fncsLoad::pFlowObjectInitializeB()
 {
     updateA(prevTime);
-    //clear any ramps initially
+    // clear any ramps initially
     dPdt = 0.0;
     dQdt = 0.0;
 }
@@ -71,7 +72,7 @@ coreTime fncsLoad::updateB()
 {
     nextUpdateTime += updatePeriod;
 
-    //now get the updates
+    // now get the updates
     auto res = fncsGetComplex(loadKey);
     if (res.real() == kNullVal) {
         dPdt = 0.0;
@@ -87,7 +88,7 @@ coreTime fncsLoad::updateB()
         unitConversion(res.imag(), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
 
     if (opFlags[use_ramp]) {
-        if (opFlags[predictive_ramp])  //ramp uses the previous change to guess into the future
+        if (opFlags[predictive_ramp])  // ramp uses the previous change to guess into the future
         {
             setP(newP);
             setQ(newQ);
@@ -169,7 +170,7 @@ void fncsLoad::set(const std::string& param, const std::string& val)
     }
 
     else {
-        //no reason to set the ramps in fncs load so go to zipLoad instead
+        // no reason to set the ramps in fncs load so go to zipLoad instead
         zipLoad::set(param, val);
     }
 }

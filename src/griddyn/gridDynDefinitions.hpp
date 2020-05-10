@@ -77,12 +77,12 @@ enum class change_code {
     state_count_change = 5,  //!< a change in the number of states occurred
 };
 
-/* May at some point in the future convert all the set/get functions to use this in the function prototypes
-to facilitate transfer to a different type*/
+/* May at some point in the future convert all the set/get functions to use this in the function
+prototypes to facilitate transfer to a different type*/
 using parameterName = const std::string&;
 
-/* may at some point use this type alias to convert all object parameters to this type and then move them to a new
-class to enable additional functionality*/
+/* may at some point use this type alias to convert all object parameters to this type and then move
+them to a new class to enable additional functionality*/
 using model_parameter = double;
 
 /* define the basic vector types*/

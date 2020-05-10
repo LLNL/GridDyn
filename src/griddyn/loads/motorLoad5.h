@@ -17,7 +17,7 @@
 namespace griddyn {
 namespace loads {
     /** @brief class implementing a model of a 3rd order induction motor
- */
+     */
     class motorLoad5: public motorLoad3 {
       private:
         /** @brief private enumerations of state variable locations in powerflow*/
@@ -97,7 +97,7 @@ namespace loads {
 
       private:
         /** @brief estimate the initial state values of the motor
-     */
+         */
         void converge();
     };
 }  // namespace loads

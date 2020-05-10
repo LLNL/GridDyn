@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #pragma once
 
 #include "../common/def.h"
@@ -40,7 +40,8 @@ namespace paradae {
         void SetMPIComm(MPI_Comm comm_) { comm = comm_; };
         void SetType(NSType t) { type = t; };
         void SetNextStep() { step++; };
-        //void SetIL(int i, int lvl){iter=i;level=lvl;max_iter=(i<max_iter)?i:max_iter;max_level=(lvl<max_level)?lvl:max_level;};
+        // void SetIL(int i, int
+        // lvl){iter=i;level=lvl;max_iter=(i<max_iter)?i:max_iter;max_level=(lvl<max_level)?lvl:max_level;};
         void SetIL(int i, int lvl);
         void Add(int nbiter);
         Real GlobalStats();

@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef FSKIT_COMMUNICATOR_H
 #define FSKIT_COMMUNICATOR_H

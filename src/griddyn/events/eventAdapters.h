@@ -49,7 +49,8 @@ class eventAdapter {
   public:
     /** @brief constructor
     @param[in] nextTime the trigger time for the event
-    @param[in] period the period of the event  (the event will trigger once per period starting at nextTime
+    @param[in] period the period of the event  (the event will trigger once per period starting at
+    nextTime
     */
     eventAdapter(coreTime nextTime = maxTime, coreTime period = timeZero);
 
@@ -350,7 +351,8 @@ class functionEventAdapter: public eventAdapter {
     /** constructor from function, time and period
     @param[in] fcal the function to execute at the trigger time
     @param triggerTime the time to execute the function
-    @param period if greater than 0 the function will execute with the specified period after triggerTIme
+    @param period if greater than 0 the function will execute with the specified period after
+    triggerTIme
     */
     functionEventAdapter(ccode_function_t fcal, coreTime triggerTime, coreTime period = 0.0);
 

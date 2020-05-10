@@ -62,14 +62,16 @@ namespace readerConfig {
 */
     void setDefaultMatchType(const std::string& matchType);
     /** set the default xml reader to use
-@details can be "1" or "tinyxml1" to use the tinyxml reader or "2" or "tinyxml2" to use the tinyxml2 reader
+@details can be "1" or "tinyxml1" to use the tinyxml reader or "2" or "tinyxml2" to use the tinyxml2
+reader
 */
     void setDefaultXMLReader(const std::string& xmltype);
     /** @brief enumeration describing how the matching should be done
- */
+     */
     enum class match_type {
         strict_case_match,  //!< match only the cases given
-        capital_case_match,  //!< match where the first letter can be either case, or all lower case, or all capitals
+        capital_case_match,  //!< match where the first letter can be either case, or all lower
+                             //!< case, or all capitals
         any_case_match,  //!< match where any letter can be any case
 
     };

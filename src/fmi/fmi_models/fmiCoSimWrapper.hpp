@@ -126,5 +126,5 @@ namespace fmi {
             fmiWrapper<fmiCoSimSubModel, BaseObj>::fmisub->timestep(time, inputs, sMode);
         }
     };
-}  //namespace fmi
-}  //namespace griddyn
+}  // namespace fmi
+}  // namespace griddyn

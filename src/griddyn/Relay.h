@@ -82,8 +82,8 @@ class Relay: public gridPrimary, objectOperatorInterface {
         continuous_flag = object_flag1,  //!< flag indicating the relay has some continuous checks
         resettable_flag = object_flag2,  //!< flag indicating that the conditions can be reset
         use_commLink = object_flag3,  //!< flag indicating that the relay uses communications
-        power_flow_checks_flag =
-            object_flag4,  //!< flag indicating that the relay should be in operation during power flow
+        power_flow_checks_flag = object_flag4,  //!< flag indicating that the relay should be in
+                                                //!< operation during power flow
         extra_relay_flag =
             object_flag5,  //!< just defining an extra name for additional relay flags
 
@@ -211,8 +211,8 @@ class Relay: public gridPrimary, objectOperatorInterface {
     /** set the condition that will trigger a particular action
     @details this can be called multiple times with different values
     actions can be associated with multiple conditions and conditions can trigger multiple actions
-    therefore this function can be called multiple times.  If called with the same actionNumber and conditionNumber
-    only the delay is updated
+    therefore this function can be called multiple times.  If called with the same actionNumber and
+    conditionNumber only the delay is updated
     @param[in] actionNumber the condition index which is the trigger for an action
     @param[in] conditionNumber the action to associate with a particular condition
     @param[in] delayTime the time between the trigger and when the associated action is triggered
@@ -225,20 +225,24 @@ class Relay: public gridPrimary, objectOperatorInterface {
     @return a change_code associated with the action describing the level of change to the system
     */
     virtual change_code triggerAction(index_t actionNumber);
-    /** define a set of conditions which all must be true for certain period of time before the action is triggered
-    @param[in] multi_conditions the set of condition indices which must all be true before an action is taken
-    @param[in] actionNumber the index of the action to take once all conditions are true for delayTime
-    @param[in] delayTime the period of time which all conditions must be true before triggering the action
+    /** define a set of conditions which all must be true for certain period of time before the
+    action is triggered
+    @param[in] multi_conditions the set of condition indices which must all be true before an action
+    is taken
+    @param[in] actionNumber the index of the action to take once all conditions are true for
+    delayTime
+    @param[in] delayTime the period of time which all conditions must be true before triggering the
+    action
     */
     virtual void setActionMultiTrigger(index_t actionNumber,
                                        const IOlocs& multi_conditions,
                                        coreTime delayTime = timeZero);
 
-    /** define the margin by which a resettable condition must be on the other side of reset level to actually
-    reset
+    /** define the margin by which a resettable condition must be on the other side of reset level
+    to actually reset
     @param[in] conditionNumber the index of the condition to alter
-    @param[in] margin the numerical value by which a value must be on opposite side of the reset level to actually
-    reset
+    @param[in] margin the numerical value by which a value must be on opposite side of the reset
+    level to actually reset
     */
     void setResetMargin(index_t conditionNumber, double margin);
     virtual void setFlag(const std::string& flag, bool val = true) override;
@@ -293,8 +297,8 @@ class Relay: public gridPrimary, objectOperatorInterface {
 
   protected:
     /** update the number of root finding functions used in the relay
-    @param[in] alertChange true if the function should send alerts to its parent object if the number of roots
-    changes
+    @param[in] alertChange true if the function should send alerts to its parent object if the
+    number of roots changes
     */
     virtual void updateRootCount(bool alertChange = true);
     /** do something when an action is taken
@@ -352,31 +356,34 @@ class Relay: public gridPrimary, objectOperatorInterface {
         IOlocs multiConditions;  //!< identification of all the conditions involved
         coreTime delayTime =
             timeZero;  //!< the delay time all conditions must be true before the action is taken
-            //!< TODO:PT account for this delay
+        //!< TODO:PT account for this delay
         mcondTrig() = default;
         mcondTrig(index_t actNum, const IOlocs& conds, coreTime delTime = timeZero):
-            actionNum(actNum), multiConditions(conds), delayTime(delTime){}
+            actionNum(actNum), multiConditions(conds), delayTime(delTime)
+        {
+        }
     };
     /** enumeration of relay flags*/
-    // count_t numAlgRoots = 0;        //!< counter for the number of root finding operations related to the
-    // condition checking
+    // count_t numAlgRoots = 0;        //!< counter for the number of root finding operations
+    // related to the condition checking
     std::vector<std::shared_ptr<Condition>> conditions;  //!< state conditionals for the system
     std::vector<std::shared_ptr<eventAdapter>>
         actions;  //!< actions to take in response to triggers
     std::vector<std::vector<index_t>> actionTriggers;  //!< the conditions that cause actions
     std::vector<std::vector<coreTime>>
-        actionDelays;  //!< the periods of time in which the condition must be true for an action to occur
+        actionDelays;  //!< the periods of time in which the condition must be true for an action to
+                       //!< occur
     std::vector<condition_status_t> cStates;  //!< a vector of states for the conditions
     std::vector<coreTime> conditionTriggerTimes;  //!< the times at which the condition triggered
     std::vector<condCheckTime>
         condChecks;  //!< a vector of condition action pairs that are in wait and see mode
     std::vector<std::vector<mcondTrig>>
         multiConditionTriggers;  //!< a vector for action which have multiple triggers
-    std::vector<index_t>
-        conditionsWithRoots;  //!< indices of the conditions with root finding functions attached to them
+    std::vector<index_t> conditionsWithRoots;  //!< indices of the conditions with root finding
+                                               //!< functions attached to them
   private:
-    /** clear all the conditional checks that have passed the initial trigger but not the full time duration for a
-    particular condition
+    /** clear all the conditional checks that have passed the initial trigger but not the full time
+    duration for a particular condition
     @param[in] conditionNumber the index of the condition to clear
     */
     void clearCondChecks(index_t conditionNumber);
@@ -397,8 +404,8 @@ class Relay: public gridPrimary, objectOperatorInterface {
                                  coreTime minimumDelayTime);
 
     /** check and if all conditions hold execute a multi-condition trigger
-    @param[in] conditionNum  the index of the condition that was just triggered that might also trigger a
-    multi-condition
+    @param[in] conditionNum  the index of the condition that was just triggered that might also
+    trigger a multi-condition
     @param[in] conditionTriggerTime the time of the trigger
     @param[in] minimumDelayTime  ignore all trigger delays below the minimumDelayTime
     */

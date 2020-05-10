@@ -290,7 +290,8 @@ void DynamicGenerator::dynObjectInitializeB(const IOdata& inputs,
         }
         if (sub->isEnabled()) {
             sub->dynInitializeB(inputArgs, localDesiredOutput, computedInputs);
-            //    sub->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+            //    sub->guessState (prevTime, m_state.data (), m_dstate_dt.data (),
+            //    cLocalbSolverMode);
         }
     }
 
@@ -308,7 +309,8 @@ void DynamicGenerator::setState(coreTime time,
         for (auto& subobj : getSubObjects()) {
             if (subobj->isEnabled()) {
                 subobj->setState(time, state, dstate_dt, sMode);
-                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (),
+                // cLocalbSolverMode);
             }
         }
         Pset += dPdt * (time - prevTime);
@@ -349,7 +351,8 @@ void DynamicGenerator::guessState(coreTime time,
         for (auto& subobj : getSubObjects()) {
             if (subobj->isEnabled()) {
                 subobj->guessState(time, state, dstate_dt, sMode);
-                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (),
+                // cLocalbSolverMode);
             }
         }
     } else if (stateSize(sMode) > 0) {
@@ -530,7 +533,8 @@ void DynamicGenerator::algebraicUpdate(const IOdata& inputs,
     //        if (sub->isEnabled ())
     //        {
     //            sub->algebraicUpdate (subInputs.inputs[sub->locIndex], sD2,
-    //                                                                m_state.data (), cLocalbSolverMode, alpha);
+    //                                                                m_state.data (),
+    //                                                                cLocalbSolverMode, alpha);
     //        }
     //    }
     // }
@@ -744,8 +748,8 @@ double DynamicGenerator::getRealPower(const IOdata& inputs,
     {
         double scale = machineBasePower / systemBasePower;
         double output = genModel->getOutput(subInputs.inputs[genmodel_loc], sD, sMode, 0) * scale;
-        // printf("t=%f (%s ) V=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-        // inputs[angleInLocation], output[PoutLocation]);
+        // printf("t=%f (%s ) V=%f T=%f, P=%f\n", time, parent->name.c_str(),
+        // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
         return output;
     }
     return Generator::getRealPower(inputs, sD, sMode);

@@ -26,7 +26,8 @@ typedef struct Cmessage CurrentMessage;
 #endif
 
 namespace loads {
-    /** @brief load model defining the interactions with a gridlabD simulation through the Ghost Swing Bus Manager*/
+    /** @brief load model defining the interactions with a gridlabD simulation through the Ghost
+     * Swing Bus Manager*/
     class gridLabDLoad: public rampLoad {
       public:
         gridLabDLoad(const std::string& objName = "gridlabDLoad_$");
@@ -84,8 +85,8 @@ namespace loads {
         double spread = 0.01;  //!< the voltage spread to use when calculating the parameters
         double Vprev = 0.0;  //!< storage for recent voltage call
         double Thprev = 0.0;  //!< storage for recent phase call (phase is not really used yet)
-        double triggerBound =
-            1.5;  //!< the bounds on the voltage in terms of the spread determining when to generate a new calculation
+        double triggerBound = 1.5;  //!< the bounds on the voltage in terms of the spread
+                                    //!< determining when to generate a new calculation
         coreTime m_lastCallTime = negTime;
         void gridLabDInitialize(void);
         void runGridLabA(coreTime time, const IOdata& inputs);

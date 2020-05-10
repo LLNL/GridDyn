@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef READ_ELEMENT_FILE_H_
 #define READ_ELEMENT_FILE_H_
@@ -46,15 +46,15 @@ coreObject* loadElementFile(coreObject* parentObject, const std::string& fileNam
             rootSimFile = false;
         }
     } else {
-        //set the warn count to 0 for the readerConfig namespace
+        // set the warn count to 0 for the readerConfig namespace
         warnCount = 0;
     }
 
-    //May need to create a readerInfo object this to ensure it gets deleted even under exception
+    // May need to create a readerInfo object this to ensure it gets deleted even under exception
     std::unique_ptr<readerInfo> rip = (ri == nullptr) ? std::make_unique<readerInfo>() : nullptr;
     readerInfo::scopeID riScope = 0;
     if (ri == nullptr) {
-        ri = rip.get();  //we created the unique_ptr now
+        ri = rip.get();  // we created the unique_ptr now
 
     } else {
         riScope = ri->newScope();
@@ -88,7 +88,7 @@ coreObject* loadElementFile(coreObject* parentObject, const std::string& fileNam
     if (!rootSimFile) {
         loadElementInformation(gco, sim, "import", *ri, {"version"});
     }
-    if (!rip) {  //scope closing can be expensive so don't do it unless we need to
+    if (!rip) {  // scope closing can be expensive so don't do it unless we need to
         ri->closeScope(riScope);
     }
 
@@ -99,6 +99,6 @@ coreObject* loadElementFile(coreObject* parentObject, const std::string& fileNam
     return gco;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn
 
 #endif

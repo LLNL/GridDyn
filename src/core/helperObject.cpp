@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "helperObject.h"
 
@@ -17,8 +17,8 @@
 #include "gmlc/utilities/string_viewOps.h"
 #include "utilities/dataDictionary.h"
 namespace griddyn {
-// start at 100 since there are some objects that use low numbers as a check for interface number and the id as
-// secondary
+// start at 100 since there are some objects that use low numbers as a check for interface number
+// and the id as secondary
 std::atomic<std::uint64_t> helperObject::s_obcnt(101);
 
 helperObject::helperObject() noexcept: m_oid(s_obcnt++) {}

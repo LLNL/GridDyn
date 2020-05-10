@@ -21,7 +21,8 @@ namespace griddyn {
 @tparam A child class of the original object
 @tparam B class of the parent object
 * @param[in] originalObject of class A to be cloned
-* @param[in] obj pointer of an object to clone to or a null pointer if a new object needs to be created
+* @param[in] obj pointer of an object to clone to or a null pointer if a new object needs to be
+created
 * @return pointer to the cloned object
 */
 template<class A, class B>

@@ -18,7 +18,7 @@
 namespace griddyn {
 namespace links {
     /** implementing a DC transmission line model
- */
+     */
     class dcLink: public Link {
       public:
         /*  enum dclink_flags

@@ -208,7 +208,8 @@ namespace helicsLib {
     {
         if (coord_) {
             if (!valKey.empty()) {
-                // coord_->registerSubscription(valKey, helicsRegister::dataType::helicsDouble, def);
+                // coord_->registerSubscription(valKey, helicsRegister::dataType::helicsDouble,
+                // def);
 
                 if (valueIndex < 0) {
                     valueIndex = coord_->addSubscription(valKey, inputUnits);

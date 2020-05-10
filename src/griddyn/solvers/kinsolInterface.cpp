@@ -45,8 +45,8 @@ namespace solvers {
                   N_Vector tmp2);
 
     // int kinsolAlgFunc (N_Vector u, N_Vector f, void *user_data);
-    // int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector
-    // tmp2);
+    // int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data,
+    // N_Vector tmp1, N_Vector tmp2);
 
     kinsolInterface::kinsolInterface(const std::string& objName): sundialsInterface(objName)
     {

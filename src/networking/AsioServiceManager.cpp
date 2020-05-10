@@ -1,7 +1,7 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable
+Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 /*
  * LLNS Copyright Start
@@ -26,8 +26,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
  */
 std::map<std::string, std::shared_ptr<AsioServiceManager>> AsioServiceManager::services;
 
-/** we expect operations on core object that modify the map to be rare but we absolutely need them to be thread
-safe so we are going to use a lock that is entirely controlled by this file*/
+/** we expect operations on core object that modify the map to be rare but we absolutely need them
+to be thread safe so we are going to use a lock that is entirely controlled by this file*/
 static std::mutex serviceLock;
 
 std::shared_ptr<AsioServiceManager>
@@ -35,7 +35,7 @@ std::shared_ptr<AsioServiceManager>
 {
     std::lock_guard<std::mutex> serveLock(
         serviceLock);  // just to ensure that nothing funny happens if you try
-        // to get a context while it is being constructed
+    // to get a context while it is being constructed
     auto fnd = services.find(serviceName);
     if (fnd != services.end()) {
         return fnd->second;
@@ -52,7 +52,7 @@ std::shared_ptr<AsioServiceManager>
 {
     std::lock_guard<std::mutex> serveLock(
         serviceLock);  // just to ensure that nothing funny happens if you try
-        // to get a context while it is being constructed
+    // to get a context while it is being constructed
     auto fnd = services.find(serviceName);
     if (fnd != services.end()) {
         return fnd->second;
@@ -112,8 +112,8 @@ AsioServiceManager::~AsioServiceManager()
     }
     if (leakOnDelete) {
         // yes I am purposefully leaking this PHILIP TOP
-        // this capability is needed for some operations on particular OS's with the shared library operations that
-        // will crash if this is closed before the library closes
+        // this capability is needed for some operations on particular OS's with the shared library
+        // operations that will crash if this is closed before the library closes
         auto val = iserv.release();
         (void)(val);
     }

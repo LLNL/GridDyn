@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fmiMELoad.h"
 
@@ -47,7 +47,8 @@ namespace fmi {
         V[1] *= 180.0 / kPI;
         fmisub->updateLocalCache(V, sD, sMode);
         auto res = fmisub->getOutputs(V, sD, sMode);
-        //printf("V[%f,%f,%f,%f,%f,%f], I[%f,%f,%f,%f,%f,%f]\n", V[0], V[1], V[2], V[3], V[4], V[5], I[0], I[1], I[2], I[3], I[4], I[5]);
+        // printf("V[%f,%f,%f,%f,%f,%f], I[%f,%f,%f,%f,%f,%f]\n", V[0], V[1], V[2], V[3], V[4],
+        // V[5], I[0], I[1], I[2], I[3], I[4], I[5]);
 
         auto act = outputTranslation(res, inputs);
         setP(act[PoutLocation]);
@@ -111,5 +112,5 @@ namespace fmi {
         }
         return powers;
     }
-}  //namespace fmi
-}  //namespace griddyn
+}  // namespace fmi
+}  // namespace griddyn

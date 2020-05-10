@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef TRANSFER_FUNCTION_BLOCK_H_
 #define TRANSFER_FUNCTION_BLOCK_H_
@@ -19,7 +19,8 @@ namespace griddyn {
 namespace blocks {
     /** @brief class implementing a generic transfer unction
  block implementing \f$H(S)=\frac{K(b_0+b_1 s +/hdots +b_n s^n}{a_0+a_1 s +/hdots +a_n s^n}\f$
-it then converts it to observable canonical form as state space matrices for implementation as part the solver
+it then converts it to observable canonical form as state space matrices for implementation as part
+the solver
 
 */
     class transferFunctionBlock: public Block {
@@ -28,9 +29,10 @@ it then converts it to observable canonical form as state space matrices for imp
         std::vector<double> a;  //!< lower time constant
         std::vector<double> b;  //!< upper time constant
       private:
-        // double rescale = 1;                   //!< containing the original $a_n$ for rescaling if coefficients are changed later
-        bool extraOutputState =
-            false;  //!< flag indicating that there is an extra state computation at the end due to direct dependence of B;
+        // double rescale = 1;                   //!< containing the original $a_n$ for rescaling if
+        // coefficients are changed later
+        bool extraOutputState = false;  //!< flag indicating that there is an extra state
+                                        //!< computation at the end due to direct dependence of B;
       public:
         /** constructor to add in the order of the transfer function
   @param[in] order  the order of the transfer function
@@ -41,7 +43,8 @@ it then converts it to observable canonical form as state space matrices for imp
   @param[in] objName  the name
   */
         explicit transferFunctionBlock(const std::string& objName);
-        /** constructor to define the transfer function coefficients assuming $b_0=1$ and all others are 0
+        /** constructor to define the transfer function coefficients assuming $b_0=1$ and all others
+  are 0
   @param[in] Acoef the denominator coefficients
   */
         explicit transferFunctionBlock(std::vector<double> Acoef);
@@ -72,7 +75,7 @@ it then converts it to observable canonical form as state space matrices for imp
                                    const stateData& sD,
                                    double resid[],
                                    const solverMode& sMode) override;
-        //only called if the genModel is not present
+        // only called if the genModel is not present
         virtual void blockJacobianElements(double input,
                                            double didt,
                                            const stateData& sD,
@@ -80,9 +83,9 @@ it then converts it to observable canonical form as state space matrices for imp
                                            index_t argLoc,
                                            const solverMode& sMode) override;
         virtual double step(coreTime time, double inputA) override;
-        //virtual void setTime(coreTime time){prevTime=time;};
+        // virtual void setTime(coreTime time){prevTime=time;};
         virtual stringVec localStateNames() const override;
     };
-}  //namespace blocks
-}  //namespace griddyn
+}  // namespace blocks
+}  // namespace griddyn
 #endif

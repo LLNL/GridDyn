@@ -1,15 +1,16 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "fncsSource.h"
 
@@ -65,7 +66,7 @@ void fncsSource::updateA(coreTime time)
     }
 
     if (opFlags[use_ramp]) {
-        if (opFlags[predictive_ramp])  //ramp uses the previous change to guess into the future
+        if (opFlags[predictive_ramp])  // ramp uses the previous change to guess into the future
         {
             m_output = newVal;
             if ((time - lastUpdateTime) > 0.001) {
@@ -134,7 +135,7 @@ void fncsSource::set(const std::string& param, const std::string& val)
         updateSubscription();
 
     } else {
-        //no reason to set the ramps in fncs load so go to zipLoad instead
+        // no reason to set the ramps in fncs load so go to zipLoad instead
         gridSource::set(param, val);
     }
 }

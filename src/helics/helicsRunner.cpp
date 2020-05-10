@@ -79,9 +79,9 @@ namespace helicsLib {
             throw(executionFailure(m_gds.get(), "power flow initialize failure"));
         }
 
-        GriddynRunner::
-            simInitialize();  // TODO this will need to be unpacked for co-iteration on the power flow
-            // solution
+        GriddynRunner::simInitialize();  // TODO this will need to be unpacked for co-iteration on
+                                         // the power flow
+        // solution
         if (!fed_) {
             throw(executionFailure(m_gds.get(), "unable to initialize helics federate"));
         }

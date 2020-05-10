@@ -1,7 +1,7 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable
+Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 
 #include "TcpHelperClasses.h"
@@ -275,7 +275,8 @@ namespace tcpLib {
             {  // scope for the connection lock
                 std::lock_guard<std::mutex> lock(connectionsMutex);
                 //  new_connection->index = static_cast<int> (connects->size());
-                // the previous 3 calls have to be made before this call since they could be used immediately
+                // the previous 3 calls have to be made before this call since they could be used
+                // immediately
                 new_connection->start();
                 connections.push_back(std::move(new_connection));
             }

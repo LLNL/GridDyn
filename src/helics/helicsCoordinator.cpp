@@ -333,7 +333,7 @@ namespace helicsLib {
     }
 
     /** set the target destination for an endpoint
- */
+     */
     void helicsCoordinator::setEndpointTarget(int32_t index, const std::string& target)
     {
         if (isValidIndex(index, eptI)) {

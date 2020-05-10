@@ -87,7 +87,7 @@ std::unique_ptr<parameterOperator> make_parameterOperator(const std::string& par
 
     string_view paramS(param);
     auto renameloc = paramS.find(" as ");  // spaces are important
-        // extract out a rename
+                                           // extract out a rename
     string_view rname;
     if (renameloc != std::string::npos) {
         rname = trim(paramS.substr(renameloc + 4));

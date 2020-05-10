@@ -27,10 +27,11 @@ class matrixData;
 namespace griddyn {
 class consData;
 /** base object for gridDynOptimizations
- * the basic object for creating a power system encapsulating some common functions and data that is needed by all
- *objects in the simulation and defining some common methods for use by all objects.  This object is not really
- *intended to be instantiated directly and is mostly a common interface to inheriting objects gridPrimary,
- *gridSecondary, and gridSubModel as it encapsulated common functionality between those objects
+ * the basic object for creating a power system encapsulating some common functions and data that is
+ *needed by all objects in the simulation and defining some common methods for use by all objects.
+ *This object is not really intended to be instantiated directly and is mostly a common interface to
+ *inheriting objects gridPrimary, gridSecondary, and gridSubModel as it encapsulated common
+ *functionality between those objects
  **/
 class gridOptObject: public coreObject {
   public:
@@ -226,8 +227,8 @@ class gridOptObject: public coreObject {
     /** get the linear constraint operations
     @details each constraint is a linear sum of coefficients of the objective values
     @param[in] of  the current object variable values
-    @param[out] cons the structure for the constraint parameters storing the coefficients, the upper and lower
-    limit
+    @param[out] cons the structure for the constraint parameters storing the coefficients, the upper
+    and lower limit
     @param[out] upperLimit value for the upper bound on the constraint function
     @param[out] lowerLimit value for the lower bound on the constraint function
     @param[in] oMode the optimization mode to use.

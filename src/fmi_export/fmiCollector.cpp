@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "fmiCollector.h"
 
@@ -76,7 +76,7 @@ namespace fmi {
     void fmiCollector::dataPointAdded(const collectorPoint& cp)
     {
         if (coord == nullptr) {
-            //find the coordinator first
+            // find the coordinator first
             auto gobj = cp.dataGrabber->getObject();
             if (gobj != nullptr) {
                 auto rto = gobj->getRoot();
@@ -92,10 +92,10 @@ namespace fmi {
             if (cp.columnCount == 1) {
                 coord->registerOutput(cp.colname, cp.column, this);
             } else {
-                //TODO:: deal with output vectors later
+                // TODO:: deal with output vectors later
             }
         }
     }
 
-}  //namespace fmi
+}  // namespace fmi
 }  // namespace griddyn

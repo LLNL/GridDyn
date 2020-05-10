@@ -1,15 +1,16 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "fncsSupport.h"
 
@@ -25,7 +26,7 @@ fncs::time gd2fncsTime(coreTime evntTime)
 coreTime fncs2gdTime(fncs::time ftime)
 {
     double val = static_cast<double>(
-        ftime / fncsTickPerSecond<int>);  //this gets the decimal should be integer division
+        ftime / fncsTickPerSecond<int>);  // this gets the decimal should be integer division
     val += (static_cast<double>(ftime % fncsTickPerSecond<int>) / fncsTickPerSecond<double>);
     return val;
 }
@@ -38,7 +39,7 @@ fncs::time gd2fncsTime(coreTime evntTime)
 coreTime fncs2gdTime(fncs::time ftime)
 {
     double val = static_cast<double>(
-        ftime / fncsTickPerSecond_i);  //this gets the decimal should be integer division
+        ftime / fncsTickPerSecond_i);  // this gets the decimal should be integer division
     val += (static_cast<double>(ftime % fncsTickPerSecond_i) / fncsTickPerSecond_i);
     return coreTime(val);
 }
@@ -71,8 +72,8 @@ void fncsRegister::registerPublication(const std::string& pub, dataType dtype)
     publications.emplace_back(pub, dtype);
 }
 
-static const std::string indent("    ");  //4 spaces
-static const std::string indent2("        ");  //8 spaces
+static const std::string indent("    ");  // 4 spaces
+static const std::string indent2("        ");  // 8 spaces
 std::string fncsRegister::makeZPLConfig(const zplInfo& info)
 {
     std::stringstream zpl;

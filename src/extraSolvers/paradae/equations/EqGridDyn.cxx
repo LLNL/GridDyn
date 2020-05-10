@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "EqGridDyn.h"
 
 #include "../common/Timer.h"
@@ -37,7 +37,7 @@ namespace paradae {
                                      solverMode* mode_,
                                      vector<double>& discontinuities)
     {
-        //n=gds_->stateSize(cDaeSolverMode);
+        // n=gds_->stateSize(cDaeSolverMode);
         n = gds_->stateSize(*mode_);
         t0 = t0_;
         Tmax = Tmax_;
@@ -53,9 +53,9 @@ namespace paradae {
         name = "EquationGridDyn";
 
         // Old code setting up 100 square pulse discontinuities at t=[0.5, 1.5, 2.5, ...]
-        //roots=RootManager(100,1,0,1e-10);
-        //roots.n_sactive=100;
-        //for (int i=0; i<100; i++)
+        // roots=RootManager(100,1,0,1e-10);
+        // roots.n_sactive=100;
+        // for (int i=0; i<100; i++)
         //{
         //    roots.is_active(i) = 1;
         //    roots.t_sroot(i) = 0.5 + i;
@@ -70,14 +70,14 @@ namespace paradae {
         }
 
         // This will print out all of the variable names
-        //stringVec stNames;
-        //gds->getStateName(stNames, cDaeSolverMode);
-        //cout << "\nVariable Names\n";
-        //for(int ii; ii< stNames.size(); ii++)
+        // stringVec stNames;
+        // gds->getStateName(stNames, cDaeSolverMode);
+        // cout << "\nVariable Names\n";
+        // for(int ii; ii< stNames.size(); ii++)
         //{
         //   cout << stNames[ii] << "\n";
         //}
-        //cout << "\n\n";
+        // cout << "\n\n";
     }
 
     void EquationGridDyn::function(const Real t,
@@ -87,7 +87,7 @@ namespace paradae {
                                    Vector& Fydy)
     {
         nb_calls++;
-        //gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(),cDaeSolverMode);
+        // gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(),cDaeSolverMode);
         gds->residualFunction(t, y.GetData(), dy.GetData(), Fydy.GetData(), *mode);
     }
 
@@ -98,14 +98,14 @@ namespace paradae {
                                          const Real cj,
                                          Matrix& J)
     {
-        //J.dump(std::cout);
+        // J.dump(std::cout);
         nb_calls_jac++;
         SparseMatrix& pJ = dynamic_cast<SparseMatrix&>(J);
         paradaeArrayData a1(&pJ);
-        //gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
+        // gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
         gds->jacobianFunction(t, y.GetData(), dy.GetData(), a1, cj, *mode);
-        //static int switcheroo = 0;
-        //if(switcheroo == 0)
+        // static int switcheroo = 0;
+        // if(switcheroo == 0)
         //{
         //   std::cout << "\n\n  Time value " << t << "\n\n";
         //   J.dump("new_jac.txt");

@@ -19,9 +19,9 @@ namespace griddyn {
 class gridBus;
 class Block;
 
-/** @brief class defining some additional components for a variable generator such as a renewable source like wind
-  and solar the generator includes the addition of a source and a filter block to define some sort of input and a
-  filtering function on that input*/
+/** @brief class defining some additional components for a variable generator such as a renewable
+  source like wind and solar the generator includes the addition of a source and a filter block to
+  define some sort of input and a filtering function on that input*/
 class variableGenerator: public DynamicGenerator {
   protected:
     Source* m_source = nullptr;  //!< reference to the generation source block
@@ -29,7 +29,8 @@ class variableGenerator: public DynamicGenerator {
     model_parameter mp_Vcutout = -1.0;  //!<[pu] the cutout voltage
     model_parameter mp_Vmax = kBigNum;  //!< [pu] the maximum operating voltage
   public:
-    //!< @brief new submodel locations for the extra variable generator block extends the ones defined in Generator
+    //!< @brief new submodel locations for the extra variable generator block extends the ones
+    //!< defined in Generator
     enum extra_block_locations { source_loc = 5, control_block_loc = 6 };
     /** @brief default constructor*/
     explicit variableGenerator(const std::string& objName = "varGen_$");

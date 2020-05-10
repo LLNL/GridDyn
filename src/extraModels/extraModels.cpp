@@ -32,4 +32,4 @@ void loadExtraModels(const std::string& /*subset*/)
                                                                      stringVec{"txaging", "txage"});
     extraFactories.push_back(c);
 }
-}  //namespace griddyn
+}  // namespace griddyn

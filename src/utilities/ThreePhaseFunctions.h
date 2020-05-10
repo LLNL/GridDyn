@@ -1,18 +1,18 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 /** @file
-*  @brief define some operations related to matrixData objects
-*/
+ *  @brief define some operations related to matrixData objects
+ */
 #ifndef THREE_PHASE_FUNCTIONS_H_
 #define THREE_PHASE_FUNCTIONS_H_
 #pragma once
@@ -40,7 +40,7 @@ static const std::complex<double> alpha2 = alpha * alpha;
 static const std::complex<double> rotp120(-0.5, sqrt(3.0) / 2.0);
 static const std::complex<double> rotn120(-0.5, -sqrt(3.0) / 2.0);
 
-//TODO::PT add enable if statements
+// TODO::PT add enable if statements
 template<class X>
 X generate3PhaseVector(const X& val)
 {
@@ -59,7 +59,7 @@ X generate3PhaseVector(const X& val)
     return vvals;
 }
 
-//TODO::PT add enable if statements
+// TODO::PT add enable if statements
 template<class X>
 X generate3PhasePolarVector(const X& val)
 {

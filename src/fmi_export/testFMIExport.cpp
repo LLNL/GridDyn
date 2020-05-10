@@ -251,8 +251,8 @@ BOOST_AUTO_TEST_CASE(test_fmi_runner2)
     auto runner = std::make_unique<fmi::fmiRunner>("testsim",
                                                    fmi_test_directory + "/three_phase_fmu",
                                                    nullptr);
-    // auto runner = std::make_unique<fmiRunner>("testsim", "C:\\Users\\top1\\Documents\\codeProjects\\New
-    // folder\\resources", nullptr);
+    // auto runner = std::make_unique<fmiRunner>("testsim",
+    // "C:\\Users\\top1\\Documents\\codeProjects\\New folder\\resources", nullptr);
     runner->simInitialize();
     runner->UpdateOutputs();
 

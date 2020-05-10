@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #pragma once
 #include "griddyn/comms/Communicator.h"
 #include "zmqLibrary/zmqSocketDescriptor.h"
@@ -50,14 +50,14 @@ namespace zmqInterface {
       protected:
         /** enumeration flags for the communicator object*/
         enum zmqCommFlags {
-            no_transmit_dest =
-                0,  //!< flag indicating whether the communicator should include the destination as the first frame
-            no_transmit_source =
-                1,  //!< flag indicating whether the communicator should include the source in the transmission
-            use_tx_proxy =
-                2,  //!< use an internal proxy NOTE:if connection and proxyAddress are false this will convert to true and use the default proxy
-            use_rx_proxy =
-                3,  //!< use an internal proxy NOTE:if connection and proxyAddress are false this will convert to true and use the default proxy
+            no_transmit_dest = 0,  //!< flag indicating whether the communicator should include the
+                                   //!< destination as the first frame
+            no_transmit_source = 1,  //!< flag indicating whether the communicator should include
+                                     //!< the source in the transmission
+            use_tx_proxy = 2,  //!< use an internal proxy NOTE:if connection and proxyAddress are
+                               //!< false this will convert to true and use the default proxy
+            use_rx_proxy = 3,  //!< use an internal proxy NOTE:if connection and proxyAddress are
+                               //!< false this will convert to true and use the default proxy
             tx_conn_specified = 4,  //!< indicator that the transmit connection was specified
             rx_conn_specified = 5,  //!< indicator that the receive connection was specified
 
@@ -72,7 +72,7 @@ namespace zmqInterface {
         std::string proxyName;  //!< the address of the local proxy to use
         std::string contextName;  //!< the context to use
 
-        //private functions
+        // private functions
       protected:
         /** handle a zmq message*/
         virtual void messageHandler(const zmq::multipart_t& msg);
@@ -82,5 +82,5 @@ namespace zmqInterface {
         virtual void addMessageBody(zmq::multipart_t& msg, std::shared_ptr<commMessage>& message);
     };
 
-}  //namespace zmqInterface
-}  //namespace griddyn
+}  // namespace zmqInterface
+}  // namespace griddyn

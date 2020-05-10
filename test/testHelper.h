@@ -129,7 +129,8 @@ void requireStates(griddyn::gridDynSimulation::gridState_t state1,
 /** run a Jacobian check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
-@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the
+Jacobian
 @return the count of the number of mismatches between the calculated and numeric calculation
 */
 int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
@@ -140,7 +141,8 @@ int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
 @param tol the tolerance to use for the check
-@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the
+Jacobian
 @return the count of the number of mismatches between the calculated and numeric calculation
 */
 int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
@@ -151,7 +153,8 @@ int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
 /** run a residual check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
-@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the
+Jacobian
 @return the count of the number of residual values that are sufficiantly far from 0
 */
 int runResidualCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
@@ -161,7 +164,8 @@ int runResidualCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
 /** run a derivative check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
-@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the
+Jacobian
 @return the count of the number of mismatches between the calculated and numeric calculation
 */
 int runDerivativeCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
@@ -171,7 +175,8 @@ int runDerivativeCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
 /** run an algebraic check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
-@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the
+Jacobian
 @return the count of the number of mismatches between the calculated and numeric calculation
 */
 int runAlgebraicCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
@@ -179,8 +184,8 @@ int runAlgebraicCheck(std::unique_ptr<griddyn::gridDynSimulation>& gds,
                       bool checkRequired = true);
 
 /** print any differences in bus voltages and angles between two vectors
-@details targeted at checking two sets of values between different simulations to make sure they produce the same
-result
+@details targeted at checking two sets of values between different simulations to make sure they
+produce the same result
 @param V1 the voltages of the first set
 @param V2 the voltages of the second set
 @param A1 the angles of the first set

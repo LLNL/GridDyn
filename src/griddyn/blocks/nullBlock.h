@@ -16,7 +16,7 @@
 namespace griddyn {
 namespace blocks {
     /** @brief class defining a null block  meaning input==output
- */
+     */
     class nullBlock final: public Block {
       public:
         /** @brief default constructor*/

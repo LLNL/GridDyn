@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -39,4 +39,4 @@ Area* readAreaElement(std::shared_ptr<readerElement>& element,
     return area;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

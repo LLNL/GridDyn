@@ -182,5 +182,5 @@ namespace exciters {
         return ret;
     }
 
-}  //namespace exciters
-}  //namespace griddyn
+}  // namespace exciters
+}  // namespace griddyn

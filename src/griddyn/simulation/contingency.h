@@ -122,7 +122,8 @@ class contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterf
     @details this header line would be general to all similar contingencies
     */
     std::string generateHeader() const;
-    /** generate an output line for a csv file containing the contingency result data and any violations
+    /** generate an output line for a csv file containing the contingency result data and any
+     * violations
      */
     std::string generateFullOutputLine() const;
     /** generate an output string containing just the contingency and any violations

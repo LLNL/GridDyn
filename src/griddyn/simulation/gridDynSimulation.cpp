@@ -355,11 +355,11 @@ std::vector<double> gridDynSimulation::getState(const solverMode& sMode) const
 
 /*
 mixed = 0,  //!< everything is mixed through each other
-grouped = 1,  //!< all similar variables are grouped together (angles, then voltage, then algebraic, then
-differential) algebraic_grouped = 2, //!< all the algebraic variables are grouped, then the differential
-voltage_first = 3, //!< grouped with the voltage coming first
-angle_first = 4,  //!< grouped with the angle coming first
-differential_first = 5, //!< differential and algebraic grouped with differential first
+grouped = 1,  //!< all similar variables are grouped together (angles, then voltage, then algebraic,
+then differential) algebraic_grouped = 2, //!< all the algebraic variables are grouped, then the
+differential voltage_first = 3, //!< grouped with the voltage coming first angle_first = 4,  //!<
+grouped with the angle coming first differential_first = 5, //!< differential and algebraic grouped
+with differential first
 */
 
 void gridDynSimulation::setupOffsets(const solverMode& sMode, offset_ordering offsetOrdering)
@@ -1081,8 +1081,8 @@ int gridDynSimulation::makeReady(gridState_t desiredState, const solverMode& sMo
                 break;
         }
     }
-    // Now if we are beyond the desired state we might have to do some additional stuff to make sure everything is
-    // ready to go
+    // Now if we are beyond the desired state we might have to do some additional stuff to make sure
+    // everything is ready to go
     if (desiredState != pState) {
         switch (desiredState) {
             case gridState_t::INITIALIZED:
@@ -1338,7 +1338,8 @@ std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface(index_t i
 std::shared_ptr<SolverInterface>
     gridDynSimulation::getSolverInterface(const std::string& solverName)
 {
-    // just run through the list of SolverInterface objects and find the first one that matches the name
+    // just run through the list of SolverInterface objects and find the first one that matches the
+    // name
     if (solverName == "powerflow") {
         return getSolverInterface(*defPowerFlowMode);
     }

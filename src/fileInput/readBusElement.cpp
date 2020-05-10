@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "core/objectFactory.hpp"
 #include "core/objectInterpreter.h"
@@ -61,16 +61,17 @@ gridBus* readBusElement(std::shared_ptr<readerElement>& element,
                 WARNPRINT(READER_WARN_IMPORTANT, "Bus type parameter not found " << B);
             }
         } else {
-            try  // type can mean two different things to a bus -either the actual type of the bus object or the
+            try  // type can mean two different things to a bus -either the actual type of the bus
+                 // object or the
             // state type of the bus this catch will
-            // will dismabiguate them since in a majority of cases we are not changing the type of the object only
-            // how it interprets the state
+            // will dismabiguate them since in a majority of cases we are not changing the type of
+            // the object only how it interprets the state
             {
                 bus->set("type", valType);
             }
-            catch (
-                const std::
-                    invalid_argument&)  // either invalidParameterValue or unrecognizedParameter depending on the actual model used
+            catch (const std::invalid_argument&)  // either invalidParameterValue or
+                                                  // unrecognizedParameter depending on the actual
+                                                  // model used
             {
                 if (!(coreObjectFactory::instance()->isValidType(busComponentName, valType))) {
                     WARNPRINT(READER_WARN_IMPORTANT, "Bus type parameter not found " << valType);
@@ -86,4 +87,4 @@ gridBus* readBusElement(std::shared_ptr<readerElement>& element,
     return bus;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

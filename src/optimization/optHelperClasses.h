@@ -126,8 +126,8 @@ class optimOffsets {
  **/
 class optOffsetTable {
   private:
-    std::vector<optimOffsets>
-        offsetContainer;  //!< an array of 6 containers for offsets corresponding to the different solver modes
+    std::vector<optimOffsets> offsetContainer;  //!< an array of 6 containers for offsets
+                                                //!< corresponding to the different solver modes
     index_t paramOffset = kNullLocation;  //!< offset for storing parameters in an array
 
   public:
@@ -225,12 +225,14 @@ class optOffsetTable {
     /** get the locations for the data
      *@param[in] oMode the optimMode we are interested in
      */
-    // void getLocations (const stateData &sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent *comp);
+    // void getLocations (const stateData &sD, double d[], const optimMode &oMode, Lp *Loc,
+    // gridComponent *comp);
     /** get the locations for the data from a stateData pointer
      *@param[in] oMode the optimMode we are interested in
      *@return the angle offset
      */
-    // void getLocations (stateData *sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent *comp);
+    // void getLocations (stateData *sD, double d[], const optimMode &oMode, Lp *Loc, gridComponent
+    // *comp);
     /** get the locations offsets for the data
      *@param[in] oMode the optimMode we are interested in
      *@return the angle offset

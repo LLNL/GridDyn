@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef LONG_LINE_H_
 #define LONG_LINE_H_
@@ -37,10 +37,10 @@ namespace links {
         longLine(const std::string& objName = "longLine_$");
         virtual coreObject* clone(coreObject* obj = nullptr) const override;
         // add components
-        virtual void add(coreObject* obj) override final;  //there shouldn't be any additional adds
+        virtual void add(coreObject* obj) override final;  // there shouldn't be any additional adds
         // remove components
         virtual void remove(coreObject* obj)
-            override final;  //there shouldn't be any removes all models are controlled internally
+            override final;  // there shouldn't be any removes all models are controlled internally
 
         virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
@@ -57,6 +57,6 @@ namespace links {
         void generateIntermediateLinks();
     };
 
-}  //namespace links
-}  //namespace griddyn
+}  // namespace links
+}  // namespace griddyn
 #endif

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef YAMLREADERELEMENT_H_
 #define YAMLREADERELEMENT_H_
@@ -72,10 +72,10 @@ class yamlReaderElement: public readerElement {
     bool isElement(const YAML::Node& testValue) const;
 
   private:
-    std::shared_ptr<YAML::Node> doc;  //!<document root
+    std::shared_ptr<YAML::Node> doc;  //!< document root
     std::vector<std::shared_ptr<yamlElement>> parents;  //!< stack of the parent objects
     std::shared_ptr<yamlElement> current;  //!< the current object
-    //YAML::const_iterator attIterator;    //!< an iterator for looping through attributes
+    // YAML::const_iterator attIterator;    //!< an iterator for looping through attributes
     int iteratorCount = 0;
     std::vector<std::shared_ptr<yamlReaderElement>> bookmarks;
 };

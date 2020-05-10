@@ -22,13 +22,14 @@ class readerInfo;
 namespace helicsLib {
     class helicsCoordinator;
 
-    /** helicsRunner is the execution object for executing in coordination with the Helics co-simulation environment
-it inherits from gridDynRunner and adds some extra features necessary for executing with helics
+    /** helicsRunner is the execution object for executing in coordination with the Helics
+co-simulation environment it inherits from gridDynRunner and adds some extra features necessary for
+executing with helics
 */
     class helicsRunner: public GriddynRunner {
       private:
-        coreOwningPtr<helicsCoordinator>
-            coord_;  //!< the coordinator object for managing object that manage the HELICS coordination
+        coreOwningPtr<helicsCoordinator> coord_;  //!< the coordinator object for managing object
+                                                  //!< that manage the HELICS coordination
         std::shared_ptr<helics::Federate> fed_;  //!< pointer to the helics federate object
       public:
         helicsRunner();

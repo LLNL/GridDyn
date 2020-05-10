@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../testHelper.h"
 #include "fileInput/fileInput.h"
@@ -39,7 +39,8 @@ BOOST_AUTO_TEST_CASE(adj_test_simple)
     BOOST_CHECK_GE(st[2], 0.99);
     BOOST_CHECK_LE(st[2], 1.01);
 
-    // tap changing doesn't do anything in this case we are checking to make sure the tap goes all the way
+    // tap changing doesn't do anything in this case we are checking to make sure the tap goes all
+    // the way
     fileName = std::string(TADJ_TEST_DIRECTORY "adj_test2.xml");
     gds2 = readSimXMLFile(fileName);
     gds2->powerflow();

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fmi/fmiGDinfo.h"
 #include "fmi/fmi_import/fmiImport.h"
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(test_3phase_fmu)
     BOOST_CHECK_EQUAL(outputs, 6);
     auto inputs = loadFmu.getCounts("inputs");
     BOOST_CHECK_EQUAL(inputs, 6);
-    //auto param = loadFmu.getCounts("parameters");
-    //auto units = loadFmu.getCounts("unit");
+    // auto param = loadFmu.getCounts("parameters");
+    // auto units = loadFmu.getCounts("unit");
     auto fm = loadFmu.createModelExchangeObject("meload");
     BOOST_REQUIRE(fm);
     double inp[6];

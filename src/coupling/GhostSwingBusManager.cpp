@@ -85,7 +85,7 @@ int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
 {
     assert(arguments.size() <=
            PATH_MAX * 4);  // there is a bug in Visual studio where the sizeof doesn't
-        // compile
+    // compile
 
     int taskId = m_nextTaskId++;
     if (g_printStuff) {
@@ -254,7 +254,8 @@ void GhostSwingBusManager::endSimulation()
         cout << "end task : " << m_taskId << endl;
     }
 #endif
-    // clear the shared_ptr, the object will probably get deleted at this point and will be unable to be called
+    // clear the shared_ptr, the object will probably get deleted at this point and will be unable
+    // to be called
     m_pInstance.reset();
 }
 

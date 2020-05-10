@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -27,8 +27,8 @@ bool isMasterObject(const coreObject* searchObject, const gridSimulation* gs);
 
 static const std::string libstring("library");
 // read XML file
-// coreObject * readSimXMLFile(const std::string &fileName, coreObject *gco, const std::string  prefix, readerInfo
-// *ri) const
+// coreObject * readSimXMLFile(const std::string &fileName, coreObject *gco, const std::string
+// prefix, readerInfo *ri) const
 gridSimulation* readSimulationElement(std::shared_ptr<readerElement>& element,
                                       readerInfo& ri,
                                       coreObject* searchObject,
@@ -168,4 +168,4 @@ bool isMasterObject(const coreObject* searchObject, const gridSimulation* gs)
     // return true if both are null since any new object would then be master
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

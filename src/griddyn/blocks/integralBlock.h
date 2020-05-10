@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef INTEGRAL_BLOCK_H_
 #define INTEGRAL_BLOCK_H_
@@ -42,7 +42,7 @@ namespace blocks {
         virtual void set(const std::string& param,
                          double val,
                          units::unit unitType = units::defunit) override;
-        //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
+        // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
         virtual void blockDerivative(double input,
                                      double didt,
@@ -54,7 +54,7 @@ namespace blocks {
                                    const stateData& sD,
                                    double resid[],
                                    const solverMode& sMode) override;
-        //only called if the genModel is not present
+        // only called if the genModel is not present
         virtual void blockJacobianElements(double input,
                                            double didt,
                                            const stateData& sD,
@@ -63,9 +63,9 @@ namespace blocks {
                                            const solverMode& sMode) override;
         virtual double step(coreTime time, double inputA) override;
         // virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode);
-        //virtual void setTime(coreTime time){prevTime=time;};
+        // virtual void setTime(coreTime time){prevTime=time;};
     };
-}  //namespace blocks
-}  //namespace griddyn
+}  // namespace blocks
+}  // namespace griddyn
 
-#endif  //INTEGRAL_BLOCK_H_
+#endif  // INTEGRAL_BLOCK_H_

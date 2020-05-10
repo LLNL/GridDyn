@@ -47,9 +47,9 @@ coreObject* Load::clone(coreObject* obj) const
     if (nobj == nullptr) {
         return obj;
     }
-    nobj->setLoad(
-        P,
-        Q);  // use the set load function in case we are cloning from a basic object to a higher level object
+    nobj->setLoad(P,
+                  Q);  // use the set load function in case we are cloning from a basic object to a
+                       // higher level object
     nobj->pfq = pfq;
     return nobj;
 }

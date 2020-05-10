@@ -17,12 +17,12 @@
 namespace griddyn {
 namespace relays {
     /** relay implementing a overcurrent breaker for a transmission line
- */
+     */
     class breaker: public Relay {
       public:
         enum breaker_flags {
-            nondirectional_flag =
-                object_flag8,  //!< flag indicating that the detection should not be based on direction
+            nondirectional_flag = object_flag8,  //!< flag indicating that the detection should not
+                                                 //!< be based on direction
             overlimit_flag = object_flag9,  //!< flag indicating that the current is over the limit
             breaker_tripped_flag = object_flag10,  //!< flag indicating that the breaker has tripped
             nonlink_source_flag =

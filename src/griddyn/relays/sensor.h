@@ -19,17 +19,17 @@ namespace griddyn {
 class Block;
 class grabberSet;
 /** @brief class implementing a sensor relay object
- a sensor can contain a set of basic control blocks and data grabbers which can grab data from any other object
-in the system and run in through a set of processes to obtain a result
-the result can be output or used as a basis for other relay actions
+ a sensor can contain a set of basic control blocks and data grabbers which can grab data from any
+other object in the system and run in through a set of processes to obtain a result the result can
+be output or used as a basis for other relay actions
 */
 class sensor: public Relay {
   public:
     /** @brief sensor flags controlling operation
      */
     enum sensor_flags {
-        direct_IO =
-            object_flag6,  //!< indication that the sensor is directly listing all inputs as outputs with
+        direct_IO = object_flag6,  //!< indication that the sensor is directly listing all inputs as
+                                   //!< outputs with
         //!< no processing
         link_type_source = object_flag7,  //!< indication that the source is a link
         link_type_sink = object_flag8,  //!< indicator that the sink is a link object
@@ -41,13 +41,14 @@ class sensor: public Relay {
     };
     /** @brief define the possible operation modes for a processing sequence*/
     enum class sequenceMode_t : unsigned char {
-        normal,  //!< the sequence runs under normal operation with both state and sampled input available
+        normal,  //!< the sequence runs under normal operation with both state and sampled input
+                 //!< available
         sampled,  //!< the sequence only runs with periodic sampling
         disabled,  //!< the sequence is disabled
     };
     /** @brief enumeration of the output modes available for the outputs
-     the output can be direct from an in input grabber, it can be directly from a block processing object
-    or it can a function of block or inputs*/
+     the output can be direct from an in input grabber, it can be directly from a block processing
+    object or it can a function of block or inputs*/
     enum class outputMode_t : unsigned char {
         block,  //!< direct from a filter block output
         blockderiv,  //!< direct time derivative of a block
@@ -63,8 +64,8 @@ class sensor: public Relay {
     std::vector<outputMode_t> outputMode;  //!< output modes corresponding to the outputs
     std::vector<sequenceMode_t> processStatus;  //!< the status of the processing sequence
     stringVec inputStrings;  //!< vector of input strings
-    index_t m_terminal =
-        0;  //!< the terminal to use on link operations  NOTE: works with link_source and link_sink flags
+    index_t m_terminal = 0;  //!< the terminal to use on link operations  NOTE: works with
+                             //!< link_source and link_sink flags
     count_t instructionCounter = 0;  //!< the number of instructions the relay has received
     std::vector<std::shared_ptr<grabberSet>> dataSources;  // the data sources for the output
     std::vector<Block*> filterBlocks;  //!< the filtered blocks

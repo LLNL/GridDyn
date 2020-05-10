@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
-//test case for element readers
+// test case for element readers
 
 #include "../exeTestHelper.h"
 #include "../testHelper.h"
@@ -30,7 +30,8 @@ BOOST_AUTO_TEST_SUITE(runner_tests)
 BOOST_AUTO_TEST_CASE(runner_test1)
 {
     std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY "/runnerTests/test_180_trip.xml");
-    //std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY "/../../examples/test_180bus_coupled_relay.xml");
+    // std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY
+    // "/../../examples/test_180bus_coupled_relay.xml");
 
     auto gdr = std::make_shared<griddyn::GriddynRunner>();
     int argc = 4;
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(runner_test1)
                 std::cout << line << "\t\t" << simTime << std::endl;
             }
             if (prevTime < simTime) {
-                //Try explicit (double) casting of simTime and see if crashes
+                // Try explicit (double) casting of simTime and see if crashes
                 m_currentGDTime = gdr->Step((double)simTime * 1.0E-9);
                 prevTime = simTime;
             } else

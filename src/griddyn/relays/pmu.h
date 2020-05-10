@@ -18,15 +18,15 @@
 namespace griddyn {
 namespace relays {
     /** @brief class modeling a PMU
- */
+     */
     class pmu: public sensor {
       public:
         enum pmu_flags {
             transmit_active =
                 object_armed_flag,  //!< flag to indicate that the relay is transmitting
             three_phase_active = three_phase_only,  //!< flag indicating 3 phase values
-            three_phase_set =
-                three_phase_capable,  //!< flag indicating that the 3-phase value was user set vs default
+            three_phase_set = three_phase_capable,  //!< flag indicating that the 3-phase value was
+                                                    //!< user set vs default
             current_active =
                 object_flag12,  //!< flag indicating that the current measurements are active
         };
@@ -64,7 +64,8 @@ namespace relays {
         void generateOutputNames();
         /** generate the filter blocks and inputs for the sensor object*/
         void createFilterBlocks();
-        /** generate a control message packet with the PMU and send it if there is an existing communicator*/
+        /** generate a control message packet with the PMU and send it if there is an existing
+         * communicator*/
         void generateAndTransmitMessage() const;
     };
 

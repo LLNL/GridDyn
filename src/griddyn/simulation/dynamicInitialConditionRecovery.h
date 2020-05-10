@@ -19,7 +19,8 @@ namespace griddyn {
 class gridDynSimulation;
 class SolverInterface;
 
-/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic simulations*/
+/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic
+ * simulations*/
 class dynamicInitialConditionRecovery {
   public:
     /** @brief constructor

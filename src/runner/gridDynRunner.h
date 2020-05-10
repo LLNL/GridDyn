@@ -46,7 +46,8 @@ class GriddynRunner {
      * Initialize a simulation run from command line arguments.
      @param[in] argc the number of console arguments
      @param[in] argv the actual console arguments
-     @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be allowed
+     @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be
+     allowed
      @return >0 normal stop,  0 normal, <0 error
      */
     virtual int Initialize(int argc, char* argv[], bool allowUnrecognized = false);
@@ -92,8 +93,8 @@ class GriddynRunner {
 
     /** get the current execution status of the simulation
     @param[out] timeReturn the current simulation time
-    @return GRIDDYN_PENDING if an asynchronous operation is ongoing otherwise returns the current state of the
-    simulation*/
+    @return GRIDDYN_PENDING if an asynchronous operation is ongoing otherwise returns the current
+    state of the simulation*/
     virtual int getStatus(coreTime& timeReturn);
     /**
      * Get the next GridDyn Event time

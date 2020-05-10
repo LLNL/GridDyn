@@ -14,7 +14,7 @@
 namespace griddyn {
 namespace relays {
     /** relay implementing differential relay protection scheme
- */
+     */
     class differentialRelay: public Relay {
       public:
         enum differentialrelay_flags {

@@ -300,8 +300,8 @@ void dcBus::setState(coreTime time,
     } else if (hasAlgebraic(sMode)) {
         if (Voffset != kNullLocation) {
             if (time > prevTime) {
-                // m_dstate_dt[voltageInLocation] = (state[Voffset] - m_state[voltageInLocation]) / (time -
-                // lastSetTime);
+                // m_dstate_dt[voltageInLocation] = (state[Voffset] - m_state[voltageInLocation]) /
+                // (time - lastSetTime);
             }
             voltage = state[Voffset];
         }
@@ -462,8 +462,8 @@ void dcBus::converge(coreTime /*time*/,
                      const solverMode& /*sMode*/,
                      converge_mode /*mode*/,
                      double /*tol*/)
-// void dcBus::converge (const coreTime time, double state[], double dstate_dt[], const solverMode &sMode, double
-// tol, int mode)
+// void dcBus::converge (const coreTime time, double state[], double dstate_dt[], const solverMode
+// &sMode, double tol, int mode)
 {
 }
 

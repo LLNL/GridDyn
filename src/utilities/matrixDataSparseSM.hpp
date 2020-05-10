@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -86,8 +86,8 @@ class blockCompute {
 
   private:
     int kShift = 0;  //!< the shift factor used for column determination
-    int bias =
-        0;  //!< the bias added to the column to even out the number of points in the first and last columns
+    int bias = 0;  //!< the bias added to the column to even out the number of points in the first
+                   //!< and last columns
 };
 
 /** @brief simple class for compute the blockIndex from a row and column and inverting it*/
@@ -110,11 +110,11 @@ class blockCompute<1, M> {
 };
 
 /** @brief class implementing an expandable sparse matrix with multiple column vectors
- sparseSMB implements a sparse matrix using a vector and not doing the sort until absolutely necessary
-the vectors contains a single 64 bit unsigned number composed by using col<<32+row allowing support for up to
-2^32-2 rows and columns to make the sorting faster when done the template parameter K indicates that the structure
-should use 2^K vectors for data storage the space allocated is approximately 2x that used in the single column
-structure
+ sparseSMB implements a sparse matrix using a vector and not doing the sort until absolutely
+necessary the vectors contains a single 64 bit unsigned number composed by using col<<32+row
+allowing support for up to 2^32-2 rows and columns to make the sorting faster when done the template
+parameter K indicates that the structure should use 2^K vectors for data storage the space allocated
+is approximately 2x that used in the single column structure
 */
 template<count_t K,
          class X = std::uint32_t,
@@ -385,9 +385,9 @@ class matrixDataSparseSMB: public matrixData<ValueT> {
 };
 
 /** @brief class implementing an expandable sparse matrix geared for Jacobian entries
- sparseSM implements a sparse matrix using a vector and not doing the sort until absolutely necessary
-the vector contains a single 32 bit unsigned number composed by using col<<16+row to make the sorting faster when
-done
+ sparseSM implements a sparse matrix using a vector and not doing the sort until absolutely
+necessary the vector contains a single 32 bit unsigned number composed by using col<<16+row to make
+the sorting faster when done
 */
 template<class X, class ValueT, sparse_ordering M>
 class matrixDataSparseSMB<0, X, ValueT, M>: public matrixData<ValueT> {
@@ -533,11 +533,11 @@ class matrixDataSparseSMB<0, X, ValueT, M>: public matrixData<ValueT> {
 };
 
 /** @brief class implementing an expandable sparse matrix with multiple column vectors
- sparseSMB implements a sparse matrix using a vector and not doing the sort until absolutely necessary
-the vectors contains a single 64 bit unsigned number composed by using col<<32+row allowing support for up to
-2^32-2 rows and columns to make the sorting faster when done the template parameter K indicates that the structure
-should use 2^K vectors for data storage the space allocated is approximately 2x that used in the single column
-structure
+ sparseSMB implements a sparse matrix using a vector and not doing the sort until absolutely
+necessary the vectors contains a single 64 bit unsigned number composed by using col<<32+row
+allowing support for up to 2^32-2 rows and columns to make the sorting faster when done the template
+parameter K indicates that the structure should use 2^K vectors for data storage the space allocated
+is approximately 2x that used in the single column structure
 */
 template<class X, class ValueT, sparse_ordering M>
 class matrixDataSparseSMB<1, X, ValueT, M>: public matrixData<ValueT> {

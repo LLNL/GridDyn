@@ -845,8 +845,8 @@ std::unique_ptr<Block> make_block(const std::string& blockstr)
         fstr = convertToLowerCase(blockNameStr.to_string());
     } else {
         gain = numeric_conversion(blockNameStr, 1.0);  // purposely not using
-            // numeric_conversionComplete to just
-            // get the first number
+                                                       // numeric_conversionComplete to just
+                                                       // get the first number
         fstr = convertToLowerCase(blockNameStr.substr(posp1 + 1).to_string());
     }
     if (fstr == "basic") {

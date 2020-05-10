@@ -76,7 +76,8 @@ namespace mpi {
             int mpi_initialized;
             MPI_Initialized(&mpi_initialized);
 
-            // Probably not a necessary check, a user using MPI should have also initialized it themselves
+            // Probably not a necessary check, a user using MPI should have also initialized it
+            // themselves
             if (mpi_initialized) {
                 //  std::cout << "About to finalize MPI for rank " << commRank << std::endl;
                 MPI_Finalize();

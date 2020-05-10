@@ -17,7 +17,7 @@
 namespace griddyn {
 namespace exciters {
     /** @brief DC2A exciter
- */
+     */
     class ExciterDC2A: public ExciterDC1A {
       protected:
       public:

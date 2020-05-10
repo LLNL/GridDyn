@@ -28,8 +28,8 @@
 //#include <fstream>
 //#include <iostream>
 namespace griddyn {
-static IOdata
-    kNullOutputVec;  //!<  this is a purposely created empty vector which gets used for functions that take as
+static IOdata kNullOutputVec;  //!<  this is a purposely created empty vector which gets used for
+                               //!<  functions that take as
 //! an input a vector but don't use it.
 
 // --------------- dynamic program ---------------
@@ -279,8 +279,8 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
             if (retval != SOLVER_ROOT_FOUND) {
                 if (timeReturn < lastTimeStop + tols.timeTol) {
                     ++tstep;
-                    if (tstep ==
-                        1)  // there are some circumstances where internal models halt advancement until
+                    if (tstep == 1)  // there are some circumstances where internal models halt
+                                     // advancement until
                     // the clock moves forward
                     {
                         currentTime += tols.timeTol;
@@ -455,8 +455,8 @@ int gridDynSimulation::dynamicPartitioned(coreTime tStop, coreTime tStep)
             if (retval != SOLVER_ROOT_FOUND) {
                 if (timeReturn < lastTimeStop + tols.timeTol) {
                     ++tstep;
-                    if (tstep ==
-                        1)  // there are some circumstances where internal models halt advancement until
+                    if (tstep == 1)  // there are some circumstances where internal models halt
+                                     // advancement until
                     // the clock moves forward
                     {
                         currentTime = currentTime + tols.timeTol;
@@ -600,9 +600,9 @@ int gridDynSimulation::step(coreTime nextStep, coreTime& timeActual)
                     return 1;
                 }
             }  // this step does a reset of IDA if necessary
-            tStop = std::min(
-                stopTime,
-                EvQ->getNextTime());  // update the stopping time just in case the events have changed
+            tStop = std::min(stopTime,
+                             EvQ->getNextTime());  // update the stopping time just in case the
+                                                   // events have changed
             retval = runDynamicSolverStep(dynData, nextStopTime, timeReturn);
             currentTime = timeReturn;
             // CSW Changed this from 2e-3 to 1e-7: need to rethink this in light of rootfinding
@@ -651,8 +651,8 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
             stateData sD(timeActual, dynData->state_data(), dynData->deriv_data());
 
             rootCheck(noInputs, sD, dynData->getSolverMode(), check_level_t::low_voltage_check);
-            // return dynData->calcIC(getSimulationTime(), probeStepTime, SolverInterface::ic_modes::fixed_diff,
-            // true);
+            // return dynData->calcIC(getSimulationTime(), probeStepTime,
+            // SolverInterface::ic_modes::fixed_diff, true);
             opFlags.reset(low_bus_voltage);
 #if JAC_CHECK_ENABLED > 0
             int mmatch = JacobianCheck(this, dynData->getSolverMode());
@@ -671,9 +671,8 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         checkNetwork(network_check_type::simplified);
     }
     if ((opFlags[state_change_flag]) ||
-        (change ==
-         change_code::
-             state_count_change))  // we changed object states so we have to do a full reset
+        (change == change_code::state_count_change))  // we changed object states so we have to do a
+                                                      // full reset
     {
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
             return true;
@@ -697,7 +696,8 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         }
         handleRootChange(sMode, dynData);
         dynData->setMaxNonZeros(jacSize(sMode));
-        // Allow for the fact that the new size of Jacobian now also has a different number of non-zeros
+        // Allow for the fact that the new size of Jacobian now also has a different number of
+        // non-zeros
         dynData->sparseReInit(SolverInterface::sparse_reinit_modes::resize);
     } else if (opFlags[root_change_flag]) {
         handleRootChange(sMode, dynData);
@@ -733,7 +733,8 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         stateData sD(getSimulationTime(), dynData->state_data(), dynData->deriv_data());
 
         rootCheck(noInputs, sD, dynData->getSolverMode(), check_level_t::low_voltage_check);
-        // return dynData->calcIC(getSimulationTime(), probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
+        // return dynData->calcIC(getSimulationTime(), probeStepTime,
+        // SolverInterface::ic_modes::fixed_diff, true);
         opFlags.reset(low_bus_voltage);
     }
     // Do the first cut guessState at the solution
@@ -756,8 +757,8 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
     retval =
         dynData->calcIC(currentTime, probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
 
-    if (retval ==
-        -22)  // this is bad initial conditions TODO:: map this to Solver ERROR codes not Sundials ERROR codes
+    if (retval == -22)  // this is bad initial conditions TODO:: map this to Solver ERROR codes not
+                        // Sundials ERROR codes
     {
         converge(currentTime,
                  dynData->state_data(),
@@ -821,8 +822,8 @@ int gridDynSimulation::generatePartitionedDynamicInitialConditions(const solverM
         /*stateData sD(getSimulationTime(), dynData->state_data(), dynData->deriv_data());
 
         rootCheck(&sD, dynData->getSolverMode(), check_level_t::low_voltage_check);
-        //return dynData->calcIC(getSimulationTime(), probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
-        opFlags.reset(low_bus_voltage);
+        //return dynData->calcIC(getSimulationTime(), probeStepTime,
+        SolverInterface::ic_modes::fixed_diff, true); opFlags.reset(low_bus_voltage);
         */
     }
     coreTime tRet;
@@ -1165,8 +1166,8 @@ int gridDynSimulation::jacobianFunction(coreTime time,
                                         const solverMode& sMode) noexcept
 {
     ++JacobianCallCount;
-    // assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption
-    // will be generally valid)
+    // assuming it is the same data as the preceding residual call  (it is for IDA but not sure if
+    // this assumption will be generally valid)
     stateData sD(time, state, dstate_dt, residCount);
     sD.cj = cj;
     fillExtraStateData(sD, sMode);

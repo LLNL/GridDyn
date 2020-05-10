@@ -51,15 +51,15 @@ namespace tcpLib {
       protected:
         /** enumeration flags for the communicator object*/
         enum zmqCommFlags {
-            no_transmit_dest =
-                0,  //!< flag indicating whether the communicator should include the destination as the first frame
-            no_transmit_source =
-                1,  //!< flag indicating whether the communicator should include the source in the transmission
-            use_tx_proxy =
-                2,  //!< use an internal proxy NOTE:if connection and proxyAddress are false this will
+            no_transmit_dest = 0,  //!< flag indicating whether the communicator should include the
+                                   //!< destination as the first frame
+            no_transmit_source = 1,  //!< flag indicating whether the communicator should include
+                                     //!< the source in the transmission
+            use_tx_proxy = 2,  //!< use an internal proxy NOTE:if connection and proxyAddress are
+                               //!< false this will
             //!< convert to true and use the default proxy
-            use_rx_proxy =
-                3,  //!< use an internal proxy NOTE:if connection and proxyAddress are false this will
+            use_rx_proxy = 3,  //!< use an internal proxy NOTE:if connection and proxyAddress are
+                               //!< false this will
             //!< convert to true and use the default proxy
             tx_conn_specified = 4,  //!< indicator that the transmit connection was specified
             rx_conn_specified = 5,  //!< indicator that the receive connection was specified
@@ -82,7 +82,8 @@ namespace tcpLib {
         /** add a header to a message*/
         // virtual void addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
         /** add the body from a regular commMessage*/
-        // virtual void addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
+        // virtual void addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage>
+        // &message);
     };
 
 }  // namespace tcpLib
