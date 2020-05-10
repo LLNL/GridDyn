@@ -16,16 +16,16 @@
 
 namespace griddyn {
 namespace paradae {
-class PVector : public Vector {
-public:
-  PVector():Vector(){};
-  PVector(const Vector& v);
-  virtual ~PVector(){};
-  PVector& operator=(const Vector& v);
-  PVector& operator=(const PVector& v);
-  void Set(int m_, Real* data_);
-};
-} // namespace paradae
-} // namespace griddyn
+    class PVector: public Vector {
+      public:
+        PVector(): Vector(){};
+        PVector(const Vector& v);
+        virtual ~PVector(){};
+        PVector& operator=(const Vector& v);
+        PVector& operator=(const PVector& v);
+        void Set(int m_, Real* data_);
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

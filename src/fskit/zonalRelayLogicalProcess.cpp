@@ -11,28 +11,23 @@
  * LLNS Copyright End
 */
 
-
-
 #include "zonalRelayLogicalProcess.h"
 
 #include <iostream>
 
 #define GRIDDYN_RANK 0
 
-ZonalRelayLogicalProcess::ZonalRelayLogicalProcess (const std::string &id)
-  : LogicalProcess (
-      fskit::GlobalLogicalProcessId (
-        fskit::FederatedSimulatorId ("gridDyn"), GRIDDYN_RANK,
-        fskit::LocalLogicalProcessId (id)))
+ZonalRelayLogicalProcess::ZonalRelayLogicalProcess(const std::string& id):
+    LogicalProcess(fskit::GlobalLogicalProcessId(fskit::FederatedSimulatorId("gridDyn"),
+                                                 GRIDDYN_RANK,
+                                                 fskit::LocalLogicalProcessId(id)))
 {
 }
 
 ZonalRelayLogicalProcess::~ZonalRelayLogicalProcess() = default;
 
-
-void ZonalRelayLogicalProcess::ProcessEventMessage (const fskit::EventMessage& eventMessage)
+void ZonalRelayLogicalProcess::ProcessEventMessage(const fskit::EventMessage& eventMessage)
 {
-  std::cout << "Received event message from ID "
-            << eventMessage.GetGlobalLogicalProcessId () << std::endl;
+    std::cout << "Received event message from ID " << eventMessage.GetGlobalLogicalProcessId()
+              << std::endl;
 }
-

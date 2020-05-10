@@ -15,10 +15,9 @@
 #include <memory>
 #include <type_traits>
 
-namespace griddyn
-{
+namespace griddyn {
 /** define the function type for the deleter*/
-using removeFunction_t = void (*) (coreObject *obj);
+using removeFunction_t = void (*)(coreObject* obj);
 
 /** template class for defining a (potentially shared) owning ptr for the coreObject
 @details uses a custom deleter to operate on the reference counter inside of the core object
@@ -27,60 +26,59 @@ the delete function should not be called
 shared pointers of coreObjects are not recommended due to the hierarchal nature of the objects
 in a block
 */
-template <class X>
-class coreOwningPtr
-{
+template<class X>
+class coreOwningPtr {
   private:
     std::unique_ptr<X, removeFunction_t> ptr;  //!< the reference to the object
   public:
-    constexpr coreOwningPtr () noexcept : ptr (nullptr, removeReference) {}
-    /*IMPLICIT*/ coreOwningPtr (X *obj) : ptr (obj, removeReference)
+    constexpr coreOwningPtr() noexcept: ptr(nullptr, removeReference) {}
+    /*IMPLICIT*/ coreOwningPtr(X* obj): ptr(obj, removeReference)
     {
-        static_assert (std::is_base_of<coreObject, X>::value, "owning ptr type must have a base of coreObject");
-        if (obj != nullptr)
-        {
-            obj->addOwningReference ();
+        static_assert(std::is_base_of<coreObject, X>::value,
+                      "owning ptr type must have a base of coreObject");
+        if (obj != nullptr) {
+            obj->addOwningReference();
         }
     }
-    /*IMPLICIT*/ coreOwningPtr (const coreOwningPtr &optr) : coreOwningPtr (optr.get ()) {}
-    template <class Y>
-    /*IMPLICIT*/ coreOwningPtr (coreOwningPtr<Y> &&ref) noexcept : ptr (ref.release (), removeReference)
+    /*IMPLICIT*/ coreOwningPtr(const coreOwningPtr& optr): coreOwningPtr(optr.get()) {}
+    template<class Y>
+    /*IMPLICIT*/ coreOwningPtr(coreOwningPtr<Y>&& ref) noexcept: ptr(ref.release(), removeReference)
     {
     }
 
-    template <class Y>
-    coreOwningPtr &operator= (coreOwningPtr<Y> &&ref) noexcept
+    template<class Y>
+    coreOwningPtr& operator=(coreOwningPtr<Y>&& ref) noexcept
     {
-        ptr.reset (ref.release ());
+        ptr.reset(ref.release());
         return *this;
     }
-    coreOwningPtr &operator= (const coreOwningPtr &optr) = delete;
-    coreOwningPtr &operator= (std::nullptr_t /*null*/) noexcept
+    coreOwningPtr& operator=(const coreOwningPtr& optr) = delete;
+    coreOwningPtr& operator=(std::nullptr_t /*null*/) noexcept
     {
         ptr = nullptr;
         return *this;
     }
     auto operator-> () const noexcept
     {  // return pointer to class object
-        return ptr.operator-> ();
+        return ptr.operator->();
     }
 
-    auto get () const noexcept
+    auto get() const noexcept
     {  // return pointer to object
-        return (ptr.get ());
+        return (ptr.get());
     }
 
-    explicit operator bool () const noexcept
+    explicit operator bool() const noexcept
     {  // test for non-null pointer
-        return (static_cast<bool> (ptr));
+        return (static_cast<bool>(ptr));
     }
-    auto release () { return ptr.release (); }
+    auto release() { return ptr.release(); }
 };
 
-template <typename X, typename... Args>
-coreOwningPtr<X> make_owningPtr (Args &&... args)
+template<typename X, typename... Args>
+coreOwningPtr<X> make_owningPtr(Args&&... args)
 {
-    return coreOwningPtr<X> (new X (std::forward<Args> (args)...));
+    return coreOwningPtr<X>(new X(std::forward<Args>(args)...));
 }
 
 /*
@@ -130,17 +128,17 @@ coreObject");
         return *this;
     }
     auto operator->() const noexcept
-    {	// return pointer to class object
+    {    // return pointer to class object
         return ptr;
     }
 
     auto get() const noexcept
-    {	// return pointer to object
+    {    // return pointer to object
         return (ptr);
     }
 
     explicit operator bool() const noexcept
-    {	// test for non-null pointer
+    {    // test for non-null pointer
         return (ptr!=nullptr);
     }
 }

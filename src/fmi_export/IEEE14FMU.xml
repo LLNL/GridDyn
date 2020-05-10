@@ -36,7 +36,7 @@
   <ScalarVariable name="Bus11_VA" valueReference="0"
                   description="Bus 11 Voltage Magnitude, Phase A"
                   causality="output" variability="continuous" initial="">
-		<Real/>
+        <Real/>
   </ScalarVariable>
   <ScalarVariable name="Bus11_VB" valueReference="1"
                   description="Bus 11 Voltage Magnitude, Phase B"

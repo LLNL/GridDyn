@@ -12,25 +12,21 @@
 
 #pragma once
 
-#include "gridSubModel.h"
-
 #include "blocks/controlBlock.h"
 #include "blocks/deadbandBlock.h"
 #include "blocks/delayBlock.h"
+#include "gridSubModel.h"
 
-namespace griddyn
-{
+namespace griddyn {
 const int govOmegaInLocation = 0;
 const int govpSetInLocation = 1;
 /** @brief class defining the interface for a governor
  the governor class is a really basic governor it includes two time constants
 and takes as input the frequency and power setting*/
-class Governor : public gridSubModel
-{
+class Governor: public gridSubModel {
   public:
     /** @brief flags for governor control*/
-    enum governor_flags
-    {
+    enum governor_flags {
         ignore_deadband = object_flag2,  //!< indicator that the deadband block should be ignored
         ignore_filter = object_flag3,  //!< indicator that the filter block should be ignored
         ignore_throttle = object_flag4,  //!< indicator that the delay block should be ignored
@@ -57,36 +53,44 @@ class Governor : public gridSubModel
     blocks::delayBlock delay;  //!< block managing the throttle filter
   public:
     /** @brief constructor*/
-    explicit Governor (const std::string &objName = "gov_#");
-    virtual coreObject *clone (coreObject *obj = nullptr) const override;
+    explicit Governor(const std::string& objName = "gov_#");
+    virtual coreObject* clone(coreObject* obj = nullptr) const override;
     /** @brief destructor*/
-    virtual ~Governor ();
-    virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
-    virtual void
-    dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
+    virtual ~Governor();
+    virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
+    virtual void dynObjectInitializeB(const IOdata& inputs,
+                                      const IOdata& desiredOutput,
+                                      IOdata& fieldSet) override;
 
-    virtual void set (const std::string &param, const std::string &val) override;
+    virtual void set(const std::string& param, const std::string& val) override;
     virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
-    virtual void setFlag (const std::string &flag, bool val) override;
-    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
-    virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-    virtual void
-    residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
-    virtual void
-    derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
-    virtual void jacobianElements (const IOdata &inputs,
-                                   const stateData &sD,
-                                   matrixData<double> &md,
-                                   const IOlocs &inputLocs,
-                                   const solverMode &sMode) override;
-    virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
+        set(const std::string& param, double val, units::unit unitType = units::defunit) override;
+    virtual void setFlag(const std::string& flag, bool val) override;
+    virtual double get(const std::string& param,
+                       units::unit unitType = units::defunit) const override;
+    virtual index_t findIndex(const std::string& field, const solverMode& sMode) const override;
+    virtual void residual(const IOdata& inputs,
+                          const stateData& sD,
+                          double resid[],
+                          const solverMode& sMode) override;
+    virtual void derivative(const IOdata& inputs,
+                            const stateData& sD,
+                            double deriv[],
+                            const solverMode& sMode) override;
+    virtual void jacobianElements(const IOdata& inputs,
+                                  const stateData& sD,
+                                  matrixData<double>& md,
+                                  const IOlocs& inputLocs,
+                                  const solverMode& sMode) override;
+    virtual void timestep(coreTime time, const IOdata& inputs, const solverMode& sMode) override;
 
-    virtual void
-    rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+    virtual void rootTest(const IOdata& inputs,
+                          const stateData& sD,
+                          double roots[],
+                          const solverMode& sMode) override;
 
-    virtual const std::vector<stringVec> &inputNames () const override;
-    virtual const std::vector<stringVec> &outputNames () const override;
+    virtual const std::vector<stringVec>& inputNames() const override;
+    virtual const std::vector<stringVec>& outputNames() const override;
 };
 
 }  // namespace griddyn

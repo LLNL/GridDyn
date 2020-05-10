@@ -21,11 +21,9 @@
 #ifndef GHOSTSWINGBUS_H_
 #define GHOSTSWINGBUS_H_
 
-class GhostSwingBus
-{
-
-private:
-public:
+class GhostSwingBus {
+  private:
+  public:
 };
 
 #endif /* GHOSTSWINGBUS_H_ */

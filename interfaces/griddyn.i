@@ -23,6 +23,3 @@ int gridDynSimulation_getResults(gridDynSimReference sim, const char *datatype, 
 
 %include "griddyn_export.h"
 %include "griddyn_export_advanced.h"
-
-
-

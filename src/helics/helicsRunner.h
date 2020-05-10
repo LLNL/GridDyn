@@ -13,42 +13,38 @@
 #include "../core/coreOwningPtr.hpp"
 #include "../runner/gridDynRunner.h"
 
-namespace helics
-{
+namespace helics {
 class Federate;
 }
 
-namespace griddyn
-{
+namespace griddyn {
 class readerInfo;
-namespace helicsLib
-{
-class helicsCoordinator;
+namespace helicsLib {
+    class helicsCoordinator;
 
-/** helicsRunner is the execution object for executing in coordination with the Helics co-simulation environment
+    /** helicsRunner is the execution object for executing in coordination with the Helics co-simulation environment
 it inherits from gridDynRunner and adds some extra features necessary for executing with helics
 */
-class helicsRunner : public GriddynRunner
-{
-  private:
-    coreOwningPtr<helicsCoordinator>
-      coord_;  //!< the coordinator object for managing object that manage the HELICS coordination
-    std::shared_ptr<helics::Federate> fed_;  //!< pointer to the helics federate object
-  public:
-    helicsRunner();
-    explicit helicsRunner(std::shared_ptr<gridDynSimulation> sim);
-    ~helicsRunner();
+    class helicsRunner: public GriddynRunner {
+      private:
+        coreOwningPtr<helicsCoordinator>
+            coord_;  //!< the coordinator object for managing object that manage the HELICS coordination
+        std::shared_ptr<helics::Federate> fed_;  //!< pointer to the helics federate object
+      public:
+        helicsRunner();
+        explicit helicsRunner(std::shared_ptr<gridDynSimulation> sim);
+        ~helicsRunner();
 
-  public:
-    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override;
+      public:
+        virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo& ri) override;
 
-    virtual void simInitialize() override;
-    virtual coreTime Run() override;
+        virtual void simInitialize() override;
+        virtual coreTime Run() override;
 
-    virtual coreTime Step(coreTime time) override;
+        virtual coreTime Step(coreTime time) override;
 
-    virtual void Finalize() override;
-};
+        virtual void Finalize() override;
+    };
 
 }  // namespace helicsLib
 }  // namespace griddyn

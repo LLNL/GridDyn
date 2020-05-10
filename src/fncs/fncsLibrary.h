@@ -14,18 +14,15 @@
 #ifndef FNCS_LIBRARY_HEADER_
 #define FNCS_LIBRARY_HEADER_
 
-#include <string>
 #include <complex>
+#include <string>
 
 void loadFNCSLibrary();
 
-void fncsSendComplex(const std::string &key, double real, double imag);
-void fncsSendComplex(const std::string &key, std::complex<double> val);
-std::complex<double> fncsGetComplex(const std::string &key);
-void fncsSendVal(const std::string &key, double val);
-double fncsGetVal(const std::string &key);
-
-
-
+void fncsSendComplex(const std::string& key, double real, double imag);
+void fncsSendComplex(const std::string& key, std::complex<double> val);
+std::complex<double> fncsGetComplex(const std::string& key);
+void fncsSendVal(const std::string& key, double val);
+double fncsGetVal(const std::string& key);
 
 #endif

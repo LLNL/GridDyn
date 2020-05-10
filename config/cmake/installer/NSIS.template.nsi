@@ -250,7 +250,7 @@ Function AddToPath
   Pop $2
   StrCmp $2 "" "" AddToPath_done
 
-  Call IsNT
+  Call isn't
   Pop $1
   StrCmp $1 1 AddToPath_NT
     ; Not on NT
@@ -308,7 +308,7 @@ Function un.RemoveFromPath
 
   IntFmt $6 "%c" 26 # DOS EOF
 
-  Call un.IsNT
+  Call un.isn't
   Pop $1
   StrCmp $1 1 unRemoveFromPath_NT
     ; Not on NT
@@ -399,21 +399,21 @@ FunctionEnd
 ###########################################
 
 ;====================================================
-; IsNT - Returns 1 if the current system is NT, 0
+; isn't - Returns 1 if the current system is NT, 0
 ;        otherwise.
 ;     Output: head of the stack
 ;====================================================
-; IsNT
+; isn't
 ; no input
 ; output, top of the stack = 1 if NT or 0 if not
 ;
 ; Usage:
-;   Call IsNT
+;   Call isn't
 ;   Pop $R0
 ;  ($R0 at this point is 1 or 0)
 
-!macro IsNT un
-Function ${un}IsNT
+!macro isn't un
+Function ${un}isn't
   Push $0
   ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
   StrCmp $0 "" 0 IsNT_yes
@@ -428,8 +428,8 @@ Function ${un}IsNT
     Push 1
 FunctionEnd
 !macroend
-!insertmacro IsNT ""
-!insertmacro IsNT "un."
+!insertmacro isn't ""
+!insertmacro isn't "un."
 
 ; StrStr
 ; input, top of stack = string to search for
@@ -478,21 +478,21 @@ FunctionEnd
 !insertmacro StrStr "un."
 
 Function Trim ; Added by Pelaca
-	Exch $R1
-	Push $R2
+    Exch $R1
+    Push $R2
 Loop:
-	StrCpy $R2 "$R1" 1 -1
-	StrCmp "$R2" " " RTrim
-	StrCmp "$R2" "$\n" RTrim
-	StrCmp "$R2" "$\r" RTrim
-	StrCmp "$R2" ";" RTrim
-	GoTo Done
+    StrCpy $R2 "$R1" 1 -1
+    StrCmp "$R2" " " RTrim
+    StrCmp "$R2" "$\n" RTrim
+    StrCmp "$R2" "$\r" RTrim
+    StrCmp "$R2" ";" RTrim
+    GoTo Done
 RTrim:
-	StrCpy $R1 "$R1" -1
-	Goto Loop
+    StrCpy $R1 "$R1" -1
+    Goto Loop
 Done:
-	Pop $R2
-	Exch $R1
+    Pop $R2
+    Exch $R1
 FunctionEnd
 
 Function ConditionalAddToRegisty
@@ -808,7 +808,7 @@ Section "Uninstall"
 @CPACK_NSIS_DELETE_ICONS@
 @CPACK_NSIS_DELETE_ICONS_EXTRA@
 
-  ;Delete empty start menu parent diretories
+  ;Delete empty start menu parent directories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
 
   startMenuDeleteLoop:
@@ -827,7 +827,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
 @CPACK_NSIS_DELETE_ICONS_EXTRA@
 
-  ;Delete empty start menu parent diretories
+  ;Delete empty start menu parent directories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
 
   secondStartMenuDeleteLoop:

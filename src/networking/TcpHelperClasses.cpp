@@ -5,349 +5,305 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 
 #include "TcpHelperClasses.h"
+
 #include <iostream>
 #include <thread>
 
-namespace griddyn
-{
-namespace tcpLib
-{
-using boost::asio::ip::tcp;
+namespace griddyn {
+namespace tcpLib {
+    using boost::asio::ip::tcp;
 
-void TcpRxConnection::start ()
-{
-    if (triggerhalt)
+    void TcpRxConnection::start()
     {
-        receiving = false;
-        return;
-    }
-    if (state == connection_state_t::prestart)
-    {
-        receiving = true;
-        state = connection_state_t::halted;
-    }
-    connection_state_t exp = connection_state_t::halted;
-    if (state.compare_exchange_strong (exp, connection_state_t::receiving))
-    {
-        if (!receiving)
-        {
+        if (triggerhalt) {
+            receiving = false;
+            return;
+        }
+        if (state == connection_state_t::prestart) {
             receiving = true;
+            state = connection_state_t::halted;
         }
-        socket_.async_receive (boost::asio::buffer (data.data () + residBufferSize,
-                                                    data.size () - residBufferSize),
-                               [this](const boost::system::error_code &error, size_t bytes_transferred) {
-                                   handle_read (error, bytes_transferred);
-                               });
-    }
-    else if (exp != connection_state_t::receiving)
-    {
-        receiving = false;
-    }
-}
-
-void TcpRxConnection::setDataCall (std::function<size_t (TcpRxConnection::pointer, const char *, size_t)> dataFunc)
-{
-    if (state == connection_state_t::prestart)
-    {
-        dataCall = std::move (dataFunc);
-    }
-    else
-    {
-        throw (std::runtime_error ("cannot set data callback after socket is started"));
-    }
-}
-void TcpRxConnection::setErrorCall (
-  std::function<bool(TcpRxConnection::pointer, const boost::system::error_code &)> errorFunc)
-{
-    if (state == connection_state_t::prestart)
-    {
-        errorCall = std::move (errorFunc);
-    }
-    else
-    {
-        throw (std::runtime_error ("cannot set error callback after socket is started"));
-    }
-}
-
-void TcpRxConnection::handle_read (const boost::system::error_code &error, size_t bytes_transferred)
-{
-    if (triggerhalt)
-    {
-        state = connection_state_t::halted;
-        receiving = false;
-        return;
-    }
-    if (!error)
-    {
-        auto used = dataCall (shared_from_this (), data.data (), bytes_transferred + residBufferSize);
-        if (used < (bytes_transferred + residBufferSize))
-        {
-            if (used > 0)
-            {
-                std::copy (data.data () + used, data.data () + bytes_transferred + residBufferSize, data.data ());
+        connection_state_t exp = connection_state_t::halted;
+        if (state.compare_exchange_strong(exp, connection_state_t::receiving)) {
+            if (!receiving) {
+                receiving = true;
             }
-            residBufferSize = bytes_transferred + residBufferSize - used;
+            socket_.async_receive(boost::asio::buffer(data.data() + residBufferSize,
+                                                      data.size() - residBufferSize),
+                                  [this](const boost::system::error_code& error,
+                                         size_t bytes_transferred) {
+                                      handle_read(error, bytes_transferred);
+                                  });
+        } else if (exp != connection_state_t::receiving) {
+            receiving = false;
         }
-        else
-        {
-            residBufferSize = 0;
-            data.assign (data.size (), 0);
+    }
+
+    void TcpRxConnection::setDataCall(
+        std::function<size_t(TcpRxConnection::pointer, const char*, size_t)> dataFunc)
+    {
+        if (state == connection_state_t::prestart) {
+            dataCall = std::move(dataFunc);
+        } else {
+            throw(std::runtime_error("cannot set data callback after socket is started"));
         }
-        state = connection_state_t::halted;
-        start ();
     }
-    else if (error == boost::asio::error::operation_aborted)
+    void TcpRxConnection::setErrorCall(
+        std::function<bool(TcpRxConnection::pointer, const boost::system::error_code&)> errorFunc)
     {
-        state = connection_state_t::halted;
-        receiving = false;
-        return;
+        if (state == connection_state_t::prestart) {
+            errorCall = std::move(errorFunc);
+        } else {
+            throw(std::runtime_error("cannot set error callback after socket is started"));
+        }
     }
-    else
+
+    void TcpRxConnection::handle_read(const boost::system::error_code& error,
+                                      size_t bytes_transferred)
     {
-        if (bytes_transferred > 0)
-        {
-            auto used = dataCall (shared_from_this (), data.data (), bytes_transferred + residBufferSize);
-            if (used < (bytes_transferred + residBufferSize))
-            {
-                if (used > 0)
-                {
-                    std::copy (data.data () + used, data.data () + bytes_transferred + residBufferSize,
-                               data.data ());
+        if (triggerhalt) {
+            state = connection_state_t::halted;
+            receiving = false;
+            return;
+        }
+        if (!error) {
+            auto used =
+                dataCall(shared_from_this(), data.data(), bytes_transferred + residBufferSize);
+            if (used < (bytes_transferred + residBufferSize)) {
+                if (used > 0) {
+                    std::copy(data.data() + used,
+                              data.data() + bytes_transferred + residBufferSize,
+                              data.data());
                 }
                 residBufferSize = bytes_transferred + residBufferSize - used;
-            }
-            else
-            {
+            } else {
                 residBufferSize = 0;
+                data.assign(data.size(), 0);
             }
-        }
-        if (errorCall)
-        {
-            if (errorCall (shared_from_this (), error))
-            {
+            state = connection_state_t::halted;
+            start();
+        } else if (error == boost::asio::error::operation_aborted) {
+            state = connection_state_t::halted;
+            receiving = false;
+            return;
+        } else {
+            if (bytes_transferred > 0) {
+                auto used =
+                    dataCall(shared_from_this(), data.data(), bytes_transferred + residBufferSize);
+                if (used < (bytes_transferred + residBufferSize)) {
+                    if (used > 0) {
+                        std::copy(data.data() + used,
+                                  data.data() + bytes_transferred + residBufferSize,
+                                  data.data());
+                    }
+                    residBufferSize = bytes_transferred + residBufferSize - used;
+                } else {
+                    residBufferSize = 0;
+                }
+            }
+            if (errorCall) {
+                if (errorCall(shared_from_this(), error)) {
+                    state = connection_state_t::halted;
+                    start();
+                } else {
+                    receiving = false;
+                }
+            } else if ((error != boost::asio::error::eof) &&
+                       (error != boost::asio::error::operation_aborted)) {
+                if (error != boost::asio::error::connection_reset) {
+                    std::cerr << "receive error " << error.message() << std::endl;
+                }
                 state = connection_state_t::halted;
-                start ();
-            }
-            else
-            {
+                receiving = false;
+            } else {
                 receiving = false;
             }
         }
-        else if ((error != boost::asio::error::eof) && (error != boost::asio::error::operation_aborted))
-        {
-            if (error != boost::asio::error::connection_reset)
-            {
-                std::cerr << "receive error " << error.message () << std::endl;
+    }
+
+    void TcpRxConnection::send(const void* buffer, size_t dataLength)
+    {
+        auto sz = socket_.send(boost::asio::buffer(buffer, dataLength));
+        assert(sz == dataLength);
+        (void)(sz);
+    }
+
+    void TcpRxConnection::send(const std::string& dataString)
+    {
+        auto sz = socket_.send(boost::asio::buffer(dataString));
+        assert(sz == dataString.size());
+        (void)(sz);
+    }
+
+    void TcpRxConnection::close()
+    {
+        triggerhalt = true;
+        state = connection_state_t::closed;
+        boost::system::error_code ec;
+        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+        if (ec) {
+            std::cerr << "error occurred sending shutdown::" << ec << std::endl;
+        }
+        socket_.close();
+        while (receiving) {
+            std::this_thread::yield();
+        }
+    }
+
+    TcpConnection::pointer TcpConnection::create(boost::asio::io_service& io_service,
+                                                 const std::string& connection,
+                                                 const std::string& port,
+                                                 size_t bufferSize)
+    {
+        return pointer(new TcpConnection(io_service, connection, port, bufferSize));
+    }
+
+    TcpConnection::TcpConnection(boost::asio::io_service& io_service,
+                                 const std::string& connection,
+                                 const std::string& port,
+                                 size_t bufferSize):
+        socket_(io_service),
+        data(bufferSize)
+    {
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(tcp::v4(), connection, port);
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        socket_.async_connect(*endpoint_iterator, [this](const boost::system::error_code& error) {
+            connect_handler(error);
+        });
+    }
+
+    void TcpConnection::connect_handler(const boost::system::error_code& error)
+    {
+        if (!error) {
+            connected.store(true);
+        } else {
+            std::cerr << "connection error " << error.message() << ": code =" << error.value()
+                      << '\n';
+        }
+    }
+    void TcpConnection::send(const void* buffer, size_t dataLength)
+    {
+        if (!isConnected()) {
+            waitUntilConnected(200);
+        }
+        auto sz = socket_.send(boost::asio::buffer(buffer, dataLength));
+        assert(sz == dataLength);
+        ((void)(sz));
+    }
+
+    void TcpConnection::send(const std::string& dataString)
+    {
+        if (!isConnected()) {
+            waitUntilConnected(200);
+        }
+        auto sz = socket_.send(boost::asio::buffer(dataString));
+        assert(sz == dataString.size());
+        ((void)(sz));
+    }
+
+    size_t TcpConnection::receive(void* buffer, size_t maxDataLength)
+    {
+        return socket_.receive(boost::asio::buffer(buffer, maxDataLength));
+    }
+
+    int TcpConnection::waitUntilConnected(int timeOut)
+    {
+        int cnt = 0;
+        while (!isConnected()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            cnt += 50;
+            if (cnt > timeOut) {
+                return (-1);
             }
-            state = connection_state_t::halted;
-            receiving = false;
         }
-        else
-        {
-            receiving = false;
+        return 0;
+    }
+
+    void TcpConnection::close()
+    {
+        cancel();
+        boost::system::error_code ec;
+        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+        if (ec) {
+            // I don't know what to do with this, in practice this message is mostly spurious
+            // but is seems I should do something with it, I just don't know what
+            // std::cerr << "error occurred sending shutdown" << std::endl;
+            ((void)(ec));
         }
+        socket_.close();
     }
-}
 
-void TcpRxConnection::send (const void *buffer, size_t dataLength)
-{
-    auto sz = socket_.send (boost::asio::buffer (buffer, dataLength));
-    assert (sz == dataLength);
-    (void)(sz);
-}
-
-void TcpRxConnection::send (const std::string &dataString)
-{
-    auto sz = socket_.send (boost::asio::buffer (dataString));
-    assert (sz == dataString.size ());
-    (void)(sz);
-}
-
-void TcpRxConnection::close ()
-{
-    triggerhalt = true;
-    state = connection_state_t::closed;
-    boost::system::error_code ec;
-    socket_.shutdown (boost::asio::ip::tcp::socket::shutdown_send, ec);
-    if (ec)
+    TcpServer::pointer
+        TcpServer::create(boost::asio::io_service& io_service, int PortNum, int nominalBufferSize)
     {
-        std::cerr << "error occurred sending shutdown::" << ec << std::endl;
+        return pointer(new TcpServer(io_service, PortNum, nominalBufferSize));
     }
-    socket_.close ();
-    while (receiving)
-    {
-        std::this_thread::yield ();
-    }
-}
 
-TcpConnection::pointer TcpConnection::create (boost::asio::io_service &io_service,
-                                              const std::string &connection,
-                                              const std::string &port,
-                                              size_t bufferSize)
-{
-    return pointer (new TcpConnection (io_service, connection, port, bufferSize));
-}
-
-TcpConnection::TcpConnection (boost::asio::io_service &io_service,
-                              const std::string &connection,
-                              const std::string &port,
-                              size_t bufferSize)
-    : socket_ (io_service), data (bufferSize)
-{
-    tcp::resolver resolver (io_service);
-    tcp::resolver::query query (tcp::v4 (), connection, port);
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve (query);
-    socket_.async_connect (*endpoint_iterator,
-                           [this](const boost::system::error_code &error) { connect_handler (error); });
-}
-
-void TcpConnection::connect_handler (const boost::system::error_code &error)
-{
-    if (!error)
+    void TcpServer::start()
     {
-        connected.store (true);
-    }
-    else
-    {
-        std::cerr << "connection error " << error.message () << ": code =" << error.value () << '\n';
-    }
-}
-void TcpConnection::send (const void *buffer, size_t dataLength)
-{
-    if (!isConnected ())
-    {
-        waitUntilConnected (200);
-    }
-    auto sz = socket_.send (boost::asio::buffer (buffer, dataLength));
-    assert (sz == dataLength);
-    ((void)(sz));
-}
-
-void TcpConnection::send (const std::string &dataString)
-{
-    if (!isConnected ())
-    {
-        waitUntilConnected (200);
-    }
-    auto sz = socket_.send (boost::asio::buffer (dataString));
-    assert (sz == dataString.size ());
-    ((void)(sz));
-}
-
-size_t TcpConnection::receive (void *buffer, size_t maxDataLength)
-{
-    return socket_.receive (boost::asio::buffer (buffer, maxDataLength));
-}
-
-int TcpConnection::waitUntilConnected (int timeOut)
-{
-    int cnt = 0;
-    while (!isConnected ())
-    {
-        std::this_thread::sleep_for (std::chrono::milliseconds (50));
-        cnt += 50;
-        if (cnt > timeOut)
-        {
-            return (-1);
+        if (halted) {
+            return;
         }
-    }
-    return 0;
-}
-
-void TcpConnection::close ()
-{
-    cancel ();
-    boost::system::error_code ec;
-    socket_.shutdown (boost::asio::ip::tcp::socket::shutdown_send, ec);
-    if (ec)
-    {
-        // I don't know what to do with this, in practice this message is mostly spurious
-        // but is seems I should do something with it, I just don't know what
-        // std::cerr << "error occurred sending shutdown" << std::endl;
-        ((void)(ec));
-    }
-    socket_.close ();
-}
-
-TcpServer::pointer TcpServer::create (boost::asio::io_service &io_service, int PortNum, int nominalBufferSize)
-{
-    return pointer (new TcpServer (io_service, PortNum, nominalBufferSize));
-}
-
-void TcpServer::start ()
-{
-    if (halted)
-    {
-        return;
-    }
-    bool exp = false;
-    if (accepting.compare_exchange_strong (exp, true))
-    {
-        std::lock_guard<std::mutex> lock (connectionsMutex);
-        if (!connections.empty ())
-        {
-            for (auto &conn : connections)
-            {
-                if (!conn->isReceiving ())
-                {
-                    conn->start ();
+        bool exp = false;
+        if (accepting.compare_exchange_strong(exp, true)) {
+            std::lock_guard<std::mutex> lock(connectionsMutex);
+            if (!connections.empty()) {
+                for (auto& conn : connections) {
+                    if (!conn->isReceiving()) {
+                        conn->start();
+                    }
                 }
             }
+            TcpRxConnection::pointer new_connection =
+                TcpRxConnection::create(acceptor_.get_io_service(), bufferSize);
+            auto& socket = new_connection->socket();
+            acceptor_.async_accept(socket,
+                                   [this, connection = std::move(new_connection)](
+                                       const boost::system::error_code& error) {
+                                       handle_accept(connection, error);
+                                   });
         }
-        TcpRxConnection::pointer new_connection =
-          TcpRxConnection::create (acceptor_.get_io_service (), bufferSize);
-        auto &socket = new_connection->socket ();
-        acceptor_.async_accept (socket,
-                                [this, connection = std::move (new_connection)](
-                                  const boost::system::error_code &error) { handle_accept (connection, error); });
     }
-}
 
-void TcpServer::handle_accept (TcpRxConnection::pointer new_connection, const boost::system::error_code &error)
-{
-    if (!error)
+    void TcpServer::handle_accept(TcpRxConnection::pointer new_connection,
+                                  const boost::system::error_code& error)
     {
-        new_connection->setDataCall (dataCall);
-        new_connection->setErrorCall (errorCall);
-        {  // scope for the connection lock
-            std::lock_guard<std::mutex> lock (connectionsMutex);
-            //  new_connection->index = static_cast<int> (connects->size());
-            // the previous 3 calls have to be made before this call since they could be used immediately
-            new_connection->start ();
-            connections.push_back (std::move (new_connection));
+        if (!error) {
+            new_connection->setDataCall(dataCall);
+            new_connection->setErrorCall(errorCall);
+            {  // scope for the connection lock
+                std::lock_guard<std::mutex> lock(connectionsMutex);
+                //  new_connection->index = static_cast<int> (connects->size());
+                // the previous 3 calls have to be made before this call since they could be used immediately
+                new_connection->start();
+                connections.push_back(std::move(new_connection));
+            }
+            accepting = false;
+            if (!halted) {
+                start();
+            }
+        } else if (error != boost::asio::error::operation_aborted) {
+            std::cerr << " error in accept::" << error.message() << std::endl;
+            accepting = false;
+        } else {
+            accepting = false;
         }
-        accepting = false;
-        if (!halted)
-        {
-            start ();
-        }
     }
-    else if (error != boost::asio::error::operation_aborted)
-    {
-        std::cerr << " error in accept::" << error.message () << std::endl;
-        accepting = false;
-    }
-    else
-    {
-        accepting = false;
-    }
-}
 
-void TcpServer::close ()
-{
-    halted = true;
-    acceptor_.close ();
-    std::lock_guard<std::mutex> lock (connectionsMutex);
-    for (auto &conn : connections)
+    void TcpServer::close()
     {
-        conn->close ();
+        halted = true;
+        acceptor_.close();
+        std::lock_guard<std::mutex> lock(connectionsMutex);
+        for (auto& conn : connections) {
+            conn->close();
+        }
+        while (accepting) {
+            std::this_thread::yield();
+        }
+        connections.clear();
     }
-    while (accepting)
-    {
-        std::this_thread::yield ();
-    }
-    connections.clear ();
-}
 
 }  // namespace tcpLib
 }  // namespace griddyn

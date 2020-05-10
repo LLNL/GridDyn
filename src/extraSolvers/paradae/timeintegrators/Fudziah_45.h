@@ -15,7 +15,7 @@
 #include "RungeKutta_DIRK.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   (Steps 5 and 6 are probably not defined accruately enough... but seems ok on Expo1D)
   \f[\begin{array}{c|ccccccc}
@@ -31,12 +31,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class Fudziah_45 : public RungeKutta_DIRK {
-public:
-  Fudziah_45(Equation* eq, bool variable_step=false);
-  virtual std::string GetName(){return "RK_ImpFu_45";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Fudziah_45: public RungeKutta_DIRK {
+      public:
+        Fudziah_45(Equation* eq, bool variable_step = false);
+        virtual std::string GetName() { return "RK_ImpFu_45"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

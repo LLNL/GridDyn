@@ -11,25 +11,22 @@
 */
 
 #include "matrixCreation.h"
+
 #include "matrixDataSparseSM.hpp"
 
-std::unique_ptr<matrixData<double>> makeSparseMatrix (count_t size, count_t maxElements)
+std::unique_ptr<matrixData<double>> makeSparseMatrix(count_t size, count_t maxElements)
 {
-    if (size < 65535)
-    {
-        if (size < 100)
-        {
-            return std::make_unique<matrixDataSparseSMB<0, std::uint32_t>> (maxElements);
+    if (size < 65535) {
+        if (size < 100) {
+            return std::make_unique<matrixDataSparseSMB<0, std::uint32_t>>(maxElements);
         }
-        if (size < 1000)
-        {
-            return std::make_unique<matrixDataSparseSMB<1, std::uint32_t>> (maxElements);
+        if (size < 1000) {
+            return std::make_unique<matrixDataSparseSMB<1, std::uint32_t>>(maxElements);
         }
-        if (size < 20000)
-        {
-            return std::make_unique<matrixDataSparseSMB<2, std::uint32_t>> (maxElements);
+        if (size < 20000) {
+            return std::make_unique<matrixDataSparseSMB<2, std::uint32_t>>(maxElements);
         }
-        return std::make_unique<matrixDataSparseSMB<2, std::uint32_t>> (maxElements);
+        return std::make_unique<matrixDataSparseSMB<2, std::uint32_t>>(maxElements);
     }
-    return std::make_unique<matrixDataSparseSMB<2, std::uint64_t>> (maxElements);
+    return std::make_unique<matrixDataSparseSMB<2, std::uint64_t>>(maxElements);
 }

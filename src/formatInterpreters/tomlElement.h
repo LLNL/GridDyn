@@ -13,19 +13,24 @@
 
 #include "toml/toml.h"
 
-class tomlElement
-{
+class tomlElement {
   public:
     int elementIndex = 0;
     std::string name;
     int arrayIndex = 0;
-    tomlElement () = default;
-    tomlElement (toml::Value vElement, std::string newName);
+    tomlElement() = default;
+    tomlElement(toml::Value vElement, std::string newName);
 
-    void clear ();
-    const toml::Value &getElement () const { return (arraytype) ? *element.find (arrayIndex) : element; }
-    int count () const { return (arraytype) ? static_cast<int> (element.size ()) : 1; }
-    bool isNull () const { return (arraytype) ? element.find (arrayIndex) != nullptr : element.empty (); }
+    void clear();
+    const toml::Value& getElement() const
+    {
+        return (arraytype) ? *element.find(arrayIndex) : element;
+    }
+    int count() const { return (arraytype) ? static_cast<int>(element.size()) : 1; }
+    bool isNull() const
+    {
+        return (arraytype) ? element.find(arrayIndex) != nullptr : element.empty();
+    }
 
   private:
     toml::Value element;

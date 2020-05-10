@@ -19,29 +19,17 @@
 /** these objects are intended to capture extra properties about a coreObject that are not in the common definition
 such as position information, metadata, etc
 */
-template <class PropertyType>
-class coreObjectProperty
-{
-private:
-	std::string name_;
-	utilities::dataDictionary<id_type_t, PropertyType> dictionary;
-public:
-	coreObjectProperty(const std::string &name) :name_(name)
-	{
+template<class PropertyType>
+class coreObjectProperty {
+  private:
+    std::string name_;
+    utilities::dataDictionary<id_type_t, PropertyType> dictionary;
 
-	}
-	void set(coreObject *obj, PropertyType data)
-	{
-		dictionary.update(obj->getID(), data);
-	}
-	PropertyType query(coreObject *obj)
-	{
-		return dictionary.query(obj->getID());
-	}
-	void clearProperty(coreObject *obj)
-	{
-		dictionary.erase(obj->getID());
-	}
+  public:
+    coreObjectProperty(const std::string& name): name_(name) {}
+    void set(coreObject* obj, PropertyType data) { dictionary.update(obj->getID(), data); }
+    PropertyType query(coreObject* obj) { return dictionary.query(obj->getID()); }
+    void clearProperty(coreObject* obj) { dictionary.erase(obj->getID()); }
 };
 /** @brief loads a position object
 *@details I don't know what a grid Position object looks like yet

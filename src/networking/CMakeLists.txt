@@ -11,35 +11,19 @@
 set(networking_sources networkingInterface.cpp)
 set(networking_headers networkingInterface.h)
 
-option(
-    ENABLE_TCP
-    "Enable TCP connection library"
-    ON
-)
+option(ENABLE_TCP "Enable TCP connection library" ON)
 
-option(
-    ENABLE_DIME
-    "Enable connection with Dime"
-    OFF
-)
+option(ENABLE_DIME "Enable connection with Dime" OFF)
 
 if(ENABLE_ZMQ OR ZMQ_NEEDED)
-    set(
-        zmqLibrary_sources
-        zmqLibrary/zmqContextManager.cpp
-        zmqLibrary/zmqHelper.cpp
-        zmqLibrary/zmqReactor.cpp
-        zmqLibrary/zmqProxyHub.cpp
-        zmqLibrary/zmqSocketDescriptor.cpp
+    set(zmqLibrary_sources
+        zmqLibrary/zmqContextManager.cpp zmqLibrary/zmqHelper.cpp zmqLibrary/zmqReactor.cpp
+        zmqLibrary/zmqProxyHub.cpp zmqLibrary/zmqSocketDescriptor.cpp
     )
 
-    set(
-        zmqLibrary_headers
-        zmqLibrary/zmqContextManager.h
-        zmqLibrary/zmqHelper.h
-        zmqLibrary/zmqReactor.h
-        zmqLibrary/zmqProxyHub.h
-        zmqLibrary/zmqSocketDescriptor.h
+    set(zmqLibrary_headers
+        zmqLibrary/zmqContextManager.h zmqLibrary/zmqHelper.h zmqLibrary/zmqReactor.h
+        zmqLibrary/zmqProxyHub.h zmqLibrary/zmqSocketDescriptor.h
     )
 
     set(zmqInterface_sources zmqCommunicator.cpp zmqInterface.cpp)
@@ -54,44 +38,24 @@ if(ENABLE_ZMQ OR ZMQ_NEEDED)
 endif()
 
 if(ENABLE_DIME)
-    set(
-        dimeInterface_sources
-        dimeCollector.cpp
-        dimeCommunicator.cpp
-        dimeClientInterface.cpp
-        dimeRunner.cpp
-        dimeInterface.cpp
+    set(dimeInterface_sources dimeCollector.cpp dimeCommunicator.cpp dimeClientInterface.cpp
+                              dimeRunner.cpp dimeInterface.cpp
     )
 
-    set(
-        dimeInterface_headers
-        dimeCollector.h
-        dimeCommunicator.h
-        dimeClientInterface.h
-        dimeRunner.h
-        dimeInterface.h
+    set(dimeInterface_headers dimeCollector.h dimeCommunicator.h dimeClientInterface.h dimeRunner.h
+                              dimeInterface.h
     )
     list(APPEND networking_sources ${dimeInterface_sources})
     list(APPEND networking_headers ${dimeInterface_headers})
 endif()
 
 if(ENABLE_TCP)
-    set(
-        tcpInterface_sources
-        AsioServiceManager.cpp
-        tcpCommunicator.cpp
-        tcpInterface.cpp
-        TcpHelperClasses.cpp
-        tcpCollector.cpp
+    set(tcpInterface_sources AsioServiceManager.cpp tcpCommunicator.cpp tcpInterface.cpp
+                             TcpHelperClasses.cpp tcpCollector.cpp
     )
 
-    set(
-        tcpInterface_headers
-        AsioServiceManager.h
-        tcpCommunicator.h
-        tcpInterface.h
-        TcpHelperClasses.h
-        tcpCollector.h
+    set(tcpInterface_headers AsioServiceManager.h tcpCommunicator.h tcpInterface.h
+                             TcpHelperClasses.h tcpCollector.h
     )
     list(APPEND networking_sources ${tcpInterface_sources})
     list(APPEND networking_headers ${tcpInterface_headers})
@@ -101,8 +65,8 @@ add_library(networking STATIC ${networking_sources} ${networking_headers})
 target_include_directories(
     networking
     # target_link_libraries(this, jsoncpp::jsoncpp) when available
-    PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
+    PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+)
 
 # TODO might not need this
 target_link_libraries(networking PRIVATE griddyn)
@@ -122,12 +86,7 @@ if(ENABLE_ZMQ OR ZMQ_NEEDED)
     target_link_libraries(networking PUBLIC griddyn ${ZMQ_DEPENDENCY})
 
     source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
-    source_group(
-        "zmqinterface"
-        FILES
-        ${zmqInterface_sources}
-        ${zmqInterface_headers}
-    )
+    source_group("zmqinterface" FILES ${zmqInterface_sources} ${zmqInterface_headers})
 endif()
 
 if(ENABLE_DIME)
@@ -144,9 +103,5 @@ list(APPEND optional_library_functions loadNetworkingLibrary)
 set(optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set(optional_library_functions ${optional_library_functions} PARENT_SCOPE)
 
-list(
-    APPEND
-        optional_component_test_files
-        ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp
-)
+list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp)
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)

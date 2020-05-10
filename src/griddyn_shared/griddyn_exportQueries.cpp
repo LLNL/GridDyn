@@ -19,132 +19,120 @@
 
 using namespace griddyn;
 
-gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, const char *queryString)
+gridDynSingleQuery gridDynSingleQuery_create(gridDynObject obj, const char* queryString)
 {
-    gridComponent *comp = getComponentPointer (obj);
+    gridComponent* comp = getComponentPointer(obj);
 
-    if (comp == nullptr)
-    {
+    if (comp == nullptr) {
         return nullptr;
     }
-    auto val = createGrabber (queryString, comp);
-    if (!val->loaded)
-    {
+    auto val = createGrabber(queryString, comp);
+    if (!val->loaded) {
         return nullptr;
     }
-    if (val->vectorGrab)
-    {
+    if (val->vectorGrab) {
         return nullptr;
     }
-    auto grabber = val.release ();
-    return reinterpret_cast<gridDynSingleQuery> (grabber);
+    auto grabber = val.release();
+    return reinterpret_cast<gridDynSingleQuery>(grabber);
 }
 
-gridDynVectorQuery gridDynVectorQuery_create (gridDynObject obj, const char *queryString)
+gridDynVectorQuery gridDynVectorQuery_create(gridDynObject obj, const char* queryString)
 {
-    gridComponent *comp = getComponentPointer (obj);
+    gridComponent* comp = getComponentPointer(obj);
 
-    if (comp == nullptr)
-    {
+    if (comp == nullptr) {
         return nullptr;
     }
-    auto mquery = new collector ();
-    mquery->add (queryString, comp);
+    auto mquery = new collector();
+    mquery->add(queryString, comp);
 
     return nullptr;
 }
 
-void gridDynSingleQuery_free (gridDynSingleQuery query)
+void gridDynSingleQuery_free(gridDynSingleQuery query)
 {
-    if (query != nullptr)
-    {
-        delete reinterpret_cast<gridGrabber *> (query);
+    if (query != nullptr) {
+        delete reinterpret_cast<gridGrabber*>(query);
     }
 }
 
-void gridDynVectorQuery_free (gridDynVectorQuery query)
+void gridDynVectorQuery_free(gridDynVectorQuery query)
 {
-    if (query != nullptr)
-    {
-        delete reinterpret_cast<collector *> (query);
+    if (query != nullptr) {
+        delete reinterpret_cast<collector*>(query);
     }
 }
 
-double gridDynSingleQuery_run (gridDynSingleQuery query)
+double gridDynSingleQuery_run(gridDynSingleQuery query)
 {
-    if (query == nullptr)
-    {
+    if (query == nullptr) {
         return kNullVal;
     }
-    auto grabber = reinterpret_cast<gridGrabber *> (query);
-    return grabber->grabData ();
+    auto grabber = reinterpret_cast<gridGrabber*>(query);
+    return grabber->grabData();
 }
 
-griddyn_status gridDynVectorQuery_run (gridDynVectorQuery query, double *data, int N)
+griddyn_status gridDynVectorQuery_run(gridDynVectorQuery query, double* data, int N)
 {
-    if (query == nullptr)
-    {
+    if (query == nullptr) {
         return griddyn_invalid_object;
     }
-    auto mGrabber = reinterpret_cast<collector *> (query);
+    auto mGrabber = reinterpret_cast<collector*>(query);
 
-    return mGrabber->grabData (data, N);
+    return mGrabber->grabData(data, N);
 }
 
-griddyn_status gridDynVectorQuery_append (gridDynVectorQuery query, gridDynObject obj, const char *queryString)
+griddyn_status
+    gridDynVectorQuery_append(gridDynVectorQuery query, gridDynObject obj, const char* queryString)
 {
-    if (query == nullptr)
-    {
+    if (query == nullptr) {
         return griddyn_invalid_object;
     }
-    gridComponent *comp = getComponentPointer (obj);
+    gridComponent* comp = getComponentPointer(obj);
 
-    if (comp == nullptr)
-    {
+    if (comp == nullptr) {
         return griddyn_invalid_object;
     }
-    auto col = reinterpret_cast<collector *> (query);
+    auto col = reinterpret_cast<collector*>(query);
 
-    col->add (queryString, comp);
+    col->add(queryString, comp);
     return griddyn_ok;
 }
 
-griddyn_status gridDynSingleQuery_update (gridDynSingleQuery query, gridDynObject obj, const char *queryString)
+griddyn_status
+    gridDynSingleQuery_update(gridDynSingleQuery query, gridDynObject obj, const char* queryString)
 {
-    if (query == nullptr)
-    {
+    if (query == nullptr) {
         return griddyn_invalid_object;
     }
-    gridComponent *comp = getComponentPointer (obj);
+    gridComponent* comp = getComponentPointer(obj);
 
-    if (comp == nullptr)
-    {
+    if (comp == nullptr) {
         return griddyn_invalid_object;
     }
-    auto grabber = reinterpret_cast<gridGrabber *> (query);
-    grabber->updateField (queryString);
-    grabber->updateObject (comp);
-    if (!grabber->loaded)
-    {
+    auto grabber = reinterpret_cast<gridGrabber*>(query);
+    grabber->updateField(queryString);
+    grabber->updateObject(comp);
+    if (!grabber->loaded) {
         return griddyn_query_load_failure;
     }
     return griddyn_ok;
 }
 
-griddyn_status gridDynVectorQuery_update (gridDynVectorQuery query, gridDynObject obj, const char *queryString)
+griddyn_status
+    gridDynVectorQuery_update(gridDynVectorQuery query, gridDynObject obj, const char* queryString)
 {
-    if (query == nullptr)
-    {
+    if (query == nullptr) {
         return griddyn_invalid_object;
     }
-    gridComponent *comp = getComponentPointer (obj);
+    gridComponent* comp = getComponentPointer(obj);
 
-    if (comp == nullptr)
-    {
+    if (comp == nullptr) {
         return griddyn_invalid_object;
     }
-    auto col = reinterpret_cast<collector *> (query);
-    col->reset ();
-    col->add (queryString, comp);
+    auto col = reinterpret_cast<collector*>(query);
+    col->reset();
+    col->add(queryString, comp);
     return griddyn_ok;
 }

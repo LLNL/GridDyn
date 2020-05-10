@@ -13,23 +13,24 @@
 // test case for operatingBoundary class
 
 #include "utilities/OperatingBoundary.h"
-#include <boost/test/floating_point_comparison.hpp>
+
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(operatingBoundary_tests, * boost::unit_test::label("quick"))
+#include <boost/test/floating_point_comparison.hpp>
+
+BOOST_AUTO_TEST_SUITE(operatingBoundary_tests, *boost::unit_test::label("quick"))
 
 using namespace utilities;
-BOOST_AUTO_TEST_CASE (opbound_test1)
+BOOST_AUTO_TEST_CASE(opbound_test1)
 {
-	OperatingBoundary Bound(-10,10,0,5);
+    OperatingBoundary Bound(-10, 10, 0, 5);
 
-	auto lim = Bound.getLimits(0.0);
-	BOOST_CHECK_CLOSE(lim.first, 0.0, 0.000001);
-	BOOST_CHECK_CLOSE(lim.second, 5.0, 0.000001);
+    auto lim = Bound.getLimits(0.0);
+    BOOST_CHECK_CLOSE(lim.first, 0.0, 0.000001);
+    BOOST_CHECK_CLOSE(lim.second, 5.0, 0.000001);
 
-	BOOST_CHECK_SMALL(Bound.dMaxROC(0.0), 0.000001);
-	BOOST_CHECK_SMALL(Bound.dMinROC(0.0), 0.0000001);
+    BOOST_CHECK_SMALL(Bound.dMaxROC(0.0), 0.000001);
+    BOOST_CHECK_SMALL(Bound.dMinROC(0.0), 0.0000001);
 }
 
-
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_SUITE_END()

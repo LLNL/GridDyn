@@ -17,7 +17,7 @@
 #define MATRIX_OPS_H_
 #pragma once
 
-#include  "matrixData.hpp"
+#include "matrixData.hpp"
 #include <vector>
 /** multiply a matrix data object by a vector
 @details assumes vec has the appropriate size otherwise undefined behavior will occur
@@ -26,7 +26,7 @@
 @param[out] res the location to store the results
 @return a vector with the results the vector will be of length M
 */
-void matrixDataMultiply(matrixData<double> &md, const double vec[], double res[]);
+void matrixDataMultiply(matrixData<double>& md, const double vec[], double res[]);
 
 /** multiply a matrix data object by a vector
 @details assumes vec has the appropriate size otherwise undefined behavior will occur
@@ -34,7 +34,6 @@ void matrixDataMultiply(matrixData<double> &md, const double vec[], double res[]
 @param[in] vec the vector data to multiply at least size N
 @return a vector with the results the vector will be of length M
 */
-std::vector<double> matrixDataMultiply(matrixData<double> &md, const double vec[]);
-
+std::vector<double> matrixDataMultiply(matrixData<double>& md, const double vec[]);
 
 #endif

@@ -21,20 +21,13 @@ target_link_libraries(gridDynMain runner griddyn_base griddyn_optional)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
     add_custom_command(
-        TARGET
-        gridDynMain
+        TARGET gridDynMain
         POST_BUILD # Adds a post-build event to gridDynMain
         COMMAND
-            ${CMAKE_COMMAND}
-            -E
-            copy_if_different # which executes "cmake - E copy_if_different..."
+            ${CMAKE_COMMAND} -E copy_if_different # which executes "cmake - E copy_if_different..."
             "${keyfile}" # <--this is in-file
             $<TARGET_FILE_DIR:gridDynMain>
     ) # <--this is out-file path
 endforeach(keyfile)
 
-install(
-    TARGETS gridDynMain
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT
-    RUNTIME
-)
+install(TARGETS gridDynMain RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT RUNTIME)

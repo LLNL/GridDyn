@@ -24,13 +24,11 @@ Lawrence Livermore National Laboratory, operated by Lawrence Livermore National 
 
 #include <string>
 
-namespace zmq
-{
+namespace zmq {
 enum class socket_type : int;
 }
 
-namespace zmqlib
-{
-zmq::socket_type socketTypeFromString (const std::string &socketType);
+namespace zmqlib {
+zmq::socket_type socketTypeFromString(const std::string& socketType);
 }
 #endif

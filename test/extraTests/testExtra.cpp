@@ -10,18 +10,16 @@
 * LLNS Copyright End
 */
 
-
 #include "griddyn/griddyn-config.h"
 #ifndef BOOST_STATIC
-#define BOOST_TEST_DYN_LINK
+#    define BOOST_TEST_DYN_LINK
 #endif
-
 
 #define BOOST_TEST_MODULE testExtra
 #define BOOST_TEST_DETECT_MEMORY_LEAK 0
 
-#include <boost/test/unit_test.hpp>
-
 #include "../testHelper.h"
 
-BOOST_GLOBAL_FIXTURE (glbconfig);
+#include <boost/test/unit_test.hpp>
+
+BOOST_GLOBAL_FIXTURE(glbconfig);

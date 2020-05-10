@@ -15,7 +15,7 @@
 #include "RungeKutta_Implicit.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|ccc}
   \frac{1}{2}-\frac{\sqrt{15}}{10}&\frac{5}{36}&\frac{2}{9}-\frac{\sqrt{15}}{15}&\frac{5}{36}-\frac{\sqrt{15}}{30}\\
@@ -25,12 +25,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class Gauss6 : public RungeKutta_Implicit{
-public:
-  Gauss6(Equation* eq);
-  virtual std::string GetName(){return "RK_Gauss_6";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Gauss6: public RungeKutta_Implicit {
+      public:
+        Gauss6(Equation* eq);
+        virtual std::string GetName() { return "RK_Gauss_6"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

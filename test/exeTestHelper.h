@@ -16,31 +16,29 @@
 
 #include <string>
 /** class designed to execute a run test of gridDynMain*/
-class exeTestRunner
-{
-private:
-	std::string exeString;
-	bool active;
-	static int counter;
-	std::string outFile;
-public:
-	exeTestRunner();
-	exeTestRunner(const std::string &baseLocation, const std::string &target);
-	exeTestRunner(const std::string &baseLocation, const std::string &baseLocation2, const std::string &target);
-	bool findFileLocation(const std::string &baseLocation, const std::string &target);
-	bool isActive() const { return active; };
+class exeTestRunner {
+  private:
+    std::string exeString;
+    bool active;
+    static int counter;
+    std::string outFile;
 
-	int run(const std::string &args) const;
+  public:
+    exeTestRunner();
+    exeTestRunner(const std::string& baseLocation, const std::string& target);
+    exeTestRunner(const std::string& baseLocation,
+                  const std::string& baseLocation2,
+                  const std::string& target);
+    bool findFileLocation(const std::string& baseLocation, const std::string& target);
+    bool isActive() const { return active; };
 
-	std::string runCaptureOutput(const std::string &args) const;
-    const std::string &getExeString() const
-    {
-        return exeString;
-    }
-private:
-   void buildOutFile();
+    int run(const std::string& args) const;
+
+    std::string runCaptureOutput(const std::string& args) const;
+    const std::string& getExeString() const { return exeString; }
+
+  private:
+    void buildOutFile();
 };
-
-
 
 #endif

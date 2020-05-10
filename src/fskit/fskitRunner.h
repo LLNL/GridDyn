@@ -12,31 +12,30 @@
 */
 #pragma once
 #ifndef _FSKIT_RUNNER_H_
-#define _FSKIT_RUNNER_H_
+#    define _FSKIT_RUNNER_H_
 
-#include "fileInput/gridDynRunner.h"
+#    include "fileInput/gridDynRunner.h"
 
-namespace fskit
-{
-	class GrantedTimeWindowScheduler;
+namespace fskit {
+class GrantedTimeWindowScheduler;
 }
 
-namespace griddyn
-{
-class fskitRunner : public GriddynRunner
-{
-public:
-	fskitRunner();
+namespace griddyn {
+class fskitRunner: public GriddynRunner {
+  public:
+    fskitRunner();
 
-private:
-	using GriddynRunner::Initialize;
+  private:
+    using GriddynRunner::Initialize;
 
-public:
-	int Initialize(int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);
-	virtual int Initialize(int argc, char *argv[]) override;
+  public:
+    int Initialize(int argc,
+                   char* argv[],
+                   std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);
+    virtual int Initialize(int argc, char* argv[]) override;
 
-	virtual coreTime Run() override;
-	virtual void Finalize() override;
+    virtual coreTime Run() override;
+    virtual void Finalize() override;
 };
-} // namespace griddyn
+}  // namespace griddyn
 #endif

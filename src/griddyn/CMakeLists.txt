@@ -10,8 +10,7 @@
 
 # project  GriddDyn
 
-set(
-    genmodel_headers
+set(genmodel_headers
     GenModel.h
     genmodels/GenModelClassical.h
     genmodels/GenModel3.h
@@ -27,8 +26,7 @@ set(
     genmodels/otherGenModels.h
 )
 
-set(
-    genmodel_sources
+set(genmodel_sources
     ${genmodel_headers}
     genmodels/GenModel.cpp
     genmodels/GenModelClassical.cpp
@@ -44,25 +42,16 @@ set(
     genmodels/GenModelInverter.cpp
 )
 
-set(
-    generator_headers
-    Generator.h
-    generators/variableGenerator.h
-    generators/isocController.h
-    generators/DynamicGenerator.h
+set(generator_headers Generator.h generators/variableGenerator.h generators/isocController.h
+                      generators/DynamicGenerator.h
 )
 
-set(
-    generator_sources
-    ${generator_headers}
-    generators/Generator.cpp
-    generators/variableGenerator.cpp
-    generators/isocController.cpp
-    generators/DynamicGenerator.cpp
+set(generator_sources
+    ${generator_headers} generators/Generator.cpp generators/variableGenerator.cpp
+    generators/isocController.cpp generators/DynamicGenerator.cpp
 )
 
-set(
-    gridSource_headers
+set(gridSource_headers
     Source.h
     sources/sourceTypes.h
     sources/rampSource.h
@@ -76,8 +65,7 @@ set(
     sources/grabberSource.h
 )
 
-set(
-    gridSource_sources
+set(gridSource_sources
     ${gridSource_headers}
     sources/Source.cpp
     sources/rampSource.cpp
@@ -91,8 +79,7 @@ set(
     sources/grabberSource.cpp
 )
 
-set(
-    exciter_headers
+set(exciter_headers
     Exciter.h
     Stabilizer.h
     exciters/ExciterDC1A.h
@@ -101,8 +88,7 @@ set(
     exciters/ExciterIEEEtype2.h
 )
 
-set(
-    exciter_sources
+set(exciter_sources
     ${exciter_headers}
     exciters/Exciter.cpp
     exciters/ExciterDC1A.cpp
@@ -112,8 +98,7 @@ set(
     stabilizers/Stabilizer.cpp
 )
 
-set(
-    gov_headers
+set(gov_headers
     Governor.h
     governors/GovernorTypes.h
     governors/GovernorHydro.h
@@ -124,8 +109,7 @@ set(
     governors/GovernorTgov1.h
 )
 
-set(
-    gov_sources
+set(gov_sources
     ${gov_headers}
     governors/Governor.cpp
     governors/GovernorHydro.cpp
@@ -136,8 +120,7 @@ set(
     governors/GovernorTgov1.cpp
 )
 
-set(
-    block_headers
+set(block_headers
     Block.h
     blocks/integralBlock.h
     blocks/deadbandBlock.h
@@ -156,8 +139,7 @@ set(
     blocks/blockLibrary.h
 )
 
-set(
-    block_sources
+set(block_sources
     ${block_headers}
     blocks/Block.cpp
     blocks/integralBlock.cpp
@@ -176,17 +158,11 @@ set(
     blocks/rampLimiter.cpp
 )
 
-set(
-    submodel_sources
-    ${genmodel_sources}
-    ${exciter_sources}
-    ${gov_sources}
-    ${gridSource_sources}
-    ${block_sources}
+set(submodel_sources ${genmodel_sources} ${exciter_sources} ${gov_sources} ${gridSource_sources}
+                     ${block_sources}
 )
 
-set(
-    load_headers
+set(load_headers
     Load.h
     loads/rampLoad.h
     loads/exponentialLoad.h
@@ -204,8 +180,7 @@ set(
     loads/ThreePhaseLoad.h
 )
 
-set(
-    load_sources
+set(load_sources
     ${load_headers}
     loads/Load.cpp
     loads/rampLoad.cpp
@@ -225,8 +200,7 @@ set(
     loads/gridLabDLoad.cpp
 )
 
-set(
-    link_headers
+set(link_headers
     links/dcLink.h
     links/acdcConverter.h
     links/adjustableTransformer.h
@@ -238,8 +212,7 @@ set(
     links/acLine.h
 )
 
-set(
-    link_sources
+set(link_sources
     ${link_headers}
     links/Link.cpp
     links/adjustableTransformer.cpp
@@ -252,8 +225,7 @@ set(
     links/acLine.cpp
 )
 
-set(
-    simulation_headers
+set(simulation_headers
     simulation/contingency.h
     simulation/continuation.h
     gridDynSimulation.h
@@ -266,8 +238,7 @@ set(
     simulation/gridDynSimulationFileOps.h
 )
 
-set(
-    simulation_sources
+set(simulation_sources
     ${simulation_headers}
     simulation/gridDynContinuation.cpp
     simulation/gridDynSimulation.cpp
@@ -284,8 +255,7 @@ set(
     simulation/gridDynContingency.cpp
 )
 
-set(
-    solver_headers
+set(solver_headers
     solvers/solverInterface.h
     solvers/sundialsInterface.h
     solvers/idaInterface.h
@@ -296,8 +266,7 @@ set(
     solvers/solverMode.hpp
 )
 
-set(
-    solver_sources
+set(solver_sources
     ${solver_headers}
     solvers/idaInterface.cpp
     solvers/kinsolInterface.cpp
@@ -312,26 +281,19 @@ set(
 )
 
 if(GRIDDYN_ENABLE_CVODE)
-    list(
-        APPEND
-            solver_sources solvers/cvodeInterface.cpp solvers/cvodeInterface.h
-    )
+    list(APPEND solver_sources solvers/cvodeInterface.cpp solvers/cvodeInterface.h)
 
     list(APPEND solver_headers solvers/cvodeInterface.h)
 
 endif(GRIDDYN_ENABLE_CVODE)
 
 if(GRIDDYN_ENABLE_ARKODE)
-    list(
-        APPEND
-            solver_sources solvers/arkodeInterface.cpp solvers/arkodeInterface.h
-    )
+    list(APPEND solver_sources solvers/arkodeInterface.cpp solvers/arkodeInterface.h)
 
     list(APPEND solver_headers solvers/arkodeInterface.h)
 endif(GRIDDYN_ENABLE_ARKODE)
 
-set(
-    core_headers
+set(core_headers
     gridComponent.h
     gridPrimary.h
     gridSecondary.h
@@ -342,8 +304,7 @@ set(
     offsetTable.h
 )
 
-set(
-    core_sources
+set(core_sources
     ${core_headers}
     gridComponent.cpp
     gridPrimary.cpp
@@ -354,8 +315,7 @@ set(
     offsetTable.cpp
 )
 
-set(
-    primary_headers
+set(primary_headers
     gridBus.h
     Area.h
     primary/dcBus.h
@@ -367,8 +327,7 @@ set(
     primary/DcBusControls.h
 )
 
-set(
-    primary_sources
+set(primary_sources
     ${primary_headers}
     primary/gridBus.cpp
     primary/Area.cpp
@@ -380,8 +339,7 @@ set(
     primary/listMaintainer.cpp
 )
 
-set(
-    event_headers
+set(event_headers
     events/Event.h
     events/eventAdapters.h
     events/eventQueue.h
@@ -394,8 +352,7 @@ set(
     events/compoundEventPlayer.h
 )
 
-set(
-    event_sources
+set(event_sources
     ${event_headers}
     events/Event.cpp
     events/eventAdapters.cpp
@@ -407,8 +364,7 @@ set(
     events/reversibleEvent.cpp
     events/parameterOperator.cpp
 )
-set(
-    measurement_headers
+set(measurement_headers
     measurement/gridGrabbers.h
     measurement/objectGrabbers.h
     measurement/collector.h
@@ -419,8 +375,7 @@ set(
     measurement/grabberInterpreter.hpp
 )
 
-set(
-    measurement_sources
+set(measurement_sources
     ${measurement_headers}
     measurement/Recorder.cpp
     measurement/gridGrabbers.cpp
@@ -433,8 +388,7 @@ set(
     measurement/grabberSet.cpp
 )
 
-set(
-    comm_headers
+set(comm_headers
     comms/commMessage.h
     comms/Communicator.h
     comms/communicationsCore.h
@@ -443,8 +397,7 @@ set(
     comms/commManager.h
 )
 
-set(
-    comm_sources
+set(comm_sources
     ${comm_headers}
     comms/commMessage.cpp
     comms/Communicator.cpp
@@ -454,8 +407,7 @@ set(
     comms/commManager.cpp
 )
 
-set(
-    relay_headers
+set(relay_headers
     Relay.h
     relays/zonalRelay.h
     relays/loadRelay.h
@@ -468,8 +420,7 @@ set(
     relays/pmu.h
 )
 
-set(
-    relay_sources
+set(relay_sources
     ${relay_headers}
     relays/Relay.cpp
     relays/zonalRelay.cpp
@@ -483,8 +434,7 @@ set(
     relays/pmu.cpp
 )
 
-set(
-    controller_headers
+set(controller_headers
     controllers/schedulerInfo.h
     controllers/scheduler.h
     controllers/reserveDispatcher.h
@@ -493,8 +443,7 @@ set(
     controllers/dispatcher.h
 )
 
-set(
-    controller_sources
+set(controller_sources
     ${controller_headers}
     controllers/scheduler.cpp
     controllers/schedulerRamp.cpp
@@ -505,8 +454,7 @@ set(
     controllers/dispatcher.cpp
 )
 
-set(
-    sublibrary_files
+set(sublibrary_files
     ${event_sources}
     ${measurement_sources}
     ${griddynIO_sources}
@@ -516,17 +464,11 @@ set(
     ${solver_sources}
 )
 
-set(
-    model_files
-    ${relay_sources}
-    ${submodel_sources}
-    ${load_sources}
-    ${link_sources}
-    ${generator_sources}
+set(model_files ${relay_sources} ${submodel_sources} ${load_sources} ${link_sources}
+                ${generator_sources}
 )
 
-set(
-    header_files
+set(header_files
     ${exciter_headers}
     ${gov_headers}
     ${block_headers}
@@ -548,29 +490,22 @@ set(
 )
 
 add_library(
-    griddyn
-    STATIC
-    ${simulation_sources}
-    ${model_files}
-    ${core_sources}
-    ${primary_sources}
-    ${sublibrary_files}
+    griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} ${primary_sources}
+                   ${sublibrary_files}
 )
 
 target_include_directories(
     griddyn
-    PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    # TODO is this right?
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+           # TODO is this right?
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 target_include_directories(
     griddyn
-    # target_link_libraries(this, ticpp::ticpp cereal::cereal (and maybe others))
-    # when available (why is ticpp here at all? cereal is a little more justifiable)
-    PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+    # target_link_libraries(this, ticpp::ticpp cereal::cereal (and maybe others)) when available
+    # (why is ticpp here at all? cereal is a little more justifiable)
+    PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
 )
 
 target_link_libraries(griddyn PUBLIC coreObjects)
@@ -578,13 +513,13 @@ target_link_libraries(griddyn PUBLIC coreObjects)
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
 target_link_libraries(griddyn PUBLIC coupling_static_lib)
 if(GRIDDYN_ENABLE_KLU)
-	if (GRIDDYN_SUITESPARSE_LOCAL_BUILD)
-		target_link_libraries(griddyn PUBLIC klu)
+    if(GRIDDYN_SUITESPARSE_LOCAL_BUILD)
+        target_link_libraries(griddyn PUBLIC klu)
         target_include_directories(griddyn PRIVATE ${KLU_INCLUDE_DIR})
-	else()
-		target_link_libraries(griddyn PUBLIC Suitesparse::klu)
-	endif()
-    
+    else()
+        target_link_libraries(griddyn PUBLIC Suitesparse::klu)
+    endif()
+
 endif(GRIDDYN_ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
@@ -607,11 +542,8 @@ source_group("solvers" FILES ${solver_sources})
 
 # create a griddyn-config.h file for program options
 configure_file(
-    ${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in
-    ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
+    ${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
 )
-install(
-    FILES ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-    COMPONENT headers
+install(FILES ${CONFIGURE_TARGET_LOCATION}/griddyn-config.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers
 )

@@ -13,62 +13,49 @@
 
 // libraries
 
-
 // headers
 #include "gridDyn.h"
-#include "gridDynServer.h"
 #include "gridDynRunner.h"
+#include "gridDynServer.h"
 #include "libraryLoader.h"
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-
 #include <chrono>
 #include <cstdio>
 #include <memory>
 
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 //using namespace boost;
 namespace po = boost::program_options;
 
-
 // main
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-	loadLibraries();
-  std::shared_ptr<gridDynSimulation> gds = std::make_shared<gridDynSimulation> ();
+    loadLibraries();
+    std::shared_ptr<gridDynSimulation> gds = std::make_shared<gridDynSimulation>();
 
-  // Store the simulation pointer somewhere so that it can be accessed in other modules.
-  gridDynSimulation::setInstance (gds.get ()); // peer to gridDynSimulation::GetInstance ();
+    // Store the simulation pointer somewhere so that it can be accessed in other modules.
+    gridDynSimulation::setInstance(gds.get());  // peer to gridDynSimulation::GetInstance ();
 
-
-  if (!gds)
-    {
-      return (-5);
+    if (!gds) {
+        return (-5);
     }
 
-  bool isMpiCountMode = false;
-  //check for an MPI run setup
-  for (int ii = 0; ii < argc; ++ii)
-    {
-      if (!strcmp ("--mpicount", argv[ii]))
-        {
-          isMpiCountMode = true;
+    bool isMpiCountMode = false;
+    //check for an MPI run setup
+    for (int ii = 0; ii < argc; ++ii) {
+        if (!strcmp("--mpicount", argv[ii])) {
+            isMpiCountMode = true;
         }
     }
 
-  po::variables_map vm;
-  int ret = argumentParser (argc, argv, vm);
-  if (ret)
-    {
-      return ret;
+    po::variables_map vm;
+    int ret = argumentParser(argc, argv, vm);
+    if (ret) {
+        return ret;
     }
 
+    //create the simulation
 
-  //create the simulation
-
- 
-
-
-  return 0;
+    return 0;
 }
-

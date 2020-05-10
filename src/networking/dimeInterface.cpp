@@ -11,32 +11,31 @@
 */
 
 #include "dimeInterface.h"
-#include "dimeCommunicator.h"
-#include "dimeCollector.h"
 
 #include "core/factoryTemplates.hpp"
 #include "core/objectFactory.hpp"
+#include "dimeCollector.h"
+#include "dimeCommunicator.h"
 #include "fileInput/readerInfo.h"
 
-namespace griddyn
-{
-static childClassFactory<dimeLib::dimeCollector, collector> dimeFac(std::vector<std::string> {"dime"});
+namespace griddyn {
+static childClassFactory<dimeLib::dimeCollector, collector>
+    dimeFac(std::vector<std::string>{"dime"});
 
-static childClassFactory<dimeLib::dimeCommunicator, Communicator> dimeComm(std::vector<std::string>{"dime"});
+static childClassFactory<dimeLib::dimeCommunicator, Communicator>
+    dimeComm(std::vector<std::string>{"dime"});
 
 void loadDimeLibrary()
 {
-	static int loaded = 0;
+    static int loaded = 0;
 
-	if (loaded == 0)
-	{
-		loaded = 1;
-	}
+    if (loaded == 0) {
+        loaded = 1;
+    }
 }
 
-
-void loadDimeReaderInfoDefinitions(readerInfo &ri)
+void loadDimeReaderInfoDefinitions(readerInfo& ri)
 {
-	ri.addTranslate("dime", "extra");
+    ri.addTranslate("dime", "extra");
 }
-}//namespace griddyn
+}  //namespace griddyn

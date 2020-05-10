@@ -11,36 +11,37 @@
  */
 
 #include "loadFMIExportObjects.h"
+
 #include "core/factoryTemplates.hpp"
-#include "fmiCoordinator.h"
 #include "core/objectFactoryTemplates.hpp"
-#include "fmiCollector.h"
-#include "fmiEvent.h"
 #include "fileInput/readerInfo.h"
+#include "fmiCollector.h"
+#include "fmiCoordinator.h"
+#include "fmiEvent.h"
 
-namespace griddyn
-{
+namespace griddyn {
 static childClassFactory<fmi::fmiCollector, collector>
-  fmiColFac (std::vector<std::string>{"fmioutput", "fmicollector"});
+    fmiColFac(std::vector<std::string>{"fmioutput", "fmicollector"});
 
 static childClassFactoryArg<fmi::fmiEvent, Event, fmi::fmiEvent::fmiEventType>
-  fmiIn (std::vector<std::string>{"fmiinput", "fmievent"}, fmi::fmiEvent::fmiEventType::input);
+    fmiIn(std::vector<std::string>{"fmiinput", "fmievent"}, fmi::fmiEvent::fmiEventType::input);
 
 static childClassFactoryArg<fmi::fmiEvent, Event, fmi::fmiEvent::fmiEventType>
-  fmiParam (std::vector<std::string>{"fmiparam", "fmiparameter"}, fmi::fmiEvent::fmiEventType::parameter);
+    fmiParam(std::vector<std::string>{"fmiparam", "fmiparameter"},
+             fmi::fmiEvent::fmiEventType::parameter);
 // static childClassFactory<dimeCommunicator, Communicator> dimeComm(std::vector<std::string>{"dime"});
 
 static typeFactory<fmi::fmiCoordinator> coord("extra", std::vector<std::string>{"fmi", "fmicoord"});
 
-void loadFMIExportObjects () {}
+void loadFMIExportObjects() {}
 
-void loadFmiExportReaderInfoDefinitions (readerInfo &ri)
+void loadFmiExportReaderInfoDefinitions(readerInfo& ri)
 {
-	ri.addTranslate("fmi", "extra");
-	ri.addTranslate("fmicoord", "extra");
-    ri.addTranslate ("fmiparam", "event");
-    ri.addTranslate ("fmiinput", "event");
-    ri.addTranslate ("fmioutput", "collector");
+    ri.addTranslate("fmi", "extra");
+    ri.addTranslate("fmicoord", "extra");
+    ri.addTranslate("fmiparam", "event");
+    ri.addTranslate("fmiinput", "event");
+    ri.addTranslate("fmioutput", "collector");
 }
 
-}//namespace griddyn
+}  //namespace griddyn

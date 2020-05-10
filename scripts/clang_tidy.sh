@@ -9,4 +9,3 @@ for f in $files; do
     echo $f
     clang-tidy $f >> $filename
 done
-

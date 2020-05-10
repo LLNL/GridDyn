@@ -1,23 +1,20 @@
 class Person {
 };
 
-
 class Room {
-public:
+  public:
     void add_person(Person person)
     {
         // do stuff
     }
 
-private:
+  private:
     Person* people_in_room;
 };
 
-
-template <class T, int N>
+template<class T, int N>
 class Bag<T, N> {
 };
-
 
 int main()
 {

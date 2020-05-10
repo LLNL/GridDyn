@@ -14,64 +14,58 @@
 #ifndef GRIDDYN_FEDERATED_SCHEDULER_H_
 #define GRIDDYN_FEDERATED_SCHEDULER_H_
 
-
-#include <memory>
 #include <cassert>
+#include <memory>
 
 namespace fskit {
 class GrantedTimeWindowScheduler;
 }
 
-namespace griddyn
-{
+namespace griddyn {
 class fskitRunner;
-} // namespace griddyn
+}  // namespace griddyn
 
 /**
  * Singleton for accessing federated scheduler.
  *
  * Singleton is initialized in GriddynRunner.
  */
-class GriddynFederatedScheduler
-{
-public:
-  static bool IsFederated ()
-  {
-    return g_scheduler != nullptr;
-  }
+class GriddynFederatedScheduler {
+  public:
+    static bool IsFederated() { return g_scheduler != nullptr; }
 
-  /**
+    /**
    * Return singleton federated scheduler.
    */
-  static std::shared_ptr<fskit::GrantedTimeWindowScheduler> GetScheduler ()
-  {
-    assert (g_scheduler);
-    return g_scheduler;
-  }
+    static std::shared_ptr<fskit::GrantedTimeWindowScheduler> GetScheduler()
+    {
+        assert(g_scheduler);
+        return g_scheduler;
+    }
 
-  /* Make non-copyable since it is this class is used to access a singleton
+    /* Make non-copyable since it is this class is used to access a singleton
    * via static methods.
    */
-  GriddynFederatedScheduler () = default;
-  GriddynFederatedScheduler (const GriddynFederatedScheduler&) = delete;
-  GriddynFederatedScheduler& operator= (const GriddynFederatedScheduler&) = delete;
+    GriddynFederatedScheduler() = default;
+    GriddynFederatedScheduler(const GriddynFederatedScheduler&) = delete;
+    GriddynFederatedScheduler& operator=(const GriddynFederatedScheduler&) = delete;
 
-  /*
+    /*
    * GriddynRunner initializes the federated scheduler.
    */
-  friend class griddyn::fskitRunner;
+    friend class griddyn::fskitRunner;
 
-private:
-  /**
+  private:
+    /**
    * Initialize singleton.
    */
-  static void Initialize (std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
-  {
-	  //TODO:: make this thread safe probably with a mutex lock
-    g_scheduler = scheduler;
-  }
+    static void Initialize(std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
+    {
+        //TODO:: make this thread safe probably with a mutex lock
+        g_scheduler = scheduler;
+    }
 
-  static std::shared_ptr<fskit::GrantedTimeWindowScheduler> g_scheduler;
+    static std::shared_ptr<fskit::GrantedTimeWindowScheduler> g_scheduler;
 };
 
-#endif // GRIDDYN_FEDERATED_SCHEDULER_H_
+#endif  // GRIDDYN_FEDERATED_SCHEDULER_H_

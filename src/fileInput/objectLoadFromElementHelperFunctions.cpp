@@ -11,37 +11,33 @@
 */
 
 #include "core/objectInterpreter.h"
-#include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
+#include "formatInterpreters/readerElement.h"
+#include "gmlc/utilities/stringOps.h"
 #include "readElement.h"
 #include "readerHelper.h"
-#include "gmlc/utilities/stringOps.h"
 
-namespace griddyn
-{
+namespace griddyn {
 using namespace readerConfig;
 
-coreObject *getParent (std::shared_ptr<readerElement> &element,
-                       readerInfo &ri,
-                       coreObject *parentObject,
-                       const std::string &alternateName)
+coreObject* getParent(std::shared_ptr<readerElement>& element,
+                      readerInfo& ri,
+                      coreObject* parentObject,
+                      const std::string& alternateName)
 {
-    std::string parentName = getElementField (element, "parent", defMatchType);
-    if (!parentName.empty ())
-    {
-        parentName = ri.checkDefines (parentName);
-        return locateObject (parentName, parentObject);
+    std::string parentName = getElementField(element, "parent", defMatchType);
+    if (!parentName.empty()) {
+        parentName = ri.checkDefines(parentName);
+        return locateObject(parentName, parentObject);
     }
-    if (!alternateName.empty ())
-    {
-        parentName = getElementAttribute (element, alternateName, defMatchType);
-        if (!parentName.empty ())
-        {
-            parentName = ri.checkDefines (parentName);
-            return locateObject (parentName, parentObject);
+    if (!alternateName.empty()) {
+        parentName = getElementAttribute(element, alternateName, defMatchType);
+        if (!parentName.empty()) {
+            parentName = ri.checkDefines(parentName);
+            return locateObject(parentName, parentObject);
         }
     }
     return nullptr;
 }
 
-}//namespace griddyn
+}  //namespace griddyn

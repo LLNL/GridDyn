@@ -2,16 +2,16 @@
 <griddyn name="test1" version="0.0.1">
    <bus name="bus1">
       <bustype>SLK</bustype>
-	  <dyntype>fixangle</dyntype>
+      <dyntype>fixangle</dyntype>
       <angle>0</angle>
       <voltage>1</voltage>
       <generator name="gen1">
-		<base>300</base>
-		<model type="inverter"/>
+        <base>300</base>
+        <model type="inverter"/>
       </generator>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
+    <name>bus2</name>
      <load name="load3">
        <P>1.500</P>
        <Q>0.3</Q>
@@ -20,7 +20,7 @@
          <value>0.1</value>
          <time>1.0</time>
        </event>
-       
+
      </load>
    </bus>
  <link from="bus1" name="bus1_to_bus2" to="bus2">

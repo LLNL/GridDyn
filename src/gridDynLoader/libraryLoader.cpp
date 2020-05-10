@@ -11,25 +11,25 @@
 * LLNS Copyright End
 */
 
-
 #include "libraryLoader.h"
+
 #include "griddyn-config.h"
 
 #ifdef ENABLE_EXTRA_MODELS
-#include "extraModels.h"
+#    include "extraModels.h"
 #endif
 
 #ifdef ENABLE_FMI
-#include "fmiGDinfo.h"
+#    include "fmiGDinfo.h"
 #endif
 
 void loadLibraries()
 {
 #ifdef ENABLE_FMI
-	loadFmiLibrary();
+    loadFmiLibrary();
 #endif
 
 #ifdef ENABLE_EXTRA_MODELS
-	loadExtraModels("");
+    loadExtraModels("");
 #endif
 }

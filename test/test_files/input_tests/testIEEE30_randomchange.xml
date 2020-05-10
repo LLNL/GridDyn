@@ -4,18 +4,18 @@
    <import file="../IEEE_test_cases/ieee30_act.cdf"/>
    <loop loopvariable="id" start=0 stop=30>
    <bus index=id>
-	<if condition="exists(load#0)">
-		<load type="random">
-		<p:mean_t>30</p:mean_t>
-		<p:stdev_l>0.002</p:stdev_l>
-		<p:zbias>0.1</p:zbias>
-		<p:time_dist>exponential</p:time_dist>
-		<p:change_dist>normal</p:change_dist>
-		<p:flags>repeated</p:flags>
-		</load>
-	</if>
-	</bus>
-	</loop>
+    <if condition="exists(load#0)">
+        <load type="random">
+        <p:mean_t>30</p:mean_t>
+        <p:stdev_l>0.002</p:stdev_l>
+        <p:zbias>0.1</p:zbias>
+        <p:time_dist>exponential</p:time_dist>
+        <p:change_dist>normal</p:change_dist>
+        <p:flags>repeated</p:flags>
+        </load>
+    </if>
+    </bus>
+    </loop>
 
 <recorder field="voltage,angle" file="30random.csv" period=5 autosave=10000/>
 <start>0</start>

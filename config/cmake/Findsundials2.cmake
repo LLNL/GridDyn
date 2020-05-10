@@ -1152,4 +1152,3 @@ list(REMOVE_DUPLICATES _Sundials_COMPONENTS_SEARCHED)
 list(SORT _Sundials_COMPONENTS_SEARCHED)
 set(_Sundials_COMPONENTS_SEARCHED "${_Sundials_COMPONENTS_SEARCHED}"
 CACHE INTERNAL "Components requested for this build tree.")
-

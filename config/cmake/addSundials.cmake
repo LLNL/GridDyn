@@ -120,20 +120,20 @@ target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${sundials_B
 add_library(SUNDIALS::SUNDIALS ALIAS sundials_all)
 
 set(SUNDIALS_LIBRARIES
-	sundials_nvecserial_static
-	sundials_sunlinsolband_static
-	sundials_sunlinsoldense_static
-	sundials_sunlinsolpcg_static
-	sundials_sunlinsolspbcgs_static
-	sundials_sunlinsolspfgmr_static
-	sundials_sunlinsolspgmr_static
-	sundials_sunlinsolsptfqmr_static
-	sundials_sunmatrixband_static
-	sundials_sunmatrixdense_static
-	sundials_sunmatrixsparse_static
-	sundials_sunnonlinsolfixedpoint_static
-	sundials_sunnonlinsolnewton_static
-	sundials_nvecmanyvector_static
+    sundials_nvecserial_static
+    sundials_sunlinsolband_static
+    sundials_sunlinsoldense_static
+    sundials_sunlinsolpcg_static
+    sundials_sunlinsolspbcgs_static
+    sundials_sunlinsolspfgmr_static
+    sundials_sunlinsolspgmr_static
+    sundials_sunlinsolsptfqmr_static
+    sundials_sunmatrixband_static
+    sundials_sunmatrixdense_static
+    sundials_sunmatrixsparse_static
+    sundials_sunnonlinsolfixedpoint_static
+    sundials_sunnonlinsolnewton_static
+    sundials_nvecmanyvector_static
 )
 
 if (${PROJECT_NAME}_ENABLE_IDA)

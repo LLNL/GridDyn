@@ -11,24 +11,24 @@
 */
 
 #include "matrixOps.h"
+
 #include <cstring>
 
-std::vector<double> matrixDataMultiply (matrixData<double> &md, const double vec[])
+std::vector<double> matrixDataMultiply(matrixData<double>& md, const double vec[])
 {
-    std::vector<double> res (md.rowLimit ());
-    matrixDataMultiply (md, vec, res.data ());
+    std::vector<double> res(md.rowLimit());
+    matrixDataMultiply(md, vec, res.data());
     return res;
 }
 
-void matrixDataMultiply (matrixData<double> &md, const double vec[], double res[])
+void matrixDataMultiply(matrixData<double>& md, const double vec[], double res[])
 {
-    memset (res, 0, sizeof (double) * md.rowLimit ());
-    auto sz = md.size ();
-    md.start ();
+    memset(res, 0, sizeof(double) * md.rowLimit());
+    auto sz = md.size();
+    md.start();
     index_t ii = 0;
-    while (ii++ < sz)
-    {
-        auto element = md.next ();
+    while (ii++ < sz) {
+        auto element = md.next();
         res[element.row] += element.data * vec[element.col];
     }
 }

@@ -16,26 +16,27 @@
 #include "measurement/collector.h"
 #include <utility>
 
-class fncsCollector :public collector
-{
-private:
-	std::vector<std::pair<std::string,std::string>> complexPairs;
-	std::vector<std::string> cnames;
-public:
-	fncsCollector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
-	explicit fncsCollector(const std::string &name);
-	~fncsCollector();
+class fncsCollector: public collector {
+  private:
+    std::vector<std::pair<std::string, std::string>> complexPairs;
+    std::vector<std::string> cnames;
 
-	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
+  public:
+    fncsCollector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
+    explicit fncsCollector(const std::string& name);
+    ~fncsCollector();
 
-	virtual change_code trigger(coreTime time) override;
+    virtual std::shared_ptr<collector>
+        clone(std::shared_ptr<collector> gr = nullptr) const override;
 
+    virtual change_code trigger(coreTime time) override;
 
-	void set(const std::string &param, double val) override;
-	void set(const std::string &param, const std::string &val) override;
+    void set(const std::string& param, double val) override;
+    void set(const std::string& param, const std::string& val) override;
 
-	virtual const std::string &getSinkName() const override;
-protected:
-	void dataPointAdded(const collectorPoint &cp) override;
+    virtual const std::string& getSinkName() const override;
+
+  protected:
+    void dataPointAdded(const collectorPoint& cp) override;
 };
 #endif

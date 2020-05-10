@@ -43,7 +43,3 @@ else
         cinfo{nn,2}=strtrim(vnames{nn}{2});
     end;
 end
-
-
-
-

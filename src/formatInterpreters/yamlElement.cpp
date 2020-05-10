@@ -14,29 +14,30 @@
 
 static const std::string nullStr;
 
-yamlElement::yamlElement (const YAML::Node &vElement, std::string newName) : name (newName), element (vElement)
+yamlElement::yamlElement(const YAML::Node& vElement, std::string newName):
+    name(newName), element(vElement)
 {
     elementIndex = 0;
 
-    if (element.IsSequence ())
-    {
+    if (element.IsSequence()) {
         arraytype = true;
         arrayIndex = 0;
-        while ((arrayIndex < element.size ()) && (element[arrayIndex].IsNull ()))
-        {
+        while ((arrayIndex < element.size()) && (element[arrayIndex].IsNull())) {
             ++arrayIndex;
         }
     }
 }
 
-
-void yamlElement::clear ()
+void yamlElement::clear()
 {
-    element.reset ();
+    element.reset();
     elementIndex = 0;
     arrayIndex = 0;
     arraytype = false;
     name = nullStr;
 }
 
-const YAML::Node yamlElement::getElement () const { return (arraytype) ? (element[arrayIndex]) : element; }
+const YAML::Node yamlElement::getElement() const
+{
+    return (arraytype) ? (element[arrayIndex]) : element;
+}

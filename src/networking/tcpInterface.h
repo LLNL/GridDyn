@@ -10,7 +10,6 @@
 * LLNS Copyright End
 */
 #pragma once
-namespace griddyn
-{
+namespace griddyn {
 void loadTcpLibrary();
-}//namespace griddyn
+}  //namespace griddyn
