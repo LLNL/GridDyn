@@ -74,7 +74,8 @@ namespace tcpLib {
         // txmsg.send(*txSocket);
     }
 
-    // void tcpCommunicator::addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> & /*message*/)
+    // void tcpCommunicator::addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> &
+    // /*message*/)
     //{
     //    if (!flags[no_transmit_source])
     //    {
@@ -82,7 +83,8 @@ namespace tcpLib {
     //    }
     //}
 
-    // void tcpCommunicator::addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message)
+    // void tcpCommunicator::addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage>
+    // &message)
     //{
     //    msg.addstr(message->to_datastring());
     //}
@@ -103,7 +105,8 @@ namespace tcpLib {
             //    {
             //        localProxy->startProxy();
             //    }
-            //    txDescriptor.addOperation(socket_ops::connect, localProxy->getIncomingConnection());
+            //    txDescriptor.addOperation(socket_ops::connect,
+            //    localProxy->getIncomingConnection());
         }
 
         if (flags[use_rx_proxy]) {
@@ -119,12 +122,15 @@ namespace tcpLib {
         // rxDescriptor.addOperation(socket_ops::subscribe, getName());
 
         // auto id = getID();
-        // txDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char *>(&id), sizeof(id)));
-        // //I know this is ugly rxDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char
+        // txDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char
+        // *>(&id), sizeof(id)));
+        // //I know this is ugly rxDescriptor.addOperation(socket_ops::subscribe,
+        // std::string(reinterpret_cast<char
         // *>(&id), sizeof(id)));  //I know this is ugly decltype(id) broadcastId = 0;
-        // txDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char *>(&broadcastId),
-        // sizeof(broadcastId)));  //I know this is ugly rxDescriptor.addOperation(socket_ops::subscribe,
-        // std::string(reinterpret_cast<char *>(&broadcastId), sizeof(broadcastId)));  //I know this is ugly
+        // txDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char
+        // *>(&broadcastId), sizeof(broadcastId)));  //I know this is ugly
+        // rxDescriptor.addOperation(socket_ops::subscribe, std::string(reinterpret_cast<char
+        // *>(&broadcastId), sizeof(broadcastId)));  //I know this is ugly
 
         // rxDescriptor.callback = [this](const multipart_t &msg) {messageHandler(msg); };
         // set up the rx socket reactor

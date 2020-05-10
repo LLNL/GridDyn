@@ -218,10 +218,10 @@ class fmi2ModelExchangeObject: public fmi2Object {
                             std::shared_ptr<const fmiModelExchangeFunctions> meFunc);
     void newDiscreteStates(fmi2EventInfo* fmi2eventInfo);
     /** call for a completed integrator step
-    @param[in] noSetFMUStatePriorToCurrentPoint flag indicating that the state will not be updated at a prior time
-    point
-    @param[out] enterEventMode output flag indicating that an event was triggered and event Mode needs to be
-    entered
+    @param[in] noSetFMUStatePriorToCurrentPoint flag indicating that the state will not be updated
+    at a prior time point
+    @param[out] enterEventMode output flag indicating that an event was triggered and event Mode
+    needs to be entered
     @param[out] terminatesSimulation output flag indicating thaat the simulation was terminated
     @throw an error if the underlying fmi returns an error code
     */
@@ -233,13 +233,13 @@ class fmi2ModelExchangeObject: public fmi2Object {
     void getDerivatives(fmi2Real derivatives[]) const;
     void getEventIndicators(fmi2Real eventIndicators[]) const;
     /** get the current values for the states
-    @param[out] states the location to store the state data states must have sufficient space allocated for the
-    states
+    @param[out] states the location to store the state data states must have sufficient space
+    allocated for the states
     */
     void getStates(fmi2Real states[]) const;
     /** get the nominal expected values for the states
-    @param[out] nominalValues the location to store the state data states must have sufficient space allocated for
-    the states
+    @param[out] nominalValues the location to store the state data states must have sufficient space
+    allocated for the states
     */
     void getNominalsOfContinuousStates(fmi2Real nominalValues[]) const;
     /** set the operating state of the FMU

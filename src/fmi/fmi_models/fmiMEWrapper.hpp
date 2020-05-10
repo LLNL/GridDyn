@@ -49,8 +49,9 @@ namespace fmi {
 
         virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override
         {
-            if (!BaseObj::opFlags
-                    [pFlow_initialized]) {  //just to make sure we actually initialized and didn't go directly to the dynamic initialization
+            if (!BaseObj::opFlags[pFlow_initialized]) {  // just to make sure we actually
+                                                         // initialized and didn't go directly to the
+                                                         // dynamic initialization
                 pFlowObjectInitializeA(time0, flags);
             }
         }

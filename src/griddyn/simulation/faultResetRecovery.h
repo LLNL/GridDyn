@@ -22,7 +22,8 @@ class SolverInterface;
 
 enum class reset_levels;
 
-/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic simulations*/
+/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic
+ * simulations*/
 class faultResetRecovery {
   protected:
     std::vector<double> initVolts;

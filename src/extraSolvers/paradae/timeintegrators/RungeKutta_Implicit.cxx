@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "RungeKutta_Implicit.h"
 
 #include "../math/DenseMatrix.h"
@@ -66,7 +66,7 @@ namespace paradae {
 
         try {
             allK.CopyData(allK_previous);
-            //Newton newton(100);
+            // Newton newton(100);
             newton.Solve(app, allK);
         }
         catch (...) {
@@ -164,7 +164,7 @@ namespace paradae {
         if (require_jac && factorize) {
             jacmat->Factorize();
         }
-        //update_jacobian=true;
+        // update_jacobian=true;
     }
 }  // namespace paradae
 }  // namespace griddyn

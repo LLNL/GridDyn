@@ -2,9 +2,10 @@
 Copyright (C) 2017, Battelle Memorial Institute
 All rights reserved.
 
-This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute;
-the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence
-Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle
+Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for
+Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence
+Livermore National Security, LLC.
 */
 /*
  * LLNS Copyright Start
@@ -30,8 +31,8 @@ namespace zmqlib {
  */
 std::map<std::string, std::shared_ptr<zmqContextManager>> zmqContextManager::contexts;
 
-/** we expect operations on core object that modify the map to be rare but we absolutely need them to be thread
-safe so we are going to use a lock that is entirely controlled by this file*/
+/** we expect operations on core object that modify the map to be rare but we absolutely need them
+to be thread safe so we are going to use a lock that is entirely controlled by this file*/
 static std::mutex contextLock;
 
 std::shared_ptr<zmqContextManager>
@@ -39,7 +40,7 @@ std::shared_ptr<zmqContextManager>
 {
     std::lock_guard<std::mutex> conlock(
         contextLock);  // just to ensure that nothing funny happens if you try to
-        // get a context while it is being constructed
+    // get a context while it is being constructed
     auto fnd = contexts.find(contextName);
     if (fnd != contexts.end()) {
         return fnd->second;

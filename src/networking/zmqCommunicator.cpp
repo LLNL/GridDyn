@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "zmqCommunicator.h"
 
@@ -99,12 +99,12 @@ namespace zmqInterface {
 
     void zmqCommunicator::initialize()
     {
-        //don't initialize twice if we already initialized
+        // don't initialize twice if we already initialized
         if (txSocket) {
             return;
         }
 
-        //set up transmission sockets and information
+        // set up transmission sockets and information
 
         if (flags[use_tx_proxy]) {
             auto localProxy = zmqProxyHub::getProxy(proxyName);
@@ -128,20 +128,20 @@ namespace zmqInterface {
         auto id = getID();
         txDescriptor.addOperation(socket_ops::subscribe,
                                   std::string(reinterpret_cast<char*>(&id),
-                                              sizeof(id)));  //I know this is ugly
+                                              sizeof(id)));  // I know this is ugly
         rxDescriptor.addOperation(socket_ops::subscribe,
                                   std::string(reinterpret_cast<char*>(&id),
-                                              sizeof(id)));  //I know this is ugly
+                                              sizeof(id)));  // I know this is ugly
         decltype(id) broadcastId = 0;
         txDescriptor.addOperation(socket_ops::subscribe,
                                   std::string(reinterpret_cast<char*>(&broadcastId),
-                                              sizeof(broadcastId)));  //I know this is ugly
+                                              sizeof(broadcastId)));  // I know this is ugly
         rxDescriptor.addOperation(socket_ops::subscribe,
                                   std::string(reinterpret_cast<char*>(&broadcastId),
-                                              sizeof(broadcastId)));  //I know this is ugly
+                                              sizeof(broadcastId)));  // I know this is ugly
 
         rxDescriptor.callback = [this](const multipart_t& msg) { messageHandler(msg); };
-        //set up the rx socket reactor
+        // set up the rx socket reactor
         if (!flags[transmit_only]) {
             zmqReactor::getReactorInstance("", contextName)->addSocket(rxDescriptor);
         }
@@ -211,16 +211,16 @@ namespace zmqInterface {
     void zmqCommunicator::messageHandler(const multipart_t& msg)
     {
         auto sz = msg.size();
-        //size should be either 2 or 3
+        // size should be either 2 or 3
         auto msgBody = (sz == 2) ? msg.peek(1) : msg.peek(2);
 
         std::string msgString(static_cast<const char*>(msgBody->data()), msgBody->size());
         std::shared_ptr<commMessage> gdMsg;
         gdMsg->from_datastring(msgString);
 
-        //call the lower level receive function
+        // call the lower level receive function
         receive(0, getName(), std::move(gdMsg));
     }
 
-}  //namespace zmqInterface
-}  //namespace griddyn
+}  // namespace zmqInterface
+}  // namespace griddyn

@@ -57,21 +57,21 @@ namespace mpi {
       public:
         using token = std::unique_ptr<tokenholder>;
         /**
-     * Create a new instance of the MpiService.  This should be
-     * called at the program launch with the command line arguments
-     * since this method invoke MPI_Thread_Init.
-     *
-     * Note that argc and argv may NOT be the same on return, just as in
-     * MPI_Init.
-     */
+         * Create a new instance of the MpiService.  This should be
+         * called at the program launch with the command line arguments
+         * since this method invoke MPI_Thread_Init.
+         *
+         * Note that argc and argv may NOT be the same on return, just as in
+         * MPI_Init.
+         */
         static MpiService*
             instance(int* argc,
                      char** argv[],
                      int threadingLevel = 0);  // only constructor that creates Instance
 
         /**
-     * Return the current instance of the singleton.
-     */
+         * Return the current instance of the singleton.
+         */
         static MpiService* instance(int threadingLevel = 0);
 
         int getRank() const { return commRank; };
@@ -90,8 +90,8 @@ namespace mpi {
         MpiService(int* argc, char** argv[], int threadingLevel);
 
         /**
-     * Singleton instance.
-     */
+         * Singleton instance.
+         */
         static std::unique_ptr<MpiService> m_pInstance;
         static std::mutex startupLock;  //!< mutex protecting the instance
         MpiService(const MpiService&) = delete;

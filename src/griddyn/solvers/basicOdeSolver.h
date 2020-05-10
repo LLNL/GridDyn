@@ -19,7 +19,7 @@
 namespace griddyn {
 namespace solvers {
     /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
- */
+     */
     class basicOdeSolver: public SolverInterface {
       private:
         std::vector<double> state;  //!< state data/

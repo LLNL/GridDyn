@@ -221,10 +221,10 @@ namespace loads {
             rvd[0] -= gmp[0];
             rvd[1] -= gmp[1];
             rvd[2] -= gmp[2];
-            // printf("t=%f:motor state a1=%f a2=%f, d1=%f, d2=%f,d3=%f\n", sD.time, gm[0], gm[1], gmd[0], gmd[1],
-            // gmd[2]);
-            // printf("t=%f:motor resid a1=%e a2=%e, d1=%e, d2=%e,d3=%e\n",sD.time,rva[0],rva[1],rvd[0],rvd[1],rvd[2]);
-            // printf("t=%f, V=%f, ir=%f, im=%f, r1=%e, r2=%e\n",sD.time,V,gm[0],gm[1],rva[0],rva[1]);
+            // printf("t=%f:motor state a1=%f a2=%f, d1=%f, d2=%f,d3=%f\n", sD.time, gm[0], gm[1],
+            // gmd[0], gmd[1], gmd[2]); printf("t=%f:motor resid a1=%e a2=%e, d1=%e,
+            // d2=%e,d3=%e\n",sD.time,rva[0],rva[1],rvd[0],rvd[1],rvd[2]); printf("t=%f, V=%f,
+            // ir=%f, im=%f, r1=%e, r2=%e\n",sD.time,V,gm[0],gm[1],rva[0],rva[1]);
         } else {
             auto offset = offsets.getAlgOffset(sMode);
             const double V = inputs[voltageInLocation];
@@ -341,8 +341,8 @@ namespace loads {
             double Te = dst[1] * ast[0] + dst[2] * ast[1];
             dv[0] = (mechPower(slip) - Te) / (2 * H);
         }
-        // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD.time, slip,mechPower(slip), Te,dv[0] );
-        // Edp and Eqp
+        // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD.time, slip,mechPower(slip), Te,dv[0]
+        // ); Edp and Eqp
         dv[1] = systemBaseFrequency * slip * dst[2] - (dst[1] + (x0 - xp) * ast[1]) / T0p;
         dv[2] = -systemBaseFrequency * slip * dst[1] - (dst[2] - (x0 - xp) * ast[0]) / T0p;
     }

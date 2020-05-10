@@ -223,8 +223,8 @@ enum alarmCode {
 
 std::uint32_t getAlarmCode(const std::string& alarmStr);
 
-// component factory is a template class that inherits from cFactory to actually to the construction of a specific
-// object
+// component factory is a template class that inherits from cFactory to actually to the construction
+// of a specific object
 
 class MessageTypeRegistry {
   public:
@@ -286,8 +286,8 @@ class payloadFactory {
     }  // return a very big range but leave a little room for special message codes
 };
 
-// TODO:: merge with the coreTypeFactory and other templates May not be able to with the extra functions required
-// create a high level object factory for the coreMessageFactory class
+// TODO:: merge with the coreTypeFactory and other templates May not be able to with the extra
+// functions required create a high level object factory for the coreMessageFactory class
 typedef std::unordered_map<std::string, payloadFactory*> mfMap;
 /** core message factory class for building messages of a specified type
  */
@@ -312,8 +312,8 @@ class corePayloadFactory {
     @param messageType string describing the class of messages
     @param type the specific message code for the message*/
     std::shared_ptr<CommPayload> createPayload(const std::string& messageType, std::uint32_t type);
-    /** build a message payload of the specific type, deriving the general type from the valid ranges of specific
-    types defining in the factory
+    /** build a message payload of the specific type, deriving the general type from the valid
+  ranges of specific types defining in the factory
   @param type the specific message code for the message*/
     std::shared_ptr<CommPayload> createPayload(std::uint32_t type);
     /** get a pointer to a specific factory*/

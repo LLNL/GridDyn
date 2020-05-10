@@ -17,7 +17,7 @@
 namespace griddyn {
 namespace loads {
     /** @brief class implementing a model of a 3rd order induction motor
- */
+     */
     class motorLoad3: public motorLoad {
       protected:
         double xp = 0.0;  //!< transient reactance of the motor
@@ -117,7 +117,7 @@ namespace loads {
 
       private:
         /** @brief estimate the initial state values of the motor
-     */
+         */
         void converge();
     };
 

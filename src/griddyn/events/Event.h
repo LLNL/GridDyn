@@ -61,7 +61,8 @@ class Event: public helperObject, public eventInterface, public objectOperatorIn
   public:
     /** construct with a name to the event*/
     explicit Event(const std::string& eventName);
-    /** default constructor will set the event time to the maximum so it will never trigger on its own
+    /** default constructor will set the event time to the maximum so it will never trigger on its
+    own
     @param[in] time0 the time to trigger the event
     */
     explicit Event(coreTime time0 = negTime);

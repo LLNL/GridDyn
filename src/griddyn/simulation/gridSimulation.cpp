@@ -292,7 +292,7 @@ void gridSimulation::log(coreObject* object, print_level level, const std::strin
         key = "||ERROR||";
         ++errorCount;
     }
-    //drop the preliminary information in a certain circumstance
+    // drop the preliminary information in a certain circumstance
     if (level == print_level::summary) {
         if (isSameObject(object, this)) {
             if (currentTime == timeZero) {
@@ -424,7 +424,8 @@ void gridSimulation::setLogger(std::function<void(int, const std::string&)> logg
     customLogger = std::move(loggingFunction);
 }
 
-// TODO:: this really shouldn't be a function,  but still debating alternative approaches to the need it addressed
+// TODO:: this really shouldn't be a function,  but still debating alternative approaches to the
+// need it addressed
 void gridSimulation::resetObjectCounters()
 {
     zipLoad::loadCount = 0;
@@ -475,8 +476,8 @@ coreObject* findMatchingObject(coreObject* obj1, gridPrimary* src, gridPrimary* 
     } else  // now we get ugly we are gridSecondary Object
     {
         coreObject* pobj = findMatchingObject(obj1->getParent(), src, sec);
-        if (pobj !=
-            nullptr) {  // this is an internal string sequence for this purpose, likely won't be documented
+        if (pobj != nullptr) {  // this is an internal string sequence for this purpose, likely
+                                // won't be documented
             obj2 = pobj->getSubObject("submodelcode", obj1->locIndex);
         }
     }

@@ -315,7 +315,8 @@ BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture,
 }
 
 #ifdef LOAD_CVODE
-/** test the control block if they can handle a differential only Jacobian and an algebraic only Jacobian
+/** test the control block if they can handle a differential only Jacobian and an algebraic only
+ * Jacobian
  */
 // BOOST_AUTO_TEST_CASE (block_alg_diff_jac_test)
 BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture,

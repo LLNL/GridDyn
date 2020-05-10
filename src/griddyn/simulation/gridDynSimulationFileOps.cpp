@@ -961,8 +961,8 @@ void loadStateBinary(gridDynSimulation* gds, const std::string& fileName, const 
             return;
         }
     }
-    // TODO:: PT this index should be checked at some point, just not sure what to do with it now, might be used
-    // for automatic solverMode location  instead of what is done currently.
+    // TODO:: PT this index should be checked at some point, just not sure what to do with it now,
+    // might be used for automatic solverMode location  instead of what is done currently.
     unsigned int oi;
     bFile.read(reinterpret_cast<char*>(&(oi)), sizeof(int));
     bFile.read(reinterpret_cast<char*>(sd->state_data()), sizeof(double) * dsize);

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #pragma once
 
 #include "griddyn/gridDynDefinitions.hpp"
@@ -18,12 +18,13 @@ namespace griddyn {
 enum class event_execution_mode {
     normal = 0,  //!< run immediately
     delayed = 1,  //!< delay the execution until after normal events have executed
-    two_part_execution =
-        2,  //!< event has two parts one running with the normal events and one running with the delayed events
+    two_part_execution = 2,  //!< event has two parts one running with the normal events and one
+                             //!< running with the delayed events
 };
 
-/** @brief defining a very basic virtual interface for all objects which work with events and triggers
-*/
+/** @brief defining a very basic virtual interface for all objects which work with events and
+ * triggers
+ */
 class eventInterface {
   public:
     virtual ~eventInterface() = default;
@@ -50,4 +51,4 @@ class eventInterface {
     virtual int eventCode() const { return 0; }
 };
 
-}  //namespace griddyn
+}  // namespace griddyn

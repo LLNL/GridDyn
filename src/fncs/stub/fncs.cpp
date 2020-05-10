@@ -45,18 +45,18 @@ void die() {}
 void finalize() {}
 
 /** Update minimum time delta after connection to broker is made.
-     * Assumes time unit is not changing. */
+ * Assumes time unit is not changing. */
 void update_time_delta(time /*delta*/) {}
 
 /** Get the keys for all values that were updated during the last
-     * time_request. */
+ * time_request. */
 vector<string> get_events()
 {
     return std::vector<std::string>();
 }
 
 /** Get a value from the cache with the given key.
-     * Will hard fault if key is not found. */
+ * Will hard fault if key is not found. */
 string get_value(const string& key)
 {
     auto fnd = container.find(key);
@@ -68,7 +68,7 @@ string get_value(const string& key)
 }
 
 /** Get a vector of values from the cache with the given key.
-     * Will return a vector of size 1 if only a single value exists. */
+ * Will return a vector of size 1 if only a single value exists. */
 vector<string> get_values(const string& key)
 {
     auto fnd = container.find(key);

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef FUNCTION_BLOCK_H_
 #define FUNCTION_BLOCK_H_
@@ -20,13 +20,15 @@
 namespace griddyn {
 namespace blocks {
     /** @brief class implementing a function operation on the input
-a wide assortment of functions are available including trig, logs, and other common math operations*/
+a wide assortment of functions are available including trig, logs, and other common math
+operations*/
     class functionBlock: public Block {
       public:
         //!< flags for function block
         enum functionblock_flags {
             uses_constantarg =
-                object_flag10,  //!< flag indicating that the function should use a constant argument for the second argument of functions
+                object_flag10,  //!< flag indicating that the function should use a constant
+                                //!< argument for the second argument of functions
         };
 
       protected:
@@ -52,15 +54,16 @@ a wide assortment of functions are available including trig, logs, and other com
         virtual void set(const std::string& param,
                          double val,
                          units::unit unitType = units::defunit) override;
-        //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
+        // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
-        //virtual void blockDerivative(double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;
+        // virtual void blockDerivative(double input, double didt, const stateData &sD, double
+        // deriv[], const solverMode &sMode) override;
         virtual void blockAlgebraicUpdate(double input,
                                           const stateData& sD,
                                           double update[],
                                           const solverMode& sMode) override;
 
-        //only called if the genModel is not present
+        // only called if the genModel is not present
         virtual void blockJacobianElements(double input,
                                            double didt,
                                            const stateData& sD,
@@ -68,12 +71,12 @@ a wide assortment of functions are available including trig, logs, and other com
                                            index_t argLoc,
                                            const solverMode& sMode) override;
         virtual double step(coreTime time, double input) override;
-        //virtual void setTime(coreTime time){prevTime=time;};
+        // virtual void setTime(coreTime time){prevTime=time;};
       protected:
         /** @brief load the function objects from a string input
     @param[in] functionName the name of the function as a string*/
         void setFunction(const std::string& functionName);
     };
-}  //namespace blocks
-}  //namespace griddyn
-#endif  //FUNCTION_BLOCK_H_
+}  // namespace blocks
+}  // namespace griddyn
+#endif  // FUNCTION_BLOCK_H_

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "../testHelper.h"
 #include "gmlc/utilities/vectorOps.hpp"
@@ -65,7 +65,7 @@ static const std::vector<file_pair_t> compare_cases{
     {"case30Q.m", "case30Q_res.m"},
     {"case_ieee30.m", "case_ieee30_res.m"},
     {"case33bw_res.m",
-     "case33bw_res.m"},  //this one has some equations at the end that we can't read
+     "case33bw_res.m"},  // this one has some equations at the end that we can't read
     {"case39.m", "case39_res.m"},
     {"case57.m", "case57_res.m"},
     {"case89pegase.m", "case89pegase_res.m"},

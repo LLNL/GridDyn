@@ -640,7 +640,8 @@ void sensor::updateA(coreTime time)
         for (index_t kk = 0; kk < blks; ++kk) {
             double inputFB = getBlockInput(kk, noInputs);
             // make sure the process can be handled in states
-            // printf("%f block %d input=%f\n ", static_cast<double>(time), static_cast<int>(kk), inputFB);
+            // printf("%f block %d input=%f\n ", static_cast<double>(time), static_cast<int>(kk),
+            // inputFB);
             filterBlocks[kk]->step(time, inputFB);
         }
     }
@@ -871,8 +872,8 @@ void sensor::rootTest(const IOdata& inputs,
         for (decltype(blks) kk = 0; kk < blks; ++kk) {
             localInputs[0] = getBlockInput(kk, inputs, sD, sMode);
             // printf("%d root test:%f block %d input=%f\n ", filterBlocks[kk]->getUserID(),
-            // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the process can be
-            // handled in states
+            // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the
+            // process can be handled in states
             filterBlocks[kk]->rootTest(localInputs, sD, roots, sMode);
         }
     }
@@ -891,8 +892,8 @@ void sensor::rootTrigger(coreTime time,
         for (decltype(blks) kk = 0; kk < blks; ++kk) {
             localInputs[0] = getBlockInput(kk, inputs);
             // make sure the process can be handled in states
-            // printf("rootTrigger:%f block %d input=%f\n ", static_cast<double>(time), static_cast<int>(kk),
-            // localInputs[0]);
+            // printf("rootTrigger:%f block %d input=%f\n ", static_cast<double>(time),
+            // static_cast<int>(kk), localInputs[0]);
             filterBlocks[kk]->rootTrigger(time, localInputs, rootMask, sMode);
         }
     }
@@ -911,8 +912,8 @@ change_code sensor::rootCheck(const IOdata& inputs,
         for (decltype(blks) kk = 0; kk < blks; ++kk) {
             localInputs[0] = getBlockInput(kk, inputs, sD, sMode);
             // printf("%d root check:%f block %d input=%f\n ", filterBlocks[kk]->getUserID(),
-            // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the process can be
-            // handled in states
+            // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the
+            // process can be handled in states
             auto iret = filterBlocks[kk]->rootCheck(localInputs, sD, sMode, level);
             ret = std::max(ret, iret);
         }

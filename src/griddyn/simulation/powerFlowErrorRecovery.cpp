@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "powerFlowErrorRecovery.h"
 
@@ -29,8 +29,9 @@ powerFlowErrorRecovery::recovery_return_codes powerFlowErrorRecovery::attemptFix
 {
     if ((error_code == -11) &&
         (sim->currentProcessState() !=
-         gridDynSimulation::gridState_t::
-             INITIALIZED)) {  // something possibly went wrong in the initial setup try a full reinitialization
+         gridDynSimulation::gridState_t::INITIALIZED)) {  // something possibly went wrong in the
+                                                          // initial setup try a full
+                                                          // reinitialization
         sim->reInitpFlow(solver->getSolverMode(), change_code::state_count_change);
         return (attempt_number > 3) ? recovery_return_codes::out_of_options :
                                       recovery_return_codes::more_options;

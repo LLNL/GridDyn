@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "outputEstimator.h"
 
@@ -59,5 +59,5 @@ namespace fmi {
         return diff_large_enough && scaled_error_large_enough;
     }
 
-}  //namespace fmi
-}  //namespace griddyn
+}  // namespace fmi
+}  // namespace griddyn

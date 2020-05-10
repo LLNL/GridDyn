@@ -2,9 +2,10 @@
 Copyright (C) 2017, Battelle Memorial Institute
 All rights reserved.
 
-This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute;
-the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence
-Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle
+Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for
+Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence
+Livermore National Security, LLC.
 */
 
 /*
@@ -68,4 +69,4 @@ void zmqSocketDescriptor::modifySocket(zmq::socket_t& sock) const
     }
 }
 
-}  //namespace zmqlib
+}  // namespace zmqlib

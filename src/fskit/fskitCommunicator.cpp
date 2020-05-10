@@ -1,5 +1,5 @@
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fskitCommunicator.h"
 
@@ -79,8 +79,9 @@ void FskitCommunicator::ProcessEventMessage(const fskit::EventMessage& eventMess
 
     std::string name = getName();
 
-    //using lambda capture to move the message to the lambda
-    // unique ptr capture with message{std::move(m)} failed on gcc 4.9.3; build shared and capture the shared ptr.
+    // using lambda capture to move the message to the lambda
+    // unique ptr capture with message{std::move(m)} failed on gcc 4.9.3; build shared and capture
+    // the shared ptr.
     auto event = std::make_unique<griddyn::functionEventAdapter>([this, message]() {
         receive(0, getName(), message);
         return griddyn::change_code::no_change;
@@ -117,7 +118,8 @@ void FskitCommunicator::doTransmit(std::shared_ptr<griddyn::commMessage> message
 
     // XXX: The time increment needs to be retrieved from somewhere. Griddyn XML file?
     fskit::Time increment(1e7);  // 1/100 of a second, in nanoseconds
-        // Think about what this delay is representing: microprocessor data transfer to comm layer, etc.
+                                 // Think about what this delay is representing: microprocessor data
+                                 // transfer to comm layer, etc.
 
     auto msg = message->to_datastring();
 

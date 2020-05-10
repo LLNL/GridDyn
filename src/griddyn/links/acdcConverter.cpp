@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "acdcConverter.h"
 
@@ -124,8 +124,8 @@ namespace links {
         prevTime = time;
     }
 
-    // it may make more sense to have the dc bus as bus 1 but then the equations wouldn't be symmetric with the the
-    // rectifier
+    // it may make more sense to have the dc bus as bus 1 but then the equations wouldn't be
+    // symmetric with the the rectifier
     void acdcConverter::updateBus(gridBus* bus, index_t /*busnumber*/)
     {
         if (dynamic_cast<dcBus*>(bus) != nullptr) {
@@ -659,11 +659,13 @@ namespace links {
         /*
   if (type == mode_t::inverter)
     {
-      printf ("inv sid=%d P1=%f P2=%f Q1=%f\n", linkInfo.seqID, linkFlows.P1, linkFlows.P2, linkFlows.Q1);
+      printf ("inv sid=%d P1=%f P2=%f Q1=%f\n", linkInfo.seqID, linkFlows.P1, linkFlows.P2,
+linkFlows.Q1);
     }
   else
     {
-      printf ("rect sid=%d P1=%f P2=%f Q1=%f\n", linkInfo.seqID, linkFlows.P1, linkFlows.P2, linkFlows.Q1);
+      printf ("rect sid=%d P1=%f P2=%f Q1=%f\n", linkInfo.seqID, linkFlows.P1, linkFlows.P2,
+linkFlows.Q1);
     }
 *     */
     }

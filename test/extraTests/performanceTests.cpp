@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "../testHelper.h"
 #include "gmlc/utilities/vectorOps.hpp"
@@ -89,7 +89,8 @@ BOOST_AUTO_TEST_CASE(performance_tests_scaling_pFlow)
         3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  14,  16,  18,  20,  24,  28,
         32,  36,  40,  45,  50,  56,  60,  66,  70,  74,  80,  84,  86,  88,  90,  92,
         100, 110, 120, 132, 136, 140, 148, 156, 164, 168, 172, 180, 188, 196, 204, 212,
-        218, 220, 224, 230, 240, 244, 250, 260, 270, 318, 340, 360, 400, /*450, 500, 550, 600, 720,800*/
+        218, 220, 224, 230, 240, 244, 250, 260, 270, 318, 340, 360, 400, /*450, 500, 550, 600,
+                                                                            720,800*/
     };
     int numLoops = 1;
     for (int rr = 0; rr < numLoops; ++rr) {

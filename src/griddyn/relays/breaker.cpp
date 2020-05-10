@@ -347,8 +347,8 @@ std::string commType;
                 assert(!std::isnan(resid[offset]));
             }
 
-            // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD.time, I1, offset, 1.0 / (recloserTap / temp +
-            // minClearingTime),sD.state[offset]);
+            // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD.time, I1, offset, 1.0 / (recloserTap /
+            // temp + minClearingTime),sD.state[offset]);
         } else if (stateSize(sMode) > 0) {
             auto offset = offsets.getDiffOffset(sMode);
             resid[offset] = sD.dstate_dt[offset];

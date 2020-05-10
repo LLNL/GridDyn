@@ -30,14 +30,15 @@ class coreObject;
 const double resid_check_tol = 1e-5;
 const double jac_check_tol = 1e-5;
 /** @brief function check on the Jacobian
-  function does a comparison between the computed Jacobian via the jacobianElements function call and a numerically
-calculated version from the residual,  It will not check Jacobian elements dependent on other state derivatives
-This function is mostly useful for diagnosing problems and is used throughout the test suite
+  function does a comparison between the computed Jacobian via the jacobianElements function call
+and a numerically calculated version from the residual,  It will not check Jacobian elements
+dependent on other state derivatives This function is mostly useful for diagnosing problems and is
+used throughout the test suite
 @param[in] gds the gridDynSimulation object to test
 @param[in] queryMode the solverMode to check the Jacobian for
 @param[in] jacTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the
-Jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch
+on the Jacobian check
 @return the number of mismatches
 */
 int JacobianCheck(gridDynSimulation* gds,
@@ -50,8 +51,8 @@ int JacobianCheck(gridDynSimulation* gds,
 @param[in] gds the griddynSimulation object to test
 @param[in] sMode the solverMode to check the residual
 @param[in] residTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the
-Jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch
+on the Jacobian check
 @return the number of mismatches
 */
 int residualCheck(gridDynSimulation* gds,
@@ -64,8 +65,8 @@ int residualCheck(gridDynSimulation* gds,
 @param[in] time the time to check the residual
 @param[in] sMode the solverMode to check the residual
 @param[in] residTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the
-Jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch
+on the Jacobian check
 @return the number of mismatches
 */
 int residualCheck(gridDynSimulation* gds,
@@ -113,7 +114,8 @@ void jacobianAnalysis(matrixData<double>& md,
                       int level);
 
 /** @brief check object equivalence
-@details checks if the objects are equivalent in function and if instructed spits out messages of the differences
+@details checks if the objects are equivalent in function and if instructed spits out messages of
+the differences
 @param[in] obj1 the first object to compare
 @param[in] obj2 the second object to compare
 @param[in] printMessage bool indicating that messages should be printed
@@ -123,8 +125,8 @@ bool checkObjectEquivalence(const coreObject* obj1,
                             const coreObject* obj2,
                             bool printMessage = true);
 
-/** @brief check the state sizes and print out state size information in a nice format for each object in a
-hierarchy
+/** @brief check the state sizes and print out state size information in a nice format for each
+object in a hierarchy
 @param[in] comp the component to print the state sizes for
 @param[in] the solver mode of the states to print
 */

@@ -72,7 +72,8 @@ coreObject* Relay::clone(coreObject* obj) const
     // clone the conditions
     for (index_t kk = 0; kk < static_cast<index_t>(conditions.size()); ++kk) {
         if (static_cast<index_t>(nobj->conditions.size()) <= kk) {
-            // the other things which depend on this are being duplicated later so just use push_back
+            // the other things which depend on this are being duplicated later so just use
+            // push_back
             nobj->conditions.emplace_back(conditions[kk]->clone());
         } else {
             conditions[kk]->cloneTo(nobj->conditions[kk].get());
@@ -81,7 +82,8 @@ coreObject* Relay::clone(coreObject* obj) const
     // clone the actions
     for (index_t kk = 0; kk < static_cast<index_t>(actions.size()); ++kk) {
         if (static_cast<index_t>(nobj->actions.size()) <= kk) {
-            // the other things which depend on this are being duplicated later so just use push_back
+            // the other things which depend on this are being duplicated later so just use
+            // push_back
             nobj->actions.emplace_back(actions[kk]->clone());
         } else {
             actions[kk]->cloneTo(nobj->actions[kk].get());
@@ -122,9 +124,8 @@ void Relay::add(std::shared_ptr<Condition> gc)
 {
     conditions.push_back(std::move(gc));
     actionTriggers.resize(conditions.size());
-    actionDelays.resize(
-        conditions
-            .size());  //!< the periods of time in which the condition must be true for an action to occur
+    actionDelays.resize(conditions.size());  //!< the periods of time in which the condition must be
+                                             //!< true for an action to occur
     cStates.resize(conditions.size(),
                    condition_status_t::active);  //!< a vector of states for the conditions
     conditionTriggerTimes.resize(
@@ -414,8 +415,8 @@ void Relay::setFlag(const std::string& flag, bool val)
 
 void Relay::updateA(coreTime time)
 {
-    auto ncond =
-        condChecks;  // the condition triggers may change the number of conditions so the array needs to
+    auto ncond = condChecks;  // the condition triggers may change the number of conditions so the
+                              // array needs to
     // be copied first
     condChecks.clear();
     nextUpdateTime = maxTime;

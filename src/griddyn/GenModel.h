@@ -23,7 +23,8 @@ class gridBus;
 
 /** @brief model simulation implementing a generator model into GridDyn
  the GenModel implements a very basic generator model with 4 states the real and reactive
-currents as algebraic states and the generator rotational speed and angle otherwise known as the second order model
+currents as algebraic states and the generator rotational speed and angle otherwise known as the
+second order model
 */
 class GenModel: public gridSubModel {
   public:
@@ -33,10 +34,11 @@ class GenModel: public gridSubModel {
 
         use_saturation_flag =
             object_flag2,  //!< flag indicating that the simulation should use a saturation model
-        use_speed_field_adjustment =
-            object_flag3,  //!< flag indicating that the simulation should use a speed field adjustment
+        use_speed_field_adjustment = object_flag3,  //!< flag indicating that the simulation should
+                                                    //!< use a speed field adjustment
         use_frequency_impedance_correction =
-            object_flag4,  //!< flag indicating that the model should use frequency impedance corrections
+            object_flag4,  //!< flag indicating that the model should use frequency impedance
+                           //!< corrections
         internal_frequency_calculation = object_flag5,
         at_angle_limits = object_flag6,
     };

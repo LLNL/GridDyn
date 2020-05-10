@@ -1,15 +1,16 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "fncsTest.h"
 
@@ -33,7 +34,7 @@ bool timeConversionCheck()
 
     return (std::abs(val - ret) < 0.0000001);
 }
-//test complex number conversions to strings
+// test complex number conversions to strings
 #ifdef USE_DUMMY_FNCS
 bool testComplexConversion()
 {
@@ -84,7 +85,7 @@ bool testComplexConversion()
     return true;
 }
 
-//test the FNCS source object
+// test the FNCS source object
 bool testFNCSsource()
 {
     fncs::clear();
@@ -120,7 +121,7 @@ bool testFNCSsource()
     src->timestep(3.5, noInputs, cLocalbSolverMode);
     double val = src->getOutput(0);
     if (std::abs(src->getOutput(0) - 7.5) >
-        0.0000001)  //checking if interpolating is working properly
+        0.0000001)  // checking if interpolating is working properly
     {
         std::cout << "predictive operation failed\n";
         return false;
@@ -130,7 +131,7 @@ bool testFNCSsource()
     src->timestep(4.2, noInputs, cLocalbSolverMode);
     val = src->getOutput(0);
     if (std::abs(src->getOutput(0) - 7.0) >
-        0.0000001)  //checking if interpolating is working properly
+        0.0000001)  // checking if interpolating is working properly
     {
         std::cout << "step wise advancement failed\n";
         return false;
@@ -143,14 +144,14 @@ bool testFNCSsource()
 
     val = src->getOutput(0);
     if (std::abs(src->getOutput(0) - 6.7) >
-        0.0000001)  //checking if interpolating is working properly
+        0.0000001)  // checking if interpolating is working properly
     {
         std::cout << "interpolation failed\n";
         return false;
     }
     return true;
 }
-//test the FNCS load object
+// test the FNCS load object
 bool testFNCSload()
 {
     fncs::clear();

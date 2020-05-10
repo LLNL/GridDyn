@@ -17,7 +17,7 @@
 namespace griddyn {
 namespace solvers {
     /** @brief SolverInterface interfacing to the SUNDIALS IDA solver
- */
+     */
     class idaInterface: public sundialsInterface {
       public:
         count_t icCount = 0;  //!< the number of times the initical condition function was called

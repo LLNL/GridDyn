@@ -154,7 +154,8 @@ namespace sources {
         return rval;
     }
 
-    // void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+    // void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode
+    // &sMode);
 
     void blockSource::residual(const IOdata& inputs,
                                const stateData& sD,

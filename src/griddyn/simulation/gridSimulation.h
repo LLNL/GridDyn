@@ -45,9 +45,10 @@ class functionEventAdapter;
 
 /** @brief Grid simulation object
  GridSimulation is a base simulation class its intention is to handle some of the basic
-simulation bookkeeping tasks that would be common to all simulations in GridDyn including things like
-logging, errors,  recording, and a few other topics.  Doesn't really do anything much as far as simulating goes
-the class isn't abstract but it is intended to be built upon for more usable simulation objects
+simulation bookkeeping tasks that would be common to all simulations in GridDyn including things
+like logging, errors,  recording, and a few other topics.  Doesn't really do anything much as far as
+simulating goes the class isn't abstract but it is intended to be built upon for more usable
+simulation objects
 */
 class gridSimulation: public Area {
   public:
@@ -57,16 +58,16 @@ class gridSimulation: public Area {
         HALTED = -2,  //!< the system is halted for some reason
         GD_ERROR = -1,  //!< the system has an error
         STARTUP = 0,  //!< the system is starting up either loaded or unloaded
-        INITIALIZED =
-            1,  //!< the system has completed a power flow initialization step and is ready to proceed to
+        INITIALIZED = 1,  //!< the system has completed a power flow initialization step and is
+                          //!< ready to proceed to
         //! power flow calculations
         POWERFLOW_COMPLETE = 2,  //!< the system has completed a power flow calculation successfully
         DYNAMIC_INITIALIZED = 3,  //!< the system has completed a dynamic initialization step
         DYNAMIC_COMPLETE =
             4,  //!< the system has completed a dynamic system calculation and advanced to the
         //! desired time successfully
-        DYNAMIC_PARTIAL =
-            5,  //!< the system has completed a dynamic system calculation but has not reached the desired time
+        DYNAMIC_PARTIAL = 5,  //!< the system has completed a dynamic system calculation but has not
+                              //!< reached the desired time
     };
     print_level consolePrintLevel =
         print_level::summary;  //!< logging level for printing to the console
@@ -92,7 +93,7 @@ class gridSimulation: public Area {
         gridState_t::STARTUP;  //!< the system state keeps track of which state the solver is in
     int errorCode =
         GS_NO_ERROR;  //!< for storage of an ERROR code if one exists (intended to be expandable to
-        //! children objects so using int instead of enum)
+    //! children objects so using int instead of enum)
     count_t alertCount = 0;  //!< count the number of alerts
     count_t warnCount = 0;  //!<  count the number of warnings from objects
     count_t errorCount = 0;  //!< count the number of logged warnings
@@ -106,8 +107,8 @@ class gridSimulation: public Area {
     coreTime timeReturn = timeZero;  //!< [s]  time returned by the solver
     coreTime nextStopTime = negTime;  //!< next time to stop the dynamic Simulation
 
-    coreTime minUpdateTime = coreTime(
-        0.0001);  //!< minimum time period to go between updates; for the hybrid simultaneous partitioned solution
+    coreTime minUpdateTime = coreTime(0.0001);  //!< minimum time period to go between updates; for
+                                                //!< the hybrid simultaneous partitioned solution
     coreTime maxUpdateTime = maxTime;  //!<(s) max time period to go between updates
     double absTime = 0;  //!< [s] seconds in unix time of the system start time;
 
@@ -197,14 +198,14 @@ class gridSimulation: public Area {
     virtual void log(coreObject* object, print_level level, const std::string& message) override;
 
     /** @brief save all the recorder data to files
-     all the recorders have files associated with them that get automatically saved at certain points this function
-    forces them to do a save operation*/
+     all the recorders have files associated with them that get automatically saved at certain
+    points this function forces them to do a save operation*/
     void saveRecorders();
 
     /**
      * @brief Gets the current simulation time.
-     @details currentTime is atomic and can be used in a multithreaded context to observe the current progress of
-     an asyncrhonously running dynamic simulation
+     @details currentTime is atomic and can be used in a multithreaded context to observe the
+     current progress of an asyncrhonously running dynamic simulation
      * @return a coreTime representing the current simulation time.
 
      */
@@ -243,8 +244,8 @@ class gridSimulation: public Area {
     void setLogger(std::function<void(int, const std::string&)> loggingFunction);
 };
 
-/** @brief find an object that has the same properties as obj1 located int the tree from src in the tree given by
-sec
+/** @brief find an object that has the same properties as obj1 located int the tree from src in the
+tree given by sec
 @param[in] obj1  the object to search for
 @param[in] src  the tree the current object is associated with
 @param[in] sec the tree to do the search in

@@ -18,7 +18,7 @@
 namespace griddyn {
 namespace solvers {
     /** @brief SolverInterface interfacing to the SUNDIALS cvode solver
- */
+     */
     class cvodeInterface: public sundialsInterface {
       public:
         count_t icCount = 0;  //!< total number of initial condition calls

@@ -357,8 +357,8 @@ namespace loads {
             double Te = dst[erppD] * ast[irA] + dst[emppD] * ast[imA];
             dv[slipD] = (mechPower(slip) - Te) / (2 * H);
         }
-        // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD.time, slip,mechPower(slip), Te,dv[0] );
-        // Edp and Eqp
+        // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD.time, slip,mechPower(slip), Te,dv[0]
+        // ); Edp and Eqp
         dv[erpD] =
             systemBaseFrequency * slip * dst[empD] - (dst[erpD] + (x0 - xp) * ast[imA]) / T0p;
         dv[empD] =
@@ -473,8 +473,9 @@ namespace loads {
         md.assign(refDiff + 2, refDiff + 2, -1 / T0p - cj);
 
         // Erpp and Empp
-        // dv[3] = -systemBaseFrequency*slip*(dst[2] - dst[4]) + ddt[1] - (dst[1] - dst[4] - (xp - xpp)*ast[1]) / T0pp;
-        // dv[4] = systemBaseFrequency*slip*(dst[1] - dst[3]) + ddt[2] - (dst[2] - dst[3] + (xp - xpp)*ast[0]) / T0pp;
+        // dv[3] = -systemBaseFrequency*slip*(dst[2] - dst[4]) + ddt[1] - (dst[1] - dst[4] - (xp -
+        // xpp)*ast[1]) / T0pp; dv[4] = systemBaseFrequency*slip*(dst[1] - dst[3]) + ddt[2] -
+        // (dst[2] - dst[3] + (xp - xpp)*ast[0]) / T0pp;
         md.assign(refDiff + 3, refAlg + 1, (xp - xpp) / T0pp);
         md.assign(refDiff + 3, refDiff, -systemBaseFrequency * (dst[2] - dst[4]));
         md.assign(refDiff + 3, refDiff + 1, -1 / T0pp + cj);

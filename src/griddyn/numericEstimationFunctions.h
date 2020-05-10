@@ -25,9 +25,10 @@ class stateData;
 class solverMode;
 
 /**
-*@brief numerically compute the partial derivatives of the internal states with respect to inputs and other
-internal states
-@details numerically computes the elements of the Jacobian matrix of the internal states of the given object
+*@brief numerically compute the partial derivatives of the internal states with respect to inputs
+and other internal states
+@details numerically computes the elements of the Jacobian matrix of the internal states of the
+given object
 @param[in] obj the object to compute the partial derivatives for
 @param[in] inputs the inputs for the secondary object
 * @param[in] sD the current state data for the simulation

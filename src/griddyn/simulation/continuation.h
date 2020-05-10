@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -39,7 +39,7 @@ class parameterSequence {
 
 class continuationSequence {
   public:
-    static int contCount;  //static variable counting the number of created lines
+    static int contCount;  // static variable counting the number of created lines
     std::string name;
     int id;
     std::vector<std::shared_ptr<parameterSequence>>
@@ -54,4 +54,4 @@ class continuationSequence {
     void step(int StepNumber);
 };
 
-}  //namespace griddyn
+}  // namespace griddyn

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // headers
 #include "subsystem.h"
@@ -37,8 +37,8 @@ subsystem::subsystem(const std::string& objName): Link(objName)
     cterm[0] = 1;
     cterm[1] = 2;
     subarea.addOwningReference();
-    addSubObject(
-        &subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
+    addSubObject(&subarea);  // add the subArea to the subObject list to take advantage of the code
+                             // in gridComponent.
 }
 
 subsystem::subsystem(count_t terminals, const std::string& objName): Link(objName)
@@ -52,8 +52,8 @@ subsystem::subsystem(count_t terminals, const std::string& objName): Link(objNam
     }
 
     subarea.addOwningReference();
-    addSubObject(
-        &subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
+    addSubObject(&subarea);  // add the subArea to the subObject list to take advantage of the code
+                             // in gridComponent.
 }
 
 coreObject* subsystem::clone(coreObject* obj) const
@@ -474,8 +474,8 @@ double subsystem::getTotalImpedance(id_type_t busId) const
     for (index_t kk = 0; kk < m_terminals; ++kk) {
         if ((busId == kk + 1) || (busId == terminalBus[kk]->getID())) {
             double vp = terminalBus[kk]->getVoltage();
-            // printf("id1 impedance=%f\n", signn(linkInfo.P1 + linkInfo.Q1)*(linkInfo.v1*linkInfo.v1) /
-            // std::hypot(linkInfo.P1, linkInfo.Q1));
+            // printf("id1 impedance=%f\n", signn(linkInfo.P1 +
+            // linkInfo.Q1)*(linkInfo.v1*linkInfo.v1) / std::hypot(linkInfo.P1, linkInfo.Q1));
             double val = signn(Pout[kk] + Qout[kk]) * (vp * vp) / std::hypot(Pout[kk], Qout[kk]);
             return (std::isnormal(val) ? val : kBigNum);
         }

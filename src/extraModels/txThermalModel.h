@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef TX_THERMAL_MODEL_H_
 #define TX_THERMAL_MODEL_H_
@@ -18,7 +18,7 @@
 namespace griddyn {
 namespace extra {
     /** @brief basic thermal model of a transformer
-*/
+     */
     class txThermalModel: public sensor {
       public:
         enum thermal_model_flags {
@@ -33,7 +33,7 @@ namespace extra {
         double DTtor = 45.0;  //!<[C] Oil rise temp at rated current
         double Tgr = 5.0 * 60.0;  //!<[s] winding time constant
         double mp_LR = 6.5;  //!< Loss Ratio
-        double mp_n = 1.0;  //!<oil exponent
+        double mp_n = 1.0;  //!< oil exponent
         double mp_m = 1.0;  //!< winding exponent
         double ambientTemp = 20;  //!<[C] ambient temperature in C
         double dTempdt = 0.0;  //!<[C/s] rate of change of ambient temperature
@@ -71,6 +71,6 @@ namespace extra {
         virtual void updateA(coreTime time) override;
     };
 
-}  //namespace extra
-}  //namespace griddyn
+}  // namespace extra
+}  // namespace griddyn
 #endif

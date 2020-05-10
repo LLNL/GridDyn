@@ -69,7 +69,8 @@ T SwigValueInit()
 #        define SWIGTEMPLATEDISAMBIGUATOR template
 #    elif defined(__HP_aCC)
 /* Needed even with `aCC -AA' when `aCC -V' reports HP ANSI C++ B3910B A.03.55 */
-/* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55 */
+/* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55
+ */
 #        define SWIGTEMPLATEDISAMBIGUATOR template
 #    else
 #        define SWIGTEMPLATEDISAMBIGUATOR
@@ -190,7 +191,8 @@ T SwigValueInit()
 #include <octave/version.h>
 
 // Macro for enabling features which require Octave version >= major.minor.patch
-// - Use (OCTAVE_PATCH_VERSION + 0) to handle both '<digit>' (released) and '<digit>+' (in development) patch numbers
+// - Use (OCTAVE_PATCH_VERSION + 0) to handle both '<digit>' (released) and '<digit>+' (in
+// development) patch numbers
 #define SWIG_OCTAVE_PREREQ(major, minor, patch)                                                    \
     ((OCTAVE_MAJOR_VERSION << 16) + (OCTAVE_MINOR_VERSION << 8) + (OCTAVE_PATCH_VERSION + 0) >=    \
      ((major) << 16) + ((minor) << 8) + (patch))
@@ -209,7 +211,8 @@ T SwigValueInit()
 #            define OCTAVE_PATCH_VERSION 0
 #        else
 
-// Hack to distinguish between Octave 3.2 and earlier versions, before OCTAVE_API_VERSION_NUMBER existed
+// Hack to distinguish between Octave 3.2 and earlier versions, before OCTAVE_API_VERSION_NUMBER
+// existed
 #            define ComplexLU __ignore
 #            include <octave/CmplxLU.h>
 #            undef ComplexLU
@@ -1386,8 +1389,8 @@ class octave_swig_type: public octave_base_value {
                 int newmemory = 0;
                 *vptr = SWIG_TypeCast(tc, types[j].second.ptr, &newmemory);
                 if (newmemory == SWIG_CAST_NEW_MEMORY) {
-                    assert(
-                        _own); /* badly formed typemap which will lead to a memory leak - it must set and use own to delete *ptr */
+                    assert(_own); /* badly formed typemap which will lead to a memory leak - it must
+                                     set and use own to delete *ptr */
                     if (_own) *_own = *_own | SWIG_CAST_NEW_MEMORY;
                 }
             }
@@ -8178,10 +8181,10 @@ SWIGRUNTIME void SWIG_InitializeModule(void* clientdata)
 }
 
 /* This function will propagate the clientdata field of type to
-* any new swig_type_info structures that have been added into the list
-* of equivalent types.  It is like calling
-* SWIG_TypeClientData(type, clientdata) a second time.
-*/
+ * any new swig_type_info structures that have been added into the list
+ * of equivalent types.  It is like calling
+ * SWIG_TypeClientData(type, clientdata) a second time.
+ */
 SWIGRUNTIME void SWIG_PropagateClientData(void)
 {
     size_t i;

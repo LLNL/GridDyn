@@ -16,7 +16,8 @@
 namespace griddyn {
 namespace relays {
     /** class implementing a protective relay for load objects
-the protective systems include underfrequency, undervoltage, and a return time so the load automatically recovers
+the protective systems include underfrequency, undervoltage, and a return time so the load
+automatically recovers
 */
     class loadRelay: public Relay {
       public:
@@ -29,8 +30,8 @@ the protective systems include underfrequency, undervoltage, and a return time s
         double cutoutFrequency = 0.0;  //!<[puHz] low frequency trigger for load
         coreTime voltageDelay = timeZero;  //!<[s]  the delay on the voltage trip
         coreTime frequencyDelay = timeZero;  //!<[s] the delay on the frequency tripping
-        coreTime offTime =
-            maxTime;  //!<[s] the time before the load comes back on line if the trip cause has been corrected
+        coreTime offTime = maxTime;  //!<[s] the time before the load comes back on line if the trip
+                                     //!<cause has been corrected
       public:
         explicit loadRelay(const std::string& objName = "loadRelay_$");
         virtual coreObject* clone(coreObject* obj = nullptr) const override;

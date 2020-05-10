@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "braid_driver.h"
 
 #include "../paradae/common/Timer.h"
@@ -804,7 +804,7 @@ namespace braid {
             braid_AccessStatusGetT(astatus, &t);
 
             if (t == app->ode->GetEq()->GetTmax()) {
-                //fprintf(stderr, "\n\n  Braid: Saving final solution\n\n");
+                // fprintf(stderr, "\n\n  Braid: Saving final solution\n\n");
                 my_Clone(app, u, &(app->solution_tfinal));
             }
 
@@ -823,8 +823,8 @@ namespace braid {
             int level, caller;
             braid_AccessStatusGetLevel(astatus, &level);
             braid_AccessStatusGetCallingFunction(astatus, &caller);
-            //cout << "Call access on lvl " << level << " from ";
-            //cout << endl;
+            // cout << "Call access on lvl " << level << " from ";
+            // cout << endl;
             app->prevlvl = level;
             if (app->ode
                     ->PrintAllITERSolution())  // && level == 0 && caller == braid_ASCaller_FAccess)

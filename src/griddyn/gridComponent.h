@@ -26,15 +26,17 @@ namespace griddyn {
 class violation;
 
 /** @brief base object for gridDynSimulations
- * the basic object for creating a power system encapsulating some common functions and data that is needed by all
- *objects in the simulation and defining some common methods for use by all objects.  This object is not really
- *intended to be instantiated directly and is mostly a common interface to inheriting objects @see gridPrimary,
- *@see gridSecondary, and @see gridSubModel as it encapsulated common functionality between those objects
+ * the basic object for creating a power system encapsulating some common functions and data that is
+ *needed by all objects in the simulation and defining some common methods for use by all objects.
+ *This object is not really intended to be instantiated directly and is mostly a common interface to
+ *inheriting objects @see gridPrimary,
+ *@see gridSecondary, and @see gridSubModel as it encapsulated common functionality between those
+ *objects
  **/
 class gridComponent: public coreObject {
   protected:
-    std::bitset<64>
-        opFlags;  //!< operational flags these flags are designed to be normal false @see ::operation_flags
+    std::bitset<64> opFlags;  //!< operational flags these flags are designed to be normal false
+                              //!< @see ::operation_flags
     offsetTable offsets;  //!< a table of offsets for the different solver modes
     count_t m_inputSize = 0;  //!< the required size of the inputs input
     count_t m_outputSize = 0;  //!< the number of outputs the subModel produces
@@ -56,19 +58,19 @@ class gridComponent: public coreObject {
     virtual coreObject* clone(coreObject* obj = nullptr) const override;
     /** @brief update internal object linkages to use objects from a new tree
     @details after a clone call on a full simulation
-    it is possible that there could be internal linkages inside of objects still pointing to the original tree
-    This function is intended to allow an object to update any internal object pointers so they point appropriately
-    to new object inside the new tree
-    The call should really only be initiated by a root object
+    it is possible that there could be internal linkages inside of objects still pointing to the
+    original tree This function is intended to allow an object to update any internal object
+    pointers so they point appropriately to new object inside the new tree The call should really
+    only be initiated by a root object
     @param[in] newRoot the root of the new simulation tree
     */
     virtual void updateObjectLinkages(coreObject* newRoot);
 
     /** @brief initialize object for power flow part A
-    after part A of the initialization the object should know how many states it has as part of the powerflow,
-    before this calling the load sizes powerflow related solverModes will be unspecified. This function is a
-    wrapper around the pFlowObjectInitializeA function which does the local object init this function handles any
-    global setup and makes sure all the flags are set properly
+    after part A of the initialization the object should know how many states it has as part of the
+    powerflow, before this calling the load sizes powerflow related solverModes will be unspecified.
+    This function is a wrapper around the pFlowObjectInitializeA function which does the local
+    object init this function handles any global setup and makes sure all the flags are set properly
     @param[in] time0 the time0 at which the power flow will take place
     @param[in] flags  any flags indicating how the initialization or execution will take place
     @throw an error if something went wrong
@@ -76,28 +78,29 @@ class gridComponent: public coreObject {
     virtual void pFlowInitializeA(coreTime time0, std::uint32_t flags);
 
     /** @brief initialize object for power flow part B
-    partB is to actually initialize the object so an initial guessState will be meaningful,  many objects just do
-    everything in part A if there is no need to separate the functions This function is a wrapper around the
-    pFlowObjectInitializeB function which does the local object init this function handles any global setup and
-    makes sure all the flags are set properly
+    partB is to actually initialize the object so an initial guessState will be meaningful,  many
+    objects just do everything in part A if there is no need to separate the functions This function
+    is a wrapper around the pFlowObjectInitializeB function which does the local object init this
+    function handles any global setup and makes sure all the flags are set properly
     */
     virtual void pFlowInitializeB();
 
     /** @brief initialize object for dynamic simulation part A
-    after part A of the initialization the object should know how many states it has as part of the dynamic
-    simulation, before this calling the load sizes dynamic related solverModes will be unspecified. This function
-    is a wrapper around the dynObjectInitializeA function which does the local object init this function handles
-    any global setup and makes sure all the flags are set properly
+    after part A of the initialization the object should know how many states it has as part of the
+    dynamic simulation, before this calling the load sizes dynamic related solverModes will be
+    unspecified. This function is a wrapper around the dynObjectInitializeA function which does the
+    local object init this function handles any global setup and makes sure all the flags are set
+    properly
     @param[in] time0 the time0 at which the power flow will take place
     @param[in] flags  any flags indicating how the initialization or execution will take place
     */
     virtual void dynInitializeA(coreTime time0, std::uint32_t flags);
 
     /** @brief initialize object for dynamic simulation part B
-    partB is to actually initialize the object so an initial guessState will be meaningful,  many objects just do
-    everything in part A if there is no need to separate the functions This function is a wrapper around the
-    dynObjectInitializeB function which does the local object init this function handles any global setup and makes
-    sure all the flags are set properly
+    partB is to actually initialize the object so an initial guessState will be meaningful,  many
+    objects just do everything in part A if there is no need to separate the functions This function
+    is a wrapper around the dynObjectInitializeB function which does the local object init this
+    function handles any global setup and makes sure all the flags are set properly
     @param[in]  desiredOutput the desired output of the gridPrimary
     */
     virtual void
@@ -138,18 +141,18 @@ see gridComponent::dynInitializeA for more details
 
     virtual void
         set(const std::string& param, double val, units::unit unitType = units::defunit) override;
-    /** check if the parameter being set is for a subobject, determine which sub object and perform the set
-     * operation*/
+    /** check if the parameter being set is for a subobject, determine which sub object and perform
+     * the set operation*/
     bool subObjectSet(const std::string& param, double val, units::unit unitType);
-    /** check if the parameter being set is for a subobject, determine which sub object and perform the set
-     * operation*/
+    /** check if the parameter being set is for a subobject, determine which sub object and perform
+     * the set operation*/
     bool subObjectSet(const std::string& param, const std::string& val);
-    /** check if the parameter being set is for a subobject, determine which sub object and perform the setFlag
-     * operation*/
+    /** check if the parameter being set is for a subobject, determine which sub object and perform
+     * the setFlag operation*/
     bool subObjectSet(const std::string& flag, bool val);
     virtual void setFlag(const std::string& flag, bool val = true) override;
-    /** there are few flags that parents should be able to set in their children, this function allows that to take
-    place
+    /** there are few flags that parents should be able to set in their children, this function
+    allows that to take place
     @param[in] flagID  the numerical location of the flag
     @param[in] val the value to set the flag too
     @param[in] parent the identifier of the parent, it must match the objects parent
@@ -158,8 +161,8 @@ see gridComponent::dynInitializeA for more details
     virtual bool getFlag(const std::string& flag) const override;
     virtual double get(const std::string& param,
                        units::unit unitType = units::defunit) const override;
-    /** check if the parameter being get is for a subobject, determine which sub object and perform the setFlag
-    operation
+    /** check if the parameter being get is for a subobject, determine which sub object and perform
+    the setFlag operation
     @param[in] param the subobject string to query the value of
     @parma[in] unitType the type of units to convert the output to
     @return a value corresponding to the request or a null value
@@ -428,8 +431,8 @@ see gridComponent::dynInitializeA for more details
     /** @brief transfer a computed state to the objects
     @param time -the time the state corresponds to
     @param state -- a double array pointing to the state information
-    @param dstate_dt a double array pointing to the state derivative information (not necessary for states with no
-    corresponding time derivative
+    @param dstate_dt a double array pointing to the state derivative information (not necessary for
+    states with no corresponding time derivative
     @param sMode  -- the solverMode corresponding to the computed state.
     */
     virtual void setState(coreTime time,
@@ -439,8 +442,8 @@ see gridComponent::dynInitializeA for more details
     /** @brief transfer state information from the objects to a vector
     @param time -the time the state corresponds to
     @param[out] state -- a double array pointing to the state information
-    @param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states
-    with no corresponding time derivative
+    @param[out] dstate_dt a double array pointing to the state derivative information (not necessary
+    for states with no corresponding time derivative
     @param sMode  -- the solverMode corresponding to the computed state.
     */
     virtual void
@@ -476,7 +479,8 @@ see gridComponent::dynInitializeA for more details
     /** @brief get the names for all the states
     @param[out] stNames -- the output state names
     @param[in] sMode  -- the solverMode corresponding to the computed state.
-    @param[in] prefix  a string prefix to put before the state names of the object-- intended for cascading calls
+    @param[in] prefix  a string prefix to put before the state names of the object-- intended for
+    cascading calls
     */
     virtual void getStateName(stringVec& stNames,
                               const solverMode& sMode,
@@ -492,8 +496,8 @@ see gridComponent::dynInitializeA for more details
     /** @brief locate a state index based on field name
     @param[in] field the name of the field to search for
     @param[in] sMode the solverMode to find the location for
-    @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not
-    initialized yet(try again later)
+    @return the index of the state  some number if valid  kInvalidLocation if not found,
+    kNullLocation if not initialized yet(try again later)
     */
     virtual index_t findIndex(const std::string& field, const solverMode& sMode) const;
 
@@ -509,14 +513,14 @@ see gridComponent::dynInitializeA for more details
                         double val,
                         units::unit unitType = units::defunit);
     /** @brief get the local state names
-    used within a couple functions to automate the population of the state names and finding of the indices  states
-    should be algebraic states first,  then differential states
+    used within a couple functions to automate the population of the state names and finding of the
+    indices  states should be algebraic states first,  then differential states
     @return a string vector of the local state names
     */
     virtual stringVec localStateNames() const;
     /** @brief get a vector of input Names
-    @details the return data is a vector of vectors of string the first element of each vector is the typical input
-    Name the others are alternatives
+    @details the return data is a vector of vectors of string the first element of each vector is
+    the typical input Name the others are alternatives
     @return a const vector of stringVec containing the names +alternatives for the inputs*/
     virtual const std::vector<stringVec>& inputNames() const;
 
@@ -536,8 +540,8 @@ see gridComponent::dynInitializeA for more details
     /** get the localBaseVoltage*/
     model_parameter baseVoltage() const { return localBaseVoltage; }
     /** @brief get a vector of output Names
-    @details the return data is a vector of vectors of string the first element of each vector is the typical
-    output Name the others are alternatives
+    @details the return data is a vector of vectors of string the first element of each vector is
+    the typical output Name the others are alternatives
     @return a const vector of stringVec containing the names +alternatives for the outputs*/
     virtual const std::vector<stringVec>& outputNames() const;
 
@@ -581,7 +585,8 @@ see gridComponent::dynInitializeA for more details
                             double deriv[],
                             const solverMode& sMode);
     /**
-    *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
+    *@brief compute the partial derivatives of the internal states with respect to inputs and other
+    internal states
     @param[in] inputs the inputs for the secondary object
     * @param[in] sD the current state data for the simulation
     * @param[out] md  the array to store the information in
@@ -596,11 +601,12 @@ see gridComponent::dynInitializeA for more details
 
     // for the stepwise dynamic system
     /** @brief move the object forward in time using local calculations
-    tells the object to progress time to a certain point the sMode is guidance on how to do it not necessarily
-    indicative of a particular solver it is meant as a suggestion not a requirement.
+    tells the object to progress time to a certain point the sMode is guidance on how to do it not
+    necessarily indicative of a particular solver it is meant as a suggestion not a requirement.
     @param[in] time the time to progress to
     @param[in] inputs  the input arguments
-    @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
+    @param[in] sMode the solverMode to give guidance to objects on how to perform internal
+    calculations
     */
     virtual void timestep(coreTime time, const IOdata& inputs, const solverMode& sMode);
 
@@ -638,8 +644,9 @@ see gridComponent::dynInitializeA for more details
 
     /** @brief call any objects that need 2 part execution to allow for parallelism
     do any pre-work for a residual call later in the calculations
-    secondary objects do not allow partial computation like primary objects can so there is no delayed computation
-    calls just the regular call and the primary object will handle delaying action.
+    secondary objects do not allow partial computation like primary objects can so there is no
+    delayed computation calls just the regular call and the primary object will handle delaying
+    action.
     @param[in] inputs  the input arguments
     @param[in] sD the data representing the current state to operate on
     @param[in] sMode the solverMode which is being solved for
@@ -664,9 +671,10 @@ see gridComponent::dynInitializeA for more details
     /**
     *a root has occurred now take action
     * @param[in] time the simulation time the root evaluation takes place
-    @param[in] rootMask a vector of integers representing a rootMask  (only object having a value of 1 in their
-    root locations should actually trigger
-    * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
+    @param[in] rootMask a vector of integers representing a rootMask  (only object having a value of
+    1 in their root locations should actually trigger
+    * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has
+    been found
     * @param[in] sMode the mode the solver is in
     **/
     virtual void rootTrigger(coreTime time,
@@ -675,8 +683,8 @@ see gridComponent::dynInitializeA for more details
                              const solverMode& sMode);
 
     /**
-    *evaluate the root functions and execute trigger from a static state for operation after an initial condition
-    check
+    *evaluate the root functions and execute trigger from a static state for operation after an
+    initial condition check
     * @param[in] time the simulation time the root evaluation takes place
     @param[in] inputs the inputs for the secondary object
     * @param[in] sD the state of the system
@@ -740,8 +748,8 @@ see gridComponent::dynInitializeA for more details
     virtual double getOutput(index_t outputNum = 0) const;
     /**
     *@brief get a single output and location
-    @ details used in cases where the state of one object is used int the computation of another for computation of
-    the Jacobian
+    @ details used in cases where the state of one object is used int the computation of another for
+    computation of the Jacobian
     * @param[in] sMode the mode the solver is in
     @param[in] num the number of the state being requested
     @return the value of the state requested
@@ -749,11 +757,11 @@ see gridComponent::dynInitializeA for more details
     virtual index_t getOutputLoc(const solverMode& sMode, index_t outputNum = 0) const;
     /**
     *@brief get a vector state indices for the output
-    @ details used in cases where the state of one object is used int the computation of another for computation of
-    the Jacobian
+    @ details used in cases where the state of one object is used int the computation of another for
+    computation of the Jacobian
     * @param[in] sMode the mode the solver is in
-    @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the
-    output
+    @return a vector containing  all the outputs locations,  kNullLocation if there is no state
+    representing the output
     **/
     virtual IOlocs getOutputLocs(const solverMode& sMode) const;
 
@@ -773,8 +781,8 @@ see gridComponent::dynInitializeA for more details
 
     /**
     *@brief compute the partial derivatives of the residuals with respect to a parameter
-    @details an object may define some number of key parameters to perform particular calculations on for
-    sensitivity analysis or other calculations
+    @details an object may define some number of key parameters to perform particular calculations
+    on for sensitivity analysis or other calculations
     @param[in] param the index code of the parameter to set in an object
     @param[in] val the updated value of the parameter to use as the basis for the calculations
     @param[in] inputs the inputs for the secondary object

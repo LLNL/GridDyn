@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "randomSource.h"
 
@@ -137,7 +137,8 @@ namespace sources {
         } else if (param == "seed") {
             utilities::gridRandom::setSeed(static_cast<int>(val));
         } else {
-            // I am purposely skipping over the rampLoad the functionality is needed but the access is not
+            // I am purposely skipping over the rampLoad the functionality is needed but the access
+            // is not
             Source::set(param, val, unitType);
         }
     }

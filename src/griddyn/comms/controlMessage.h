@@ -23,7 +23,7 @@
 namespace griddyn {
 namespace comms {
     /** a message type used for requesting control actions to relays and sending values in response
- */
+     */
     class controlMessagePayload: public CommPayload {
       public:
         /** the enumeration of the message types available in control messages*/
@@ -47,8 +47,9 @@ namespace comms {
             CANCEL = BASE_CONTROL_MESSAGE_NUMBER + 22,  //!< cancel a scheduled operation
             CANCEL_SUCCESS = BASE_CONTROL_MESSAGE_NUMBER +
                 24,  //!< acknowledge that the cancel operation was successful
-            CANCEL_FAIL = BASE_CONTROL_MESSAGE_NUMBER +
-                26  //!< respond to a cancel with an indication that the cancel operation was not successful
+            CANCEL_FAIL =
+                BASE_CONTROL_MESSAGE_NUMBER + 26  //!< respond to a cancel with an indication that
+                                                  //!< the cancel operation was not successful
         };
         std::string m_field;  //!< the field in question
         double m_value = 0.0;  //!< the value of the field

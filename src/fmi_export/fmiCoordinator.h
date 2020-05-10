@@ -92,7 +92,8 @@ namespace fmi {
     */
         double getOutput(index_t vr);
 
-        /** get the numerical outputs from the underlying simulation and store them to a local buffer
+        /** get the numerical outputs from the underlying simulation and store them to a local
+    buffer
     @param[in] time the time to get the outputs for
     */
         void updateOutputs(coreTime time);

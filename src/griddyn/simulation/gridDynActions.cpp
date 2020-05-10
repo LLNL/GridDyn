@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "gridDynActions.h"
 
@@ -47,19 +47,16 @@ void gridDynAction::process(const std::string& operation)
         }
     }
     reset();
-    if (sz == 0)  
-    {
+    if (sz == 0) {
         // check if there was no command
         return;
     }
     std::string cmd = convertToLowerCase(ssep[0]);
 
-    if (cmd == "ignore") 
-    {
+    if (cmd == "ignore") {
         // ignore XXXXXX
         command = gd_action_t::ignore;
-    } else if (cmd == "set")  
-    {
+    } else if (cmd == "set") {
         // set parameter(s) value(d)
         if (sz >= 3) {
             command = gd_action_t::set;
@@ -71,8 +68,7 @@ void gridDynAction::process(const std::string& operation)
         } else {
             throw(invalidParameterValue(cmd));
         }
-    } else if (cmd == "setall") 
-    {
+    } else if (cmd == "setall") {
         // setall  objecttype(s) parameter(s) value(d)
         command = gd_action_t::setall;
         if (sz >= 4) {
@@ -86,8 +82,7 @@ void gridDynAction::process(const std::string& operation)
         } else {
             throw(invalidParameterValue(cmd));
         }
-    } else if (cmd == "setsolver") 
-    {
+    } else if (cmd == "setsolver") {
         // setsolver mode(s) solver(s|i)
         command = gd_action_t::setsolver;
         if (sz >= 3) {
@@ -101,8 +96,7 @@ void gridDynAction::process(const std::string& operation)
         } else {
             throw(invalidParameterValue(cmd));
         }
-    } else if (cmd == "print") 
-    {
+    } else if (cmd == "print") {
         // print parameter(s) setstring(s)
         command = gd_action_t::print;
         if (sz >= 3) {
@@ -111,19 +105,16 @@ void gridDynAction::process(const std::string& operation)
         } else {
             throw(invalidParameterValue(cmd));
         }
-    } else if (cmd == "powerflow") 
-    {
+    } else if (cmd == "powerflow") {
         // powerflow
         command = gd_action_t::powerflow;
-    } else if (cmd == "step") 
-    {
+    } else if (cmd == "step") {
         // step solutionType*
         command = gd_action_t::step;
         if (sz > 1) {
             string1 = ssep[1];
         }
-    } else if (cmd == "eventmode")
-    {
+    } else if (cmd == "eventmode") {
         // eventmode tstop*  tstep*
         command = gd_action_t::eventmode;
         if (sz > 1) {
@@ -132,12 +123,10 @@ void gridDynAction::process(const std::string& operation)
                 val_double2 = numeric_conversion(ssep[2], kNullVal);
             }
         }
-    } else if (cmd == "initialize") 
-    {
+    } else if (cmd == "initialize") {
         // initialize
         command = gd_action_t::initialize;
-    } else if (cmd == "dynamic") 
-    {
+    } else if (cmd == "dynamic") {
         // dynamic "dae"|"part"|"decoupled" stoptime(d)* steptime(d)*
         if (sz == 1) {
             command = gd_action_t::dynamicDAE;
@@ -176,16 +165,14 @@ void gridDynAction::process(const std::string& operation)
                 command = gd_action_t::dynamicDAE;
             }
         }
-    } else if (cmd == "dynamicdae") 
-    {
+    } else if (cmd == "dynamicdae") {
         // dynamicdae stoptime(d)*
         command = gd_action_t::dynamicDAE;
 
         if (sz > 1) {
             val_double = numeric_conversion(ssep[1], kNullVal);
         }
-    } else if (cmd == "dynamicpart") 
-    {
+    } else if (cmd == "dynamicpart") {
         // dynamicpart stoptime(d)* steptime(d)*
         command = gd_action_t::dynamicPart;
 
@@ -195,8 +182,7 @@ void gridDynAction::process(const std::string& operation)
                 val_double2 = numeric_conversion(ssep[2], kNullVal);
             }
         }
-    } else if (cmd == "dynamicdecoupled")  
-    {
+    } else if (cmd == "dynamicdecoupled") {
         // dynamicdecoupled stop(d)* step(d)*
         command = gd_action_t::dynamicPart;
 
@@ -206,8 +192,7 @@ void gridDynAction::process(const std::string& operation)
                 val_double2 = numeric_conversion(ssep[2], kNullVal);
             }
         }
-    } else if (cmd == "reset") 
-    {
+    } else if (cmd == "reset") {
         // reset level(i)
         if (sz > 1) {
             auto test_int = numeric_conversion<int>(ssep[1], -435);
@@ -219,8 +204,7 @@ void gridDynAction::process(const std::string& operation)
             val_int = 0;
         }
         command = gd_action_t::reset;
-    } else if (cmd == "iterate") 
-    {
+    } else if (cmd == "iterate") {
         // iterate interval(d)* stoptime(d)*
         command = gd_action_t::iterate;
         if (sz > 1) {
@@ -231,15 +215,14 @@ void gridDynAction::process(const std::string& operation)
         }
     } else if (cmd == "check") {
         // check
-        command = gd_action_t::check; 
+        command = gd_action_t::check;
         if (sz > 1) {
             string1 = ssep[1];
             if (sz > 2) {
                 string2 = ssep[2];
             }
         }
-    } else if (cmd == "run")  
-    {
+    } else if (cmd == "run") {
         // run time(d)*
         if (sz > 1) {
             double test = numeric_conversion(ssep[1], kNullVal);
@@ -251,8 +234,7 @@ void gridDynAction::process(const std::string& operation)
             val_double = kNullVal;
         }
         command = gd_action_t::run;
-    } else if (cmd == "save")  
-    {
+    } else if (cmd == "save") {
         // save subject(s) file(s)
         if (sz > 2) {
             string1 = ssep[1];
@@ -261,8 +243,7 @@ void gridDynAction::process(const std::string& operation)
             throw(invalidParameterValue(cmd));
         }
         command = gd_action_t::save;
-    } else if (cmd == "load")  
-    {
+    } else if (cmd == "load") {
         // load subject(s) file(s)
         if (sz > 2) {
             string1 = ssep[1];
@@ -271,8 +252,7 @@ void gridDynAction::process(const std::string& operation)
             throw(invalidParameterValue("load"));
         }
         command = gd_action_t::load;
-    } else if (cmd == "add") 
-    {
+    } else if (cmd == "add") {
         // add addstring(s)
         if (sz > 1) {
             string1 = ssep[1];
@@ -283,8 +263,7 @@ void gridDynAction::process(const std::string& operation)
             throw(invalidParameterValue("add"));
         }
         command = gd_action_t::add;
-    } else if (cmd == "rollback")  
-    {
+    } else if (cmd == "rollback") {
         // rollback point(s|d)
         command = gd_action_t::rollback;
         if (sz > 1) {
@@ -295,8 +274,7 @@ void gridDynAction::process(const std::string& operation)
         } else {
             string1 = "last";
         }
-    } else if (cmd == "checkpoint") 
-    {
+    } else if (cmd == "checkpoint") {
         // checkpoint name(s)
         command = gd_action_t::checkpoint;
         if (sz > 1) {
@@ -307,9 +285,7 @@ void gridDynAction::process(const std::string& operation)
         } else {
             string1 = "";
         }
-    }
-    else if (cmd == "contingency")  
-    {
+    } else if (cmd == "contingency") {
         // contingency mode|fileName output_file|method
         command = gd_action_t::contingency;
         string1 = ssep[1];

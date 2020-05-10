@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fileInput.h"
 
@@ -94,7 +94,7 @@ namespace readerConfig {
             default_xml_reader = xmlreader::tinyxml2;
         }
     }
-}  //namespace readerConfig
+}  // namespace readerConfig
 
 using namespace readerConfig;
 
@@ -239,8 +239,9 @@ void addToParent(coreObject* objectToAdd, coreObject* parentObject)
     }
 }
 
-// if multiple object with the same name may have been added (parallel transmission lines, generators, etc)
-// sequence through the count to find one that hasn't been used then rename the object and add it.
+// if multiple object with the same name may have been added (parallel transmission lines,
+// generators, etc) sequence through the count to find one that hasn't been used then rename the
+// object and add it.
 void addToParentRename(coreObject* objectToAdd, coreObject* parentObject)
 {
     std::string bname = objectToAdd->getName();
@@ -254,4 +255,4 @@ void addToParentRename(coreObject* objectToAdd, coreObject* parentObject)
     addToParent(objectToAdd, parentObject);
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

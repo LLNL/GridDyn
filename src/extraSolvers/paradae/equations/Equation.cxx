@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "Equation.h"
 
 #include "../math/SVector.h"
@@ -80,7 +80,8 @@ namespace paradae {
         return false;
     }
 
-    // Return true if root found. Return the time of the root, and modifie the state. At the end, glo=ghi
+    // Return true if root found. Return the time of the root, and modifie the state. At the end,
+    // glo=ghi
     bool Equation::CheckUnscheduledRoots(IPoly& P,
                                          Real tlo,
                                          Vector& glo,
@@ -101,7 +102,7 @@ namespace paradae {
                 if (abs(ghi(i)) < tol) {
                     if (roots.dir_root(i) * glo(i) <= 0) {
                         zroot = true;
-                        iroot(i + roots.n_sroots) = (glo(i) > 0) ? -1 : 1;  //TODO check
+                        iroot(i + roots.n_sroots) = (glo(i) > 0) ? -1 : 1;  // TODO check
                     }
                 } else {
                     if (glo(i) * ghi(i) < 0 && glo(i) * roots.dir_root(i) <= 0) {

@@ -27,8 +27,8 @@ class listMaintainer;
 
 /** @brief class implementing a power system area
  the area class acts as a container for other primary objects including areas
-it also acts as focal point for wide area controls such as AGC and can compute other functions and statistics
-across a wide area
+it also acts as focal point for wide area controls such as AGC and can compute other functions and
+statistics across a wide area
 */
 class Area: public gridPrimary {
     friend class listMaintainer;
@@ -36,8 +36,8 @@ class Area: public gridPrimary {
   public:
     /** @brief flags for area operations and control*/
     enum area_flags {
-        reverse_converge =
-            object_flag1,  //!< flag indicating that the area should do a convergence/algebraic loop in reverse
+        reverse_converge = object_flag1,  //!< flag indicating that the area should do a
+                                          //!< convergence/algebraic loop in reverse
         direction_oscillate =
             object_flag2,  //!< flag indicating that the direction of iteration for convergence
         //!< functions should flip every time the function is called
@@ -57,9 +57,10 @@ class Area: public gridPrimary {
     std::vector<gridPrimary*> rootObjects;  //!< list of objects with roots
     std::vector<gridPrimary*> pFlowAdjustObjects;  //!< list of objects with power flow checks
     /** @brief storage location for shared_ptrs to griddyn
-    the direct pointer to the object will get passed to the system but the ownership will be changed so it won't be
-    deleted by the normal means this allows storage of shared_ptrs to modeled objects but also other objects that
-    potentially act as storage containers, do periodic updates, generate alerts or interact with other simulations
+    the direct pointer to the object will get passed to the system but the ownership will be changed
+    so it won't be deleted by the normal means this allows storage of shared_ptrs to modeled objects
+    but also other objects that potentially act as storage containers, do periodic updates, generate
+    alerts or interact with other simulations
     */
     std::vector<coreObject*> objectHolder;  //!< storage location for shared pointers to an object
 
@@ -360,13 +361,15 @@ class Area: public gridPrimary {
     count_t getLinkLoss(std::vector<double>& losses, index_t start = 0) const;
     /** @brief get a vector of generation power from the attached buses
     @param[out] powers the vector to put the bus real power from generators
-    @param[in] start  the index into the vector A to start the generation power values from this area
+    @param[in] start  the index into the vector A to start the generation power values from this
+    area
     @return an index where the last value was placed
     */
     count_t getBusGenerationReal(std::vector<double>& powers, index_t start = 0) const;
     /** @brief get a vector of generation reactive power from the attached buses
     @param[out] powers the vector to put the bus reactive power from generators
-    @param[in] start  the index into the vector A to start the generation power values from this area
+    @param[in] start  the index into the vector A to start the generation power values from this
+    area
     @return an index where the last value was placed
     */
     count_t getBusGenerationReactive(std::vector<double>& powers, index_t start = 0) const;
@@ -378,7 +381,8 @@ class Area: public gridPrimary {
     count_t getBusLoadReal(std::vector<double>& powers, index_t start = 0) const;
     /** @brief get a vector of bus load reactive power from the attached buses
     @param[out] powers the vector to put the bus load reactive power from bus loads
-    @param[in] start  the index into the vector A to start the load reactive power values from this area
+    @param[in] start  the index into the vector A to start the load reactive power values from this
+    area
     @return an index where the last value was placed
     */
     count_t getBusLoadReactive(std::vector<double>& powers, index_t start = 0) const;

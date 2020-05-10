@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 #pragma once
 
 #include "../Exciter.h"
@@ -16,7 +16,7 @@ namespace griddyn {
 namespace exciters {
 
     /** @brief IEEE Type 1 exciter
-*/
+     */
     class ExciterIEEEtype1: public Exciter {
       protected:
         model_parameter Ke = 1.0;  // [pu] self-excited field
@@ -50,7 +50,7 @@ namespace exciters {
                                 const stateData& sD,
                                 double deriv[],
                                 const solverMode& sMode) override;
-        //only called if the genModel is not present
+        // only called if the genModel is not present
         virtual void jacobianElements(const IOdata& inputs,
                                       const stateData& sD,
                                       matrixData<double>& md,
@@ -67,6 +67,6 @@ namespace exciters {
                                       check_level_t level) override;
     };
 
-}  //namespace exciters
+}  // namespace exciters
 
-}  //namespace griddyn
+}  // namespace griddyn

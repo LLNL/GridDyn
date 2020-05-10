@@ -105,13 +105,14 @@ class acLine: public Link {
     double getTapAngle() const { return tapAngle; }
 
     void disable() override;
-    /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or another
-     performs the calculations necessary to get the power at the measureTerminal to be a certain value
+    /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or
+    another performs the calculations necessary to get the power at the measureTerminal to be a
+    certain value
     @param[in] power  the desired real power flow as measured by measureTerminal
-    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by
-    default
-    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or
-    1 is selected based on busTypes
+    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a
+    busID,  1 by default
+    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both
+    are changed or 1 is selected based on busTypes
     @param[in] unitType -- the units related to power
     @return 0 for success, some other number for failure
     */
@@ -121,13 +122,14 @@ class acLine: public Link {
                              units::unit unitType = units::defunit) override;
 
     /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
-     performs the calculations necessary to get the power at the measureTerminal to be a certain value
+     performs the calculations necessary to get the power at the measureTerminal to be a certain
+    value
     @param[in] rPower  the desired real power flow as measured by measureTerminal
     @param[in] rPower  the desired reactive power flow as measured by measureTerminal
-    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by
-    default
-    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or
-    1 is selected based on busTypes
+    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a
+    busID,  1 by default
+    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both
+    are changed or 1 is selected based on busTypes
     @param[in] unitType -- the units related to power
     @return 0 for success, some other number for failure
     */
@@ -138,8 +140,10 @@ class acLine: public Link {
                          units::unit unitType = units::defunit) override;
 
     /** @brief check for any violations of link limits or other factors based on power flow results
-     checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
-    @param[out] Violation_vector --a list of all the violations any new violations get added to the result
+     checks things like the maximum angle,  power flow /current limits based on ratings and a few
+    other things
+    @param[out] Violation_vector --a list of all the violations any new violations get added to the
+    result
     */
     virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
     virtual change_code
@@ -188,8 +192,8 @@ class acLine: public Link {
                                           const solverMode& sMode) override;
     virtual count_t outputDependencyCount(index_t num, const solverMode& sMode) const override;
     virtual double getMaxTransfer() const override;
-    // virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode
-    // &sMode);
+    // virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const
+    // solverMode &sMode);
     virtual void setState(coreTime time,
                           const double state[],
                           const double dstate_dt[],
@@ -233,8 +237,9 @@ class acLine: public Link {
     /** @brief computes the values for nonConnected line
      */
     void swOpenCalc();
-    /** @brief assumes r is small and the angle is small and the voltage is constant for real power computation and
-    angle is constant for reactive power computation so there is no cross coupling between V and theta*/
+    /** @brief assumes r is small and the angle is small and the voltage is constant for real power
+    computation and angle is constant for reactive power computation so there is no cross coupling
+    between V and theta*/
     void fastDecoupledCalc();
     /** @brief  fault Derivative Calculations
      */
@@ -263,9 +268,9 @@ class acLine: public Link {
     /** @brief linearizes computations around previous operating point
      */
     void linearDeriv();
-    /** @brief assumes r is small and the angle is small and the voltage is constant for real power computation and
-    angle is constant for reactive power computation
-    so there is no cross coupling between V and theta for partial derivatives*/
+    /** @brief assumes r is small and the angle is small and the voltage is constant for real power
+    computation and angle is constant for reactive power computation so there is no cross coupling
+    between V and theta for partial derivatives*/
     void fastDecoupledDeriv();
     /** @brief switch open derivatives*/
     void swOpenDeriv();

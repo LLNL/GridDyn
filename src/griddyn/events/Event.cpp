@@ -100,7 +100,7 @@ bool Event::checkArmed()
 void Event::loadField(coreObject* searchObj, const std::string& newField)
 {
     auto renameloc = newField.find(" as ");  // spaces are important
-        // extract out a rename
+                                             // extract out a rename
 
     objInfo fdata;
     if (renameloc != std::string::npos) {
@@ -352,8 +352,8 @@ EventInfo::EventInfo(const std::string& eventString, coreObject* rootObj)
 }
 
 // @time1[,time2,time3,... + period] |[rootobj::obj1:]field(units) const =
-// val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or [rootobj::obj:]field(units)
-// = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
+// val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or
+// [rootobj::obj:]field(units) = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
 void EventInfo::loadString(const std::string& eventString, coreObject* rootObj)
 {
     std::string objString;

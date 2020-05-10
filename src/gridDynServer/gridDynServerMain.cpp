@@ -1,6 +1,7 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,7 +10,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // libraries
 
@@ -25,7 +26,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-//using namespace boost;
+// using namespace boost;
 namespace po = boost::program_options;
 
 // main
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
     }
 
     bool isMpiCountMode = false;
-    //check for an MPI run setup
+    // check for an MPI run setup
     for (int ii = 0; ii < argc; ++ii) {
         if (!strcmp("--mpicount", argv[ii])) {
             isMpiCountMode = true;
@@ -55,7 +56,7 @@ int main(int argc, char* argv[])
         return ret;
     }
 
-    //create the simulation
+    // create the simulation
 
     return 0;
 }

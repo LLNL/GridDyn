@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -15,7 +15,8 @@
 #include <string>
 namespace utilities {
 /** @brief class implementing a saturation model
- *@details 4 mathematical models are available including: quadratic, scaled_quadratic, exponential, and linear
+ *@details 4 mathematical models are available including: quadratic, scaled_quadratic, exponential,
+ *and linear
  */
 class saturation {
   public:
@@ -42,15 +43,15 @@ class saturation {
      *@param[in] satType a string containing the type of the saturation*/
     explicit saturation(const std::string& satType);
     /** set the S10 and S12 parameter
-     *@details sets the parameters of the saturation function previously specified at the point 1.0 and 1.2
-     *The values input should correspond to the reduction in values so 0.0 for no saturation
+     *@details sets the parameters of the saturation function previously specified at the point 1.0
+     *and 1.2 The values input should correspond to the reduction in values so 0.0 for no saturation
      *@param[in] S1  the value reduction at 1.0
      *@param[in] S2 the value reduction at 1.2
      */
     void setParam(double S1, double S2);
     /** @brief define the saturation function by specifying the reduction at two points
-     *@details sets the parameters of the saturation function previously specified at the points V1 and V2
-     *The values input should correspond to the reduction in values so 0.0 for no saturation
+     *@details sets the parameters of the saturation function previously specified at the points V1
+     *and V2 The values input should correspond to the reduction in values so 0.0 for no saturation
      *@param[in] V1 the point along the saturation curve that S1 is given
      *@param[in] S1  the value reduction at V1
      *@param[in] V2 the point along the saturation curve from which S2 is given
@@ -92,4 +93,4 @@ class saturation {
     void loadFunctions();
 };
 
-}  //namespace utilities
+}  // namespace utilities

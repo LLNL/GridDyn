@@ -51,8 +51,8 @@ Each link has a disconnect switch at the from bus and the to bus
 */
 class Link: public gridPrimary {
   public:
-    static std::atomic<count_t>
-        linkCount;  //!< static variable counting the number of created lines used for automatic user ID creation
+    static std::atomic<count_t> linkCount;  //!< static variable counting the number of created
+                                            //!< lines used for automatic user ID creation
     // it can be edited as it does not impact link operations just for user convenience
     /** @brief define some basic flag locations for Link*/
     enum gridLink_flags {
@@ -120,13 +120,14 @@ class Link: public gridPrimary {
                                   const stateData& sD,
                                   const solverMode& sMode) override;
 
-    /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or another
-     performs the calculations necessary to get the power at the measureTerminal to be a certain value
+    /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or
+    another performs the calculations necessary to get the power at the measureTerminal to be a
+    certain value
     @param[in] power  the desired real power flow as measured by measureTerminal
-    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by
-    default
-    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or
-    1 is selected based on busTypes
+    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a
+    busID,  1 by default
+    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both
+    are changed or 1 is selected based on busTypes
     @param[in] unitType -- the units related to power
     @return 0 for success, some other number for failure
     */
@@ -135,13 +136,14 @@ class Link: public gridPrimary {
                              id_type_t fixedTerminal = 0,
                              units::unit unitType = units::defunit);
     /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
-     performs the calculations necessary to get the power at the measureTerminal to be a certain value
+     performs the calculations necessary to get the power at the measureTerminal to be a certain
+    value
     @param[in] rPower  the desired real power flow as measured by measureTerminal
     @param[in] rPower  the desired reactive power flow as measured by measureTerminal
-    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by
-    default
-    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or
-    1 is selected based on busTypes
+    @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a
+    busID,  1 by default
+    @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both
+    are changed or 1 is selected based on busTypes
     @param[in] unitType -- the units related to power
     @return 0 for success, some other number for failure
     */
@@ -151,8 +153,8 @@ class Link: public gridPrimary {
                          id_type_t fixedTerminal = 0,
                          units::unit unitType = units::defunit);
     /** @brief propagate a network number to all connected buses
-     checks if a link actually connects the two buses in an AC sense, then checks if a bus is already part of the
-    specified network and if not it adds it to the queue
+     checks if a link actually connects the two buses in an AC sense, then checks if a bus is
+    already part of the specified network and if not it adds it to the queue
     @param[in] network  the new network number
     @param[in] stk a FIFO queue of buses to add to the network
     */
@@ -163,8 +165,10 @@ class Link: public gridPrimary {
     */
     virtual void updateBus(gridBus* bus, index_t busNumber);
     /** @brief check for any violations of link limits or other factors based on power flow results
-     checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
-    @param[out] Violation_vector --a list of all the violations any new violations get added to the result
+     checks things like the maximum angle,  power flow /current limits based on ratings and a few
+    other things
+    @param[out] Violation_vector --a list of all the violations any new violations get added to the
+    result
     */
     virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
 
@@ -188,14 +192,14 @@ class Link: public gridPrimary {
     */
     virtual double getAngle(const double state[], const solverMode& sMode) const;
     /** @brief get the absolute angle of an attached bus
-    @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets the opposite
-    angle
+    @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets
+    the opposite angle
     * @return the absolute angle
     */
     double getBusAngle(id_type_t busId = 0) const;
     /** @brief get the absolute angle of an attached bus
-    @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets the opposite
-    angle
+    @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets
+    the opposite angle
     * @return the absolute angle
     */
 
@@ -217,7 +221,8 @@ class Link: public gridPrimary {
     virtual double getImagImpedance(id_type_t busId = 0) const;
     /** @brief get the magnitude of the perceived impedance at a particular bus
     @param[in] busId  either 1 or 2 or the object id of the bus
-    * @return the magnitude of the perceived impedance, sign indicated flow direction of the real current
+    * @return the magnitude of the perceived impedance, sign indicated flow direction of the real
+    current
     */
     virtual double getTotalImpedance(id_type_t busId = 0) const;
     /** @brief get the magnitude of the current at a particular bus
@@ -333,13 +338,14 @@ class Link: public gridPrimary {
 @param[in] lnk  the link to search for
 @param[in] src  the existing parent object
 @param[in] sec  the desired parent object tree
-@return a pointer to a link on the second tree that matches the calling link based on name and location
+@return a pointer to a link on the second tree that matches the calling link based on name and
+location
 */
 Link* getMatchingLink(Link* lnk, gridPrimary* src, gridPrimary* sec);
 
 /** @brief compare 2 links
-  check a number of link parameters to see if they match, probably not that useful of function any more ,but it was
-useful during development
+  check a number of link parameters to see if they match, probably not that useful of function any
+more ,but it was useful during development
 @param[in] lnk1  the first link to check
 @param[in] lnk2  the second link to check
 @param[in] cmpBus  whether to compare links or not  (deep comparison of links)

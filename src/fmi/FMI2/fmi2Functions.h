@@ -29,9 +29,9 @@
                       fmiFreeModelInstance, fmiFreeSlaveInstance -> fmiFreeInstance
                       fmiEnterModelInitializationMode, fmiEnterSlaveInitializationMode ->
    fmiEnterInitializationMode fmiExitModelInitializationMode , fmiExitSlaveInitializationMode  ->
-   fmiExitInitializationMode fmiTerminateModel, fmiTerminateSlave  -> fmiTerminate fmiResetSlave -> fmiReset (now
-   also for ModelExchange and not only for CoSimulation) Functions renamed: fmiUpdateDiscreteStates ->
-   fmiNewDiscreteStates
+   fmiExitInitializationMode fmiTerminateModel, fmiTerminateSlave  -> fmiTerminate fmiResetSlave ->
+   fmiReset (now also for ModelExchange and not only for CoSimulation) Functions renamed:
+   fmiUpdateDiscreteStates -> fmiNewDiscreteStates
    - June 13, 2013: Functions removed:
                        fmiInitializeModel
                        fmiEventUpdate

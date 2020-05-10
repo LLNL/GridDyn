@@ -467,7 +467,8 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
         return const_cast<Area*>(this);
     }
     if ((typeName == "gen") || (typeName == "load") || (typeName == "generator")) {
-        // this is potentially computationally expensive, wouldn't recommend doing this search in a big system
+        // this is potentially computationally expensive, wouldn't recommend doing this search in a
+        // big system
         for (auto& bus : m_Buses) {
             coreObject* obj = bus->findByUserID(typeName, searchID);
             if (obj != nullptr) {
@@ -561,7 +562,8 @@ void Area::pFlowObjectInitializeB()
 {
     std::vector<gridPrimary*> lateBObjects;
 
-    // links need to be initialized first so the initial power flow can be computed through the buses
+    // links need to be initialized first so the initial power flow can be computed through the
+    // buses
     for (auto& link : m_Links) {
         if (link->checkFlag(late_b_initialize)) {
             lateBObjects.push_back(link);
@@ -651,8 +653,8 @@ void Area::updateLocalCache(const IOdata& inputs, const stateData& sD, const sol
 change_code Area::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, check_level_t level)
 {
     auto ret = change_code::no_change;
-    opFlags.set(
-        disable_flag_updates);  // this is so the adjustment object list can't get reset in the middle of
+    opFlags.set(disable_flag_updates);  // this is so the adjustment object list can't get reset in
+                                        // the middle of
     // this computation
     if (level < check_level_t::low_voltage_check) {
         for (auto obj : pFlowAdjustObjects) {
@@ -1024,8 +1026,8 @@ count_t Area::getFreq(std::vector<double>& frequencies, index_t start) const
 }
 
 /*
-count_t Area::getFreq(std::vector<double> &F, const double state[], const solverMode &sMode, index_t start)
-const
+count_t Area::getFreq(std::vector<double> &F, const double state[], const solverMode &sMode, index_t
+start) const
 {
     count_t cnt = 0;
     for (auto &area : m_Areas)
@@ -1454,10 +1456,11 @@ void Area::rootTrigger(coreTime time,
     auto currentRootObject = rootObjects.begin();
     auto obend = rootObjects.end();
     auto ors = (*currentRootObject)->rootSize(sMode);
-    opFlags.set(
-        disable_flag_updates);  // root triggers can cause a flag change and the flag update currently
+    opFlags.set(disable_flag_updates);  // root triggers can cause a flag change and the flag update
+                                        // currently
     // checks the root object
-    // TODO::May be wise at some point to revisit the combination of the flags and root object checking
+    // TODO::May be wise at some point to revisit the combination of the flags and root object
+    // checking
     for (auto rc : RF) {
         if (rc < rootOffset + cloc) {
             continue;

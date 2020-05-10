@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../events/Event.h"
 #include "../events/eventQueue.h"
@@ -285,9 +285,9 @@ int gridDynSimulation::pFlowInitialize(coreTime time0)
     auto ssize = stateSize(sm);
     pFlowData->allocate(ssize);
 
-    // initialization is divided into two parts to account for complex initialization routines that need to
-    // communicate
-    // so the A phase is start up and the B phase is to set up the results if needed
+    // initialization is divided into two parts to account for complex initialization routines that
+    // need to communicate so the A phase is start up and the B phase is to set up the results if
+    // needed
     int retval = checkNetwork(network_check_type::full);
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
         return retval;
@@ -326,9 +326,9 @@ bool gridDynSimulation::loadBalance(double prevPower, const std::vector<double>&
     auto pv = prevSlkGen.begin();
     for (auto& bus : slkBusses) {
         cPower -= (bus->getLinkReal() + bus->getLoadReal());
-        bus->set(
-            "p",
-            -(*pv));  // reset the slk generators to previous levels so the adjustments work properly
+        bus->set("p",
+                 -(*pv));  // reset the slk generators to previous levels so the adjustments work
+                           // properly
         ++pv;
     }
 
@@ -339,8 +339,8 @@ bool gridDynSimulation::loadBalance(double prevPower, const std::vector<double>&
         // just let the residual error go to the swing bus.
         return false;
     }
-    // TODO:: PT  this makes a really big assumptions about the location (in the simulation) of the buses really
-    // need to put some thought into working this through the areas
+    // TODO:: PT  this makes a really big assumptions about the location (in the simulation) of the
+    // buses really need to put some thought into working this through the areas
     if (cPower > 0.0) {
         for (auto& bus : gbusses) {
             if ((bus->isEnabled()) && (bus->getAdjustableCapacityUp() > 0.0)) {

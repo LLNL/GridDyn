@@ -22,7 +22,7 @@ namespace braid {
     using namespace paradae;
 
     /** @brief class implementing XBraid algorithms for power system DAEs
- */
+     */
     class braidSolver: public SolverInterface {
       private:
         std::vector<double> state;  //!< state data/
@@ -71,5 +71,5 @@ namespace braid {
         /** execute the braid solve*/
         virtual int RunBraid(ODEProblem* ode, MapParam* param, Real*& timegrid, int Ngridpoints);
     };
-}  //namespace braid
-}  //namespace griddyn
+}  // namespace braid
+}  // namespace griddyn

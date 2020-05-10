@@ -19,7 +19,7 @@ namespace griddyn {
 class Block;
 namespace sources {
     /** define a source object that contains another source which is followed by a Block object
- */
+     */
     class blockSource: public Source {
       private:
         Source* src = nullptr;  //!< pointer to the source object
@@ -48,7 +48,8 @@ namespace sources {
         virtual double get(const std::string& param,
                            units::unit unitType = units::defunit) const override;
 
-        // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+        // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const
+        // solverMode &sMode);
 
         virtual void residual(const IOdata& inputs,
                               const stateData& sD,

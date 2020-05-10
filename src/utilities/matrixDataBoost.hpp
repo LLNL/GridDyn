@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef _MATRIX_DATA_BOOST_H_
 #define _MATRIX_DATA_BOOST_H_
@@ -18,12 +18,13 @@
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
-/** @brief class implementing an expandable sparse matrix based on the boost matrices geared for Jacobian entries*/
+/** @brief class implementing an expandable sparse matrix based on the boost matrices geared for
+ * Jacobian entries*/
 template<class type>
 class matrixDataBoost: public matrixData<type> {
   public:
     boost::numeric::ublas::mapped_matrix<type, boost::numeric::ublas::column_major>
-        m;  //!<boost matrix to interface
+        m;  //!< boost matrix to interface
   public:
     /** @brief constructor
     @param[in] R  number of rows
@@ -31,8 +32,8 @@ class matrixDataBoost: public matrixData<type> {
     */
     matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C){};
     /**
-    * function to clear the data
-    */
+     * function to clear the data
+     */
     void clear() override { m.clear(); }
     void assign(index_t X, index_t Y, const type& num) override
     {
@@ -43,19 +44,19 @@ class matrixDataBoost: public matrixData<type> {
     count_t size() const override { return static_cast<count_t>(m.nnz()); }
     count_t capacity() const override { return m.nnz_capacity(); }
     /**
-    * @brief don't use this function
-    */
+     * @brief don't use this function
+     */
     matrixElement<type> element(index_t N) { return matrixElement<type>(); }
     /**
-    * @brief don't use this function
-    */
+     * @brief don't use this function
+     */
     matrixElement<type> start() override
     {
         return {matrixData<type>::rowLim, matrixData<type>::colLim, type(0)};
     }
     /**
-    * @brief don't use this function
-    */
+     * @brief don't use this function
+     */
     matrixElement<type> next() override
     {
         return {matrixData<type>::rowLim, matrixData<type>::colLim, type(0)};

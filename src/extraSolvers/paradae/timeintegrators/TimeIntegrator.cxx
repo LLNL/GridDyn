@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "TimeIntegrator.h"
 
 #include <cmath>
@@ -122,21 +122,24 @@ namespace paradae {
         if (val.used_dt < 1e-5) success_error_test = 1;
 
         if (!success_solver) {
-            /* Newton solver failed, we reset the *next values to *prev, and set an arbitrary rfactor */
+            /* Newton solver failed, we reset the *next values to *prev, and set an arbitrary
+             * rfactor */
             val.RollBack();
             val.next_dt = val.used_dt / max_rfactor;  // TODO : which rfactor should we use?
             return NONLIN_FAIL;
         }
         if (!success_error_test) {
             if (found_root && !do_braid) {
-                // The error test failed but there was a root. Set the next_dt to get to the root and redo step
+                // The error test failed but there was a root. Set the next_dt to get to the root
+                // and redo step
                 val.RollBack();
                 // JBS COMMENT OUT val.next_dt=val.troot-val.t;
                 val.next_dt = (val.troot - val.t) / max_rfactor;  // JBS Comment in
                 return WARN_ROOT;
             }
             // TODO if a root was found, use that information...
-            /* Solution failed the error estimate test. We still keep it, rfactor should already be set */
+            /* Solution failed the error estimate test. We still keep it, rfactor should already be
+             * set */
             return ERRTEST_FAIL;
         }
         if (!found_root) {
@@ -155,7 +158,8 @@ namespace paradae {
             val.SetNextAtRoot();
             return OK_ROOT;
         } else {
-            /* We passed a root taking the step, going too far. We keep troot in next_dx for future use */
+            /* We passed a root taking the step, going too far. We keep troot in next_dx for future
+             * use */
             val.next_dt = val.troot - val.t;
             val.snext.CopyData(val.sroot);
             return WARN_ROOT;

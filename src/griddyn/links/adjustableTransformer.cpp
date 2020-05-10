@@ -254,8 +254,8 @@ namespace links {
                 tapAngle = minTapAngle;
             }
         } else if (param == "fault") {
-            // not faults not allowed on adjustable transformoers change shunt conductance  or impedance to simulate a
-            // fault
+            // not faults not allowed on adjustable transformoers change shunt conductance  or
+            // impedance to simulate a fault
             LOG_ERROR(
                 "faults not allowed on adjustable transformers change shunt conductance  or impedance to "
                 "simulate a fault");
@@ -396,7 +396,8 @@ namespace links {
         if (isConnected()) {
             if (cMode == control_mode_t::MW_control) {
                 if (!opFlags[no_pFlow_adjustments]) {
-                    return;  // no network connection if the MW flow is controlled since the angle relationship is
+                    return;  // no network connection if the MW flow is controlled since the angle
+                             // relationship is
                     // variable
                 }
             }
@@ -551,9 +552,8 @@ namespace links {
                 case control_mode_t::manual_control:
                     break;
                 case control_mode_t::voltage_control:
-                    if ((Vmin <= 0.8) &&
-                        (Vmax >=
-                         1.2))  // check to make sure the actual controls are not effectively disabled
+                    if ((Vmin <= 0.8) && (Vmax >= 1.2))  // check to make sure the actual controls
+                                                         // are not effectively disabled
                     {
                         break;
                     }
@@ -566,7 +566,8 @@ namespace links {
                         tap0 = tap;
                     } else {
                         double ttap = tap;
-                        // making sure we stay in the bounds with the quantization from the current point
+                        // making sure we stay in the bounds with the quantization from the current
+                        // point
                         if (ttap >= midTap) {
                             while (ttap > midTap) {
                                 ttap -= stepSize;
@@ -592,7 +593,8 @@ namespace links {
                         tapAngle0 = tapAngle;
                     } else {
                         double ttap = tapAngle;
-                        // making sure we stay in the bounds with the quantization from the current point
+                        // making sure we stay in the bounds with the quantization from the current
+                        // point
                         if (ttap >= midTap) {
                             while (ttap > midTap) {
                                 ttap -= stepSize;
@@ -680,8 +682,8 @@ namespace links {
                 prevValue = linkFlows.P1;
             }
         } else if (cMode == control_mode_t::voltage_control) {
-            if (opFlags
-                    [continuous_flag])  // if continuous mode just check the min and max tap angle
+            if (opFlags[continuous_flag])  // if continuous mode just check the min and max tap
+                                           // angle
             {
                 if (tap < minTap) {
                     tap = minTap;
@@ -1258,9 +1260,9 @@ namespace links {
                 if (adjCount > 0) {
                     if (signn(prevAdjust) != signn(-direction * stepSize)) {
                         oCount++;
-                        // we are giving the Vmin priority here so it will always err on protecting the low voltage
-                        // side if it can.
-                        // if it is oscillating and goes over Vmax it will end in a state that leaves it there.
+                        // we are giving the Vmin priority here so it will always err on protecting
+                        // the low voltage side if it can. if it is oscillating and goes over Vmax
+                        // it will end in a state that leaves it there.
                     }
                 }
                 if (ret > change_code::no_change) {

@@ -73,14 +73,14 @@ class Condition: public objectOperatorInterface {
     */
     void setConditionRHS(std::shared_ptr<grabberSet> valGrabber);
     /**run the comparison between condition sides from gridGrabbers
-     * @return returns a difference between the condition and parameter designed to go negative if the condition is
-     *met
+     * @return returns a difference between the condition and parameter designed to go negative if
+     *the condition is met
      **/
     virtual double evalCondition();
     /**
      *run the comparison between for state grabbers
-     * @return returns a difference between the condition and parameter designed to go negative if the condition is
-     *met
+     * @return returns a difference between the condition and parameter designed to go negative if
+     *the condition is met
      **/
     virtual double evalCondition(const stateData& sD, const solverMode& sMode);
     /**
@@ -88,12 +88,14 @@ class Condition: public objectOperatorInterface {
     @param[in] side either 1 for left hand side or 2 for right hand side
     @param[in] sD the state data from which to get the values
     @param[in] sMode the solverMode related to the state data
-    * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
+    * @return returns the value for the comparison side=1 is left hand side, side=2 is the right
+    hand side
     **/
     double getVal(int side, const stateData& sD, const solverMode& sMode) const;
     /**
      *get the value for which the comparison is made
-     * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
+     * @return returns the value for the comparison side=1 is left hand side, side=2 is the right
+     *hand side
      **/
     double getVal(int side) const;
 
@@ -130,7 +132,8 @@ class Condition: public objectOperatorInterface {
     */
     virtual void setMargin(double val);
     /** change the margin setting functionality
-    @param[in] margin_on  a boolean true if the condition operator should use margins, false otherwise
+    @param[in] margin_on  a boolean true if the condition operator should use margins, false
+    otherwise
     */
     virtual void useMargin(bool margin_on)
     {

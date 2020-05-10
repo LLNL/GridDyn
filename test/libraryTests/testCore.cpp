@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../testHelper.h"
 #include "core/coreExceptions.h"
@@ -195,8 +195,8 @@ BOOST_AUTO_TEST_CASE(gridDynTime_tests)
     BOOST_CHECK_CLOSE(dval3, -1.0, 0.0000001);
 }
 
-/** test case to construct all objects and do some potentially problematic things to them to ensure the object
-doesn't break or cause a fault
+/** test case to construct all objects and do some potentially problematic things to them to ensure
+the object doesn't break or cause a fault
 */
 
 BOOST_AUTO_TEST_CASE(object_tests_probe)
@@ -213,12 +213,12 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
             BOOST_CHECK_EQUAL(obj->getName(), "bob");
             obj->setName(std::string());
             BOOST_CHECK_EQUAL(obj->getName(), "");
-            obj->set("", "empty");  //this should not throw an exception
-            obj->set("", 0.34, defunit);  //this should not throw an exception
-            obj->setFlag("", false);  //This should not throw an exception
-            obj->set("#unknown", "empty");  //this should not throw an exception
-            obj->set("#unknown", 0.34, defunit);  //this should not throw an exception
-            obj->setFlag("#unknown", false);  //This should not throw an exception
+            obj->set("", "empty");  // this should not throw an exception
+            obj->set("", 0.34, defunit);  // this should not throw an exception
+            obj->setFlag("", false);  // This should not throw an exception
+            obj->set("#unknown", "empty");  // this should not throw an exception
+            obj->set("#unknown", 0.34, defunit);  // this should not throw an exception
+            obj->setFlag("#unknown", false);  // This should not throw an exception
 
             if (obj->isCloneable()) {
                 auto nobj = obj->clone();

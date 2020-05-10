@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "../paradae/common/MapParam.h"
 #include "../paradae/common/def.h"
@@ -163,7 +163,7 @@ namespace braid {
         solveTime = t0;
 
         // USE  EquationGridDyn(t0_,Tmax_,N_unistep_,gds_,y0_);
-        int n = m_gds->stateSize(mode);  //cDaeSolverMode);
+        int n = m_gds->stateSize(mode);  // cDaeSolverMode);
         SVector y0_(n, 0.0), y0p_(n, 0.0);
 
         // Compute global time domain values
@@ -172,8 +172,8 @@ namespace braid {
         double dt = static_cast<double>(m_gds->getStepTime());
         int N_unistep_ = ceil((stopTime - static_cast<double>(tStart)) / dt);
 
-        m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode);  //cDaeSolverMode);
-        //y0_.dump("new_code_init_con.txt");
+        m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode);  // cDaeSolverMode);
+        // y0_.dump("new_code_init_con.txt");
         equation = new EquationGridDyn(
             static_cast<double>(tStart), stopTime, N_unistep_, m_gds, y0_, &mode, discontinuities);
     }
@@ -321,7 +321,7 @@ namespace braid {
         braid_SetTimeGrid(core, my_TimeGrid);
         braid_SetSpatialRefine(core, my_SpatialRefine);
         braid_SetSpatialCoarsen(core, my_SpatialCoarsen);
-        //braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell, my_PropagateShell);
+        // braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell, my_PropagateShell);
         braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell);
 
         // User-specified parameters
@@ -467,5 +467,5 @@ namespace braid {
     {
         return 0;
     }
-}  //namespace braid
-}  //namespace griddyn
+}  // namespace braid
+}  // namespace griddyn

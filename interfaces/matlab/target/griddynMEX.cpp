@@ -67,7 +67,8 @@ T SwigValueInit()
 #        define SWIGTEMPLATEDISAMBIGUATOR template
 #    elif defined(__HP_aCC)
 /* Needed even with `aCC -AA' when `aCC -V' reports HP ANSI C++ B3910B A.03.55 */
-/* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55 */
+/* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55
+ */
 #        define SWIGTEMPLATEDISAMBIGUATOR template
 #    else
 #        define SWIGTEMPLATEDISAMBIGUATOR
@@ -1137,7 +1138,8 @@ SWIGRUNTIME int
         if (own) {
             *own = *own | SWIG_CAST_NEW_MEMORY;
         } else {
-            /* badly formed typemap which will lead to a memory leak - it must set and use own to delete *ptr */
+            /* badly formed typemap which will lead to a memory leak - it must set and use own to
+             * delete *ptr */
             mexErrMsgIdAndTxt("SWIG:ConvertPointerObj",
                               "SWIG error in converting pointer for type %s. Bad typemap?",
                               type->name);
@@ -6829,10 +6831,10 @@ SWIGRUNTIME void SWIG_InitializeModule(void* clientdata)
 }
 
 /* This function will propagate the clientdata field of type to
-* any new swig_type_info structures that have been added into the list
-* of equivalent types.  It is like calling
-* SWIG_TypeClientData(type, clientdata) a second time.
-*/
+ * any new swig_type_info structures that have been added into the list
+ * of equivalent types.  It is like calling
+ * SWIG_TypeClientData(type, clientdata) a second time.
+ */
 SWIGRUNTIME void SWIG_PropagateClientData(void)
 {
     size_t i;

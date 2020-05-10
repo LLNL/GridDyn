@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "compoundEvent.h"
 
@@ -50,7 +50,7 @@ namespace events {
 
     void compoundEvent::updateObject(coreObject* gco, object_update_mode mode)
     {
-        //TODO:  more thinking on exception safety
+        // TODO:  more thinking on exception safety
         if (mode == object_update_mode::direct) {
             setTarget(gco);
         } else if (mode == object_update_mode::match) {
@@ -77,7 +77,7 @@ namespace events {
 
     void compoundEvent::setValue(double val, units::unit newUnits)
     {
-        //TODO(pt):: THIS has issues
+        // TODO(pt):: THIS has issues
         for (auto& vv : values) {
             vv = val;
         }
@@ -168,5 +168,5 @@ namespace events {
         }
         return armed;
     }
-}  //namespace events
-}  //namespace griddyn
+}  // namespace events
+}  // namespace griddyn

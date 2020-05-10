@@ -17,11 +17,11 @@
 
 namespace griddyn {
 namespace fmi {
-    /** class to help with estimating outputs based on changes to the states and inputs in intermediate steps.
-The output may not be a state variable in these contexts the FMI itself doesn't always stay updated in intermediate
-time values Thus the output may need to be estimated for use in the rest of the system.  The estimate is done by
-using the Jacobian values for the output from both the input and states and summing them with the actual difference
-between the last known value
+    /** class to help with estimating outputs based on changes to the states and inputs in
+intermediate steps. The output may not be a state variable in these contexts the FMI itself doesn't
+always stay updated in intermediate time values Thus the output may need to be estimated for use in
+the rest of the system.  The estimate is done by using the Jacobian values for the output from both
+the input and states and summing them with the actual difference between the last known value
 */
     class outputEstimator {
       private:

@@ -41,8 +41,9 @@ namespace relays {
         bool measureAction;  //!< flag indicating the action is a measurement event
     };
 
-    /** @brief relay with control functionality  i.e. the ability to control an object through a comm channel
- */
+    /** @brief relay with control functionality  i.e. the ability to control an object through a
+     * comm channel
+     */
     class controlRelay: public Relay {
       public:
         enum controlrelay_flags {

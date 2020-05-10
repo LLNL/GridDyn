@@ -75,7 +75,8 @@ enum class fmi_variable_type_t {
     string,
     enumeration,
     unknown,
-    numeric,  //!< not used directly in an fmu but intended to catch all numeric in search operations
+    numeric,  //!< not used directly in an fmu but intended to catch all numeric in search
+              //!< operations
 };
 
 class fmi_variable_type {

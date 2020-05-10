@@ -24,11 +24,11 @@ class coreObject;
 using property_type =
     mpark::variant<double, std::pair<double, units::unit>, int, bool, std::string>;
 
-/** class for temporarily holding object properties if the object has delayed initialization or something to that
-effect
-@details includes storage for string, double, integer, and binary properties,  targeted at griddyn and helper
-objects It should be able to handle setting via regular pointer or shared pointer only coreObjects are meant to
-make use of gridUnits*/
+/** class for temporarily holding object properties if the object has delayed initialization or
+something to that effect
+@details includes storage for string, double, integer, and binary properties,  targeted at griddyn
+and helper objects It should be able to handle setting via regular pointer or shared pointer only
+coreObjects are meant to make use of gridUnits*/
 class propertyBuffer {
   private:
     std::vector<std::pair<std::string, property_type>> properties;  //!< storage for the properties
@@ -62,7 +62,8 @@ class propertyBuffer {
     }
     /** the template is supposed to work for all different types of pointer objects
     regular pointers, shared_ptrs, or unique ptrs, it takes a reference to the pointer
-    @details this is mostly to apply to helper objects typically captured in a smart pointer of some kind
+    @details this is mostly to apply to helper objects typically captured in a smart pointer of some
+    kind
     */
     template<class X>
     void apply(X& obj) const

@@ -195,7 +195,8 @@ then write data (NumElements*8 Bytes);
 0 -state information
 1 -derivative information
 2 -residual information
-@param[in] key a code indicating the source of the information (typically the index of the solver data object)
+@param[in] key a code indicating the source of the information (typically the index of the solver
+data object)
 @param[in] numElements the number of elements
 @param[in] data the data to write to the file
 @param[in] fileName the name of the file
@@ -214,12 +215,13 @@ void writeVector(coreTime time,
 
 /** @brief write a array to a file
 encodes a header into the file
-time(8 bytes), code(0x0001|code) for Jacobian data (4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
-then write data in triplets (4byte row, 4 byte col, 8 byte double data)
+time(8 bytes), code(0x0001|code) for Jacobian data (4 bytes), index(4 bytes), key(4 bytes), length(4
+bytes), then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @param[in] time the time associated with the data
 @param[in] code a code describing the type of information in the array
 @param[in] index an indexing value associated with the data
-@param[in] key a code indicating the source of the information (typically the index of the solver data object)
+@param[in] key a code indicating the source of the information (typically the index of the solver
+data object)
 @param[in] a1 the Jacobian data to write to the file
 @param[in] fileName the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)

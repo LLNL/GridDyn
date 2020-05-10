@@ -127,7 +127,8 @@ public:
         virtual void addGen(schedulerReg *sched);
         virtual void removeSched(schedulerReg *sched);
         virtual void set (const std::string &param, std::string val);
-        virtual void set (const std::string &param, double val, units::unit unitType = units::defunit);
+        virtual void set (const std::string &param, double val, units::unit unitType =
+units::defunit);
 
         virtual void regChange();
 protected:

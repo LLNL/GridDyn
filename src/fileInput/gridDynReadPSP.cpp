@@ -99,8 +99,8 @@ void loadPSP(coreObject* parentObject, const std::string& fileName, const basicR
                             morebus = false;
                             continue;
                         }
-                        // because we can read the line section before the bus section and that is confusing so we just
-                        // make sure we read the bus section first
+                        // because we can read the line section before the bus section and that is
+                        // confusing so we just make sure we read the bus section first
                         if (!nobus) {
                             continue;
                         }

@@ -15,11 +15,12 @@
 
 namespace griddyn {
 /** @brief base class for any model can act as a component of another model
-* gridSubModel class defines the interface for models which can act as components of other models such as Exciter,
-or Governor most of the differential equations are contained in submodels.  The interface is meant to be flexible
-so unlike gridSecondary models there is no predefined interface, but at the same time many of the function calls
-are intended to be the same,  The main difference being there is only one initialize function, they can operate in
-power flow but those objects just call initialize twice
+* gridSubModel class defines the interface for models which can act as components of other models
+such as Exciter, or Governor most of the differential equations are contained in submodels.  The
+interface is meant to be flexible so unlike gridSecondary models there is no predefined interface,
+but at the same time many of the function calls are intended to be the same,  The main difference
+being there is only one initialize function, they can operate in power flow but those objects just
+call initialize twice
 
 **/
 class gridSubModel: public gridComponent {

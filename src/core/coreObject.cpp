@@ -23,8 +23,8 @@
 using namespace gmlc::utilities;
 
 namespace griddyn {
-// start at 101 since there are some objects that use low numbers as a check for interface number and the id as
-// secondary
+// start at 101 since there are some objects that use low numbers as a check for interface number
+// and the id as secondary
 std::atomic<id_type_t> coreObject::s_obcnt(101);
 
 coreObject::coreObject(const std::string& objName): m_refCount(0), m_oid(s_obcnt++), name(objName)
@@ -400,8 +400,8 @@ void coreObject::makeNewOID()
     m_oid = ++s_obcnt;
 }
 // NOTE: there is some potential for recursion here if the parent object searches in lower objects
-// But in some cases you search up, and others you want to search down so we will rely on intelligence on the part
-// of the implementer
+// But in some cases you search up, and others you want to search down so we will rely on
+// intelligence on the part of the implementer
 coreObject* coreObject::find(const std::string& object) const
 {
     return (parent->find(object));

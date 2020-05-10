@@ -1,6 +1,7 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,7 +10,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // libraries
 
@@ -31,7 +32,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-//using namespace boost;
+// using namespace boost;
 namespace po = boost::program_options;
 
 // main
@@ -92,7 +93,7 @@ int main(int argc, char* argv[])
 
         time_granted = fncs::time_request(time_desired);
         printf("grantTime=%llu\n", static_cast<unsigned long long>(time_granted));
-        //check if the granted time is too small to do anything about
+        // check if the granted time is too small to do anything about
         if (time_granted < time_desired) {
             if (fncs2gdTime(time_granted) - gds->getCurrentTime() < 0.00001) {
                 continue;

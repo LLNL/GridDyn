@@ -69,7 +69,8 @@ namespace fmi {
 
             if (opFlags[use_output_estimator])
             {
-            //  if we require the use of output estimators flag that to the simulation and load the information
+            //  if we require the use of output estimators flag that to the simulation and load the
+            information
             // for the estimator
             alert(this, SINGLE_STEP_REQUIRED);
             double val;
@@ -109,7 +110,8 @@ namespace fmi {
         probeFMU ();  // probe the fmu
         if (opFlags[use_output_estimator])
         {
-            // if we require the use of output estimators flag that to the simulation and load the information
+            // if we require the use of output estimators flag that to the simulation and load the
+        information
             // for the estimator
             alert (this, SINGLE_STEP_REQUIRED);
             loadOutputJac ();

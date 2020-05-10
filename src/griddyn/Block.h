@@ -22,12 +22,12 @@ namespace blocks {
 
 /** @brief class implementing basic control system block
  the basic block class takes a single input X  the output is then \f$K*(X+bias)\f$
-optionally implementing limiters Omax and Omin  the limiters have a reset level specified by resetLevel
-once the object is initialized the determination of whether to use the ramps is fixed and cannot be changed
-unless the object is reinitialized directly
+optionally implementing limiters Omax and Omin  the limiters have a reset level specified by
+resetLevel once the object is initialized the determination of whether to use the ramps is fixed and
+cannot be changed unless the object is reinitialized directly
 
-the blocks take 1 or 2 inputs the first being the single input,  if the differential input is set then the second
-argument is the time derivative of the input
+the blocks take 1 or 2 inputs the first being the single input,  if the differential input is set
+then the second argument is the time derivative of the input
 */
 class Block: public gridSubModel {
   public:
@@ -35,8 +35,8 @@ class Block: public gridSubModel {
      */
     enum controller_flags {
         step_only = object_flag1,  //!< flag indicating that the block does not have any state
-        use_state =
-            object_flag2,  //!< flag indicating that the basic block should not control the state before the limiters
+        use_state = object_flag2,  //!< flag indicating that the basic block should not control the
+                                   //!< state before the limiters
         has_limits = object_armed_flag,  //!< flag indicating the block has limits of some kind
         use_block_limits = object_flag3,  //!< flag indicating the block has upper and lower limits
         use_ramp_limits = object_flag4,  //!< flag indicating the block has ramp limits
@@ -45,11 +45,11 @@ class Block: public gridSubModel {
             object_flag5,  //!< flag indicating that the input is a differential state
         use_direct =
             object_flag6,  //!< flag indicating that the block should just use the input directly
-        simplified =
-            object_flag7,  //!< flag indicating that the block should revert to basic block behavior [used
+        simplified = object_flag7,  //!< flag indicating that the block should revert to basic block
+                                    //!< behavior [used
         //!< only by derived object]
-        anti_windup_limits =
-            object_flag8,  //!< flag indicating that the limits should be anti-windup [used only by derived objects]
+        anti_windup_limits = object_flag8,  //!< flag indicating that the limits should be
+                                            //!< anti-windup [used only by derived objects]
     };
 
   protected:
@@ -92,8 +92,8 @@ class Block: public gridSubModel {
     @details wraps the call to dynInitializeB to simplify things for a block
     @param[in] input  the initial input to the block
     @param[in] desiredOutput the initial desired output for the block
-    @return if input is kNullVal it returns the input required to make the output match desiredOutput otherwise
-    it returns the initial output
+    @return if input is kNullVal it returns the input required to make the output match
+    desiredOutput otherwise it returns the initial output
     */
     double blockInitialize(double input, double desiredOutput);
 
@@ -104,12 +104,13 @@ class Block: public gridSubModel {
     virtual double get(const std::string& param,
                        units::unit unitType = units::defunit) const override;
 
-    // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+    // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const
+    // solverMode &sMode);
 
     /** @brief simplifying function in place of residual since block have only one input/output
     @param[in] input  the block input
-    @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise
-    ignored
+    @param[in] didt the input derivative used if the differential input flag is set and it is needed
+    otherwise ignored
     @param[in] sD the state data
     @param[out] resid the location to store the Jacobian elements
     @param[in] sMode the solverMode that corresponds to the state data
@@ -125,10 +126,11 @@ class Block: public gridSubModel {
                           double resid[],
                           const solverMode& sMode) override;
 
-    /** @brief simplifying function in place of derivative call since block have only one input/output
+    /** @brief simplifying function in place of derivative call since block have only one
+    input/output
     @param[in] input  the block input
-    @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise
-    ignored
+    @param[in] didt the input derivative used if the differential input flag is set and it is needed
+    otherwise ignored
     @param[in] sD the state data
     @param[out] deriv the location to store the derivative elements
     @param[in] sMode the solverMode that corresponds to the state data
@@ -144,7 +146,8 @@ class Block: public gridSubModel {
                             double deriv[],
                             const solverMode& sMode) override;
 
-    /** @brief simplifying function in place of algebraicUpdate call since block have only one input/output
+    /** @brief simplifying function in place of algebraicUpdate call since block have only one
+    input/output
     @param[in] input  the block input
     @param[in] sD the state data
     @param[out] deriv the location to store the derivative elements
@@ -161,10 +164,11 @@ class Block: public gridSubModel {
                                  const solverMode& sMode,
                                  double alpha) override;
 
-    /** @brief simplifying function in place of Jacobian elements since block have only one input/output
+    /** @brief simplifying function in place of Jacobian elements since block have only one
+    input/output
     @param[in] input  the block input
-    @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise
-    ignored
+    @param[in] didt the input derivative used if the differential input flag is set and it is needed
+    otherwise ignored
     @param[in] sD the state data
     @param[out] md the location to store the Jacobian elements
     @param[in] argLoc the index location of the input
@@ -212,13 +216,14 @@ class Block: public gridSubModel {
     /** get the single output for the block based on local information
      */
     virtual double getBlockOutput() const;
-    /** get the time derivative of the block output -should only be used for block with a differential output
+    /** get the time derivative of the block output -should only be used for block with a
+    differential output
     @param[in] sD the state data to use in computing the output
     @param[in] sMode the solverMode associated with the stateData
     */
     virtual double getBlockDoutDt(const stateData& sD, const solverMode& sMode) const;
-    /**get the time derivative of the block output -should only be used for block with a differential output based
-     * on local information
+    /**get the time derivative of the block output -should only be used for block with a
+     * differential output based on local information
      */
     virtual double getBlockDoutDt() const;
     /** get the name of the output for a block*/

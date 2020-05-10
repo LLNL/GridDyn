@@ -43,9 +43,9 @@ class grabberInterpreter {
     }
     std::unique_ptr<baseX> interpretGrabberBlock(const std::string& command, coreObject* obj)
     {
-        // this is to resolve an issue with URI specified parameters and the division operator but still allow
-        // normal division operator in most cases  for URI specified the % must be used for division or the
-        // function form
+        // this is to resolve an issue with URI specified parameters and the division operator but
+        // still allow normal division operator in most cases  for URI specified the % must be used
+        // for division or the function form
         const std::string& mdivstr =
             (command.find_last_of('?') == std::string::npos) ? mdiv1String : mdiv2String;
         std::unique_ptr<baseX> ggb = nullptr;

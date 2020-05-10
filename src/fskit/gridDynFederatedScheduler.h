@@ -1,4 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
  * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
@@ -35,8 +36,8 @@ class GriddynFederatedScheduler {
     static bool IsFederated() { return g_scheduler != nullptr; }
 
     /**
-   * Return singleton federated scheduler.
-   */
+     * Return singleton federated scheduler.
+     */
     static std::shared_ptr<fskit::GrantedTimeWindowScheduler> GetScheduler()
     {
         assert(g_scheduler);
@@ -44,24 +45,24 @@ class GriddynFederatedScheduler {
     }
 
     /* Make non-copyable since it is this class is used to access a singleton
-   * via static methods.
-   */
+     * via static methods.
+     */
     GriddynFederatedScheduler() = default;
     GriddynFederatedScheduler(const GriddynFederatedScheduler&) = delete;
     GriddynFederatedScheduler& operator=(const GriddynFederatedScheduler&) = delete;
 
     /*
-   * GriddynRunner initializes the federated scheduler.
-   */
+     * GriddynRunner initializes the federated scheduler.
+     */
     friend class griddyn::fskitRunner;
 
   private:
     /**
-   * Initialize singleton.
-   */
+     * Initialize singleton.
+     */
     static void Initialize(std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
     {
-        //TODO:: make this thread safe probably with a mutex lock
+        // TODO:: make this thread safe probably with a mutex lock
         g_scheduler = scheduler;
     }
 

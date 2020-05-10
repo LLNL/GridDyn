@@ -16,8 +16,8 @@
 #include "gridSubModel.h"
 namespace griddyn {
 class Generator;
-/** @brief the exciter class defines the interface for power grid exciters and implements a very simple version of
- * such a device
+/** @brief the exciter class defines the interface for power grid exciters and implements a very
+ * simple version of such a device
  */
 
 const int exciterVoltageInLocation = 0;
@@ -41,8 +41,8 @@ class Exciter: public gridSubModel {
     model_parameter Vref = 1.0;  //!< [pu] reference voltage for voltage regulator
     model_parameter Ka = 10;  //!< [pu] amplifier gain
     model_parameter Ta = 0.004;  //!< [s]    amplifier time constant
-    model_parameter vBias =
-        0.0;  //!< bias field level for adjusting the field output so the ref can remain at some nominal level
+    model_parameter vBias = 0.0;  //!< bias field level for adjusting the field output so the ref
+                                  //!< can remain at some nominal level
     int limitState = 0;  //!< indicator of which state has the limits applied
   public:
     /** @brief constructor*/

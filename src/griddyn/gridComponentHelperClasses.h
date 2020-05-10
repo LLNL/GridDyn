@@ -20,8 +20,8 @@
 #include <bitset>
 
 namespace griddyn {
-constexpr static std::uint64_t flagMask =
-    0x3FE;  //!< general flag mask for convenience to mask out flags that typically cascade to parents
+constexpr static std::uint64_t flagMask = 0x3FE;  //!< general flag mask for convenience to mask out
+                                                  //!< flags that typically cascade to parents
 
 /** @brief  an enumeration of flags in the opFlags bitset for gridComponent
 @details flags are intended to be default off hence the various names in certain circumstances
@@ -62,8 +62,8 @@ enum operation_flags {
         16,  //!< indicator that the object controls the local bus voltage at a specific level
     indirect_power_control =
         17,  //!< flag indicating the object must use indirect means to control the voltage
-    adjustable_P =
-        18,  //!< flag indicating that the object has adjustable power setting and can be used by slack
+    adjustable_P = 18,  //!< flag indicating that the object has adjustable power setting and can be
+                        //!< used by slack
     //! bus for control of angle
 
     // some indicator flags for local objects
@@ -84,8 +84,8 @@ enum operation_flags {
     jacobian_count_change_flag = 28,  //!< flag indicating a change in the Jacobian count
     slack_bus_change = 29,  //!< flag indicating a change in the slack bus
     voltage_control_change = 30,  //!< flag indicating a change in voltage control on a bus
-    connectivity_change_flag =
-        31,  //!< flag indicating a change in bus connectivity possibly indicating islanding or isolated buses
+    connectivity_change_flag = 31,  //!< flag indicating a change in bus connectivity possibly
+                                    //!< indicating islanding or isolated buses
 
     /*flags 32-44 are intended for local object usage*/
     object_flag1 = 32,
@@ -118,8 +118,8 @@ enum operation_flags {
     no_gridcomponent_set =
         51,  //!< flag indicating skipping of the gridComponent set function for parent setting
     //! without throwing an error
-    being_deleted =
-        52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some
+    being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted
+                         //!<  NOTE::useful for some
     //! large objects with components allocated in larger fashion so we skip over some steps
     //! in object removal
     separate_processing =
@@ -175,8 +175,8 @@ enum init_control_flags {
     auto_bus_disconnect = 9,  //!< disable automatic bus disconnection in exceptional circumstances
     no_auto_autogen = 10,  //!< disable automatic autogeneration for slk/afix/pv buses
     all_loads_to_constant_impedence = 11,  //!< convert all loads to constant impedance
-    force_constant_pflow_initialization =
-        12,  //!< for some objects that initialize through power flow calculations force it to be constant
+    force_constant_pflow_initialization = 12,  //!< for some objects that initialize through power
+                                               //!< flow calculations force it to be constant
     ignore_saturation = 13,  //!< ignore saturation effects
     low_voltage_checking = 15,  //!< enable low voltage checking on buses
 };
@@ -329,7 +329,7 @@ class solverOffsets {
     index_t algOffset = kNullLocation;  //!< location for generic offsets
     index_t diffOffset = kNullLocation;  //!< location for the differential offsets
     index_t rootOffset = kNullLocation;  //!< location for the root offsets
-        // total object sizes
+                                         // total object sizes
 
     bool stateLoaded = false;  //!< flag indicating the state sizes have been loaded
     bool jacobianLoaded = false;  //!< flag indicated Jacobian size is loaded
@@ -440,24 +440,24 @@ class stateData {
   public:
     coreTime time = 0.0;  //!< time corresponding to the state data
     count_t seqID = 0;  //!< a sequence id to differentiate between subsequent state data objects
-    index_t stateSize =
-        0;  //!< the size of the state vector, if at zero the information is presumed to come from another source
-    double cj =
-        1.0;  //!< a number used in Jacobian calculations if there is a derivative used in the calculations
+    index_t stateSize = 0;  //!< the size of the state vector, if at zero the information is
+                            //!< presumed to come from another source
+    double cj = 1.0;  //!< a number used in Jacobian calculations if there is a derivative used in
+                      //!< the calculations
     const double* state = nullptr;  //!< the current state guessState
     const double* dstate_dt = nullptr;  //!< the state time derivative array
-    const double* fullState =
-        nullptr;  //!< the full state data (for cases where state contains only differential or algebraic components)
-    const double* diffState =
-        nullptr;  //!< the differential state data (for cases where state contains only algebraic components)
-    const double* algState =
-        nullptr;  //!< the algebraic state data (for cases where state contains only differential components)
+    const double* fullState = nullptr;  //!< the full state data (for cases where state contains
+                                        //!< only differential or algebraic components)
+    const double* diffState = nullptr;  //!< the differential state data (for cases where state
+                                        //!< contains only algebraic components)
+    const double* algState = nullptr;  //!< the algebraic state data (for cases where state contains
+                                       //!< only differential components)
     double* scratch1 =
         nullptr;  //!< scratch space the objects can use for calculations (if not null it should be
-        //! the same size as state
+    //! the same size as state
     double* scratch2 =
         nullptr;  //!< scratch space the objects can use for calculations (if not null it should be
-        //! the same size as state
+    //! the same size as state
     coreTime altTime = 0.0;  //!< the time corresponding to the other part of the state
     index_t pairIndex = kNullLocation;  //!< the index of the mode the paired data comes from
 

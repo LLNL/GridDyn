@@ -18,17 +18,16 @@
 namespace griddyn {
 namespace links {
     /** @brief extends the link class to include adjustments to the tap and tapAngle
-*  principally a model for adjustable transformers such as ULTC or regulators or other types of transformers with
-adjustments.
-it implements three types of control in power flow voltage control of local or remote buses,  local reactive power
-flow, and local real power flow the real power flow is the only one that adjusts the angle.  available control
-include stepped and continuous
+*  principally a model for adjustable transformers such as ULTC or regulators or other types of
+transformers with adjustments. it implements three types of control in power flow voltage control of
+local or remote buses,  local reactive power flow, and local real power flow the real power flow is
+the only one that adjusts the angle.  available control include stepped and continuous
 
 */
     class adjustableTransformer: public acLine {
       public:
         /** @brief  enumeration of the available control types
-     */
+         */
         enum class control_mode_t {
             manual_control = 0,  //!< no automatic adjustments
             voltage_control = 1,  //!< automatic control based on voltage
@@ -36,7 +35,7 @@ include stepped and continuous
             MVar_control = 3  //!< automatic control based on real power flow at a specific terminal
         };
         /** @brief  flags for
-     */
+         */
         enum adjustable_flags {
             continuous_flag = object_flag5,  //!< flag indicating continuous adjustments
             use_target_mode = object_flag6,  //!< flag indicating target mode
@@ -66,27 +65,27 @@ include stepped and continuous
         model_parameter Qmin = -kBigNum;  //!< the maximum power before changing the tap
         // double Tm;                //!< time constant
         // double Td;                //!< time constant
-        double direction =
-            1;  //!< variable storing whether the directional derivate of the tap changes with respect
-            //!< to voltage or power is positive or negative
+        double direction = 1;  //!< variable storing whether the directional derivate of the tap
+                               //!< changes with respect
+        //!< to voltage or power is positive or negative
         model_parameter tapMaxChangeRate = kBigNum;  //!< maximum rate at which the tap can change
         model_parameter sample_rate = 4.0;  //!< [s]the rate at which the measurements are sampled
         gridBus* controlBus = nullptr;  //!< the control bus to monitor voltage
 
         double tap0 = 0.0;  //!< baseline tap position used for continuous tap settings
         double tapAngle0 = 0.0;  //!< baseline tapAngle position used for continuous tap settings
-        model_parameter stepDelay =
-            30;  //!< step control for adjusting the quantity or the time constant for continuous system
+        model_parameter stepDelay = 30;  //!< step control for adjusting the quantity or the time
+                                         //!< constant for continuous system
         model_parameter mp_Tm = 0.05;  //!< time constant for continuous tap settings
         model_parameter dTapdt = 0;  //!< rate of change of the tap
         model_parameter dTapAdt = 0;  //!< rate of change of the tapAngle
       private:
-        int controlNum =
-            -1;  //!< the control bus and number setting are not fully determined until initialization so
-            //!< this stores information from the startup phase
-        std::string
-            controlName;  //!< the control bus and number setting are not fully determined until initialization
-            //!< so this stores information from the startup phase
+        int controlNum = -1;  //!< the control bus and number setting are not fully determined until
+                              //!< initialization so
+        //!< this stores information from the startup phase
+        std::string controlName;  //!< the control bus and number setting are not fully determined
+                                  //!< until initialization
+        //!< so this stores information from the startup phase
         count_t adjCount = 0;
         count_t oCount = 0;
         double prevAdjust = 0.0;
@@ -113,8 +112,8 @@ include stepped and continuous
     @param[in] cBus  the specified control Bus*/
         void setControlBus(gridBus* cBus);
         /**@ brief set the control bus to a specified bus number
-    @param[in] busNumber-- this can be 1 or 2 for already attached buses or the user id of a bus in which cases the
-    parent of the link is searched for the bus*/
+    @param[in] busNumber-- this can be 1 or 2 for already attached buses or the user id of a bus in
+    which cases the parent of the link is searched for the bus*/
         void setControlBus(index_t busNumber = 2);
 
         change_code powerFlowAdjust(const IOdata& inputs,
@@ -216,16 +215,21 @@ include stepped and continuous
                         const stateData& sD,
                         matrixData<double>& md,
                         const solverMode& sMode);
-        /** @brief do any stepped adjustments  based on voltage control from the power flow calculations
-    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
+        /** @brief do any stepped adjustments  based on voltage control from the power flow
+    calculations
+    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was
+    stepped
     */
         change_code voltageControlAdjust();
         /** @brief do any stepped adjustments  based on MW control from the power flow calculations
-    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
+    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was
+    stepped
     */
         change_code MWControlAdjust();
-        /** @brief do any stepped adjustments  based on MVAR control from the power flow calculations
-    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
+        /** @brief do any stepped adjustments  based on MVAR control from the power flow
+    calculations
+    @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was
+    stepped
     */
         change_code MVarControlAdjust();
     };

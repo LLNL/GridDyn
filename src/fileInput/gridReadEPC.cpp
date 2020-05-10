@@ -558,7 +558,8 @@ void epcReadDCBus(dcBus* bus, string_view line, double /*base*/, const basicRead
     }
 }
 
-//#load data  [10485]          id   ------------long_id_------------     st      mw      mvar    mw_i    mvar_i
+//#load data  [10485]          id   ------------long_id_------------     st      mw      mvar mw_i
+//mvar_i
 // mw_z      mvar_z  ar zone  date_in date_out pid N own sdmon nonc ithbus ithflag
 void epcReadLoad(zipLoad* ld, string_view line, double /*base*/)
 {
@@ -612,7 +613,8 @@ void epcReadLoad(zipLoad* ld, string_view line, double /*base*/)
     // ignore the owner field
 }
 
-//#shunt data  [1988]         id                               ck  se  long_id_     st ar zone    pu_mw  pu_mvar
+//#shunt data  [1988]         id                               ck  se  long_id_     st ar zone pu_mw
+//pu_mvar
 // date_in date_out pid N own part1 own part2 own part3 own part4 --num--  --name--  --kv--
 
 void epcReadFixedShunt(zipLoad* ld, string_view line, double /*base*/)
@@ -696,8 +698,8 @@ void epcReadSwitchShunt(loads::svd* ld, string_view line, double /*base*/)
             break;
         case 1:
             ld->set("mode", "stepped");
-            //ld->set("vmax", high);
-            //ld->set("vmin", low);
+            // ld->set("vmax", high);
+            // ld->set("vmin", low);
             if (rbus != nullptr) {
                 ld->setControlBus(rbus);
             }
@@ -772,10 +774,12 @@ void epcReadSwitchShunt(loads::svd* ld, string_view line, double /*base*/)
 
     ld->set("yq", -initVal, pu);
 }
-//#generator data  [XXX]    id   ------------long_id_------------    st ---no--     reg_name       prf  qrf  ar
+//#generator data  [XXX]    id   ------------long_id_------------    st ---no--     reg_name prf qrf
+//ar
 // zone   pgen   pmax   pmin   qgen   qmax   qmin   mbase   cmp_r cmp_x gen_r gen_x           hbus
 // tbus           date_in date_out pid N
-//#-rtran -xtran -gtap- ow1 part1 ow2 part2 ow3 part3 ow4 part4 ow5 part5 ow6 part6 ow7 part7 ow8 part8 gov agc
+//#-rtran -xtran -gtap- ow1 part1 ow2 part2 ow3 part3 ow4 part4 ow5 part5 ow6 part6 ow7 part7 ow8
+//part8 gov agc
 // disp basld air turb qtab pmax2 sdmon
 
 void epcReadGen(Generator* gen, string_view line, double /*base*/)
@@ -870,9 +874,11 @@ std::string generateLineName(const string_viewVector& svec, const std::string& p
     return temp2;
 }
 
-//#branch data[17003]                                ck  se------------long_id_------------st resist   react
-// charge   rate1  rate2  rate3  rate4 aloss  lngth #ar zone trangi tap_f tap_t  date_in date_out pid N ty  rate5
-// rate6  rate7  rate8 ow1 part1 ow2 part2 ow3 part3 ow4 part4 ow5 part5 ow6 part6 ow7 part7 ow8 part8 ohm sdmon
+//#branch data[17003]                                ck  se------------long_id_------------st resist
+//react
+// charge   rate1  rate2  rate3  rate4 aloss  lngth #ar zone trangi tap_f tap_t  date_in date_out
+// pid N ty  rate5 rate6  rate7  rate8 ow1 part1 ow2 part2 ow3 part3 ow4 part4 ow5 part5 ow6 part6
+// ow7 part7 ow8 part8 ohm sdmon
 //#
 void epcReadBranch(coreObject* parentObject,
                    string_view line,
@@ -945,10 +951,11 @@ void epcReadBranch(coreObject* parentObject,
     }
 }
 
-//#dc line data[0]                                  ck------------long_id_------------st ar zone   resist   react
-// capac   rate1  rate2  rate3  rate4  len  aloss    date_in date_out PID N  rate5  rate6  rate7  rate8 #len-- -
-// loss - date_in date_out pid N  rate5  rate6  rate7  rate8 ow1 part1 ow2 part2 ow3 part3 ow4 part4 ow5 part5 ow6
-// part6 ow7 part7 ow8 part8
+//#dc line data[0]                                  ck------------long_id_------------st ar zone
+//resist   react
+// capac   rate1  rate2  rate3  rate4  len  aloss    date_in date_out PID N  rate5  rate6  rate7
+// rate8 #len-- - loss - date_in date_out pid N  rate5  rate6  rate7  rate8 ow1 part1 ow2 part2 ow3
+// part3 ow4 part4 ow5 part5 ow6 part6 ow7 part7 ow8 part8
 
 void epcReadDCBranch(coreObject* parentObject,
                      string_view line,

@@ -34,9 +34,8 @@ class gridObjectHolder: public coreObject {
   public:
     explicit gridObjectHolder(count_t objs): coreObject("holder_#"), objArray(objs), objCount(objs)
     {
-        for (
-            auto& so :
-            objArray) {  // we want to add an owning reference since these objects are held internally and should not be deleted
+        for (auto& so : objArray) {  // we want to add an owning reference since these objects are
+                                     // held internally and should not be deleted
             // elsewhere
             so.addOwningReference();
         }

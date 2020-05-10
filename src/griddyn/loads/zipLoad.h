@@ -15,9 +15,9 @@
 #include "../Load.h"
 
 namespace griddyn {
-/** primary load class supports 3 main types of loads  constant power, constant impedance, constant current
-these loads should for the basis of most non dynamic load models following the ZIP model Z-constant impedance,
-I-constant current, P- constant Power
+/** primary load class supports 3 main types of loads  constant power, constant impedance, constant
+current these loads should for the basis of most non dynamic load models following the ZIP model
+Z-constant impedance, I-constant current, P- constant Power
 */
 class zipLoad: public Load {
   public:

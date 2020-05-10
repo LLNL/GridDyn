@@ -27,8 +27,8 @@ namespace blocks {
             uses_deadband = object_flag10,  //!< flag indicating the deadband is in use
             uses_shiftedoutput =
                 object_flag11,  //!< flag indicating the output should shift for continuity
-            dbtrigger_high =
-                object_flag12,  //!< flag indicating the deadband has been triggered on the high side
+            dbtrigger_high = object_flag12,  //!< flag indicating the deadband has been triggered on
+                                             //!< the high side
         };
         /** states for the deadband block*/
         enum class deadbandstate_t { normal, rampup, outside, rampdown, shifted };
@@ -67,7 +67,8 @@ namespace blocks {
                          units::unit unitType = units::defunit) override;
         // virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
-        // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+        // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const
+        // solverMode &sMode);
         virtual void blockDerivative(double input,
                                      double didt,
                                      const stateData& sD,

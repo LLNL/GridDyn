@@ -131,7 +131,8 @@ namespace relays {
     void pmu::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
     {
         if (m_sourceObject == nullptr) {
-            // we know the parent is most likely an area so find the corresponding bus that matches the user ID
+            // we know the parent is most likely an area so find the corresponding bus that matches
+            // the user ID
             if (getUserID() != kNullLocation) {
                 m_sourceObject = getParent()->getSubObject("bus", getUserID());
             }

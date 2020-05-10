@@ -35,10 +35,9 @@ if T1 is 0 it behaves like the basic block
     @param[in] t1  the time constant
     @param[in] objName the name of the block
     */
-        controlBlock(
-            double t1,
-            const std::string& objName =
-                "controlBlock_#");  // convert to the equivalent of a delay block with t2=0;
+        controlBlock(double t1,
+                     const std::string& objName = "controlBlock_#");  // convert to the equivalent
+                                                                      // of a delay block with t2=0;
         /** alternate constructor to add in the time constant
     @param[in] t1  the time constant
     @param[in] t2 the upper time constant

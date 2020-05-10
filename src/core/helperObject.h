@@ -40,8 +40,8 @@ class helperObject {
 
     explicit helperObject(std::string objectName);
 
-    // don't allow copy constructors and assignment operator as they would introduce all sorts of other complicated
-    // issues in the system
+    // don't allow copy constructors and assignment operator as they would introduce all sorts of
+    // other complicated issues in the system
     helperObject(const helperObject&) = delete;
     void operator=(helperObject& obj) = delete;
     /** @brief default destructor  so it can be overridden*/
@@ -98,8 +98,8 @@ class helperObject {
      */
     std::uint64_t getID() const noexcept { return m_oid; }
     /**
-     * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is higher than
-     * another object
+     * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is
+     * higher than another object
      */
     void makeNewOID();
 

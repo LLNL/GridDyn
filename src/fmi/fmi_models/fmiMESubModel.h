@@ -41,8 +41,8 @@ namespace fmi {
         count_t m_eventCount = 0;  //!< the number of event indicators
         std::shared_ptr<fmi2ModelExchangeObject> me;
 
-        std::vector<outputEstimator*>
-            oEst;  //!< vector of objects used for output estimation //TODO:: Make this an actual vector of objects
+        std::vector<outputEstimator*> oEst;  //!< vector of objects used for output estimation
+                                             //!< //TODO:: Make this an actual vector of objects
         coreTime localIntegrationTime = 0.01;
         fmuMode prevFmiState = fmuMode::instantiatedMode;
         std::vector<vInfo> stateInformation;

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef BLOCK_SEQUENCE_H_
 #define BLOCK_SEQUENCE_H_
@@ -18,8 +18,8 @@
 namespace griddyn {
 namespace blocks {
     /** @brief class implementing a sequence of blocks as a single block
-A block is defined as a single input single output subModel.  This object takes any number of blocks in a sequence
-and processes them in the appropriate fashion.
+A block is defined as a single input single output subModel.  This object takes any number of blocks
+in a sequence and processes them in the appropriate fashion.
 */
     class blockSequence: public Block {
       public:
@@ -34,7 +34,7 @@ and processes them in the appropriate fashion.
         std::vector<double> blockOutputs;  //!< temporary storage for block outputs
         std::vector<double> blockDoutDt;  //!< temporary storage for block ramp outputs
         index_t seqID = 0;  //!< sequence ID for last update
-        //NOTE:: 4 byte gap here
+        // NOTE:: 4 byte gap here
         double sampleTime = kBigNum;  //!< the minimum local sampling time for local integration
       public:
         /** @brief default constructor*/
@@ -95,7 +95,7 @@ and processes them in the appropriate fashion.
                                       const stateData& sD,
                                       const solverMode& sMode,
                                       check_level_t level) override;
-        //virtual void setTime(coreTime time){prevTime=time;};
+        // virtual void setTime(coreTime time){prevTime=time;};
         /** get the output of one of the component blocks
     *@param[in] blockNum the index of the block to the get the output of
     @return the output value of the requested block
@@ -116,6 +116,6 @@ and processes them in the appropriate fashion.
         virtual coreObject* findByUserID(const std::string& typeName,
                                          index_t searchID) const override;
     };
-}  //namespace blocks
-}  //namespace griddyn
+}  // namespace blocks
+}  // namespace griddyn
 #endif

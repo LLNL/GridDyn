@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #include "RungeKutta_SDIRK.h"
 
 #include "../math/DBlockTriMatrix.h"
@@ -48,7 +48,7 @@ namespace paradae {
         bool success = true;
         PVector Ki, Kim1;
         Solver_App_SDIRK* app_sdirk = dynamic_cast<Solver_App_SDIRK*>(app);
-        //Newton newton(100);
+        // Newton newton(100);
 
         if (app_sdirk == nullptr) {
             cerr << "Error when casting Solver_App_RK in SDIRK. This should not happen" << endl;
@@ -59,7 +59,7 @@ namespace paradae {
             app_sdirk->SetSolverStep(i, allK, x0);
             if (i > 0) {
                 allK.GetPVector(i - 1, Kim1);
-                //Ki.CopyData(Kim1);
+                // Ki.CopyData(Kim1);
             }
 
             Ki.Fill(0);
@@ -137,7 +137,7 @@ namespace paradae {
             jacmat->operator*=(alpha);
             if (factorize) jacmat->Factorize();
         }
-        //update_jacobian=true;
+        // update_jacobian=true;
     }
 }  // namespace paradae
 }  // namespace griddyn

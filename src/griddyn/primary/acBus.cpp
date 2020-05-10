@@ -240,7 +240,8 @@ void acBus::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
             Padj = true;  // We have a P control object
         }
 
-        if (!Padj) {  // if there is no generator listed on SLK or afix bus we need one for accounting purposes so add a
+        if (!Padj) {  // if there is no generator listed on SLK or afix bus we need one for
+                      // accounting purposes so add a
             // default one
             if (!CHECK_CONTROLFLAG(flags, no_auto_autogen)) {
                 LOG_NORMAL("SLK BUS with No adjustable power elements, enabling auto_gen");
@@ -2099,8 +2100,8 @@ void acBus::converge(coreTime time,
                                 dV = DQ / Qvii + DP / Pvii;
                                 if ((!std::isfinite(dV)) ||
                                     ((minV > 0.35) &&
-                                     (v1 - dV <
-                                      minV)))  // probably means the real power computation is invalid
+                                     (v1 - dV < minV)))  // probably means the real power
+                                                         // computation is invalid
                                 {
                                     dV = DQ / Qvii;
                                 }

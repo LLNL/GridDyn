@@ -84,7 +84,7 @@ struct tolerances {
     double rtol = 1e-6;  //!< the relative tolerance
     coreTime timeTol =
         kSmallTime;  //!< the allowable time slop in events.  The time span below which the system
-        //! doesn't really care about
+    //! doesn't really care about
 };
 
 class Recorder;
@@ -94,8 +94,8 @@ class Event;
 
 enum class contingency_mode_t;  // forward declare the enumeration
 /** @brief the GridDyn Simulation Class
-  the gridDynSimulation class contains the mechanics for generating solutions to various power systems problems of
-  interest
+  the gridDynSimulation class contains the mechanics for generating solutions to various power
+  systems problems of interest
 */
 class gridDynSimulation: public gridSimulation {
   public:
@@ -113,8 +113,8 @@ class gridDynSimulation: public gridSimulation {
     /** @brief enumeration of ordering schemes for variables*/
     enum class offset_ordering {
         mixed = 0,  //!< everything is mixed through each other
-        grouped =
-            1,  //!< all similar variables are grouped together (angles, then voltage, then algebraic, then
+        grouped = 1,  //!< all similar variables are grouped together (angles, then voltage, then
+                      //!< algebraic, then
         //! differential)
         algebraic_grouped = 2,  //!< all the algebraic variables are grouped, then the differential
         voltage_first = 3,  //!< grouped with the voltage coming first
@@ -135,9 +135,10 @@ class gridDynSimulation: public gridSimulation {
     const solverMode* defDynDiffMode =
         &cDynDiffSolverMode;  //!< link to the default differential solver mode
 
-    dynamic_solver_methods defaultDynamicSolverMethod = dynamic_solver_methods::
-        dae;  //!< specifies which dynamic solver method to use if it is not otherwise
-        //! specified.
+    dynamic_solver_methods defaultDynamicSolverMethod =
+        dynamic_solver_methods::dae;  //!< specifies which dynamic solver method to use if it is not
+                                      //!< otherwise
+    //! specified.
     offset_ordering default_ordering =
         offset_ordering::mixed;  //!< the default_ordering scheme for state variables
     count_t max_Vadjust_iterations = 30;  //!< maximum number of Voltage adjust iterations
@@ -160,8 +161,8 @@ class gridDynSimulation: public gridSimulation {
     std::vector<std::shared_ptr<SolverInterface>> solverInterfaces;  //!< vector of solver data
     std::vector<const double*>
         extraStateInformation;  //!< a vector of additional state information for solveMode pairings
-    std::vector<const double*>
-        extraDerivInformation;  //!< a vector of additional derivative Information for solverMode pairings
+    std::vector<const double*> extraDerivInformation;  //!< a vector of additional derivative
+                                                       //!< Information for solverMode pairings
     std::vector<gridComponent*>
         singleStepObjects;  //!< objects which require a state update after time step
     std::vector<gridBus*> slkBusses;  //!< vector of slack buses to aid in powerFlow adjust
@@ -169,8 +170,9 @@ class gridDynSimulation: public gridSimulation {
     std::vector<std::shared_ptr<continuationSequence>>
         continList;  //!< set of continuation sequences to run
     std::vector<std::function<int()>>
-        additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the PflowInitializeA
-        //!< step
+        additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the
+                                            //!< PflowInitializeA
+    //!< step
   public:
     /** @ constructor to set the name
     @param[in] objName the name of the simulation*/
@@ -178,9 +180,9 @@ class gridDynSimulation: public gridSimulation {
     ~gridDynSimulation();
     virtual coreObject* clone(coreObject* obj = nullptr) const override;
 
-    /** @brief set a particular instantiation of the simulation object to be the master for various purposes
-     this function along with getInstance is used by external libraries to get particular information about the
-    simulation without needing to store a copy of the simulation pointer
+    /** @brief set a particular instantiation of the simulation object to be the master for various
+    purposes this function along with getInstance is used by external libraries to get particular
+    information about the simulation without needing to store a copy of the simulation pointer
     @param[in] gds a pointer to the simulation intended to be the master*/
     static void setInstance(gridDynSimulation* gds);
 
@@ -202,7 +204,7 @@ class gridDynSimulation: public gridSimulation {
     */
     int checkNetwork(
         network_check_type checkType);  // function to do a check on the network and potentially
-        // reorder a few things and make sure it is solvable
+    // reorder a few things and make sure it is solvable
 
     /** @brief perform a power flow calculation
   @return in indicating success (0) or failure (non-zero)*/
@@ -260,7 +262,8 @@ class gridDynSimulation: public gridSimulation {
     @return int indicating success (0) or failure (non-zero)*/
     int step() override;
 
-    /**@brief run powerFlow in event driven mode,  evaluate the power flow at every given event or iteration time
+    /**@brief run powerFlow in event driven mode,  evaluate the power flow at every given event or
+    iteration time
     @param[in] t_end the stopping time for the simulation
     @param[in] t_step  the step size (the maximum time between powerFlow evaluation is t_step
     @return int indicating success (0) or failure (non-zero)*/
@@ -307,9 +310,8 @@ class gridDynSimulation: public gridSimulation {
     /**@brief initialize the simulation for dynamic simulation at the specified time
     @param[in] tStart the time of the initialization default to 0
     @return int indicating success (0) or failure (non-zero)*/
-    int dynInitialize(
-        coreTime tStart =
-            negTime);  // code can detect this default param and use a previously specified start time
+    int dynInitialize(coreTime tStart = negTime);  // code can detect this default param and use a
+                                                   // previously specified start time
     void alert(coreObject* object, int code) override;
 
     /** @brief function to count the number of MPI objects required for this simulation
@@ -325,8 +327,8 @@ class gridDynSimulation: public gridSimulation {
     count_t nonZeros(const solverMode& sMode) const;
 
     /** @brief compute the network residuals
-      computes a set of function for the power system such $r(\hat{x},\hat{x'})=f(x,x)- f(\hat{x},\hat{x}')$
-    so that r approaches 0 as the $x$ == $\hat{x}
+      computes a set of function for the power system such $r(\hat{x},\hat{x'})=f(x,x)-
+    f(\hat{x},\hat{x}')$ so that r approaches 0 as the $x$ == $\hat{x}
     @param[in] time  the simulation time of the evaluation
     @param[in] state  the state information to evaluation
     @param[in] dstate_dt  the time derivative of the state
@@ -444,13 +446,15 @@ class gridDynSimulation: public gridSimulation {
     */
     solverMode getSolverMode(const std::string& solverType);
 
-    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface array
+    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface
+  array
   @param[in] index the index into the SolverInterface storage array
   @return a shared pointer to a SolverInterface
   */
     std::shared_ptr<const SolverInterface> getSolverInterface(index_t index) const;
 
-    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface array
+    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface
+    array
     @param[in] index the index into the SolverInterface storage array
     @return a shared pointer to a SolverInterface
     */
@@ -470,8 +474,8 @@ class gridDynSimulation: public gridSimulation {
     std::shared_ptr<SolverInterface> getSolverInterface(const solverMode& sMode);
 
     /** @brief get the SolverInterface referenced by name
-    @param[in] solverName string representing the SolverInterface name,  can be customized name or a particular
-    type
+    @param[in] solverName string representing the SolverInterface name,  can be customized name or a
+    particular type
     @return a shared pointer to a SolverInterface
     */
     std::shared_ptr<SolverInterface> getSolverInterface(const std::string& solverName);
@@ -531,8 +535,8 @@ class gridDynSimulation: public gridSimulation {
 
     /** @brief get the current solverMode from the simulation
     @param[in] sMode  input solverMode to check
-    @return if sMode is valid it returns that if not it finds the current active mode and returns a reference to
-    that
+    @return if sMode is valid it returns that if not it finds the current active mode and returns a
+    reference to that
     */
     const solverMode& getCurrentMode(const solverMode& sMode = cEmptySolverMode) const;
 
@@ -545,9 +549,10 @@ class gridDynSimulation: public gridSimulation {
     @param[in] sMode the solverMode of the state Data object
     */
     void fillExtraStateData(stateData& sD, const solverMode& sMode) const;
-    /** @brief add an initialization function that will execute prior to the internal initialization in HELICS
-    @param fptr a function object that returns an int.  if the value is non-zero it returns a failure the
-    initialization will halt
+    /** @brief add an initialization function that will execute prior to the internal initialization
+    in HELICS
+    @param fptr a function object that returns an int.  if the value is non-zero it returns a
+    failure the initialization will halt
     */
     void addInitOperation(std::function<int()> fptr);
 
@@ -558,21 +563,22 @@ class gridDynSimulation: public gridSimulation {
     void checkOffsets(const solverMode& sMode);
 
     /** @brief get and update a SolverInterface object
-     the difference here is that the object may not exist, in which case it is created and loaded with recent
-    information from the models
+     the difference here is that the object may not exist, in which case it is created and loaded
+    with recent information from the models
     @param[in] sMode the solverMode to get the data for
     @return a shared pointer to the SolverInterface object
     */
     std::shared_ptr<SolverInterface> updateSolver(const solverMode& sMode);
 
     /** @brief get a pointer to a solverMode based on a string
-    @param[in] solverType the string representing the solverMode, this can be a particular type of solverMode or
-    the name of a solver
+    @param[in] solverType the string representing the solverMode, this can be a particular type of
+    solverMode or the name of a solver
     @return the solverMode named by the string or a blank one if none can be found
     */
     const solverMode* getSolverModePtr(const std::string& solverType) const;
 
-    /** @brief get a pointer to a solverMode dependent on a particular index of the solver data structure
+    /** @brief get a pointer to a solverMode dependent on a particular index of the solver data
+    structure
     @param[in] index the index into the SolverInterface storage array
     @return the solverMode named by the string or a blank one if none can be found
     */
@@ -635,7 +641,8 @@ class gridDynSimulation: public gridSimulation {
     */
     virtual int dynamicDecoupled(coreTime tStop, coreTime tStep = negTime);
 
-    /** @brief ensure that the simulation has consistent initial conditions for starting a dynamic simulation
+    /** @brief ensure that the simulation has consistent initial conditions for starting a dynamic
+    simulation
     @param[in] sMode the solver mode for which to generate the initial conditions
     @return FUNCTION_EXECUTION_SUCCESS(0) if successful negative number if not
     */
@@ -665,11 +672,12 @@ class gridDynSimulation: public gridSimulation {
                                  std::shared_ptr<SolverInterface>& dynData);
 
     /** @brief reset the dynamic simulation
-     function checks for various conditions that cause specific things in the solver or simulation to be reset
-    the nature of the reset can be driven by the reset_code given as an argument or internal flags from alerts or
-    other mechanisms
+     function checks for various conditions that cause specific things in the solver or simulation
+    to be reset the nature of the reset can be driven by the reset_code given as an argument or
+    internal flags from alerts or other mechanisms
     @param[in] sMode the solverMode to operate on
-    @param[in] change the optional change code that the reset should function to, otherwise automatically detected
+    @param[in] change the optional change code that the reset should function to, otherwise
+    automatically detected
     @return true if the check did something, false if nothing has changed
     */
     bool dynamicCheckAndReset(const solverMode& sMode, change_code change = change_code::no_change);
@@ -678,8 +686,8 @@ class gridDynSimulation: public gridSimulation {
     void handleRootChange(const solverMode& sMode, std::shared_ptr<SolverInterface>& dynData);
 
     int checkAlgebraicRoots(std::shared_ptr<SolverInterface>& dynData);
-    /** @brief checks events for events needing to run and runs them then checks if a reset is needed if so it does
-    so
+    /** @brief checks events for events needing to run and runs them then checks if a reset is
+    needed if so it does so
     @param[in] cTime the time to run the events
     @param[in] sMode the solverMode to run
     @return true if the reset Function was run and did something

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #ifndef Equation_h
 #define Equation_h
 
@@ -29,18 +29,18 @@ namespace paradae {
         int n_uroots;  // Number of unscheduled roots
         int n_uactive;  // Number of active unscheduled roots
         int n_sactive;  // Number of active scheduled roots
-            // If a root is inactive, the code ignores it
+                        // If a root is inactive, the code ignores it
         int n_state;  // Size of the state vector, i.e. number of DOFs in space
 
         SVector is_active;  // Vector of size n_sroots+n_uroots, that says if a root
-            // is active or not.  First n_sroots indices are for
-            // scheduled roots, with the following indices
-            // indicating activity for unscheduled roots
+                            // is active or not.  First n_sroots indices are for
+                            // scheduled roots, with the following indices
+                            // indicating activity for unscheduled roots
 
         SVector dir_root;  // Direction of the crossing that would create a discontinuity
-            //   -1: zero is crossed with g decreasing,
-            //    1: zero is crossed with g increasing,
-            //    0: both direction would create a discontinuity
+                           //   -1: zero is crossed with g decreasing,
+                           //    1: zero is crossed with g increasing,
+                           //    0: both direction would create a discontinuity
 
         SVector t_sroot;  // The times of the scheduled discontinuities
         Real tol;  // Root finding tolerance

@@ -25,8 +25,8 @@ namespace loads {
             locked_flag = object_flag7,
             reactive_control_flag = object_flag8,
             reverse_control_flag = object_flag9,
-            reverse_toggled_flag =
-                object_flag10,  // indicator that the reverse flag has been toggled so don't try it again
+            reverse_toggled_flag = object_flag10,  // indicator that the reverse flag has been
+                                                   // toggled so don't try it again
         };
 
       protected:
@@ -77,9 +77,9 @@ namespace loads {
         virtual void set(const std::string& param,
                          double val,
                          units::unit unitType = units::defunit) override;
-        /** define which bus the svd is controlling voltage on if it is not otherwise specified it is assumed to be the
-     * parent bus
-     */
+        /** define which bus the svd is controlling voltage on if it is not otherwise specified it
+         * is assumed to be the parent bus
+         */
         virtual void setControlBus(gridBus* cBus);
 
         /** add a reactive block to the controller

@@ -119,7 +119,8 @@ double interpretStringBlock(string_view command, readerInfo& ri)
     auto val = gmlc::utilities::numeric_conversionComplete<double>(command, std::nan("0"));
     if (std::isnan(val)) {
         std::string ncommand = ri.checkDefines(command.to_string());
-        // iterate the process until the variable is no longer modified and still fails conversion to numerical
+        // iterate the process until the variable is no longer modified and still fails conversion
+        // to numerical
         if (command != ncommand) {
             val = gmlc::utilities::numeric_conversionComplete<double>(ncommand, std::nan("0"));
             if (std::isnan(val)) {

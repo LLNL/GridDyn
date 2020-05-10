@@ -1,7 +1,7 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable
+Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 
 /*
@@ -87,10 +87,11 @@ class AsioServiceManager {
 
     static void closeService(const std::string& serviceName = std::string());
     /** tell the service to free the pointer and leak the memory on delete
-    @details You may ask why, well in windows systems when operating in a DLL if this context is closed after
-    certain other operations that happen when the DLL is unlinked bad things can happen, and since in nearly all
-    cases this happens at Shutdown leaking really doesn't matter that much and if you don't the service could
-    terminate before some other parts of the program which cause all sorts of odd errors and issues
+    @details You may ask why, well in windows systems when operating in a DLL if this context is
+    closed after certain other operations that happen when the DLL is unlinked bad things can
+    happen, and since in nearly all cases this happens at Shutdown leaking really doesn't matter
+    that much and if you don't the service could terminate before some other parts of the program
+    which cause all sorts of odd errors and issues
     */
     static void setServiceToLeakOnDelete(const std::string& serviceName = std::string());
     virtual ~AsioServiceManager();
@@ -102,8 +103,9 @@ class AsioServiceManager {
     boost::asio::io_service& getBaseService() const { return *iserv; }
 
     /** run a single thread for the service manager to execute asynchronous services in
-    @details will run a single thread for the io_service,  it will not stop the thread until either the service
-    manager is closed or the haltServiceLoop function is called and there is no more work
+    @details will run a single thread for the io_service,  it will not stop the thread until either
+    the service manager is closed or the haltServiceLoop function is called and there is no more
+    work
     @param in the name of the service
     */
     static LoopHandle runServiceLoop(const std::string& serviceName = std::string());

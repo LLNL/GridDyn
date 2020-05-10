@@ -16,7 +16,7 @@
 namespace griddyn {
 namespace solvers {
     /** @brief SolverInterface interfacing to the SUNDIALS kinsol solver
- */
+     */
     class kinsolInterface: public sundialsInterface {
       public:
         /** @brief constructor*/
@@ -27,7 +27,7 @@ namespace solvers {
     */
         kinsolInterface(gridDynSimulation* gds, const solverMode& sMode);
         /** @brief destructor
-     */
+         */
         virtual ~kinsolInterface();
 
         virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;

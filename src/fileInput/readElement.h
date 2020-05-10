@@ -50,9 +50,9 @@ Relay* readRelayElement(std::shared_ptr<readerElement>& element,
                         readerInfo& ri,
                         coreObject* searchObject = nullptr);
 
-// zipLoad * readLoadElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject =
-// nullptr); Generator * readGeneratorElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject
-// *searchObject = nullptr);
+// zipLoad * readLoadElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject
+// *searchObject = nullptr); Generator * readGeneratorElement (std::shared_ptr<readerElement>
+// &element, readerInfo *ri, coreObject *searchObject = nullptr);
 Link* readLinkElement(std::shared_ptr<readerElement>& element,
                       readerInfo& ri,
                       coreObject* searchObject = nullptr,
@@ -165,8 +165,8 @@ coreObject* getParent(std::shared_ptr<readerElement>& element,
                       coreObject* parentObject,
                       const std::string& alternateName = "");
 
-// This set of constants and functions is to allow templating of the object type but getting an alternative string
-// for the parent type
+// This set of constants and functions is to allow templating of the object type but getting an
+// alternative string for the parent type
 const std::string emptyString = "";
 const std::string areaTypeString = "area";
 const std::string busTypeString = "bus";

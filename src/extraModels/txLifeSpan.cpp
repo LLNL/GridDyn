@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "txLifeSpan.h"
 
@@ -26,8 +26,8 @@ namespace griddyn {
 namespace extra {
     txLifeSpan::txLifeSpan(const std::string& objName): sensor(objName)
     {
-        opFlags.reset(
-            continuous_flag);  //this is a not a continuous model everything is slow so no need to make it continuous
+        opFlags.reset(continuous_flag);  // this is a not a continuous model everything is slow so
+                                         // no need to make it continuous
         outputStrings = {{"remaininglife", "liferemaining"},
                          {"lossoflife"},
                          {"rate", "rateofloss"}};
@@ -99,13 +99,13 @@ namespace extra {
             return sensor::dynObjectInitializeA(time0, flags);
         }
 
-        if (updatePeriod >
-            negTime) {  //set the period to the period of the simulation to at least 1/5 the winding time constant
+        if (updatePeriod > negTime) {  // set the period to the period of the simulation to at least
+                                       // 1/5 the winding time constant
             coreTime pstep = getRoot()->get("steptime");
             if (pstep < timeZero) {
                 pstep = 1.0;
             }
-            coreTime mtimestep = 120.0;  //update once per minute
+            coreTime mtimestep = 120.0;  // update once per minute
             updatePeriod = pstep * std::floor(mtimestep / pstep);
             if (updatePeriod < pstep) {
                 updatePeriod = pstep;
@@ -114,10 +114,11 @@ namespace extra {
         if (!opFlags[dyn_initialized]) {
             sensor::setFlag("sampled", true);
             if (inputStrings.empty()) {
-                //assume we are connected to a temperature sensor
+                // assume we are connected to a temperature sensor
                 sensor::set("input0", "hot_spot");
             }
-            auto b1 = new blocks::integralBlock(1.0 / 3600);  //add a gain so the output is in hours
+            auto b1 = new blocks::integralBlock(1.0 / 3600);  // add a gain so the output is in
+                                                              // hours
             sensor::add(b1);
             b1->parentSetFlag(separate_processing, true, this);
 
@@ -163,10 +164,10 @@ namespace extra {
     {
         IOdata iset{0.0};
         filterBlocks[0]->dynInitializeB(iset, iset, iset);
-        Relay::dynObjectInitializeB(
-            inputs,
-            desiredOutput,
-            fieldSet);  //skip over sensor::dynInitializeB since we are initializing the blocks here
+        Relay::dynObjectInitializeB(inputs,
+                                    desiredOutput,
+                                    fieldSet);  // skip over sensor::dynInitializeB since we are
+                                                // initializing the blocks here
     }
 
     void txLifeSpan::updateA(coreTime time)
@@ -206,5 +207,5 @@ namespace extra {
         }
     }
 
-}  //namespace extra
-}  //namespace griddyn
+}  // namespace extra
+}  // namespace griddyn

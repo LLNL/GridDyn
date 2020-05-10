@@ -18,7 +18,7 @@ namespace griddyn {
 /** namespace containing the various types of solvers that can be used with GridDyn*/
 namespace solvers {
     /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
- */
+     */
     class basicSolver: public SolverInterface {
       public:
         /** define whether to use the gauss algorithm or the gauss-seidel algorithm*/

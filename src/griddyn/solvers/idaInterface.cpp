@@ -385,7 +385,8 @@ namespace solvers {
         if (initCondMode ==
             ic_modes::fixed_masked_and_deriv)  // mainly for use upon startup from steady state
         {
-            // do a series of steps to ensure the original algebraic states are fixed and the derivatives are fixed
+            // do a series of steps to ensure the original algebraic states are fixed and the
+            // derivatives are fixed
             flags.set(useMask_flag);
             loadMaskElements();
             if (!flags[dense_flag]) {

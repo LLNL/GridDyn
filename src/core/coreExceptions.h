@@ -35,19 +35,19 @@ is not of a type that can be added
 */
 class unrecognizedObjectException: public coreObjectException {
   public:
-    explicit unrecognizedObjectException(coreObject* obj) noexcept: coreObjectException(obj){}
+    explicit unrecognizedObjectException(coreObject* obj) noexcept: coreObjectException(obj) {}
     virtual const char* what() const noexcept override { return "unrecognized object"; }
 };
 
 class objectAddFailure: public coreObjectException {
   public:
-    explicit objectAddFailure(coreObject* obj) noexcept: coreObjectException(obj){}
+    explicit objectAddFailure(coreObject* obj) noexcept: coreObjectException(obj) {}
     virtual const char* what() const noexcept override { return "failure to add object"; }
 };
 
 class objectRemoveFailure: public coreObjectException {
   public:
-    explicit objectRemoveFailure(coreObject* obj) noexcept: coreObjectException(obj){}
+    explicit objectRemoveFailure(coreObject* obj) noexcept: coreObjectException(obj) {}
     virtual const char* what() const noexcept override { return "failure to remove object"; }
 };
 
@@ -60,7 +60,7 @@ class unrecognizedParameter: public std::invalid_argument {
 
 class invalidParameterValue: public std::invalid_argument {
   public:
-    invalidParameterValue() noexcept: std::invalid_argument("invalid parameter entry"){}
+    invalidParameterValue() noexcept: std::invalid_argument("invalid parameter entry") {}
     invalidParameterValue(const std::string& param):
         std::invalid_argument(std::string("invalid parameter value for ") + param){};
 };
@@ -71,12 +71,14 @@ class executionFailure: public coreObjectException {
 
   public:
     explicit executionFailure(const coreObject* obj, const std::string& error_message):
-        coreObjectException(obj), message(error_message){}
+        coreObjectException(obj), message(error_message)
+    {
+    }
     virtual const char* what() const noexcept override { return message.c_str(); }
 };
 class cloneFailure: public coreObjectException {
   public:
-    explicit cloneFailure(const coreObject* obj) noexcept: coreObjectException(obj){}
+    explicit cloneFailure(const coreObject* obj) noexcept: coreObjectException(obj) {}
     virtual const char* what() const noexcept override { return "clone failure"; }
 };
 
@@ -86,13 +88,17 @@ class fileOperationError: public std::exception {
 
   public:
     explicit fileOperationError(const std::string& error_message = "file operation error"):
-        message(error_message){}
+        message(error_message)
+    {
+    }
     virtual const char* what() const noexcept override { return message.c_str(); }
 };
 class invalidFileName: public fileOperationError {
   public:
     explicit invalidFileName(const std::string& error_message = "file name is invalid"):
-        fileOperationError(error_message){}
+        fileOperationError(error_message)
+    {
+    }
 };
 
 }  // namespace griddyn

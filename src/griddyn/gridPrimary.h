@@ -20,9 +20,9 @@ class Area;
 class Link;
 class Relay;
 
-// these next two enumerations are used throughout the code base so I wouldn't recommend changing them if you want
-// the code to work properly making it adaptive would require a lot changes to const strings and arrays so isn't
-// worth it as I don't see a good reason for it to need to change
+// these next two enumerations are used throughout the code base so I wouldn't recommend changing
+// them if you want the code to work properly making it adaptive would require a lot changes to
+// const strings and arrays so isn't worth it as I don't see a good reason for it to need to change
 /** @brief locations for secondary input parameters (aka bus output locations)*/
 enum secondary_input_locations {
     voltageInLocation = 0,
@@ -36,17 +36,17 @@ enum secondary_output_locations {
 };
 
 /** @brief base class for top level simulation objects including gridBus, Link, gridRelays, and Area
-  gridPrimary class defines the interface for gridPrimary objects which are nominally objects that can be contained
-by a root object which is an area usually,  though there is no restriction in other classes also containing primary
-objects.
+  gridPrimary class defines the interface for gridPrimary objects which are nominally objects that
+can be contained by a root object which is an area usually,  though there is no restriction in other
+classes also containing primary objects.
 
 **/
 class gridPrimary: public gridComponent {
   public:
     int zone = 1;  //!< publicly accessible loss zone indicator not used internally
-    index_t locIndex2 =
-        kNullLocation;  //!< a second lookup index for the object to reference parent location in storage arrays for
-        //!< use by containing objects with no operational dependencies
+    index_t locIndex2 = kNullLocation;  //!< a second lookup index for the object to reference
+                                        //!< parent location in storage arrays for
+    //!< use by containing objects with no operational dependencies
 
   public:
     /**@brief default constructor*/
@@ -124,9 +124,10 @@ class gridPrimary: public gridComponent {
                                  const solverMode& sMode);
 
     /** @brief  try to shift the states to something more consistent
-      called when the current states do not make a consistent condition,  calling converge will attempt to move
-    them to a more valid state mode controls how this is done  0- does a single iteration loop mode=1 tries to
-    iterate until convergence based on tol mode=2  tries harder mode=3 does it with voltage only
+      called when the current states do not make a consistent condition,  calling converge will
+    attempt to move them to a more valid state mode controls how this is done  0- does a single
+    iteration loop mode=1 tries to iterate until convergence based on tol mode=2  tries harder
+    mode=3 does it with voltage only
     @pararm[in] time  the time of the corresponding states
     @param[in,out]  state the states of the system at present and shifted to match the updates
     @param[in,out] dstate_dt  the derivatives of the state that get updated
@@ -142,8 +143,8 @@ class gridPrimary: public gridComponent {
                           double tol = 0.01);
 
     /** @brief do a check on the power flow results
-     * checks for an violations of recommended power flow levels such as voltage, power limits, transfer capacity,
-     * angle limits, etc
+     * checks for an violations of recommended power flow levels such as voltage, power limits,
+     * transfer capacity, angle limits, etc
      * @param[out] Violation_vector, a storage location for any detected violations
      */
     virtual void pFlowCheck(std::vector<violation>& Violation_vector);

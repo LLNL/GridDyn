@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -255,9 +255,9 @@ BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, compare_cases, data::xrange
             auto b1 = gds->getBus(kk);
             auto cmp = compareBus(b2, b1, false);
             if (cmp == false) {
-                //useful to enable if there is ever an error but can make spurious warnings
+                // useful to enable if there is ever an error but can make spurious warnings
                 // std::cout << "bus " << kk <<" id["<<b1->getUserID()<< "] does not match" << '\n';
-                //cmp = compareBus(b1, b2, false,true);
+                // cmp = compareBus(b1, b2, false,true);
             }
             b2->setVoltageAngle(volts1[kk], ang1[kk]);
         }

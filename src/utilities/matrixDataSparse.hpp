@@ -145,7 +145,8 @@ class matrixDataSparse: public matrixData<ValueT> {
 
     using matrixData<ValueT>::copyTranslateRow;
 
-    /** @brief translate all the elements in a particular row in a2 and translate row origRow to newRow
+    /** @brief translate all the elements in a particular row in a2 and translate row origRow to
+       newRow
         @param[in] a2  the matrixDataSparse object to copy from
         @param[in] origRow the column to change
         @param[in] newRow the column to change origRow into
@@ -159,7 +160,8 @@ class matrixDataSparse: public matrixData<ValueT> {
         }
     }
 
-    /** @brief translate all the elements in a particular column in a2 and translate column origCol to newCol
+    /** @brief translate all the elements in a particular column in a2 and translate column origCol
+       to newCol
         @param[in] a2  the matrixDataSparse object to copy from
         @param[in] origCol the column to change
         @param[in] newCol the column to change origCol into

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../Generator.h"
 #include "../gridBus.h"
@@ -32,7 +32,7 @@ namespace exciters {
                                    "type1");  // setup type 1 as the default
     static childTypeFactory<ExciterIEEEtype2, Exciter> gfet2("exciter", "type2");
 
-}  //namespace exciters
+}  // namespace exciters
 
 Exciter::Exciter(const std::string& objName): gridSubModel(objName)
 {
@@ -285,4 +285,4 @@ const std::vector<stringVec>& Exciter::outputNames() const
     return outputNamesStr;
 }
 
-}  //namespace griddyn
+}  // namespace griddyn

@@ -104,7 +104,8 @@ namespace helicsLib {
         } else if (param == "loadkey") {
             loadKey = val;
 
-            // helicsRegister::instance()->registerPublication(loadKey, helicsRegister::dataType::helicsComplex);
+            // helicsRegister::instance()->registerPublication(loadKey,
+            // helicsRegister::dataType::helicsComplex);
         } else if ((param == "outunits") || (param == "outputunits")) {
             outUnits = units::unit_cast_from_string(val);
         } else {
@@ -124,7 +125,8 @@ namespace helicsLib {
     {
         std::complex<double> cv = std::polar(voltage, angle);
         std::string def = std::to_string(cv.real()) + "+" + std::to_string(cv.imag()) + "j";
-        // helicsRegister::instance()->registerSubscription(voltageKey, helicsRegister::dataType::helicsComplex, def);
+        // helicsRegister::instance()->registerSubscription(voltageKey,
+        // helicsRegister::dataType::helicsComplex, def);
     }
 
 }  // namespace helicsLib

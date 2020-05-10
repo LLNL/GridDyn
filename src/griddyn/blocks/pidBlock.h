@@ -19,7 +19,8 @@
 namespace griddyn {
 namespace blocks {
     /** @brief class implementing a PID controller
-the derivative operator has a prefilter operation on it with a time constant T1 and the output has a delay of Td*/
+the derivative operator has a prefilter operation on it with a time constant T1 and the output has a
+delay of Td*/
     class pidBlock: public Block {
       public:
       protected:
@@ -67,7 +68,7 @@ the derivative operator has a prefilter operation on it with a time constant T1 
         virtual stringVec localStateNames() const override;
     };
 
-}  //namespace blocks
-}  //namespace griddyn
+}  // namespace blocks
+}  // namespace griddyn
 
 #endif  // PID_BLOCK_H_

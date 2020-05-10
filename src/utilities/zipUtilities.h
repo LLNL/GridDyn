@@ -24,8 +24,8 @@ enum class zipMode {
 /** zip a set of files into a zip file
 @param[in] file the name of the file to zip the specified files into
 @param[in] filesToZip  a list of files to zip
-@param[in] mode  (optional) set to zipMode::overwrite to overwrite any existing file zipMode::append to append,
-defaults to overwrite
+@param[in] mode  (optional) set to zipMode::overwrite to overwrite any existing file zipMode::append
+to append, defaults to overwrite
 @return 0 on success an error code otherwise
 */
 int zip(const std::string& file,
@@ -34,8 +34,8 @@ int zip(const std::string& file,
 /** zip a folder into a zip file
 @param[in] file the name of the file to zip the specified files into
 @param[in] folderLoc the folder to zip
-@param[in] mode  (optional) set to zipMode::overwrite to overwrite any existing file zipMode::append to append,
-defaults to overwrite
+@param[in] mode  (optional) set to zipMode::overwrite to overwrite any existing file zipMode::append
+to append, defaults to overwrite
 @return 0 on success an error code otherwise
 */
 int zipFolder(const std::string& file,

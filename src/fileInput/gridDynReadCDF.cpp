@@ -482,8 +482,8 @@ void cdfReadBranch(coreObject* parentObject,
     lnk->setName(temp2);
     addToParentRename(lnk, parentObject);
 
-    // skip the load flow area and loss zone and circuit for now TODO:: PT Fix this when area controls are put in
-    // place
+    // skip the load flow area and loss zone and circuit for now TODO:: PT Fix this when area
+    // controls are put in place
 
     // get the branch impedance
     R = numeric_conversion(line.substr(19, 10), 0.0);

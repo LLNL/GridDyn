@@ -15,8 +15,8 @@
 #include <vector>
 
 namespace utilities {
-/** class to define a lookup table based operating boundary, for min and max limits, values are interpolated in
- * intermediate points with a linear interpolator*/
+/** class to define a lookup table based operating boundary, for min and max limits, values are
+ * interpolated in intermediate points with a linear interpolator*/
 class OperatingBoundary {
   private:
     /** simple structor for containing points*/
@@ -69,11 +69,14 @@ class OperatingBoundary {
     double getMin(double val) const;
     /** get both the lower and upper bounds*/
     std::pair<double, double> getLimits(double val) const;
-    /** get the rate of change in upper bound for a given value (aka the slope of the interpolator)*/
+    /** get the rate of change in upper bound for a given value (aka the slope of the
+     * interpolator)*/
     double dMaxROC(double val) const;
-    /** get the rate of change in lower bound for a given value (aka the slope of the interpolator)*/
+    /** get the rate of change in lower bound for a given value (aka the slope of the
+     * interpolator)*/
     double dMinROC(double val) const;
-    /** get the rate of change in lower and upper bounds for a given value (aka the slope of the interpolator)*/
+    /** get the rate of change in lower and upper bounds for a given value (aka the slope of the
+     * interpolator)*/
     std::pair<double, double> getLimitsROC(double val) const;
     /** clear the table*/
     void clear();

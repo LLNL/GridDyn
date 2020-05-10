@@ -21,10 +21,9 @@ using removeFunction_t = void (*)(coreObject* obj);
 
 /** template class for defining a (potentially shared) owning ptr for the coreObject
 @details uses a custom deleter to operate on the reference counter inside of the core object
-intended to be used when there are multiple owners with independent lives and for direct instantiated objects where
-the delete function should not be called
-shared pointers of coreObjects are not recommended due to the hierarchal nature of the objects
-in a block
+intended to be used when there are multiple owners with independent lives and for direct
+instantiated objects where the delete function should not be called shared pointers of coreObjects
+are not recommended due to the hierarchal nature of the objects in a block
 */
 template<class X>
 class coreOwningPtr {
@@ -92,9 +91,8 @@ public:
     childObject() noexcept{};
     childObject(X* obj,coreObject* parentObj):ptr(obj),parent(parentObj)
     {
-        static_assert (std::is_base_of<coreObject, X>::value, "child Object ptr type must have a base of
-coreObject");
-        if (ptr != nullptr)
+        static_assert (std::is_base_of<coreObject, X>::value, "child Object ptr type must have a
+base of coreObject"); if (ptr != nullptr)
         {
             ptr->setParent(parent);
             ptr->addOwningReference();
