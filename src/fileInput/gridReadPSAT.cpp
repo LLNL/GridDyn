@@ -39,7 +39,7 @@
 #include <iostream>
 
 namespace griddyn {
-using namespace units;
+//using namespace units;
 
 void loadPSATBusArray(coreObject* parentObject,
                       double basepower,
@@ -298,6 +298,9 @@ void loadPSATGenArray(coreObject* /*parentObject*/,
                       const mArray& gens,
                       const std::vector<gridBus*>& busList)
 {
+    using units::MVAR;
+    using units::MW;
+
     for (auto& genInfo : gens) {
         auto ind1 = static_cast<size_t>(genInfo[0]);
         gridBus* bus = busList[ind1];
@@ -460,7 +463,7 @@ void loadPSATLinkArray(coreObject* parentObject,
         }
 
         if (lnkInfo[5] != 0.0) {
-            lnk->set("ratinga", lnkInfo[2], MVAR);
+            lnk->set("ratinga", lnkInfo[2], units::MVAR);
         }
 
         if (lnkInfo.size() >= 11) {
@@ -471,7 +474,7 @@ void loadPSATLinkArray(coreObject* parentObject,
         }
         if (lnkInfo.size() >= 12) {
             if (lnkInfo[11] != 0) {
-                lnk->set("tapangle", lnkInfo[11], deg);
+                lnk->set("tapangle", lnkInfo[11], units::deg);
             }
         }
     }
@@ -503,7 +506,7 @@ void loadPSATLinkArrayB(coreObject* parentObject,
         }
 
         if (lnkInfo[5] != 0) {
-            lnk->set("ratinga", lnkInfo[2], MVAR);
+            lnk->set("ratinga", lnkInfo[2], units::MVAR);
         }
 
         if (lnkInfo.size() >= 11) {
@@ -514,7 +517,7 @@ void loadPSATLinkArrayB(coreObject* parentObject,
         }
         if (lnkInfo.size() >= 12) {
             if (lnkInfo[11] != 0.0) {
-                lnk->set("tapangle", lnkInfo[11], deg);
+                lnk->set("tapangle", lnkInfo[11], units::deg);
             }
         }
     }
@@ -728,43 +731,51 @@ void loadPSATSynArray(coreObject* /*parentObject*/,
         auto mode = genData[4];
 
         GenModel* gm = nullptr;
-        if (mode < 2.1)  // second order classical model
+        if (mode < 2.1)  
         {
+            // second order classical model
             gm = new GenModel();
-        } else if (mode < 3.1)  // 3rd order model
+        } else if (mode < 3.1) 
         {
+            // 3rd order model
             gm = new GenModel3();
-        } else if (mode < 4.1)  // 4th order model
+        } else if (mode < 4.1)  
         {
+            // 4th order model
             gm = new GenModel4();
-        } else if (mode < 5.15)  // 5th order model type 1
+        } else if (mode < 5.15)  
         {
+            // 5th order model type 1
             gm = new GenModel5();
-        } else if (mode < 5.25)  // 5th order model type 2
+        } else if (mode < 5.25) 
         {
+            // 5th order model type 2
             gm = new GenModel5type2();
-        } else if (mode < 5.35)  // 5th order model type 3
+        } else if (mode < 5.35)  
         {
+            // 5th order model type 3
             gm = new GenModel5type3();
-        } else if (mode < 6.05)  // 6th order model
+        } else if (mode < 6.05)  
         {
+            // 6th order model
             gm = new GenModel6type2();
-        } else if (mode < 8.05)  // 8th order model
+        } else if (mode < 8.05)  
         {
+            // 8th order model
             gm = new GenModel8();
         }
         if (gm == nullptr) {
             std::cout << "genModel " << mode << " not implemented yet\n";
             continue;
         }
-        gm->set("rating", genData[1], MW);
-        gen->set("basevoltage", genData[2], kV);
+        gm->set("rating", genData[1], units::MW);
+        gen->set("basevoltage", genData[2], units::kV);
         double xl = genData[5];
         gm->set("xl", genData[5]);
         gm->set("r", genData[6]);
         gm->set("xdp", genData[8] - xl);
         gm->set("h", genData[17] / 2.0);
-        gm->set("d", genData[18], puHz);  // the damping coefficient in PSAT is in puHz
+        gm->set("d", genData[18], units::puHz);  // the damping coefficient in PSAT is in puHz
         if (mode > 2.1)  // deal with the voltage speed adjustment
         {
             if (genData.size() >= 21) {
@@ -827,11 +838,13 @@ void loadPSATTgArray(coreObject* parentObject,
             continue;
         }
         mode = govData[1];
-        if (mode < 1.1)  // second order classical model
+        if (mode < 1.1)  
         {
+            // second order classical model
             gm = new Governor();
-        } else if (mode < 2.1)  // 3rd order model
+        } else if (mode < 2.1)  
         {
+            // 3rd order model
             gm = new governors::GovernorIeeeSimple();
         }
 

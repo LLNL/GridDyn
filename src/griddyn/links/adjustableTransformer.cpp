@@ -1236,11 +1236,11 @@ namespace links {
     change_code adjustableTransformer::voltageControlAdjust()
     {
         auto ret = change_code::no_change;
-        double V;
+
         // check the voltage to make it is within the appropriate band
-        V = controlBus->getVoltage();
+        double voltage = controlBus->getVoltage();
         if (!(opFlags[use_target_mode])) {
-            if (V > Vmax) {
+            if (voltage > Vmax) {
                 tap = tap + direction * stepSize;
                 ret = change_code::parameter_change;
                 if (adjCount > 0) {
@@ -1254,7 +1254,7 @@ namespace links {
                 if (ret > change_code::no_change) {
                     prevAdjust = direction * stepSize;
                 }
-            } else if (V < Vmin) {
+            } else if (voltage < Vmin) {
                 tap = tap - direction * stepSize;
                 ret = change_code::parameter_change;
                 if (adjCount > 0) {
@@ -1280,10 +1280,10 @@ namespace links {
                 prevAdjust = 0;
                 ret = change_code::no_change;
             }
-            prevValue = V;
+            prevValue = voltage;
         } else {
             double shift = 0;
-            double dev = V - Vtarget;
+            double dev = voltage - Vtarget;
             if (std::abs(dev) < stepSize / 2.0) {
                 ret = change_code::no_change;
             } else {
@@ -1309,7 +1309,7 @@ namespace links {
                     if (std::abs(prevAdjust + shift) < stepSize / 2.0) {
                         oCount++;
                         if (oCount > 3) {
-                            if (V > prevValue) {
+                            if (voltage > prevValue) {
                                 ret = change_code::no_change;
                                 tap = tap - shift;
                             }
@@ -1318,7 +1318,7 @@ namespace links {
                 }
                 if (ret > change_code::no_change) {
                     prevAdjust = shift;
-                    prevValue = V;
+                    prevValue = voltage;
                 }
             }
         }

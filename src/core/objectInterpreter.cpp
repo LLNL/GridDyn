@@ -66,8 +66,9 @@ coreObject* locateObject(const std::string& Istring,
     if (mname == rootObj->getName()) {
         obj = const_cast<coreObject*>(rootObj);
     } else if ((mname[0] == '@') ||
-               (mname[0] == '/'))  // implies searching the parent object as well
+               (mname[0] == '/'))  
     {
+        // implies searching the parent object as well
         mname.erase(0);
         obj = rootObj->find(mname);
         if (obj == nullptr) {
@@ -108,12 +109,14 @@ coreObject* locateObject(const std::string& Istring,
         }
     }
 
-    if ((sep == '/') && (obj != nullptr))  // we have a '/' so go into the sub model
+    if ((sep == '/') && (obj != nullptr))  
     {
+        // we have a '/' so go into the sub model
         obj = locateObject(secName, obj, false);
     } else if ((secName[0] == ':') &&
-               (obj != nullptr)) {  // we have a double colon so go deeper in the object using the
-                                    // found object as the base
+               (obj != nullptr)) {
+        // we have a double colon so go deeper in the object using the
+        // found object as the base
         obj = locateObject(secName.substr(1), obj, false);
     }
     return obj;

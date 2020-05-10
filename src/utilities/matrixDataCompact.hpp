@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_COMPACT_H_
-#define _MATRIX_DATA_COMPACT_H_
 #pragma once
 
 #include "utilities/matrixData.hpp"
@@ -38,7 +36,7 @@ class matrixDataCompact: public matrixData<ValueT> {
     {
         // in column major order
         dVec[col * R + row] += num;
-    };
+    }
 
     virtual count_t size() const override { return R * C; };
     virtual count_t capacity() const override { return R * C; };
@@ -74,7 +72,7 @@ class matrixDataCompact: public matrixData<ValueT> {
         return tp;
     }
 
-    virtual ValueT at(index_t rowN, index_t colN) const override { return dVec[colN * R + rowN]; };
+    virtual ValueT at(index_t rowN, index_t colN) const override { return dVec[colN * R + rowN]; }
     auto begin() { return matrixIteratorCompact(this, 0); }
     auto end() { return matrixIteratorCompact(this, R * C); }
 
@@ -112,5 +110,3 @@ class matrixDataCompact: public matrixData<ValueT> {
         index_t counter;
     };
 };
-
-#endif

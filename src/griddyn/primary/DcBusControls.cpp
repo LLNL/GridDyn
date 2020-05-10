@@ -203,17 +203,20 @@ void DcBusControls::mergeBus(dcBus* mbus)
                 mbus->busController.slaveBusses.clear();
             }
         }
-    } else if (controlledBus->getID() > mbus->getID())  // mbus is now this buses master
+    } else if (controlledBus->getID() > mbus->getID())  
     {
+        // mbus is now this buses master
         if (controlledBus->checkFlag(
-                dcBus::bus_flags::slave_bus))  // if we are already a slave forward the merge to the
-                                               // master
+                dcBus::bus_flags::slave_bus))  
         {
+            // if we are already a slave forward the merge to the
+            // master
             if (masterBus->getID() != mbus->getID()) {
                 masterBus->mergeBus(mbus);
             }
-        } else  // we were a master now mbus is the master
+        } else 
         {
+            // we were a master now mbus is the master
             if (slaveBusses.empty())  // no slave buses
             {
                 masterBus = mbus;
@@ -245,8 +248,9 @@ void DcBusControls::unmergeBus(dcBus* mbus)
         } else if (isSameObject(masterBus, mbus)) {
             mbus->unmergeBus(controlledBus);  // flip it around so this bus is unmerged from mbus
         }
-    } else  // in the masterbus
+    } else  
     {
+        // in the masterbus
         if ((mbus->checkFlag(dcBus::bus_flags::slave_bus)) &&
             (isSameObject(controlledBus, mbus->busController.masterBus))) {
             for (auto& eb : slaveBusses) {

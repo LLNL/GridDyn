@@ -651,9 +651,9 @@ namespace links {
 
         linkFlows.P1 = dirMult * linkInfo.v2 * Idc;
         linkFlows.P2 = -linkFlows.P1;
-        double sr = k3sq2 * linkInfo.v1 * Idc;
+        double reactive = k3sq2 * linkInfo.v1 * Idc;
 
-        linkFlows.Q1 = -std::sqrt(sr * sr - linkFlows.P1 * linkFlows.P1);
+        linkFlows.Q1 = -std::sqrt(reactive * reactive - linkFlows.P1 * linkFlows.P1);
 
         // Q2 is 0 since bus k is a DC bus.
         /*
@@ -679,9 +679,9 @@ linkFlows.Q1);
             linkInfo.v2 = B2->getVoltage();
             linkFlows.P1 = dirMult * linkInfo.v2 * Idc;
             linkFlows.P2 = -linkFlows.P1;
-            double sr = k3sq2 * linkInfo.v1 * Idc;
+            double sourceP = k3sq2 * linkInfo.v1 * Idc;
 
-            linkFlows.Q1 = -std::sqrt(sr * sr - linkFlows.P1 * linkFlows.P1);
+            linkFlows.Q1 = -std::sqrt(sourceP * sourceP - linkFlows.P1 * linkFlows.P1);
         }
     }
 

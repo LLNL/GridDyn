@@ -111,8 +111,9 @@ class grabberInterpreter {
                         ggb = std::make_unique<opX>(std::move(ggbA), std::move(ggbB), cmdBlock);
                     }
                 }
-            } else  // not a function call so must be units description
+            } else  
             {
+                // not a function call so must be units description
                 ggb = singleBlockInterpreter(command, obj);
             }
         } else {
@@ -192,15 +193,17 @@ class grabberInterpreter {
                 return nullptr;  // we can't interpret this
             }
         } else if (valA != kNullVal) {
-            if (ggbB)  // both are grabber blocks
+            if (ggbB) 
             {
+                // both are grabber blocks
                 ggb = std::move(ggbB);
                 ggb->bias = valA;
                 if (op == '-') {
                     ggb->gain = -1.0;
                 }
-            } else if (valB != kNullVal)  // both are numeric
+            } else if (valB != kNullVal)  
             {
+                // both are numeric
                 ggb = std::make_unique<baseX>("constant", obj);
                 if (op == '+') {
                     ggb->bias = valA + valB;
@@ -237,10 +240,12 @@ class grabberInterpreter {
         std::unique_ptr<baseX> ggbB =
             (valB == kNullVal) ? interpretGrabberBlock(Bblock, obj) : nullptr;
 
-        if (ggbA)  // we know Ablock is std::make_shared<grabber
+        if (ggbA)  
         {
-            if (ggbB)  // both are grabber blocks
+            // we know Ablock is std::make_shared<grabber
+            if (ggbB)  
             {
+                // both are grabber blocks
                 ggb =
                     std::make_unique<opX>(std::move(ggbA), std::move(ggbB), command.substr(rlc, 1));
             } else if (valB != kNullVal) {
@@ -262,8 +267,9 @@ class grabberInterpreter {
                 return nullptr;  // we can't interpret this
             }
         } else if (valA != kNullVal) {
-            if (ggbB)  // B is a block
+            if (ggbB) 
             {
+                // B is a block
                 if (op == '*') {
                     ggb = std::move(ggbB);
                     ggb->gain = valA;
@@ -275,8 +281,9 @@ class grabberInterpreter {
                                                 std::move(ggbB),
                                                 command.substr(rlc, 1));
                 }
-            } else if (valB != kNullVal)  // both are numeric
+            } else if (valB != kNullVal) 
             {
+                // both are numeric
                 ggb = std::make_unique<baseX>("constant", obj);
                 if (op == '*') {
                     ggb->bias = valA * valB;
