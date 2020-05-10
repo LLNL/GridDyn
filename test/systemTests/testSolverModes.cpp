@@ -10,18 +10,20 @@
 * LLNS Copyright End
 */
 
+#include "../testHelper.h"
 #include "griddyn/simulation/diagnostics.h"
 #include "griddyn/solvers/solverInterface.h"
-#include "../testHelper.h"
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
 #include <cstdio>
 #include <iostream>
 
+#include <boost/test/unit_test.hpp>
+
+#include <boost/test/tools/floating_point_comparison.hpp>
+
 using namespace griddyn;
-static std::string solverMode_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/solvermode_tests/");
+static std::string solverMode_test_directory =
+    std::string(GRIDDYN_TEST_DIRECTORY "/solvermode_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (solverMode_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(solverMode_tests, gridDynSimulationTestFixture)
 
-
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_SUITE_END()

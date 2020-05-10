@@ -19,7 +19,7 @@ ts=timeSeries2('twobusdynout.csv');% replace the file name with the appropriate 
  title('Bus 1 Real Generation');
  ylabel('Generation (pu)');
  xlabel('time(s)');
- 
+
  figure(2);
  hold off;
  freq1=diff(ts(3))./diff(ts.time)/(2.0*pi);
@@ -29,7 +29,7 @@ ts=timeSeries2('twobusdynout.csv');% replace the file name with the appropriate 
  title('Bus Frequency');
  xlabel('time(s)');
  ylabel('frequency deviation (Hz)');
- 
+
  figure(3);
  hold off;
 

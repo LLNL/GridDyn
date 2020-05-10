@@ -11,14 +11,14 @@
  */
 
 #include "reserveDispatcher.h"
+
 #include "../Area.h"
 #include "../Generator.h"
 #include "AGControl.h"
 #include "core/coreExceptions.h"
 #include "scheduler.h"
 
-namespace griddyn
-{
+namespace griddyn {
 /*
 
 class reserveDispatcher
@@ -68,94 +68,78 @@ protected:
 
 
 */
-reserveDispatcher::reserveDispatcher (const std::string &objName) : coreObject (objName) {}
+reserveDispatcher::reserveDispatcher(const std::string& objName): coreObject(objName) {}
 
-coreObject *reserveDispatcher::clone (coreObject *obj) const
+coreObject* reserveDispatcher::clone(coreObject* obj) const
 {
-    reserveDispatcher *nobj;
-    if (obj == nullptr)
-    {
-        nobj = new reserveDispatcher ();
-    }
-    else
-    {
-        nobj = dynamic_cast<reserveDispatcher *> (obj);
-        if (nobj == nullptr)
-        {
+    reserveDispatcher* nobj;
+    if (obj == nullptr) {
+        nobj = new reserveDispatcher();
+    } else {
+        nobj = dynamic_cast<reserveDispatcher*>(obj);
+        if (nobj == nullptr) {
             // if we can't cast the pointer clone at the next lower level
-            coreObject::clone (obj);
+            coreObject::clone(obj);
             return obj;
         }
     }
-    coreObject::clone (nobj);
+    coreObject::clone(nobj);
     nobj->thresholdStart = thresholdStart;
     nobj->thresholdStop = thresholdStop;
     nobj->dispatchInterval = dispatchInterval;  // 5 minutes
     return nobj;
 }
 
-reserveDispatcher::~reserveDispatcher ()
+reserveDispatcher::~reserveDispatcher()
 {
     index_t kk;
-    for (kk = 0; kk < schedCount; kk++)
-    {
+    for (kk = 0; kk < schedCount; kk++) {
         // schedList[kk]->reserveDispatcherUnlink();
     }
 }
 
-void reserveDispatcher::moveSchedulers (reserveDispatcher *rD)
+void reserveDispatcher::moveSchedulers(reserveDispatcher* rD)
 {
     index_t kk;
-    schedList.resize (this->schedCount + rD->schedCount);
-    resUsed.resize (this->schedCount + rD->schedCount);
-    resAvailable.resize (this->schedCount + rD->schedCount);
+    schedList.resize(this->schedCount + rD->schedCount);
+    resUsed.resize(this->schedCount + rD->schedCount);
+    resAvailable.resize(this->schedCount + rD->schedCount);
 
-    for (kk = 0; kk < rD->schedCount; kk++)
-    {
-        //	rD->schedList[kk]->reserveDispatcherUnlink();
+    for (kk = 0; kk < rD->schedCount; kk++) {
+        //    rD->schedList[kk]->reserveDispatcherUnlink();
         this->schedList[this->schedCount + kk] = rD->schedList[kk];
-        //	rD->schedList[kk]->reserveDispatcherLink(this);
+        //    rD->schedList[kk]->reserveDispatcherLink(this);
     }
-    checkGen ();
+    checkGen();
 }
 
-double reserveDispatcher::dynInitializeA (coreTime time0, double dispatchSet)
+double reserveDispatcher::dynInitializeA(coreTime time0, double dispatchSet)
 {
     currDispatch = dispatchSet;
-    if (dispatchSet > 0)
-    {
-        dispatch (dispatchSet);
+    if (dispatchSet > 0) {
+        dispatch(dispatchSet);
         dispatchTime = time0;
     }
     prevTime = time0;
     return currDispatch;
 }
 
-double reserveDispatcher::updateP (coreTime time, double pShort)
+double reserveDispatcher::updateP(coreTime time, double pShort)
 {
-    if (currDispatch > 0)
-    {
-        if (time > (dispatchTime + dispatchInterval))
-        {
-            if (currDispatch + pShort < thresholdStop)
-            {
-                dispatch (0);
+    if (currDispatch > 0) {
+        if (time > (dispatchTime + dispatchInterval)) {
+            if (currDispatch + pShort < thresholdStop) {
+                dispatch(0);
                 dispatchTime = time;
-            }
-            else
-            {
-                dispatch (currDispatch + pShort);
+            } else {
+                dispatch(currDispatch + pShort);
                 dispatchTime = time;
             }
         }
-    }
-    else
-    {
-        if (pShort > thresholdStart)
-        {
-            if ((time - dispatchTime) > dispatchInterval)
-            {
-                dispatch (pShort);
+    } else {
+        if (pShort > thresholdStart) {
+            if ((time - dispatchTime) > dispatchInterval) {
+                dispatch(pShort);
                 dispatchTime = time;
             }
         }
@@ -163,26 +147,19 @@ double reserveDispatcher::updateP (coreTime time, double pShort)
     return currDispatch;
 }
 
-double reserveDispatcher::testP (coreTime time, double pShort)
+double reserveDispatcher::testP(coreTime time, double pShort)
 {
     double output = 0;
-    if (currDispatch > 0)
-    {
-        if (time > (dispatchTime + dispatchInterval))
-        {
-            if (currDispatch + pShort > thresholdStop)
-            {
+    if (currDispatch > 0) {
+        if (time > (dispatchTime + dispatchInterval)) {
+            if (currDispatch + pShort > thresholdStop) {
                 output = currDispatch + pShort;
             }
         }
-    }
-    else
-    {
-        if (pShort > thresholdStart)
-        {
-            if ((time - dispatchTime) > dispatchInterval)
-            {
-                dispatch (pShort);
+    } else {
+        if (pShort > thresholdStart) {
+            if ((time - dispatchTime) > dispatchInterval) {
+                dispatch(pShort);
                 dispatchTime = time;
             }
         }
@@ -190,151 +167,128 @@ double reserveDispatcher::testP (coreTime time, double pShort)
     return output;
 }
 
-void reserveDispatcher::remove (schedulerRamp *sched)
+void reserveDispatcher::remove(schedulerRamp* sched)
 {
-    for (auto sch = schedList.begin (); sch != schedList.end (); ++sch)
-    {
-        if (isSameObject (*sch, sched))
-        {
-            schedList.erase (sch);
+    for (auto sch = schedList.begin(); sch != schedList.end(); ++sch) {
+        if (isSameObject(*sch, sched)) {
+            schedList.erase(sch);
             --schedCount;
-            checkGen ();
+            checkGen();
             return;
         }
     }
 }
 
-void reserveDispatcher::add (coreObject *obj)
+void reserveDispatcher::add(coreObject* obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
-    {
-        add (static_cast<schedulerRamp *> (obj));
-    }
-    else
-    {
-        throw (unrecognizedObjectException (this));
+    if (dynamic_cast<schedulerRamp*>(obj) != nullptr) {
+        add(static_cast<schedulerRamp*>(obj));
+    } else {
+        throw(unrecognizedObjectException(this));
     }
 }
 
-void reserveDispatcher::add (schedulerRamp *sched)
+void reserveDispatcher::add(schedulerRamp* sched)
 {
     schedCount++;
-    schedList.push_back (sched);
-    resUsed.resize (schedCount);
-    resAvailable.resize (schedCount);
-    //	sched->reserveDispatcherLink(this);
-    checkGen ();
+    schedList.push_back(sched);
+    resUsed.resize(schedCount);
+    resAvailable.resize(schedCount);
+    //    sched->reserveDispatcherLink(this);
+    checkGen();
 }
 
-void reserveDispatcher::remove (coreObject *obj)
+void reserveDispatcher::remove(coreObject* obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
-    {
-        remove (static_cast<schedulerRamp *> (obj));
+    if (dynamic_cast<schedulerRamp*>(obj) != nullptr) {
+        remove(static_cast<schedulerRamp*>(obj));
     }
 }
 
-void reserveDispatcher::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
-
-void reserveDispatcher::set (const std::string &param, double val, units::unit unitType)
+void reserveDispatcher::set(const std::string& param, const std::string& val)
 {
-    if ((param == "threshold") || (param == "thresholdstart"))
-    {
+    coreObject::set(param, val);
+}
+
+void reserveDispatcher::set(const std::string& param, double val, units::unit unitType)
+{
+    if ((param == "threshold") || (param == "thresholdstart")) {
         thresholdStart = val;
-        if (thresholdStop > thresholdStart)
-        {
+        if (thresholdStop > thresholdStart) {
             thresholdStop = thresholdStart / 2;
         }
-    }
-    else if (param == "thresholdstop")
-    {
+    } else if (param == "thresholdstop") {
         thresholdStop = val;
-    }
-    else if ((param == "dispatchinterval") || (param == "interval"))
-    {
+    } else if ((param == "dispatchinterval") || (param == "interval")) {
         dispatchInterval = val;
-    }
-    else
-    {
-        coreObject::set (param, val, unitType);
+    } else {
+        coreObject::set(param, val, unitType);
     }
 }
 
-void reserveDispatcher::schedChange () { checkGen (); }
+void reserveDispatcher::schedChange()
+{
+    checkGen();
+}
 
-void reserveDispatcher::checkGen ()
+void reserveDispatcher::checkGen()
 {
     reserveAvailable = 0;
-    for (decltype (schedCount) kk = 0; kk < schedCount; kk++)
-    {
-        resAvailable[kk] = schedList[kk]->getReserveTarget ();
+    for (decltype(schedCount) kk = 0; kk < schedCount; kk++) {
+        resAvailable[kk] = schedList[kk]->getReserveTarget();
         reserveAvailable += resAvailable[kk];
 
-        resUsed[kk] = schedList[kk]->getReserveTarget ();
+        resUsed[kk] = schedList[kk]->getReserveTarget();
     }
 }
 
-void reserveDispatcher::dispatch (double level)
+void reserveDispatcher::dispatch(double level)
 {
     double avail = 0.0;
     int ind = -1;
     // if the dispatch is too low
-    while (currDispatch < level)
-    {
-        for (decltype (schedCount) kk = 0; kk < schedCount; kk++)
-        {
+    while (currDispatch < level) {
+        for (decltype(schedCount) kk = 0; kk < schedCount; kk++) {
             auto tempAvail = resAvailable[kk] - resUsed[kk];
-            if (tempAvail > avail)
-            {
+            if (tempAvail > avail) {
                 ind = kk;
                 avail = tempAvail;
             }
         }
-        if (avail == 0)
-        {
+        if (avail == 0) {
             break;
         }
-        if (avail <= (level - currDispatch))
-        {
-            schedList[ind]->setReserveTarget (resUsed[ind] + avail);
+        if (avail <= (level - currDispatch)) {
+            schedList[ind]->setReserveTarget(resUsed[ind] + avail);
             resUsed[ind] = resUsed[ind] + avail;
             currDispatch += avail;
-        }
-        else
-        {
+        } else {
             auto tempAvail = level - currDispatch;
-            schedList[ind]->setReserveTarget (resUsed[ind] + tempAvail);
+            schedList[ind]->setReserveTarget(resUsed[ind] + tempAvail);
             resUsed[ind] = resUsed[ind] + tempAvail;
             currDispatch += tempAvail;
         }
     }
 
     // if the dispatch is too high
-    while (currDispatch > level)
-    {
-        for (decltype (schedCount) kk = 0; kk < schedCount; kk++)
-        {
+    while (currDispatch > level) {
+        for (decltype(schedCount) kk = 0; kk < schedCount; kk++) {
             auto tempAvail = resUsed[kk];
-            if (tempAvail > avail)
-            {
+            if (tempAvail > avail) {
                 ind = kk;
                 avail = tempAvail;
             }
         }
-        if (avail == 0)
-        {
+        if (avail == 0) {
             break;
         }
-        if (avail < (currDispatch - level))
-        {
-            schedList[ind]->setReserveTarget (0);
+        if (avail < (currDispatch - level)) {
+            schedList[ind]->setReserveTarget(0);
             resUsed[ind] = 0;
             currDispatch -= avail;
-        }
-        else
-        {
+        } else {
             auto tempAvail = currDispatch - level;
-            schedList[ind]->setReserveTarget (resUsed[ind] - tempAvail);
+            schedList[ind]->setReserveTarget(resUsed[ind] - tempAvail);
             resUsed[ind] = resUsed[ind] - tempAvail;
             currDispatch -= tempAvail;
         }

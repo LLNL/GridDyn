@@ -10,31 +10,27 @@
 * LLNS Copyright End
 */
 
+#include "tcpInterface.h"
+
 #include "core/factoryTemplates.hpp"
 #include "core/objectFactory.hpp"
-
-#include "tcpInterface.h"
-#include "tcpCommunicator.h"
 #include "tcpCollector.h"
+#include "tcpCommunicator.h"
 
+namespace griddyn {
 
+static childClassFactory<tcpLib::tcpCollector, collector> tcpcol(std::vector<std::string>{"tcp"});
 
-
-namespace griddyn
-{
-
-static childClassFactory<tcpLib::tcpCollector, collector> tcpcol(std::vector<std::string> {"tcp"});
-
-static childClassFactory<tcpLib::tcpCommunicator, Communicator> tcpComm(std::vector<std::string>{"tcp"});
+static childClassFactory<tcpLib::tcpCommunicator, Communicator>
+    tcpComm(std::vector<std::string>{"tcp"});
 
 void loadTcpLibrary()
 {
-	static int loaded = 0;
+    static int loaded = 0;
 
-	if (loaded == 0)
-	{
-		loaded = 1;
-	}
+    if (loaded == 0) {
+        loaded = 1;
+    }
 }
 
-}//namespace griddyn
+}  //namespace griddyn

@@ -10,13 +10,12 @@
 * LLNS Copyright End
 */
 #pragma once
-namespace griddyn
-{
+namespace griddyn {
 
 class readerInfo;
 
 void loadHELICSLibrary();
 
-void loadHelicsReaderInfoDefinitions(readerInfo &ri);
+void loadHelicsReaderInfoDefinitions(readerInfo& ri);
 
-} // namespace griddyn
+}  // namespace griddyn

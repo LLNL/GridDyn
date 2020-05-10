@@ -38,7 +38,7 @@ function testFunctionOne(testCase)
 end
 
 function testBasic(testCase)
-global ieee_test_directory 
+global ieee_test_directory
 global matlab_test_directory
 global other_test_directory
 
@@ -55,7 +55,7 @@ global other_test_directory
 end
 
 function testGetResults(testCase)
-   global ieee_test_directory 
+   global ieee_test_directory
 
    import griddyn.*
    sim = gridDynSimulation_create('', 'sim2')
@@ -66,7 +66,7 @@ function testGetResults(testCase)
       res = gridDynSimulation_powerflow(sim)
 %      voltages = griddyn.doubleArray(cnt)
 %      act = griddyn.gridDynSimulation_getResults(sim, "voltage" ,voltages, cnt);
-      
+
    end
 end
 
@@ -91,7 +91,7 @@ end
 %        del angles
 %     end
 % end
-%% Optional file fixtures  
+%% Optional file fixtures
 function setupOnce(testCase)  % do not change function name
 % set a new path, for example
 end
@@ -100,11 +100,11 @@ function teardownOnce(testCase)  % do not change function name
 % change back to original path, for example
 end
 
-%% Optional fresh fixtures  
+%% Optional fresh fixtures
 
 function setup(testCase)  % do not change function name
-% open a figure, for example    
-global ieee_test_directory 
+% open a figure, for example
+global ieee_test_directory
 global matlab_test_directory
 global other_test_directory
 ieee_test_directory = '../../test/test_files/IEEE_test_cases/'
@@ -115,5 +115,3 @@ end
 function teardown(testCase)  % do not change function name
 % close figure, for example
 end
-
-

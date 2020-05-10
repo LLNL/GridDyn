@@ -33,7 +33,7 @@ cls=[];
 ignoreClasses={'gridObjectHolder','typeFactory','childTypeFactory','typeFactoryArg'};
 for ff=1:length(filedir)
     dlist=dir(fullfile(filedir{ff},'*.h'));
-    
+
     for nn=1:length(dlist)
         tempCls=getClassInfo(fullfile(filedir{ff},dlist(nn).name));
         for pp=1:length(tempCls)
@@ -49,7 +49,7 @@ for ff=1:length(filedir)
                 cls(end+1)=tempCls(pp);
             end
         end
-      
+
     end
 end
 %%
@@ -58,7 +58,7 @@ for ff=1:length(filedir)
     for nn=1:length(dlistCPP)
         tempCls=getClassSetInfo(fullfile(filedir{ff},dlistCPP(nn).name));
         for pp=1:length(tempCls)
-            
+
             for qq=1:length(cls)
                 if (isequal(cls(qq).name,tempCls(pp).name))
                     cls(qq).setData=tempCls(pp).dset;
@@ -76,4 +76,3 @@ end
 %order={'gridCoreObject','gridObject','gridPrimary','gridSecondary','gridSubModel'};
 %saveDir='C:\Users\top1\Documents\codeProjects\transmission\docs\manuals\inputTables';
 %generateLatexTables(cls,order,saveDir);
-

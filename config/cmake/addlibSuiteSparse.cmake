@@ -81,29 +81,29 @@ set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD
     ON
     CACHE INTERNAL ""
 )
-set(KLU_INCLUDE_DIR "${${lcName}_SOURCE_DIR}/Suitesparse/KLU/Include" 
-					"${${lcName}_SOURCE_DIR}/Suitesparse/AMD/Include" 
-                    "${${lcName}_SOURCE_DIR}/Suitesparse/SuiteSparse_config" 
-					"${${lcName}_SOURCE_DIR}/Suitesparse/COLAMD/Include"
-					"${${lcName}_SOURCE_DIR}/Suitesparse/BTF/Include" 
-					CACHE INTERNAL "")
+set(KLU_INCLUDE_DIR "${${lcName}_SOURCE_DIR}/Suitesparse/KLU/Include"
+                    "${${lcName}_SOURCE_DIR}/Suitesparse/AMD/Include"
+                    "${${lcName}_SOURCE_DIR}/Suitesparse/SuiteSparse_config"
+                    "${${lcName}_SOURCE_DIR}/Suitesparse/COLAMD/Include"
+                    "${${lcName}_SOURCE_DIR}/Suitesparse/BTF/Include"
+                    CACHE INTERNAL "")
 
 if (NOT EXISTS ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake)
     file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
              ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake
         )
-    file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/checkGetSuiteSparse-griddyn.cmake 
+    file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/checkGetSuiteSparse-griddyn.cmake
               ${PROJECT_SOURCE_DIR}/config/cmake/CMakeLists-suitesparse.txt
               DESTINATION
              ${${lcName}_SOURCE_DIR})
-             
+
      file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists.txt
              ${${lcName}_SOURCE_DIR}/CMakeLists.old
         )
-     file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-griddyn.cmake 
+     file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-griddyn.cmake
              ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
              )
-             
+
        file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists-suitesparse.txt
              ${${lcName}_SOURCE_DIR}/CMakeLists.txt
              )

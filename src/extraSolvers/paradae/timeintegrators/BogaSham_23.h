@@ -15,7 +15,7 @@
 #include "RungeKutta_Explicit.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|cccc}
   0&&&&\\
@@ -27,12 +27,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class BogaSham_23 : public RungeKutta_Explicit{
-public:
-  BogaSham_23(Equation* eq, bool variable_step=false);
-  virtual std::string GetName(){return "RK_ExpBS_23";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class BogaSham_23: public RungeKutta_Explicit {
+      public:
+        BogaSham_23(Equation* eq, bool variable_step = false);
+        virtual std::string GetName() { return "RK_ExpBS_23"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

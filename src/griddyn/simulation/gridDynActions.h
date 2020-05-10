@@ -15,19 +15,16 @@
 
 #include "../gridDynDefinitions.hpp"
 
-namespace griddyn
-{
+namespace griddyn {
 // TODO:: use variant and string_view
 
 /** @brief class to define action and parameters for GridDyn operations
  */
-class gridDynAction
-{
+class gridDynAction {
   public:
     /** @brief the list of possible actions
      */
-    enum class gd_action_t
-    {
+    enum class gd_action_t {
         ignore,  //!< null action
         set,  //!< set a parameter
         setsolver,  //!< set a parameter in the solver
@@ -61,21 +58,21 @@ class gridDynAction
     double val_double2 = kNullVal;  //!< double parameter 2 of the action
 
     /** @brief constructor*/
-    gridDynAction () = default;
+    gridDynAction() = default;
     /** @brief constructor taking a command
     @param[in] action command
     */
-    /*IMPLICIT*/ gridDynAction (gd_action_t action) noexcept;
+    /*IMPLICIT*/ gridDynAction(gd_action_t action) noexcept;
     /** @brief constructor with action string
     @param[in] operation  a string containing the information for a specific action*/
-    /*IMPLICIT*/ gridDynAction (const std::string &operation);
+    /*IMPLICIT*/ gridDynAction(const std::string& operation);
 
     /** @brief fill an actions parameters based on a string
     @param[in] operation  a string containing the information for a specific action*/
-    void process (const std::string &operation);
+    void process(const std::string& operation);
 
     /** @brief reset the action to base state*/
-    void reset ();
+    void reset();
 };
 }  // namespace griddyn
 

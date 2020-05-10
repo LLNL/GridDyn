@@ -4,19 +4,19 @@
       <type>SLK</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	   <generator name="gen1">
+       <generator name="gen1">
         <model type="4"/>
-		<exciter type="basic"/>
-		<governor type="tgov1"/>
-		<P>0.4</P>
+        <exciter type="basic"/>
+        <governor type="tgov1"/>
+        <P>0.4</P>
       </generator>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
+    <name>bus2</name>
      <load name="load3" type="helics">
-	 <loadkey>load3val</loadkey>
-	 <voltagekey>voltage3key</voltagekey>
-	 <period>2</period>
+     <loadkey>load3val</loadkey>
+     <voltagekey>voltage3key</voltagekey>
+     <period>2</period>
        <P>1.500</P>
        <Q>0.3</Q>
      </load>

@@ -73,24 +73,24 @@ end
 
 
 % \begin{table}[ht]
-%   	
-%   	\caption{Solver Control Options} % title of Table
-%   	\centering % used for centering table
-%   	\begin{tabular}{l c p{8cm}} % centered columns (4 columns)
-%   		\hline %inserts double horizontal lines
-%   		parameter & default & description \\ [0.5ex] % inserts table
-%   		%heading
-%   		\hline % inserts single horizontal line
-%   		printlevel & error(1) & may be specified with a string or number "debug"(2), "error"(1), "none"(0), "erro" only prints out error messges \\ % inserting body of the table
-%   		approx & "none" & see Table~\ref{table:approxmodes} for details on possible options \\
-%   		flags &  & see Table~\ref{table:solverFlags} for details on available flags \\
-%   		tolerance & 1e-8 & the residual tolerance to use\\
-%   		name & solver\_\# & the name of the solver \\
-%   		index & automatic & the specified index of the solver \\
-%   		file & & log file for the solver \\% [1ex] adds vertical space
-%   		\hline %inserts single line
-%   	\end{tabular}
-%   	\label{table:solverOptions}
+%
+%       \caption{Solver Control Options} % title of Table
+%       \centering % used for centering table
+%       \begin{tabular}{l c p{8cm}} % centered columns (4 columns)
+%           \hline %inserts double horizontal lines
+%           parameter & default & description \\ [0.5ex] % inserts table
+%           %heading
+%           \hline % inserts single horizontal line
+%           printlevel & error(1) & may be specified with a string or number "debug"(2), "error"(1), "none"(0), "error" only prints out error messages \\ % inserting body of the table
+%           approx & "none" & see Table~\ref{table:approxmodes} for details on possible options \\
+%           flags &  & see Table~\ref{table:solverFlags} for details on available flags \\
+%           tolerance & 1e-8 & the residual tolerance to use\\
+%           name & solver\_\# & the name of the solver \\
+%           index & automatic & the specified index of the solver \\
+%           file & & log file for the solver \\% [1ex] adds vertical space
+%           \hline %inserts single line
+%       \end{tabular}
+%       \label{table:solverOptions}
 %   \end{table}
 
 function str=genTable(cls,qq)
@@ -106,8 +106,8 @@ for vv=1:size(tdata.setData,1)
 
     if (key~=0)
         found=0;
-        
-            
+
+
         for kk=1:ccnt-1
             if (dblock{kk,1}==key)
                 dblock{kk,2}=[dblock{kk,2},', ',nameTranslate(tdata.setData{vv,1})];
@@ -128,7 +128,7 @@ for vv=1:size(tdata.setData,1)
                 end
                 if (~isempty(tdata.variables{key,3}))
                     dblock{ccnt,5}=nameTranslate(strtrim(tdata.variables{key,3}));
-                    
+
                 end
                 ccnt=ccnt+1;
             else
@@ -139,10 +139,10 @@ for vv=1:size(tdata.setData,1)
                         dblock{pp,2}=[dblock{pp,2},', ',nameTranslate(tdata.setData{vv,1})];
                     end
                 end
-           
-                
+
+
             end
-            
+
         end
     else
         dblock{ccnt,2}=nameTranslate(tdata.setData{vv,1});
@@ -158,7 +158,7 @@ for vv=1:size(tdata.setData,1)
                  end
         ccnt=ccnt+1;
     end
-    
+
 end
 bigTable=(size(dblock,1)>20);
 

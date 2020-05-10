@@ -13,125 +13,115 @@
 #include "Condition.h"
 #include "grabberInterpreter.hpp"
 
-namespace griddyn
-{
+namespace griddyn {
 /*
 enum class compound_mode
 {
     c_and, c_or, c_any, c_xor, c_one_of, c_two_of, c_three_of
 };
 */
-double compoundCondition::evalCondition () { return 0.0; }
-double compoundCondition::evalCondition (const stateData & /*sD*/, const solverMode & /*sMode*/) { return 0.0; }
-bool compoundCondition::checkCondition () const
+double compoundCondition::evalCondition()
+{
+    return 0.0;
+}
+double compoundCondition::evalCondition(const stateData& /*sD*/, const solverMode& /*sMode*/)
+{
+    return 0.0;
+}
+bool compoundCondition::checkCondition() const
 {
     unsigned int tc = 0;
-    for (auto &gc : conditions)
-    {
-        if (gc->checkCondition ())
-        {
+    for (auto& gc : conditions) {
+        if (gc->checkCondition()) {
             ++tc;
-            if (breakTrue)
-            {
+            if (breakTrue) {
                 break;
             }
-        }
-        else
-        {
-            if (breakFalse)
-            {
+        } else {
+            if (breakFalse) {
                 break;
             }
         }
     }
-    return evalCombinations (tc);
+    return evalCombinations(tc);
 }
 
-bool compoundCondition::checkCondition (const stateData &sD, const solverMode &sMode) const
+bool compoundCondition::checkCondition(const stateData& sD, const solverMode& sMode) const
 {
     unsigned int tc = 0;
-    for (auto &gc : conditions)
-    {
-        if (gc->checkCondition (sD, sMode))
-        {
+    for (auto& gc : conditions) {
+        if (gc->checkCondition(sD, sMode)) {
             ++tc;
-            if (breakTrue)
-            {
+            if (breakTrue) {
                 break;
             }
-        }
-        else
-        {
-            if (breakFalse)
-            {
+        } else {
+            if (breakFalse) {
                 break;
             }
         }
     }
-    return evalCombinations (tc);
+    return evalCombinations(tc);
 }
 
-void compoundCondition::add (std::shared_ptr<Condition> gc)
+void compoundCondition::add(std::shared_ptr<Condition> gc)
 {
-    if (gc)
-    {
-        conditions.push_back (std::move (gc));
+    if (gc) {
+        conditions.push_back(std::move(gc));
     }
-    throw (addFailureException ());
+    throw(addFailureException());
 }
 
-void compoundCondition::setMode (compound_mode newMode)
+void compoundCondition::setMode(compound_mode newMode)
 {
     mode = newMode;
-    switch (mode)
-    {
-    case compound_mode::c_and:
-        breakTrue = false;
-        breakFalse = true;
-        break;
-    case compound_mode::c_any:
-    case compound_mode::c_or:
-    case compound_mode::c_none:
-        breakTrue = true;
-        breakFalse = false;
-        break;
-    default:
-        breakTrue = false;
-        breakFalse = false;
-        break;
+    switch (mode) {
+        case compound_mode::c_and:
+            breakTrue = false;
+            breakFalse = true;
+            break;
+        case compound_mode::c_any:
+        case compound_mode::c_or:
+        case compound_mode::c_none:
+            breakTrue = true;
+            breakFalse = false;
+            break;
+        default:
+            breakTrue = false;
+            breakFalse = false;
+            break;
     }
 }
 
-bool compoundCondition::evalCombinations (count_t trueCount) const
+bool compoundCondition::evalCombinations(count_t trueCount) const
 {
-    switch (mode)
-    {
-    case compound_mode::c_and:
-    case compound_mode::c_all:
-    default:
-        return (trueCount == static_cast<count_t> (conditions.size ()));
-    case compound_mode::c_any:
-    case compound_mode::c_or:
-        return (trueCount > 0);
-    case compound_mode::c_one_of:
-        return (trueCount == 1);
-    case compound_mode::c_two_of:
-        return (trueCount == 2);
-    case compound_mode::c_three_of:
-        return (trueCount == 3);
-    case compound_mode::c_two_or_more:
-        return (trueCount >= 2);
-    case compound_mode::c_three_or_more:
-        return (trueCount >= 3);
-    case compound_mode::c_xor:
-    case compound_mode::c_odd:
-        return ((trueCount & 0x01) == 1);
-    case compound_mode::c_even:
-        return ((trueCount & 0x01) == 0);
-    case compound_mode::c_even_min:
-        return ((trueCount != 0) && ((trueCount & 0x01) == 0));
-    case compound_mode::c_none:
-        return (trueCount == 0);
+    switch (mode) {
+        case compound_mode::c_and:
+        case compound_mode::c_all:
+        default:
+            return (trueCount == static_cast<count_t>(conditions.size()));
+        case compound_mode::c_any:
+        case compound_mode::c_or:
+            return (trueCount > 0);
+        case compound_mode::c_one_of:
+            return (trueCount == 1);
+        case compound_mode::c_two_of:
+            return (trueCount == 2);
+        case compound_mode::c_three_of:
+            return (trueCount == 3);
+        case compound_mode::c_two_or_more:
+            return (trueCount >= 2);
+        case compound_mode::c_three_or_more:
+            return (trueCount >= 3);
+        case compound_mode::c_xor:
+        case compound_mode::c_odd:
+            return ((trueCount & 0x01) == 1);
+        case compound_mode::c_even:
+            return ((trueCount & 0x01) == 0);
+        case compound_mode::c_even_min:
+            return ((trueCount != 0) && ((trueCount & 0x01) == 0));
+        case compound_mode::c_none:
+            return (trueCount == 0);
     }
 }
 

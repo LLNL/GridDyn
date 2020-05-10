@@ -13,6 +13,6 @@ if (${ALREADY_LOADED} LESS 0)
 string(REPLACE "public class griddynJNI {"
        "public class griddynJNI {\n  static {\n    System.loadLibrary\(\"${LIBRARY_FILE}\"\);\n  }" GRIDDYN_JNI_SOURCE
        "${GRIDDYN_JNI_SOURCE}")
-   
+
 file(WRITE griddynJNI.java "${GRIDDYN_JNI_SOURCE}")
 endif()

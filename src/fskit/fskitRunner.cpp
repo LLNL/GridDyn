@@ -12,47 +12,47 @@
 */
 
 #include "fskitRunner.h"
-#include "griddyn/gridDynSimulation.h"
-#include "gridDynFederatedScheduler.h"
-#include "fskitCommunicator.h"
+
 #include "core/factoryTemplates.hpp"
+#include "fskitCommunicator.h"
+#include "gridDynFederatedScheduler.h"
 #include "griddyn-tracer.h"
+#include "griddyn/gridDynSimulation.h"
 
-namespace griddyn
-{
-static childClassFactory<FskitCommunicator,griddyn::Communicator> commFac(std::vector<std::string>{ "fskit" });
+namespace griddyn {
+static childClassFactory<FskitCommunicator, griddyn::Communicator>
+    commFac(std::vector<std::string>{"fskit"});
 
-fskitRunner::fskitRunner()
+fskitRunner::fskitRunner() {}
+
+int fskitRunner::Initialize(int argc,
+                            char* argv[],
+                            std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
 {
+    if (scheduler) {
+        GriddynFederatedScheduler::Initialize(scheduler);
+    }
+    return Initialize(argc, argv);
 }
 
-int fskitRunner::Initialize(int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
+int fskitRunner::Initialize(int argc, char* argv[])
 {
-	if (scheduler)
-	{
-		GriddynFederatedScheduler::Initialize(scheduler);
-	}
-	return Initialize(argc, argv);
-}
-
-int fskitRunner::Initialize(int argc, char *argv[])
-{
-	GRIDDYN_TRACER("GridDyn::GriddynRunner::Initialize");
-	auto retval = GriddynRunner::Initialize(argc, argv);
-	auto gds = GriddynRunner::getSim();
-	gridDynSimulation::setInstance(gds.get());
-	return retval;
+    GRIDDYN_TRACER("GridDyn::GriddynRunner::Initialize");
+    auto retval = GriddynRunner::Initialize(argc, argv);
+    auto gds = GriddynRunner::getSim();
+    gridDynSimulation::setInstance(gds.get());
+    return retval;
 }
 
 coreTime fskitRunner::Run()
 {
-	GRIDDYN_TRACER("GridDyn::GriddynRunner::Run");
-	return GriddynRunner::Run();
+    GRIDDYN_TRACER("GridDyn::GriddynRunner::Run");
+    return GriddynRunner::Run();
 }
 
 void fskitRunner::Finalize()
 {
-	GRIDDYN_TRACER("GridDyn::GriddynRunner::Finalize");
-	GriddynRunner::Finalize();
+    GRIDDYN_TRACER("GridDyn::GriddynRunner::Finalize");
+    GriddynRunner::Finalize();
 }
-} // namespace griddyn
+}  // namespace griddyn

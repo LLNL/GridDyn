@@ -25,12 +25,8 @@ You should have received a copy of the FMILIB_License.txt file
 along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 */
 
-#include "plugins/gridDynPluginApi.h"
-#include <boost/dll/alias.hpp>  // for BOOST_DLL_ALIAS
-
-#include "fmi_importGD.h"
-
 #include "core/objectFactoryTemplates.hpp"
+#include "fmi_importGD.h"
 #include "fmi_models/CymeDistLoad.h"
 #include "fmi_models/fmiCoSimLoad.h"
 #include "fmi_models/fmiCoSimLoad3phase.h"
@@ -39,31 +35,36 @@ along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 #include "fmi_models/fmiGovernor.h"
 #include "fmi_models/fmiMELoad.h"
 #include "fmi_models/fmiMELoad3phase.h"
-
+#include "plugins/gridDynPluginApi.h"
 #include <memory>
+
+#include <boost/dll/alias.hpp>  // for BOOST_DLL_ALIAS
 
 // create the component factories
 
-namespace griddyn
-{
-static childTypeFactory<fmi::fmiMELoad, Load> fmild ("load", stringVec{"fmimeload", "fmi", "me"});
-static childTypeFactory<fmi::fmiCoSimLoad, Load> fmiCSld ("load", stringVec{"fmicosimload", "cosim"});
+namespace griddyn {
+static childTypeFactory<fmi::fmiMELoad, Load> fmild("load", stringVec{"fmimeload", "fmi", "me"});
+static childTypeFactory<fmi::fmiCoSimLoad, Load> fmiCSld("load",
+                                                         stringVec{"fmicosimload", "cosim"});
 static childTypeFactory<fmi::fmiCoSimLoad3phase, Load>
-  fmiCSld3 ("load", stringVec{"fmicosimload3", "fmicosimload3phase"});
-static childTypeFactory<fmi::fmiMELoad3phase, Load>
-  fmiMEld3 ("load", stringVec{"fmimeload3", "fmiload3phase", "fmi3phase", "fmimeload3phase", "fmime3phase"});
-static childTypeFactory<fmi::fmiGovernor, Governor> fmiGov ("governor", stringVec{"fmigov", "fmigovernor", "fmi"});
-static childTypeFactory<fmi::fmiExciter, Exciter> fmiExciter ("exciter", stringVec{"fmiexiter", "fmi"});
+    fmiCSld3("load", stringVec{"fmicosimload3", "fmicosimload3phase"});
+static childTypeFactory<fmi::fmiMELoad3phase, Load> fmiMEld3(
+    "load",
+    stringVec{"fmimeload3", "fmiload3phase", "fmi3phase", "fmimeload3phase", "fmime3phase"});
+static childTypeFactory<fmi::fmiGovernor, Governor>
+    fmiGov("governor", stringVec{"fmigov", "fmigovernor", "fmi"});
+static childTypeFactory<fmi::fmiExciter, Exciter> fmiExciter("exciter",
+                                                             stringVec{"fmiexiter", "fmi"});
 static childTypeFactory<fmi::fmiGenModel, GenModel>
-  fmiGM ("genmodel", stringVec{"fmigenmodel", "fmimachine", "fmi"});
-static childTypeFactory<fmi::CymeDistLoadME, Load> cymeME ("load", stringVec{"cyme", "cymeme", "cymefmi"});
+    fmiGM("genmodel", stringVec{"fmigenmodel", "fmimachine", "fmi"});
+static childTypeFactory<fmi::CymeDistLoadME, Load> cymeME("load",
+                                                          stringVec{"cyme", "cymeme", "cymefmi"});
 
-void loadFmiLibrary ()
+void loadFmiLibrary()
 {
     static int loaded = 0;
 
-    if (loaded == 0)
-    {
+    if (loaded == 0) {
         loaded = 1;
     }
 }
@@ -71,26 +72,29 @@ void loadFmiLibrary ()
 }  // namespace griddyn
 
 // Someday I will get plugins to work
-namespace fmi_plugin_namespace
-{
+namespace fmi_plugin_namespace {
 using namespace griddyn;
-class fmiPlugin : public gridDynPlugInApi
-{
+class fmiPlugin: public gridDynPlugInApi {
     static std::vector<std::shared_ptr<objectFactory>> fmiFactories;
-    fmiPlugin () = default;
+    fmiPlugin() = default;
 
   public:
-    std::string name () const override { return "fmi"; }
+    std::string name() const override { return "fmi"; }
 
-    void load () override
+    void load() override
     {
-        auto b = std::make_shared<childTypeFactory<fmi::fmiMELoad, Load>> ("load", stringVec{"fmiload", "fmi"});
-        fmiFactories.push_back (b);
+        auto b =
+            std::make_shared<childTypeFactory<fmi::fmiMELoad, Load>>("load",
+                                                                     stringVec{"fmiload", "fmi"});
+        fmiFactories.push_back(b);
     }
 
-    void load (const std::string & /*section*/) override { load (); }
+    void load(const std::string& /*section*/) override { load(); }
     // Factory method
-    static std::shared_ptr<fmiPlugin> create () { return std::shared_ptr<fmiPlugin> (new fmiPlugin ()); }
+    static std::shared_ptr<fmiPlugin> create()
+    {
+        return std::shared_ptr<fmiPlugin>(new fmiPlugin());
+    }
 };
 
 /*BOOST_DLL_ALIAS(

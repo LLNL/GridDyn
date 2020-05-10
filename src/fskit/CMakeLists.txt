@@ -8,8 +8,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(
-    fskit_sources
+set(fskit_sources
     fskitCommunicator.cpp
     gridDynFederatedScheduler.cpp
     gridDynfskit.cpp
@@ -18,8 +17,7 @@ set(
     GridDynFederatedSimulator.cpp
 )
 
-set(
-    fskit_headers
+set(fskit_headers
     fskitCommunicator.h
     gridDynFederatedScheduler.h
     gridDynfskit.h
@@ -33,19 +31,12 @@ find_package(FSKIT)
 
 add_library(fskitLibrary STATIC ${fskit_sources} ${fskit_headers})
 
-find_package(
-    Boost ${BOOST_MINIMUM_VERSION}
-    COMPONENTS mpi serialization REQUIRED
-)
+find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS mpi serialization REQUIRED)
 
 target_include_directories(fskitLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
 target_link_libraries(
-    fskitLibrary
-    runner
-    ${FSKIT_LIBRARIES}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_MPI_LIBRARY}
+    fskitLibrary runner ${FSKIT_LIBRARIES} ${Boost_SERIALIZATION_LIBRARY} ${Boost_MPI_LIBRARY}
 )
 
 install(
@@ -55,10 +46,8 @@ install(
     COMPONENT libraries
 )
 
-install(
-    FILES ${fskit_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fskit
-    COMPONENT headers
+install(FILES ${fskit_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fskit
+        COMPONENT headers
 )
 
 list(APPEND optional_library_key_headers fskit/gridDynfskit.h)

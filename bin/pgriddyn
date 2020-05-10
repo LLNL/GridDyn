@@ -1,8 +1,8 @@
 #!/bin/bash
 # LLNS Copyright Start
 # Copyright (c) 2014, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -38,7 +38,7 @@ export GLPATH=$GRIDDYN_DIR/lib/gridlabd:$GRIDDYN_DIR/share/gridlabd
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GRIDDYN_DIR}/lib
 
 # Note: can set GRIDDYN_PROFILER in environment such as:
-# > export GRIDDYN_PROFILER="valgrind --leak-check=full" 
+# > export GRIDDYN_PROFILER="valgrind --leak-check=full"
 
 if [ -z "${PARGRID_TIMER}" ]
 then
@@ -67,26 +67,26 @@ function mpirun-wrapper {
    numberOfMPITasks=$((numberOfGridLABDInstances + 1))
 
    echo "Number of MPI tasks : $numberOfMPITasks"
-   
+
    case $(uname -a) in
       *chaos*)
-	 # if not running under SLURM assume user wants to run interactivly on debug node
-	 if [ -z "${SLURM_JOB_ID}" ]
-	 then
-	    echo "Running interactive"
- 	    ${PARGRID_TIMER} srun -p pdebug --output stdout.$$.%t -n$((numberOfMPITasks)) \
-	       $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
-	 else
- 	    ${PARGRID_TIMER} srun --overcommit --output stdout.$$.%t -n$((numberOfMPITasks)) \
-	       $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
-	 fi
-    	 ;;
+     # if not running under SLURM assume user wants to run interactively on debug node
+     if [ -z "${SLURM_JOB_ID}" ]
+     then
+        echo "Running interactive"
+         ${PARGRID_TIMER} srun -p pdebug --output stdout.$$.%t -n$((numberOfMPITasks)) \
+           $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
+     else
+         ${PARGRID_TIMER} srun --overcommit --output stdout.$$.%t -n$((numberOfMPITasks)) \
+           $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
+     fi
+         ;;
       *)
- 	 ${PARGRID_TIMER} mpirun --output-filename stdout.$$ -n $((numberOfMPITasks)) \
-	    $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
- 	 ;;
+      ${PARGRID_TIMER} mpirun --output-filename stdout.$$ -n $((numberOfMPITasks)) \
+        $PARGRID_PROFILER $GRIDDYN_GRIDLABD_EXE --pargrid $args
+      ;;
    esac
-   
+
 }
 
-mpirun-wrapper $* 
+mpirun-wrapper $*

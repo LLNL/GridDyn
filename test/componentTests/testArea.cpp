@@ -10,99 +10,91 @@
  * LLNS Copyright End
 */
 
-#include "core/coreExceptions.h"
-#include "griddyn/gridBus.h"
-#include "griddyn/Link.h"
 #include "../testHelper.h"
+#include "core/coreExceptions.h"
 #include "gmlc/utilities/vectorOps.hpp"
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
+#include "griddyn/Link.h"
+#include "griddyn/gridBus.h"
 #include <cmath>
-// testP case for coreObject object
 
+#include <boost/test/unit_test.hpp>
+
+#include <boost/test/tools/floating_point_comparison.hpp>
+// testP case for coreObject object
 
 #define AREA_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/area_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (area_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
+BOOST_FIXTURE_TEST_SUITE(area_tests,
+                         gridDynSimulationTestFixture,
+                         *boost::unit_test::label("quick"))
 
 using namespace griddyn;
-BOOST_AUTO_TEST_CASE (area_test1)
+BOOST_AUTO_TEST_CASE(area_test1)
 {
-    std::string fileName = std::string (AREA_TEST_DIRECTORY "area_test1.xml");
+    std::string fileName = std::string(AREA_TEST_DIRECTORY "area_test1.xml");
 
-    gds = readSimXMLFile (fileName);
+    gds = readSimXMLFile(fileName);
     requireState(gridDynSimulation::gridState_t::STARTUP);
 
-    gds->pFlowInitialize ();
+    gds->pFlowInitialize();
     requireState(gridDynSimulation::gridState_t::INITIALIZED);
 
     int count;
-    count = gds->getInt ("totalareacount");
-    BOOST_CHECK_EQUAL (count, 1);
-    count = gds->getInt ("totalbuscount");
-    BOOST_CHECK_EQUAL (count, 9);
+    count = gds->getInt("totalareacount");
+    BOOST_CHECK_EQUAL(count, 1);
+    count = gds->getInt("totalbuscount");
+    BOOST_CHECK_EQUAL(count, 9);
     // check the linkcount
-    count = gds->getInt ("totallinkcount");
-    BOOST_CHECK_EQUAL (count, 9);
+    count = gds->getInt("totallinkcount");
+    BOOST_CHECK_EQUAL(count, 9);
 
-    gds->powerflow ();
+    gds->powerflow();
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
+    auto st = gds->getState();
 
-    auto st = gds->getState ();
+    fileName = std::string(AREA_TEST_DIRECTORY "area_test0.xml");
 
+    gds2 = readSimXMLFile(fileName);
 
-    fileName = std::string (AREA_TEST_DIRECTORY "area_test0.xml");
-
-
-    gds2 = readSimXMLFile (fileName);
-
-
-    gds2->powerflow ();
+    gds2->powerflow();
     requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-
-    auto st2 = gds2->getState ();
-    auto diffs = gmlc::utilities::countDiffs (st, st2, 0.00001);
-    BOOST_CHECK (diffs == 0);
+    auto st2 = gds2->getState();
+    auto diffs = gmlc::utilities::countDiffs(st, st2, 0.00001);
+    BOOST_CHECK(diffs == 0);
 }
 
-BOOST_AUTO_TEST_CASE (area_test_add)
+BOOST_AUTO_TEST_CASE(area_test_add)
 {
-    auto area = std::make_unique<Area> ("area1");
+    auto area = std::make_unique<Area>("area1");
 
-    auto bus1 = new gridBus ("bus1");
-    try
-    {
-        area->add (bus1);
-        area->add (bus1);
+    auto bus1 = new gridBus("bus1");
+    try {
+        area->add(bus1);
+        area->add(bus1);
     }
-    catch (...)
-    {
-        BOOST_CHECK (false);
+    catch (...) {
+        BOOST_CHECK(false);
     }
 
-    auto bus2 = bus1->clone ();
-    try
-    {
-        area->add (bus2);
+    auto bus2 = bus1->clone();
+    try {
+        area->add(bus2);
         // this is testing failure
-        BOOST_CHECK (false);
+        BOOST_CHECK(false);
     }
-    catch (const objectAddFailure &oaf)
-    {
-        BOOST_CHECK (oaf.who () == "area1");
+    catch (const objectAddFailure& oaf) {
+        BOOST_CHECK(oaf.who() == "area1");
     }
-    bus2->setName ("bus2");
-    try
-    {
-        area->add (bus2);
-        BOOST_CHECK (isSameObject (bus2->getParent (), area.get ()));
+    bus2->setName("bus2");
+    try {
+        area->add(bus2);
+        BOOST_CHECK(isSameObject(bus2->getParent(), area.get()));
     }
-    catch (...)
-    {
-        BOOST_CHECK (false);
+    catch (...) {
+        BOOST_CHECK(false);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,5 +1,5 @@
 classdef SwigRef < handle
-  properties(Hidden = true, Access = public) 
+  properties(Hidden = true, Access = public)
     swigPtr
   end
   methods(Static = true, Access = protected)

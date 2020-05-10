@@ -11,8 +11,7 @@
 */
 #pragma once
 
-namespace griddyn
-{
+namespace griddyn {
 void loadNetworkingLibrary();
 
-}//namespace griddyn
+}  //namespace griddyn

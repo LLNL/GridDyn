@@ -11,124 +11,109 @@
 * LLNS Copyright End
 */
 
-#include "config.h"
-
 #include "fncsLibrary.h"
+
+#include "config.h"
+#include "core/factoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
+#include "fncs.hpp"
 #include "fncsCollector.h"
 #include "fncsLoad.h"
 #include "fncsSource.h"
-#include "core/factoryTemplates.h"
-#include "core/objectFactoryTemplates.h"
-
-#include "fncs.hpp"
-
+#include "stringConversion.h"
 #include <regex>
 #include <sstream>
-#include "stringConversion.h"
 
 #define HAVE_REGEX
 
-static childClassFactory<fncsCollector, collector> fncsFac(std::vector<std::string> {"fncs"});
+static childClassFactory<fncsCollector, collector> fncsFac(std::vector<std::string>{"fncs"});
 
-static childTypeFactory<fncsSource, rampSource> fnsrc("source", stringVec{ "fncs" });
+static childTypeFactory<fncsSource, rampSource> fnsrc("source", stringVec{"fncs"});
 static childTypeFactory<fncsLoad, gridRampLoad> fnld("load", "fncs");
 
 void loadFNCSLibrary()
 {
-	static int loaded = 0;
+    static int loaded = 0;
 
-	if (loaded == 0)
-	{
-		loaded = 1;
-	}
+    if (loaded == 0) {
+        loaded = 1;
+    }
 }
 
-void fncsSendComplex(const std::string &key, double real, double imag)
+void fncsSendComplex(const std::string& key, double real, double imag)
 {
-	std::complex<double> cv(real, imag);
-	std::stringstream ss;
-	ss << real;
-	if (imag >= 0.0)
-	{
-		ss << '+' << imag;
-	}
-	else
-	{
-		ss << imag;
-	}
-	ss << 'j';
-	fncs::publish(key, ss.str());
+    std::complex<double> cv(real, imag);
+    std::stringstream ss;
+    ss << real;
+    if (imag >= 0.0) {
+        ss << '+' << imag;
+    } else {
+        ss << imag;
+    }
+    ss << 'j';
+    fncs::publish(key, ss.str());
 }
 
-void fncsSendComplex(const std::string &key, std::complex<double> val)
+void fncsSendComplex(const std::string& key, std::complex<double> val)
 {
-	fncsSendComplex(key, val.real(), val.imag());
+    fncsSendComplex(key, val.real(), val.imag());
 }
 
 #ifdef HAVE_REGEX
-const std::regex creg("([+-]?(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)\\s*([+-]\\s*(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)[ji]*");
+const std::regex creg(
+    "([+-]?(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)\\s*([+-]\\s*(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)[ji]*");
 
-std::complex<double> fncsGetComplex(const std::string &key)
+std::complex<double> fncsGetComplex(const std::string& key)
 {
-	std::string s=fncs::get_value(key);
-	if (s.empty())
-	{
-		return std::complex<double>(kNullVal, kNullVal);
-	}
-	std::smatch m;
-	double re = 0.0;
-	double im = 0.0;
-	std::regex_search(s, m, creg);
-	if (m.size() == 9)
-	{
-		re = numeric_conversionComplete(m[1], kNullVal);
-		im = numeric_conversionComplete(m[5], kNullVal);
-		
-	}
-	else
-	{
-		if ((s.back() == 'j') || (s.back() == 'i'))
-		{
-			s.pop_back();
-			im = numeric_conversionComplete(s, kNullVal);
+    std::string s = fncs::get_value(key);
+    if (s.empty()) {
+        return std::complex<double>(kNullVal, kNullVal);
+    }
+    std::smatch m;
+    double re = 0.0;
+    double im = 0.0;
+    std::regex_search(s, m, creg);
+    if (m.size() == 9) {
+        re = numeric_conversionComplete(m[1], kNullVal);
+        im = numeric_conversionComplete(m[5], kNullVal);
 
-		}
-		else
-		{
-			re = numeric_conversionComplete(s, kNullVal);
-		}
-	}
-	return std::complex<double>(re, im);
+    } else {
+        if ((s.back() == 'j') || (s.back() == 'i')) {
+            s.pop_back();
+            im = numeric_conversionComplete(s, kNullVal);
+
+        } else {
+            re = numeric_conversionComplete(s, kNullVal);
+        }
+    }
+    return std::complex<double>(re, im);
 }
 #else
-std::complex<double> fncsGetComplex(const std::string &key)
+std::complex<double> fncsGetComplex(const std::string& key)
 {
-	std::string s = fncs::get_value(key);
-	if (s.empty())
-	{
-		return std::complex<double>(kNullVal, kNullVal);
-	}
-	auto sp = s.find_last_of("+-");
-	try
-	{
-		double re = std::stod(s.substr(0, sp));
-		auto ij = s.find_last_of("ij");
-		double im = std::stod(s.substr(sp, ij - sp - 1));
-		return std::complex<double>(re, im);
-	}
-	catch(...)
-	{
-		return std::complex<double>(kNullVal, kNullVal);
-	}
+    std::string s = fncs::get_value(key);
+    if (s.empty()) {
+        return std::complex<double>(kNullVal, kNullVal);
+    }
+    auto sp = s.find_last_of("+-");
+    try {
+        double re = std::stod(s.substr(0, sp));
+        auto ij = s.find_last_of("ij");
+        double im = std::stod(s.substr(sp, ij - sp - 1));
+        return std::complex<double>(re, im);
+    }
+    catch (...) {
+        return std::complex<double>(kNullVal, kNullVal);
+    }
 }
 #endif
-void fncsSendVal(const std::string &key, double val)
+void fncsSendVal(const std::string& key, double val)
 {
-	fncs::publish(key, std::to_string(val));
+    fncs::publish(key, std::to_string(val));
 }
 
-double fncsGetVal(const std::string &key)
+double fncsGetVal(const std::string& key)
 {
-	std::string s= fncs::get_value(key);
-	return numeric_conversionComplete(s, kNullVal);
+    std::string s = fncs::get_value(key);
+    return numeric_conversionComplete(s, kNullVal);
 }

@@ -27,7 +27,7 @@ while (~isempty(line))
         break;
     end
     t1=regexp(line,'(\d+)\[([^\]]*)\]\s(\d+)\sr=([^s]*)state=([^\s])[^=]*=([^\s])[^=]*=([^\s])','tokens');
-    
+
     if (~isempty(t1))
         index=str2double(t1{1}{1})-indexBias;
         st=str2double(t1{1}{3})+1;
@@ -39,7 +39,7 @@ while (~isempty(line))
                 res(currentRes).state(1,jj)=res(currentRes-1).state(end,jj);
                 res(currentRes).dr(1,jj)=res(currentRes-1).dr(end,jj);
                 res(currentRes).ds(1,jj)=res(currentRes-1).ds(end,jj);
-                
+
             end
             res(currentRes-1).state(end,:)=[];
                 res(currentRes-1).time(end)=[];
@@ -49,7 +49,7 @@ while (~isempty(line))
             index=str2double(t1{1}{1})-indexBias;
         end
         res(currentRes).time(index) = str2double(t1{1}{2});
-        
+
         res(currentRes).resid(index,st)=str2double(t1{1}{4});
         res(currentRes).state(index,st)=str2double(t1{1}{5});
         res(currentRes).dr(index,st)=str2double(t1{1}{6});
@@ -57,7 +57,7 @@ while (~isempty(line))
         line=fgets(fid);
         continue;
     end
-    
+
     t1=regexp(line,'(\d+)\[([^\]]*)\]\s(\d+)\sr=([^s]*)state=([^\s])','tokens');
     if (~isempty(t1))
         index=str2double(t1{1}{1})-indexBias;
@@ -98,7 +98,7 @@ while (~isempty(line))
     end
     %stname block
     line=fgets(fid);
-    
+
   %  t1=regexp(line,'(\d+)\[([^\]]*)','tokens');
 end
 fclose(fid);

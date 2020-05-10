@@ -11,7 +11,6 @@
 * LLNS Copyright End
 */
 
-
 #ifndef GRIDDYN_LOAD_FSKIT_H_
 #define GRIDDYN_LOAD_FSKIT_H_
 
@@ -21,7 +20,6 @@
 "all" or use default for all models
 others will be added as the library grows
 */
-void loadFskit(const std::string &subset="");
-
+void loadFskit(const std::string& subset = "");
 
 #endif

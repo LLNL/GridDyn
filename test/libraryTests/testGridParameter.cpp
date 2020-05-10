@@ -10,19 +10,19 @@
 * LLNS Copyright End
 */
 
-
 // test case for coreObject object
 
-#include "griddyn/gridDynDefinitions.hpp"
-#include "fileInput/gridParameter.h"
 #include "../testHelper.h"
-#include <boost/test/floating_point_comparison.hpp>
+#include "fileInput/gridParameter.h"
+#include "griddyn/gridDynDefinitions.hpp"
+
 #include <boost/test/unit_test.hpp>
 
+#include <boost/test/tools/floating_point_comparison.hpp>
 
-static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
+static const std::string xmlTestDirectory(GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 
-BOOST_AUTO_TEST_SUITE (gridmodel_parameterests)
+BOOST_AUTO_TEST_SUITE(gridmodel_parameterests)
 
-BOOST_AUTO_TEST_CASE (gridmodel_parameterest1) {}
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_CASE(gridmodel_parameterest1) {}
+BOOST_AUTO_TEST_SUITE_END()

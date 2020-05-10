@@ -11,18 +11,19 @@
 */
 
 #include "../testHelper.h"
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
-
 #include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <iostream>
 #include <set>
 #include <utility>
 
-BOOST_FIXTURE_TEST_SUITE (simulation_tests, gridDynSimulationTestFixture)
+#include <boost/test/unit_test.hpp>
 
-static const std::string validationTestDirectory (GRIDDYN_TEST_DIRECTORY "/validation_tests/");
+#include <boost/test/tools/floating_point_comparison.hpp>
 
-BOOST_AUTO_TEST_CASE (simulation_ordering_tests) {}
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_FIXTURE_TEST_SUITE(simulation_tests, gridDynSimulationTestFixture)
+
+static const std::string validationTestDirectory(GRIDDYN_TEST_DIRECTORY "/validation_tests/");
+
+BOOST_AUTO_TEST_CASE(simulation_ordering_tests) {}
+BOOST_AUTO_TEST_SUITE_END()

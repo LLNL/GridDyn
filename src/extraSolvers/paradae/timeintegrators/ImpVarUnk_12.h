@@ -14,7 +14,7 @@
 #include "RungeKutta_DIRK.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|cccc}
   1&1&&&\\
@@ -26,11 +26,10 @@ namespace paradae {
   \end{array}
   \f]
  */
-class ImpVarUnk_12 : public RungeKutta_DIRK {
-public:
-  ImpVarUnk_12(Equation* eq, bool variable_step=false);
-  virtual std::string GetName(){return "RK_Imp_12";};
-};
-} // namespace paradae
-} // namespace griddyn
-
+    class ImpVarUnk_12: public RungeKutta_DIRK {
+      public:
+        ImpVarUnk_12(Equation* eq, bool variable_step = false);
+        virtual std::string GetName() { return "RK_Imp_12"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn

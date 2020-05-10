@@ -16,40 +16,41 @@
 
 #include "loadModels/otherLoads.h"
 
-class fncsLoad:public gridRampLoad
-{
-public:
-	enum fncs_load_flags
-	{
-		use_ramp = object_flag8,
-		predictive_ramp = object_flag9,
-		initial_query = object_flag10,
-	};
-protected:
-	std::string voltageKey;			//!< the key to send voltage
-	std::string loadKey; 	//!< time series containing the load information
-	gridUnits::units_t inputUnits = gridUnits::MW;
-	double scaleFactor = 1.0;			//!< scaling factor on the load
-private:
-	double prevP = 0;
-	double prevQ = 0;
-public:
-	explicit fncsLoad(const std::string &objName = "fncsLoad_$");
+class fncsLoad: public gridRampLoad {
+  public:
+    enum fncs_load_flags {
+        use_ramp = object_flag8,
+        predictive_ramp = object_flag9,
+        initial_query = object_flag10,
+    };
 
-	~fncsLoad()
-	{
-	}
-	coreObject * clone(coreObject *obj = nullptr) const override;
-	virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags) override;
-	virtual void pFlowObjectInitializeB() override;
+  protected:
+    std::string voltageKey;  //!< the key to send voltage
+    std::string loadKey;  //!< time series containing the load information
+    gridUnits::units_t inputUnits = gridUnits::MW;
+    double scaleFactor = 1.0;  //!< scaling factor on the load
+  private:
+    double prevP = 0;
+    double prevQ = 0;
 
-	virtual void updateA(coreTime time) override;
-	virtual coreTime updateB() override;
-	virtual void timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
-	virtual void setFlag(const std::string &param, bool val = true) override;
-	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-private:
-	void setSubscription();
+  public:
+    explicit fncsLoad(const std::string& objName = "fncsLoad_$");
+
+    ~fncsLoad() {}
+    coreObject* clone(coreObject* obj = nullptr) const override;
+    virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags) override;
+    virtual void pFlowObjectInitializeB() override;
+
+    virtual void updateA(coreTime time) override;
+    virtual coreTime updateB() override;
+    virtual void timestep(coreTime ttime, const IOdata& inputs, const solverMode& sMode) override;
+    virtual void setFlag(const std::string& param, bool val = true) override;
+    virtual void set(const std::string& param, const std::string& val) override;
+    virtual void set(const std::string& param,
+                     double val,
+                     gridUnits::units_t unitType = gridUnits::defUnit) override;
+
+  private:
+    void setSubscription();
 };
 #endif

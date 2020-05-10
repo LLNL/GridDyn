@@ -1,6 +1,5 @@
 version: 2
 aliases:
-
   - &setup_griddyn
     name: setup_griddyn
     environment:
@@ -9,20 +8,20 @@ aliases:
       cd build
       eval cmake .. ${CMAKE_FLAGS}
       make -j 4
-      
+
   - &run_griddyn_tests
     name: run_griddyn_tests
     command: |
-       /root/project/scripts/run-circleci-tests.sh
-       RESULT=$?
-       exit $RESULT
+      /root/project/scripts/run-circleci-tests.sh
+      RESULT=$?
+      exit $RESULT
 
 jobs:
   build_gcc8:
     docker:
       - image: helics/buildenv:gcc8-builder
     environment:
-      CMAKE_FLAGS: " -DGRIDDYN_BUILD_TESTS=ON "
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON '
     steps:
       - checkout
       - run: *setup_griddyn
@@ -31,7 +30,7 @@ jobs:
     docker:
       - image: helics/buildenv:gcc7-builder
     environment:
-      CMAKE_FLAGS: " -DGRIDDYN_BUILD_TESTS=ON "
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON '
     steps:
       - checkout
       - run: *setup_griddyn
@@ -43,5 +42,3 @@ workflows:
     jobs:
       - build_gcc8
       - build_gcc7
-
-

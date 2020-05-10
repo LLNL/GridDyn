@@ -25,8 +25,7 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
 #include <map>
 #include <mutex>
 
-namespace zmqlib
-{
+namespace zmqlib {
 /** a storage system for the available core objects allowing references by name to the core
  */
 std::map<std::string, std::shared_ptr<zmqContextManager>> zmqContextManager::contexts;
@@ -35,60 +34,58 @@ std::map<std::string, std::shared_ptr<zmqContextManager>> zmqContextManager::con
 safe so we are going to use a lock that is entirely controlled by this file*/
 static std::mutex contextLock;
 
-std::shared_ptr<zmqContextManager> zmqContextManager::getContextPointer (const std::string &contextName)
+std::shared_ptr<zmqContextManager>
+    zmqContextManager::getContextPointer(const std::string& contextName)
 {
-    std::lock_guard<std::mutex> conlock (contextLock);  // just to ensure that nothing funny happens if you try to
-                                                        // get a context while it is being constructed
-    auto fnd = contexts.find (contextName);
-    if (fnd != contexts.end ())
-    {
+    std::lock_guard<std::mutex> conlock(
+        contextLock);  // just to ensure that nothing funny happens if you try to
+        // get a context while it is being constructed
+    auto fnd = contexts.find(contextName);
+    if (fnd != contexts.end()) {
         return fnd->second;
     }
 
-    auto newContext = std::shared_ptr<zmqContextManager> (new zmqContextManager (contextName));
-    contexts.emplace (contextName, newContext);
+    auto newContext = std::shared_ptr<zmqContextManager>(new zmqContextManager(contextName));
+    contexts.emplace(contextName, newContext);
     return newContext;
     // if it doesn't make a new one with the appropriate name
 }
 
-zmq::context_t &zmqContextManager::getContext (const std::string &contextName)
+zmq::context_t& zmqContextManager::getContext(const std::string& contextName)
 {
-    return getContextPointer (contextName)->getBaseContext ();
+    return getContextPointer(contextName)->getBaseContext();
 }
 
-void zmqContextManager::closeContext (const std::string &contextName)
+void zmqContextManager::closeContext(const std::string& contextName)
 {
-    std::lock_guard<std::mutex> conlock (contextLock);
-    auto fnd = contexts.find (contextName);
-    if (fnd != contexts.end ())
-    {
-        contexts.erase (fnd);
+    std::lock_guard<std::mutex> conlock(contextLock);
+    auto fnd = contexts.find(contextName);
+    if (fnd != contexts.end()) {
+        contexts.erase(fnd);
     }
 }
 
-bool zmqContextManager::setContextToLeakOnDelete (const std::string &contextName)
+bool zmqContextManager::setContextToLeakOnDelete(const std::string& contextName)
 {
-    std::lock_guard<std::mutex> conlock (contextLock);
-    auto fnd = contexts.find (contextName);
-    if (fnd != contexts.end ())
-    {
+    std::lock_guard<std::mutex> conlock(contextLock);
+    auto fnd = contexts.find(contextName);
+    if (fnd != contexts.end()) {
         fnd->second->leakOnDelete = true;
     }
     return false;
 }
-zmqContextManager::~zmqContextManager ()
+zmqContextManager::~zmqContextManager()
 {
-    if (leakOnDelete)
-    {
+    if (leakOnDelete) {
         // yes I am purposefully leaking this PHILIP TOP
-        auto val = zcontext.release ();
+        auto val = zcontext.release();
         (void)(val);
     }
 }
 
-zmqContextManager::zmqContextManager (const std::string &contextName) : name (contextName)
+zmqContextManager::zmqContextManager(const std::string& contextName): name(contextName)
 {
-    zcontext = std::make_unique<zmq::context_t> ();
+    zcontext = std::make_unique<zmq::context_t>();
 }
 
 }  // namespace zmqlib

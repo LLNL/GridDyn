@@ -35,41 +35,39 @@
 #define PROTECTION_MESSAGE_H
 
 #include "griddyn/griddyn-config.h"
-
-#include <string>
 #include <fskit/event-message.h>
+#include <string>
+
 #include <boost/serialization/serialization.hpp>
 
-class ProtectionMessage : public fskit::EventMessage
-{
-public:
-  enum MESSAGE_TYPE
-  {
-    NO_EVENT,
-    LOCAL_FAULT_EVENT,
-    REMOTE_FAULT_EVENT,
-    BREAKER_TRIP_EVENT,
-    BREAKER_CLOSE_EVENT,
-    BREAKER_TRIP_COMMAND,
-    BREAKER_CLOSE_COMMAND,
-    BREAKER_OOS_COMMAND
-  };
+class ProtectionMessage: public fskit::EventMessage {
+  public:
+    enum MESSAGE_TYPE {
+        NO_EVENT,
+        LOCAL_FAULT_EVENT,
+        REMOTE_FAULT_EVENT,
+        BREAKER_TRIP_EVENT,
+        BREAKER_CLOSE_EVENT,
+        BREAKER_TRIP_COMMAND,
+        BREAKER_CLOSE_COMMAND,
+        BREAKER_OOS_COMMAND
+    };
 
-  ProtectionMessage ();
-  ProtectionMessage (MESSAGE_TYPE t);
-  virtual ~ProtectionMessage ();
+    ProtectionMessage();
+    ProtectionMessage(MESSAGE_TYPE t);
+    virtual ~ProtectionMessage();
 
-  MESSAGE_TYPE GetMessageType (void);
+    MESSAGE_TYPE GetMessageType(void);
 
-private:
-  friend class boost::serialization::access;
-  template<class Archive>
-  void serialize (Archive & ar, const int version)
-  {
-    ar & m_messageType;
-  }
+  private:
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive& ar, const int version)
+    {
+        ar& m_messageType;
+    }
 
-  MESSAGE_TYPE m_messageType;
+    MESSAGE_TYPE m_messageType;
 };
 
-#endif // PROTECTION_MESSAGE_H
+#endif  // PROTECTION_MESSAGE_H

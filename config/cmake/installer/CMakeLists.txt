@@ -80,12 +80,12 @@ IF(UNIX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
   endif(ENABLE_EXTRA_COMPILER_WARNINGS)
 ELSE(UNIX)
   IF(MINGW)
@@ -123,7 +123,7 @@ ENDIF(UNIX)
 include(configGenerator)
 
 IF (VERSION_OPTION)
-	add_compile_options(${VERSION_OPTION})
+    add_compile_options(${VERSION_OPTION})
 ELSE ()
 set(CMAKE_CXX_STANDARD 14)
 ENDIF ()
@@ -145,20 +145,20 @@ IF(OPENMP_ENABLE)
   FIND_PACKAGE(OpenMP)
   IF(OPENMP_FOUND)
     ADD_DEFINITIONS(-DHAVE_OPENMP)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CDD_FLAGS} ${OpenMP_CXX_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
   ELSE(OPENMP_FOUND)
     message(STATUS "Disabling OpenMP support, could not determine compiler flags")
-	set(OPENMP_ENABLE FALSE)
+    set(OPENMP_ENABLE FALSE)
   ENDIF(OPENMP_FOUND)
 ELSE(OPENMP_ENABLE)
   set(OPENMP_FOUND FALSE)
 ENDIF(OPENMP_ENABLE)
 
 IF (OPENMP_FOUND)
-	OPTION(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
-	OPTION(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
+    OPTION(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
+    OPTION(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
 ENDIF(OPENMP_FOUND)
 
 OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
@@ -208,30 +208,30 @@ ENDIF(MSVC)
 set(SuiteSparse_VERBOSE OFF)
   find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
   if(SuiteSparse_FOUND)
-	list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+    list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
   #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
   IF (AUTOBUILD_KLU)
-		OPTION(FORCE_KLU_REBUILD "force rebuild of KLU" OFF)
-		IF(FORCE_KLU_REBUILD)
-			include(buildSuiteSparse)
-			build_suitesparse()
-			set(FORCE_KLU_REBUILD OFF CACHE BOOL "force rebuild of KLU" FORCE)
-		ENDIF(FORCE_KLU_REBUILD)
-	ENDIF(AUTOBUILD_KLU)
+        OPTION(FORCE_KLU_REBUILD "force rebuild of KLU" OFF)
+        IF(FORCE_KLU_REBUILD)
+            include(buildSuiteSparse)
+            build_suitesparse()
+            set(FORCE_KLU_REBUILD OFF CACHE BOOL "force rebuild of KLU" FORCE)
+        ENDIF(FORCE_KLU_REBUILD)
+    ENDIF(AUTOBUILD_KLU)
   else(SuiteSparse_FOUND)
-	OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" OFF)
-	IF (AUTOBUILD_KLU)
-		include(buildSuiteSparse)
-		build_suitesparse()
-		set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
-		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
-	ENDIF(AUTOBUILD_KLU)
-	if (SuiteSparse_FOUND)
-	   list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
-	else()
-		message( FATAL_ERROR "KLU not functional - support will not be provided")
-		message( "Double check spelling specified libraries (search is case sensitive)")
-	endif()
+    OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" OFF)
+    IF (AUTOBUILD_KLU)
+        include(buildSuiteSparse)
+        build_suitesparse()
+        set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
+        find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
+    ENDIF(AUTOBUILD_KLU)
+    if (SuiteSparse_FOUND)
+       list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+    else()
+        message( FATAL_ERROR "KLU not functional - support will not be provided")
+        message( "Double check spelling specified libraries (search is case sensitive)")
+    endif()
   endif(SuiteSparse_FOUND)
 
 endif(KLU_ENABLE)
@@ -256,26 +256,26 @@ SHOW_VARIABLE(SUNDIALS_DIR PATH
 find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
 
   if(SUNDIALS_FOUND)
-	list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
+    list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
   OPTION(FORCE_SUNDIALS_REBUILD "force rebuild of sundials" OFF)
-	IF (AUTOBUILD_SUNDIALS)
+    IF (AUTOBUILD_SUNDIALS)
 
-		IF(FORCE_SUNDIALS_REBUILD)
-			include(buildSundials)
-			build_sundials()
-			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
-		ENDIF(FORCE_SUNDIALS_REBUILD)
-	ELSE (AUTOBUILD_SUNDIALS)
-	   IF(FORCE_SUNDIALS_REBUILD)
-			include(buildSundials)
-			build_sundials()
-			set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
-			set(SUNDIALS_LIBRARIES NOT_FOUND CACHE FORCE)
-			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
-			set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
-			find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
-		ENDIF(FORCE_SUNDIALS_REBUILD)
-	ENDIF(AUTOBUILD_SUNDIALS)
+        IF(FORCE_SUNDIALS_REBUILD)
+            include(buildSundials)
+            build_sundials()
+            set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
+        ENDIF(FORCE_SUNDIALS_REBUILD)
+    ELSE (AUTOBUILD_SUNDIALS)
+       IF(FORCE_SUNDIALS_REBUILD)
+            include(buildSundials)
+            build_sundials()
+            set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
+            set(SUNDIALS_LIBRARIES NOT_FOUND CACHE FORCE)
+            set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
+            set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
+            find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
+        ENDIF(FORCE_SUNDIALS_REBUILD)
+    ENDIF(AUTOBUILD_SUNDIALS)
   else(SUNDIALS_FOUND)
     OPTION(AUTOBUILD_SUNDIALS "enable Sundials to automatically download and build" OFF)
     message(STATUS "abs=${AUTOBUILD_SUNDIALS}")
@@ -288,8 +288,8 @@ find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONEN
   if (SUNDIALS_FOUND)
     list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
   else (SUNDIALS_FOUND)
-	message( FATAL_ERROR "sundials not found - unable to continue")
-	message( "Double check spelling specified libraries (search is case sensitive)")
+    message( FATAL_ERROR "sundials not found - unable to continue")
+    message( "Double check spelling specified libraries (search is case sensitive)")
   endif(SUNDIALS_FOUND)
   endif(SUNDIALS_FOUND)
 
@@ -318,30 +318,30 @@ set (optional_library_functions )
 
 IF (MSVC)
 find_path(BOOST_TEST_PATH
-			NAMES 			boost/version.hpp
-			PATHS		C:/boost_1_64_0
-						C:/boost_1_63_0
-						C:/boost_1_61_0
-						D:/boost_1_64_0
-						D:/boost_1_63_0
-						D:/boost_1_61_0
-						C:/boost/boost_1_64_0
-						C:/boost/boost_1_63_0
-						C:/boost/boost_1_61_0
-						D:/boost/boost_1_64_0
-						D:/boost/boost_1_63_0
-						D:/boost/boost_1_61_0
-						C:/local/boost_1_64_0
-						C:/local/boost_1_63_0
-						C:/local/boost_1_61_0
-						D:/local/boost_1_64_0
-						D:/local/boost_1_63_0
-						D:/local/boost_1_61_0
-		)
+            NAMES             boost/version.hpp
+            PATHS        C:/boost_1_64_0
+                        C:/boost_1_63_0
+                        C:/boost_1_61_0
+                        D:/boost_1_64_0
+                        D:/boost_1_63_0
+                        D:/boost_1_61_0
+                        C:/boost/boost_1_64_0
+                        C:/boost/boost_1_63_0
+                        C:/boost/boost_1_61_0
+                        D:/boost/boost_1_64_0
+                        D:/boost/boost_1_63_0
+                        D:/boost/boost_1_61_0
+                        C:/local/boost_1_64_0
+                        C:/local/boost_1_63_0
+                        C:/local/boost_1_61_0
+                        D:/local/boost_1_64_0
+                        D:/local/boost_1_63_0
+                        D:/local/boost_1_61_0
+        )
 
-		if (BOOST_TEST_PATH)
-		set(BOOST_ROOT ${BOOST_TEST_PATH})
-		endif(BOOST_TEST_PATH)
+        if (BOOST_TEST_PATH)
+        set(BOOST_ROOT ${BOOST_TEST_PATH})
+        endif(BOOST_TEST_PATH)
 ENDIF(MSVC)
 
 SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
@@ -390,12 +390,12 @@ add_subdirectory(src/griddyn)
 OPTION(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
 IF (ENABLE_PLUGINS)
-	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		set(ENABLE_PLUGINS OFF)
-		message("Plugin support requires BOOST 1.61 or higher")
-	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		add_subdirectory(plugins)
-	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+    IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+        set(ENABLE_PLUGINS OFF)
+        message("Plugin support requires BOOST 1.61 or higher")
+    ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+        add_subdirectory(plugins)
+    ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(ENABLE_PLUGINS)
 
 # -------------------------------------------------------------
@@ -419,12 +419,12 @@ OPTION(FMI_ENABLE "Enable FMI support" ON)
 # link against them.
 
 IF (FMI_ENABLE)
-	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		set(FMI_ENABLE OFF CACHE BOOL "Enable FMI Support" FORCE)
-		message("FMI support requires BOOST 1.61 or higher")
-	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		add_subdirectory(src/fmi)
-	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+    IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+        set(FMI_ENABLE OFF CACHE BOOL "Enable FMI Support" FORCE)
+        message("FMI support requires BOOST 1.61 or higher")
+    ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+        add_subdirectory(src/fmi)
+    ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(FMI_ENABLE)
 
 
@@ -474,12 +474,12 @@ IF (GRIDDYN_GENERATE_DOXYGEN_DOC)
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
 
-	SHOW_VARIABLE(DOXYGEN_OUTPUT_DIR PATH "location to put Doxygen docs" "${CMAKE_CURRENT_SOURCE_DIR}/docs")
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-	add_custom_target(doc
-	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs}
-	COMMENT "Generating API documentation with Doxygen" VERBATIM
+    SHOW_VARIABLE(DOXYGEN_OUTPUT_DIR PATH "location to put Doxygen docs" "${CMAKE_CURRENT_SOURCE_DIR}/docs")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(doc
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs}
+    COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
@@ -494,31 +494,31 @@ OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
 # link against them.
 
 IF (FNCS_EXECUTABLE)
-	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
-	IF(USE_DUMMY_FNCS)
-		HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
-		HIDE_VARIABLE(FNCS_INSTALL_PATH)
+    SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
+    IF(USE_DUMMY_FNCS)
+        HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
+        HIDE_VARIABLE(FNCS_INSTALL_PATH)
 
-	ELSE(USE_DUMMY_FNCS)
-		SHOW_VARIABLE(USE_FNCS_SHARED_LIBRARY BOOL "used a dynamic shared library for the FNCS interface" OFF)
-		set(ZMQ_NEEDED ON)
-		IF(USE_FNCS_SHARED_LIBRARY)
-			SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
-			find_package(FNCS)
-		ELSE (USE_FNCS_SHARED_LIBRARY)
-			HIDE_VARIABLE(FNCS_INSTALL_PATH)
-			SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
+    ELSE(USE_DUMMY_FNCS)
+        SHOW_VARIABLE(USE_FNCS_SHARED_LIBRARY BOOL "used a dynamic shared library for the FNCS interface" OFF)
+        set(ZMQ_NEEDED ON)
+        IF(USE_FNCS_SHARED_LIBRARY)
+            SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
+            find_package(FNCS)
+        ELSE (USE_FNCS_SHARED_LIBRARY)
+            HIDE_VARIABLE(FNCS_INSTALL_PATH)
+            SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
             SHOW_VARIABLE(CZMQ_INCLUDE_PATH PATH  "path to the czmq headers" "${CZMQ_INCLUDE_PATH}")
-				find_package(CZMQ)
-				list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
-		ENDIF(USE_FNCS_SHARED_LIBRARY)
+                find_package(CZMQ)
+                list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
+        ENDIF(USE_FNCS_SHARED_LIBRARY)
 
-	ENDIF(USE_DUMMY_FNCS)
-	add_subdirectory(src/fncs)
+    ENDIF(USE_DUMMY_FNCS)
+    add_subdirectory(src/fncs)
 ELSE(FNCS_EXECUTABLE)
-	HIDE_VARIABLE(FNCS_INSTALL_PATH)
-	HIDE_VARIABLE(USE_DUMMY_FNCS)
-	HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
+    HIDE_VARIABLE(FNCS_INSTALL_PATH)
+    HIDE_VARIABLE(USE_DUMMY_FNCS)
+    HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
 ENDIF(FNCS_EXECUTABLE)
 
 
@@ -531,10 +531,10 @@ OPTION(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
 # link against them.
 
 IF (HELICS_EXECUTABLE)
-	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
-	set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
+    SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
+    set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
 ELSE(HELICS_EXECUTABLE)
-	HIDE_VARIABLE(HELICS_INSTALL_PATH)
+    HIDE_VARIABLE(HELICS_INSTALL_PATH)
 ENDIF(HELICS_EXECUTABLE)
 
 # -------------------------------------------------------------
@@ -574,39 +574,39 @@ endif(NOT ZMQ_FOUND)
 # ZMQ_INCLUDE_DIR, where to find zmq.h
 # ZMQ_LIBRARY, the library needed to use ZMQ
 # ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
-	if (ZMQ_FOUND)
-		add_subdirectory(src/zmqLib)
-	else(ZMQ_FOUND)
-		message(SEND_ERROR "unable to locate zmq library")
-	endif(ZMQ_FOUND)
+    if (ZMQ_FOUND)
+        add_subdirectory(src/zmqLib)
+    else(ZMQ_FOUND)
+        message(SEND_ERROR "unable to locate zmq library")
+    endif(ZMQ_FOUND)
 ENDIF((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 
 
 IF (HELICS_EXECUTABLE)
-	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
-	set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
-	find_package(HELICS)
-	IF(NOT HELICS_FOUND)
-		OPTION(AUTOBUILD_HELICS "enable HELICS to automatically download and build" OFF)
-		IF(AUTOBUILD_HELICS)
-			include(buildHELICS)
-			build_helics()
-			set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
-			find_package(HELICS)
-		ENDIF(AUTOBUILD_HELICS)
-	ELSE (NOT HELICS_FOUND)
-		OPTION(FORCE_HELICS_REBUILD "force rebuild of helics" OFF)
-		IF (AUTOBUILD_HELICS)
-			IF(FORCE_HELICS_REBUILD)
-				include(buildHELICS)
-				build_helics()
-				set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
-				set(FORCE_HELICS_REBUILD OFF CACHE BOOL "force rebuild of helics" FORCE)
-			ENDIF(FORCE_HELICS_REBUILD)
-		ENDIF(AUTOBUILD_HELICS)
-	ENDIF(NOT HELICS_FOUND)
+    SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
+    set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+    find_package(HELICS)
+    IF(NOT HELICS_FOUND)
+        OPTION(AUTOBUILD_HELICS "enable HELICS to automatically download and build" OFF)
+        IF(AUTOBUILD_HELICS)
+            include(buildHELICS)
+            build_helics()
+            set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+            find_package(HELICS)
+        ENDIF(AUTOBUILD_HELICS)
+    ELSE (NOT HELICS_FOUND)
+        OPTION(FORCE_HELICS_REBUILD "force rebuild of helics" OFF)
+        IF (AUTOBUILD_HELICS)
+            IF(FORCE_HELICS_REBUILD)
+                include(buildHELICS)
+                build_helics()
+                set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+                set(FORCE_HELICS_REBUILD OFF CACHE BOOL "force rebuild of helics" FORCE)
+            ENDIF(FORCE_HELICS_REBUILD)
+        ENDIF(AUTOBUILD_HELICS)
+    ENDIF(NOT HELICS_FOUND)
 
-	add_subdirectory(src/helics)
+    add_subdirectory(src/helics)
 ENDIF(HELICS_EXECUTABLE)
 FILE(GLOB KEY_LIBRARY_FILES  ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
@@ -620,7 +620,7 @@ OPTION(OPTIMIZATION_ENABLE "Enable Optimization libraries" OFF)
 # If OPTIMIZATION is enabled try to locate the libraries
 # link against them.
 IF(OPTIMIZATION_ENABLE)
-	add_subdirectory(src/optimization)
+    add_subdirectory(src/optimization)
 ENDIF(OPTIMIZATION_ENABLE)
 
 add_subdirectory(src/fileInput)
@@ -632,7 +632,7 @@ add_subdirectory(src/gridDynCombined)
 OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" ON)
 
 IF(BUILD_SHARED_FMI_LIBRARY)
-	add_subdirectory(src/fmi_export)
+    add_subdirectory(src/fmi_export)
 ENDIF(BUILD_SHARED_FMI_LIBRARY)
 
 add_subdirectory(src/gridDynMain)

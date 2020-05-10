@@ -20,30 +20,27 @@
 #include <memory>
 
 #ifndef GRIDDYN_PENDING
-#define GRIDDYN_PENDING (25)
+#    define GRIDDYN_PENDING (25)
 #endif
 // forward declaration for CLI::App
-namespace CLI
-{
+namespace CLI {
 class App;
 }  // namespace CLI
 
-namespace griddyn
-{
+namespace griddyn {
 class gridDynSimulation;
 class readerInfo;
 /**
  * Build and run a GridDyn simulation.
  */
-class GriddynRunner
-{
+class GriddynRunner {
   public:
     /** constructor*/
     GriddynRunner();
     GriddynRunner(std::shared_ptr<gridDynSimulation> sim);
     /** Destructor*/
     virtual ~GriddynRunner();
-    int InitializeFromString(const std::string &cmdargs);
+    int InitializeFromString(const std::string& cmdargs);
 
     /**
      * Initialize a simulation run from command line arguments.
@@ -52,7 +49,7 @@ class GriddynRunner
      @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be allowed
      @return >0 normal stop,  0 normal, <0 error
      */
-    virtual int Initialize(int argc, char *argv[], bool allowUnrecognized = false);
+    virtual int Initialize(int argc, char* argv[], bool allowUnrecognized = false);
     /**
     * Initialize a simulation run from command line arguments using a given readerInfo structure
     @param[in] argc the number of console arguments
@@ -60,7 +57,7 @@ class GriddynRunner
     @param[in] ri the readerInfo structure that contains any additional reader information
     @return >0 normal stop,  0 normal, <0 error
     */
-    int Initialize(int argc, char *argv[], readerInfo &ri, bool allowUnrecognized = false);
+    int Initialize(int argc, char* argv[], readerInfo& ri, bool allowUnrecognized = false);
     /** initialization the simulation object so it is ready to run*/
     virtual void simInitialize();
     /**
@@ -97,7 +94,7 @@ class GriddynRunner
     @param[out] timeReturn the current simulation time
     @return GRIDDYN_PENDING if an asynchronous operation is ongoing otherwise returns the current state of the
     simulation*/
-    virtual int getStatus(coreTime &timeReturn);
+    virtual int getStatus(coreTime& timeReturn);
     /**
      * Get the next GridDyn Event time
      *
@@ -107,13 +104,13 @@ class GriddynRunner
 
     virtual void Finalize();
     virtual int Reset();
-    virtual int Reset(readerInfo &ri);
+    virtual int Reset(readerInfo& ri);
     /** reset the underlying simulation of a runner*/
     void resetSim(std::shared_ptr<gridDynSimulation> sim) { m_gds = std::move(sim); }
     /** get a pointer to the simulation object*/
     std::shared_ptr<const gridDynSimulation> getSim() const { return m_gds; }
 
-    std::shared_ptr<gridDynSimulation> &getSim();
+    std::shared_ptr<gridDynSimulation>& getSim();
     /** check if the runner is ready for another command */
     virtual bool isReady() const;
 
@@ -131,19 +128,19 @@ class GriddynRunner
     decltype(std::chrono::high_resolution_clock::now()) m_stopTime;
     bool eventMode = false;
 
-    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri);
+    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo& ri);
 
-    std::shared_ptr<CLI::App> generateBaseCommandLineParser(readerInfo &ri);
+    std::shared_ptr<CLI::App> generateBaseCommandLineParser(readerInfo& ri);
 
     /** actually load the command line arguments*/
-    int loadCommandArgument(readerInfo &ri, bool allow_unrecognized);
+    int loadCommandArgument(readerInfo& ri, bool allow_unrecognized);
 
   protected:
-    std::string execPath; //!< the executable path from command line arguments
+    std::string execPath;  //!< the executable path from command line arguments
   private:
     std::future<coreTime> async_ret;  //!< future code for the asynchronous operations
     int argc_val{0};
-    char **argv_vals = nullptr;
+    char** argv_vals = nullptr;
     std::string arg_string;
 };
 
