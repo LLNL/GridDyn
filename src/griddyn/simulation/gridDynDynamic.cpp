@@ -670,17 +670,13 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
     if (opFlags[connectivity_change_flag]) {
         checkNetwork(network_check_type::simplified);
     }
-    if ((opFlags[state_change_flag]) ||
-        (change == change_code::state_count_change)) 
-    {
+    if ((opFlags[state_change_flag]) || (change == change_code::state_count_change)) {
         // we changed object states so we have to do a full reset
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
             return true;
         }
         reInitDyn(sMode);
-    } else if ((opFlags[object_change_flag]) ||
-               (change == change_code::object_change)) 
-    {
+    } else if ((opFlags[object_change_flag]) || (change == change_code::object_change)) {
         // the object count changed
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
             return true;
@@ -702,8 +698,7 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         dynData->sparseReInit(SolverInterface::sparse_reinit_modes::resize);
     } else if (opFlags[root_change_flag]) {
         handleRootChange(sMode, dynData);
-    } else  
-    {
+    } else {
         // mode ==0
         opFlags &= RESET_CHANGE_FLAG_MASK;
         return false;
@@ -759,8 +754,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
     retval =
         dynData->calcIC(currentTime, probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
 
-    if (retval == -22) 
-    {
+    if (retval == -22) {
         // this is bad initial conditions TODO:: map this to Solver ERROR codes not
         // Sundials ERROR codes
         converge(currentTime,

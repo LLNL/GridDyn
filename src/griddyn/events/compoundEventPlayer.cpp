@@ -97,13 +97,11 @@ namespace events {
                 } else {
                     armed = false;
                 }
-            } else  
-            {
+            } else {
                 // just proceed to the next trigger and Value
                 triggerTime = ts.time(currIndex);
             }
-        } else 
-        {
+        } else {
             // no file so loop if there is a period otherwise disarm
             if (period > timeZero) {
                 do {

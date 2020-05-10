@@ -177,7 +177,7 @@ class matrixData {
     /**
      *  @brief reserve space in the array for
      */
-    virtual void reserve(count_t /*maxNonZeros*/){}
+    virtual void reserve(count_t /*maxNonZeros*/) {}
 
     /**
      *  @brief get the value at a specific location

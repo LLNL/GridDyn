@@ -473,8 +473,7 @@ coreObject* findMatchingObject(coreObject* obj1, gridPrimary* src, gridPrimary* 
         obj2 = getMatchingArea(dynamic_cast<Area*>(obj1), src, sec);
     } else if (dynamic_cast<Link*>(obj1) != nullptr) {
         obj2 = getMatchingLink(dynamic_cast<Link*>(obj1), src, sec);
-    } else  
-    {
+    } else {
         // now we get ugly we are gridSecondary Object
         coreObject* pobj = findMatchingObject(obj1->getParent(), src, sec);
         if (pobj != nullptr) {  // this is an internal string sequence for this purpose, likely

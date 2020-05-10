@@ -53,16 +53,20 @@ class objectRemoveFailure: public coreObjectException {
 
 class unrecognizedParameter: public std::invalid_argument {
   public:
-    unrecognizedParameter() noexcept: std::invalid_argument("unrecognized parameter"){}
+    unrecognizedParameter() noexcept: std::invalid_argument("unrecognized parameter") {}
     unrecognizedParameter(const std::string& param):
-        std::invalid_argument(std::string("unrecognized Parameter:") + param){}
+        std::invalid_argument(std::string("unrecognized Parameter:") + param)
+    {
+    }
 };
 
 class invalidParameterValue: public std::invalid_argument {
   public:
     invalidParameterValue() noexcept: std::invalid_argument("invalid parameter entry") {}
     invalidParameterValue(const std::string& param):
-        std::invalid_argument(std::string("invalid parameter value for ") + param){}
+        std::invalid_argument(std::string("invalid parameter value for ") + param)
+    {
+    }
 };
 
 class executionFailure: public coreObjectException {
