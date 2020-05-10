@@ -111,8 +111,7 @@ class grabberInterpreter {
                         ggb = std::make_unique<opX>(std::move(ggbA), std::move(ggbB), cmdBlock);
                     }
                 }
-            } else  
-            {
+            } else {
                 // not a function call so must be units description
                 ggb = singleBlockInterpreter(command, obj);
             }
@@ -193,16 +192,14 @@ class grabberInterpreter {
                 return nullptr;  // we can't interpret this
             }
         } else if (valA != kNullVal) {
-            if (ggbB) 
-            {
+            if (ggbB) {
                 // both are grabber blocks
                 ggb = std::move(ggbB);
                 ggb->bias = valA;
                 if (op == '-') {
                     ggb->gain = -1.0;
                 }
-            } else if (valB != kNullVal)  
-            {
+            } else if (valB != kNullVal) {
                 // both are numeric
                 ggb = std::make_unique<baseX>("constant", obj);
                 if (op == '+') {
@@ -240,11 +237,9 @@ class grabberInterpreter {
         std::unique_ptr<baseX> ggbB =
             (valB == kNullVal) ? interpretGrabberBlock(Bblock, obj) : nullptr;
 
-        if (ggbA)  
-        {
+        if (ggbA) {
             // we know Ablock is std::make_shared<grabber
-            if (ggbB)  
-            {
+            if (ggbB) {
                 // both are grabber blocks
                 ggb =
                     std::make_unique<opX>(std::move(ggbA), std::move(ggbB), command.substr(rlc, 1));
@@ -267,8 +262,7 @@ class grabberInterpreter {
                 return nullptr;  // we can't interpret this
             }
         } else if (valA != kNullVal) {
-            if (ggbB) 
-            {
+            if (ggbB) {
                 // B is a block
                 if (op == '*') {
                     ggb = std::move(ggbB);
@@ -281,8 +275,7 @@ class grabberInterpreter {
                                                 std::move(ggbB),
                                                 command.substr(rlc, 1));
                 }
-            } else if (valB != kNullVal) 
-            {
+            } else if (valB != kNullVal) {
                 // both are numeric
                 ggb = std::make_unique<baseX>("constant", obj);
                 if (op == '*') {

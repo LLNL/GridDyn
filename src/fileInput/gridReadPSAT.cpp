@@ -39,7 +39,7 @@
 #include <iostream>
 
 namespace griddyn {
-//using namespace units;
+// using namespace units;
 
 void loadPSATBusArray(coreObject* parentObject,
                       double basepower,
@@ -731,36 +731,28 @@ void loadPSATSynArray(coreObject* /*parentObject*/,
         auto mode = genData[4];
 
         GenModel* gm = nullptr;
-        if (mode < 2.1)  
-        {
+        if (mode < 2.1) {
             // second order classical model
             gm = new GenModel();
-        } else if (mode < 3.1) 
-        {
+        } else if (mode < 3.1) {
             // 3rd order model
             gm = new GenModel3();
-        } else if (mode < 4.1)  
-        {
+        } else if (mode < 4.1) {
             // 4th order model
             gm = new GenModel4();
-        } else if (mode < 5.15)  
-        {
+        } else if (mode < 5.15) {
             // 5th order model type 1
             gm = new GenModel5();
-        } else if (mode < 5.25) 
-        {
+        } else if (mode < 5.25) {
             // 5th order model type 2
             gm = new GenModel5type2();
-        } else if (mode < 5.35)  
-        {
+        } else if (mode < 5.35) {
             // 5th order model type 3
             gm = new GenModel5type3();
-        } else if (mode < 6.05)  
-        {
+        } else if (mode < 6.05) {
             // 6th order model
             gm = new GenModel6type2();
-        } else if (mode < 8.05)  
-        {
+        } else if (mode < 8.05) {
             // 8th order model
             gm = new GenModel8();
         }
@@ -838,12 +830,10 @@ void loadPSATTgArray(coreObject* parentObject,
             continue;
         }
         mode = govData[1];
-        if (mode < 1.1)  
-        {
+        if (mode < 1.1) {
             // second order classical model
             gm = new Governor();
-        } else if (mode < 2.1)  
-        {
+        } else if (mode < 2.1) {
             // 3rd order model
             gm = new governors::GovernorIeeeSimple();
         }
