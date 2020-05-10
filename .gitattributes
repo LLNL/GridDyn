@@ -6,8 +6,12 @@
 *.player text eol=lf
 
 *.jpg binary
+*.JPG binary
 *.png binary
 *.mat binary
+*.pdf binary
+*.fmu binary
+*.pptx binary
 
 *.cpp  diff=cpp
 *.hpp  diff=cpp
