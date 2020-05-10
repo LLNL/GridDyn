@@ -16,22 +16,20 @@
 #include "fmiMEWrapper.hpp"
 #include "griddyn/Governor.h"
 
-namespace griddyn
-{
-namespace fmi
-{
-class fmiMESubModel;
-/** class defining a governor with the dynamics through an FMI object*/
-class fmiGovernor : public fmiMEWrapper<Governor>
-{
-  public:
-    fmiGovernor (const std::string &objName = "fmiExciter_#");
-    virtual coreObject *clone (coreObject *obj = nullptr) const override;
+namespace griddyn {
+namespace fmi {
+    class fmiMESubModel;
+    /** class defining a governor with the dynamics through an FMI object*/
+    class fmiGovernor: public fmiMEWrapper<Governor> {
+      public:
+        fmiGovernor(const std::string& objName = "fmiExciter_#");
+        virtual coreObject* clone(coreObject* obj = nullptr) const override;
 
-    virtual void set (const std::string &param, const std::string &val) override;
-    virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
-};
+        virtual void set(const std::string& param, const std::string& val) override;
+        virtual void set(const std::string& param,
+                         double val,
+                         units::unit unitType = units::defunit) override;
+    };
 
 }  // namespace fmi
 }  // namespace griddyn

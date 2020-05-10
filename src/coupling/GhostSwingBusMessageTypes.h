@@ -22,40 +22,35 @@
 #define CURRENTTAG 3
 #define STOPTAG 4
 
-namespace griddyn
-{
-enum class messageTags
-{
-	model_spec = 1,
-	voltage_step = 2,
-	current = 3,
-	stop = 4,
+namespace griddyn {
+enum class messageTags {
+    model_spec = 1,
+    voltage_step = 2,
+    current = 3,
+    stop = 4,
 };
 /**
  * Voltage message sent from transmission to distribution.
  */
 
-typedef struct
-{
-	double real[3];
-	double imag[3];
+typedef struct {
+    double real[3];
+    double imag[3];
 } ThreePhaseValue;
 
-struct Vmessage
-{
-	ThreePhaseValue voltage[3];   // LEB: Start with 3 for now...grow later
-	int numThreePhaseVoltage;
-	unsigned int deltaTime;
+struct Vmessage {
+    ThreePhaseValue voltage[3];  // LEB: Start with 3 for now...grow later
+    int numThreePhaseVoltage;
+    unsigned int deltaTime;
 };
 typedef struct Vmessage VoltageMessage;
 
 /**
  * Current message sent from distribution to transmission.
  */
-struct Cmessage
-{
-	ThreePhaseValue current[3];
-	int numThreePhaseCurrent;
+struct Cmessage {
+    ThreePhaseValue current[3];
+    int numThreePhaseCurrent;
 };
 typedef struct Cmessage CurrentMessage;
 
@@ -64,13 +59,12 @@ typedef struct Cmessage CurrentMessage;
  */
 
 #ifndef PATH_MAX
-#define PATH_MAX 128
+#    define PATH_MAX 128
 #endif
 
-typedef struct
-{
-	char arguments[PATH_MAX * 4];
+typedef struct {
+    char arguments[PATH_MAX * 4];
 } CommandLineMessage;
 
-}//namespace griddyn
+}  //namespace griddyn
 #endif

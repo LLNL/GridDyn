@@ -68,15 +68,15 @@
 <participation>0</participation></generator>
 </bus>
 <recorder>
-		<field>voltage</field>
-		<period>2</period>
-		<file>busVrecNQ.dat</file>
-		</recorder>
-		<recorder>
-		<field>busload</field>
-		<period>2</period>
-		<file>busLrecNQ.dat</file>
-		</recorder>
+        <field>voltage</field>
+        <period>2</period>
+        <file>busVrecNQ.dat</file>
+        </recorder>
+        <recorder>
+        <field>busload</field>
+        <period>2</period>
+        <file>busLrecNQ.dat</file>
+        </recorder>
    <timestart>0</timestart>
    <timestop>600</timestop>
    <timestep>2</timestep>

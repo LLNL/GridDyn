@@ -16,13 +16,13 @@
 
 namespace griddyn {
 namespace paradae {
-class Equation_DAE : public Equation {
-public:
-  // Redefinition of inherited virtual methods
-  virtual ~Equation_DAE(){};
-  virtual type_Equation GetTypeEq(){return DAE;};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Equation_DAE: public Equation {
+      public:
+        // Redefinition of inherited virtual methods
+        virtual ~Equation_DAE(){};
+        virtual type_Equation GetTypeEq() { return DAE; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

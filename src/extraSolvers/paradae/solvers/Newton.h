@@ -17,17 +17,22 @@
 
 namespace griddyn {
 namespace paradae {
-enum NWT_error {NEWTON_NOT_CONVERGED, NEWTON_INF_NAN};
+    enum NWT_error { NEWTON_NOT_CONVERGED, NEWTON_INF_NAN };
 
-class Newton : Solver{
-  Real tol;
-  bool newton_always_update_jac;
-public:
-  Newton(){tol=-1;newton_always_update_jac=false;};
-  Newton(int max_iter_, Real tol_=-1, bool update=false);
-  int Solve(Solver_App* app, Vector& x);
-};
-} // namespace paradae
-} // namespace griddyn
+    class Newton: Solver {
+        Real tol;
+        bool newton_always_update_jac;
+
+      public:
+        Newton()
+        {
+            tol = -1;
+            newton_always_update_jac = false;
+        };
+        Newton(int max_iter_, Real tol_ = -1, bool update = false);
+        int Solve(Solver_App* app, Vector& x);
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

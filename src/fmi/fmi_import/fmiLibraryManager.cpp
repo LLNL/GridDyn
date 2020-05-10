@@ -11,25 +11,22 @@
 */
 
 #include "fmiLibraryManager.h"
+
 #include "fmiImport.h"
 #include "fmiObjects.h"
 
-std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string &libFile)
+std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string& libFile)
 {
     std::unique_lock<std::mutex> lock(libraryLock);
     auto fnd = quickReferenceLibraries.find(libFile);
     std::string fmilib;
-    if (fnd != quickReferenceLibraries.end())
-    {
+    if (fnd != quickReferenceLibraries.end()) {
         fmilib = fnd->second;
-    }
-    else
-    {
+    } else {
         fmilib = libFile;
     }
     auto fndLib = libraries.find(fmilib);
-    if (fndLib != libraries.end())
-    {
+    if (fndLib != libraries.end()) {
         return fndLib->second;
     }
     lock.unlock();
@@ -40,36 +37,38 @@ std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string &lib
     return newLib;
 }
 
-std::unique_ptr<fmi2ModelExchangeObject> fmiLibraryManager::createModelExchangeObject(const std::string &fmuIdentifier, const std::string &ObjectName)
+std::unique_ptr<fmi2ModelExchangeObject>
+    fmiLibraryManager::createModelExchangeObject(const std::string& fmuIdentifier,
+                                                 const std::string& ObjectName)
 {
-	auto Lib = getLibrary(fmuIdentifier);
-	return Lib->createModelExchangeObject(ObjectName);
+    auto Lib = getLibrary(fmuIdentifier);
+    return Lib->createModelExchangeObject(ObjectName);
 }
 
-std::unique_ptr<fmi2CoSimObject> fmiLibraryManager::createCoSimulationObject(const std::string &fmuIdentifier, const std::string &ObjectName)
+std::unique_ptr<fmi2CoSimObject>
+    fmiLibraryManager::createCoSimulationObject(const std::string& fmuIdentifier,
+                                                const std::string& ObjectName)
 {
-
-	auto Lib = getLibrary(fmuIdentifier);
-	return Lib->createCoSimulationObject(ObjectName);
+    auto Lib = getLibrary(fmuIdentifier);
+    return Lib->createCoSimulationObject(ObjectName);
 }
 
-void fmiLibraryManager::loadBookMarkFile(const std::string & /*bookmarksFile*/)
+void fmiLibraryManager::loadBookMarkFile(const std::string& /*bookmarksFile*/)
 {
-	//TODO:: loading a bookmarks file
+    //TODO:: loading a bookmarks file
 }
 
-void fmiLibraryManager::addShortCut(const std::string &name, const std::string &fmuLocation)
+void fmiLibraryManager::addShortCut(const std::string& name, const std::string& fmuLocation)
 {
-	std::lock_guard<std::mutex> lock(libraryLock);
-	quickReferenceLibraries.emplace(name, fmuLocation);
+    std::lock_guard<std::mutex> lock(libraryLock);
+    quickReferenceLibraries.emplace(name, fmuLocation);
 }
 
 fmiLibraryManager& fmiLibraryManager::instance()
 {
-	static fmiLibraryManager s_instance;
-	return s_instance;
+    static fmiLibraryManager s_instance;
+    return s_instance;
 }
-
 
 fmiLibraryManager::fmiLibraryManager() = default;
 

@@ -10,30 +10,26 @@
 * LLNS Copyright End
 */
 
+#include "zmqInterface.h"
+
 #include "core/factoryTemplates.hpp"
 #include "core/objectFactory.hpp"
-
-#include "zmqInterface.h"
-#include "dimeCommunicator.h"
 #include "dimeCollector.h"
+#include "dimeCommunicator.h"
 #include "zmqCommunicator.h"
 
+namespace griddyn {
 
-
-
-namespace griddyn
-{
-
-static childClassFactory<zmqInterface::zmqCommunicator, Communicator> zmqComm(std::vector<std::string>{"zmq"});
+static childClassFactory<zmqInterface::zmqCommunicator, Communicator>
+    zmqComm(std::vector<std::string>{"zmq"});
 
 void loadZMQLibrary()
 {
-	static int loaded = 0;
+    static int loaded = 0;
 
-	if (loaded == 0)
-	{
-		loaded = 1;
-	}
+    if (loaded == 0) {
+        loaded = 1;
+    }
 }
 
-}//namespace griddyn
+}  //namespace griddyn

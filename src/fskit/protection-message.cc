@@ -19,23 +19,19 @@
  */
 
 #include "protection-message.h"
-ProtectionMessage::ProtectionMessage ()
-  : EventMessage (),
-    m_messageType (ProtectionMessage::LOCAL_FAULT_EVENT)
+ProtectionMessage::ProtectionMessage():
+    EventMessage(), m_messageType(ProtectionMessage::LOCAL_FAULT_EVENT)
 {
 }
 
-ProtectionMessage::ProtectionMessage (ProtectionMessage::MESSAGE_TYPE t)
-  : EventMessage (),
-    m_messageType (t)
+ProtectionMessage::ProtectionMessage(ProtectionMessage::MESSAGE_TYPE t):
+    EventMessage(), m_messageType(t)
 {
 }
 
-ProtectionMessage::~ProtectionMessage ()
-{
-}
+ProtectionMessage::~ProtectionMessage() {}
 
-ProtectionMessage::MESSAGE_TYPE ProtectionMessage::GetMessageType ()
+ProtectionMessage::MESSAGE_TYPE ProtectionMessage::GetMessageType()
 {
-  return m_messageType;
+    return m_messageType;
 }

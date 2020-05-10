@@ -15,7 +15,7 @@
 #include "RungeKutta_DIRK.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|c}
   1&1\\\hline
@@ -23,12 +23,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class BackwardEuler : public RungeKutta_DIRK {
-public:
-  BackwardEuler(Equation* eq);
-  virtual std::string GetName(){return "RK_BEuler_1";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class BackwardEuler: public RungeKutta_DIRK {
+      public:
+        BackwardEuler(Equation* eq);
+        virtual std::string GetName() { return "RK_BEuler_1"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

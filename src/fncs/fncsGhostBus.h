@@ -13,39 +13,38 @@
 */
 
 #ifndef FNCS_GHOSTBUS_HEADER_
-#define FNCS_GHSOSTBUS_HEADER_
-#pragma once
-#include "gridBus.h"
+#    define FNCS_GHSOSTBUS_HEADER_
+#    pragma once
+#    include "gridBus.h"
 
-/** class meant to implement a Ghost Bus 
-@details the bus gets its voltage from another simulation, otherwise it acts pretty much like an 
+/** class meant to implement a Ghost Bus
+@details the bus gets its voltage from another simulation, otherwise it acts pretty much like an
 infinite bus*/
-class fncsGhostBus :public gridBus
-{
-protected:
-	std::string voltageKey;			//!< the key to send voltage
-	std::string loadKey; 	//!< time series containing the load information
-	gridUnits::units_t outUnits = gridUnits::defUnit;
-public:
-	explicit fncsGhostBus(const std::string &objName = "fncsGhostbus_$");
+class fncsGhostBus: public gridBus {
+  protected:
+    std::string voltageKey;  //!< the key to send voltage
+    std::string loadKey;  //!< time series containing the load information
+    gridUnits::units_t outUnits = gridUnits::defUnit;
 
-	~fncsGhostBus()
-	{
-	}
-	virtual coreObject * clone(coreObject *obj = nullptr) const override;
-	virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags) override;
-	virtual void pFlowObjectInitializeB() override;
+  public:
+    explicit fncsGhostBus(const std::string& objName = "fncsGhostbus_$");
 
-	virtual void updateA(coreTime time) override;
-	virtual coreTime updateB() override;
-	virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
-	virtual void setFlag(const std::string &param, bool val = true) override;
-	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    ~fncsGhostBus() {}
+    virtual coreObject* clone(coreObject* obj = nullptr) const override;
+    virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags) override;
+    virtual void pFlowObjectInitializeB() override;
 
-private:
-	void updateSubscription();
+    virtual void updateA(coreTime time) override;
+    virtual coreTime updateB() override;
+    virtual void timestep(coreTime ttime, const IOdata& inputs, const solverMode& sMode) override;
+    virtual void setFlag(const std::string& param, bool val = true) override;
+    virtual void set(const std::string& param, const std::string& val) override;
+    virtual void set(const std::string& param,
+                     double val,
+                     gridUnits::units_t unitType = gridUnits::defUnit) override;
 
+  private:
+    void updateSubscription();
 };
 
 #endif

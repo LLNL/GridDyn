@@ -4,18 +4,18 @@
       <type>infinite</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
-	  
+    <name>bus2</name>
+
      <load name="loadfncs" type="fncs">
-	 <loadkey>fncsload</loadkey>
-	 <voltagekey>fncsvoltage</voltagekey>
-	 <period>1.0</period>
+     <loadkey>fncsload</loadkey>
+     <voltagekey>fncsvoltage</voltagekey>
+     <period>1.0</period>
        <P>0.7</P>
-	   <Q>0.1</Q>
+       <Q>0.1</Q>
      </load>
-	 <load name="load3" type="motor">
+     <load name="load3" type="motor">
        <P>0.4</P>
      </load>
    </bus>
@@ -27,5 +27,5 @@
    <basepower>100</basepower>
    <timestart>0</timestart>
    <timestop>10</timestop>
-   
+
 </griddyn>

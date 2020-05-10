@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2017, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -14,7 +14,7 @@
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
-	set(VERSION_OPTION -std=c++1y)
+    set(VERSION_OPTION -std=c++1y)
   else ()
     set(VERSION_OPTION -std=c++1z)
   endif()

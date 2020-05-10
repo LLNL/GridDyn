@@ -4,17 +4,17 @@
       <type>infinite</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
-	  
+    <name>bus2</name>
+
      <load name="load3" type="approx">
-	 <load type="fmimeload3phase">
-	 <fmu>test_fmus/DUMMY_0CYMDIST.fmu</fmu>
+     <load type="fmimeload3phase">
+     <fmu>test_fmus/DUMMY_0CYMDIST.fmu</fmu>
        <param name="a2" value=0/>
-	   <param name="b2" value=0/>
-	   <param name="c2" value=0/>
-	   </load>
+       <param name="b2" value=0/>
+       <param name="c2" value=0/>
+       </load>
      </load>
    </bus>
  <link from="bus1" name="bus1_to_bus2" to="bus2">
@@ -26,5 +26,5 @@
    <timestart>0</timestart>
    <timestop>30</timestop>
    <timestep>0.010</timestep>
-   
+
 </griddyn>

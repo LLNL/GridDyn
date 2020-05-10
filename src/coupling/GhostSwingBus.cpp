@@ -18,14 +18,10 @@
  *      Author: banks12
  */
 
-#include <stddef.h>
-#include <iostream>
 #include "GhostSwingBus.h"
+
+#include <iostream>
+#include <stddef.h>
 using namespace std;
 
-GhostSwingBus::GhostSwingBus ()
-{
-
-}
-
-
+GhostSwingBus::GhostSwingBus() {}

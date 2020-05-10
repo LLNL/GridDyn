@@ -15,55 +15,55 @@
 #define GRIDDYN_FEDERATED_SIMULATOR_H
 
 #include "fskit/fskitRunner.h"
-
-#include <fskit/granted-time-window-scheduler.h>
-#include <fskit/variable-step-size-federated-simulator.h>
 #include <fskit/discrete-event-federated-simulator.h>
+#include <fskit/granted-time-window-scheduler.h>
 #include <fskit/time.h>
-
-#include <random>
+#include <fskit/variable-step-size-federated-simulator.h>
 #include <iostream>
+#include <random>
 
-namespace griddyn
-{
+namespace griddyn {
 class fskitRunner;
-} // namespace griddyn
+}  // namespace griddyn
 
 /**
  * Example variable step size simulator implementation.
  */
-class GriddynFederatedSimulator : public fskit::VariableStepSizeFederatedSimulator, public fskit::DiscreteEventFederatedSimulator
-{
-public:
-  GriddynFederatedSimulator (std::string name, int argc, char *argv[],
-                             std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);
+class GriddynFederatedSimulator:
+    public fskit::VariableStepSizeFederatedSimulator,
+    public fskit::DiscreteEventFederatedSimulator {
+  public:
+    GriddynFederatedSimulator(std::string name,
+                              int argc,
+                              char* argv[],
+                              std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);
 
-  bool Initialize (void);
+    bool Initialize(void);
 
-  void StartCommunication (void);
+    void StartCommunication(void);
 
-  bool TestCommunication (void);
+    bool TestCommunication(void);
 
-  fskit::Time CalculateLocalGrantedTime (void);
+    fskit::Time CalculateLocalGrantedTime(void);
 
-  bool Finalize (void);
+    bool Finalize(void);
 
-  // Methods used by Variable Step Size simulator
-  std::tuple<fskit::Time,bool> TimeAdvancement (const fskit::Time& time);
+    // Methods used by Variable Step Size simulator
+    std::tuple<fskit::Time, bool> TimeAdvancement(const fskit::Time& time);
 
-  // Methods used by Discrete Event simulator
-  void StartTimeAdvancement (const fskit::Time& time);
-  
-  std::tuple<bool,bool> TestTimeAdvancement (void);
+    // Methods used by Discrete Event simulator
+    void StartTimeAdvancement(const fskit::Time& time);
 
-private:
-  std::string m_name;
+    std::tuple<bool, bool> TestTimeAdvancement(void);
 
-  fskit::Time m_currentFskitTime;
-  fskit::Time m_grantedTime;
-  griddyn::coreTime m_currentGriddynTime;
+  private:
+    std::string m_name;
 
-  std::shared_ptr<griddyn::fskitRunner> m_griddyn;
+    fskit::Time m_currentFskitTime;
+    fskit::Time m_grantedTime;
+    griddyn::coreTime m_currentGriddynTime;
+
+    std::shared_ptr<griddyn::fskitRunner> m_griddyn;
 };
 
 #endif

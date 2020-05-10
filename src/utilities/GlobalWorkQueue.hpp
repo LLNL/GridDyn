@@ -13,10 +13,9 @@
 #include "gmlc/containers/WorkQueue.hpp"
 #include <memory>
 
-namespace griddyn
-{
+namespace griddyn {
 /** get a copy of a pointer to a global work queue
 the work queue itself is thread safe
 */
-const std::shared_ptr<gmlc::containers::WorkQueue> &getGlobalWorkQueue(int threads = -1);
+const std::shared_ptr<gmlc::containers::WorkQueue>& getGlobalWorkQueue(int threads = -1);
 }  // namespace griddyn

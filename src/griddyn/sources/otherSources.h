@@ -13,20 +13,11 @@
 #ifndef OTHERSOURCES_H_
 #define OTHERSOURCES_H_
 
-
-#include "sourceTypes.h"
 #include "../comms/commManager.h"
+#include "sourceTypes.h"
 #include <functional>
 
-namespace griddyn
-{
+namespace griddyn {
 
-
-
-
-
-
-
-
-} //namespace griddyn
+}  //namespace griddyn
 #endif

@@ -17,35 +17,32 @@
 #include "readElement.h"
 #include "readElementFile.h"
 #include "readerHelper.h"
-
 #include <cstdio>
 #include <sstream>
 #include <utility>
+
 #include <boost/filesystem.hpp>
 
-namespace griddyn
-{
+namespace griddyn {
 using namespace readerConfig;
 
-std::unique_ptr<gridDynSimulation> readSimXMLFile (const std::string &fileName, readerInfo *ri, xmlreader rtype)
+std::unique_ptr<gridDynSimulation>
+    readSimXMLFile(const std::string& fileName, readerInfo* ri, xmlreader rtype)
 {
-	if (!boost::filesystem::exists(fileName))
-	{
-		return nullptr;
-	}
-    if (rtype == xmlreader::default_reader)
-    {
+    if (!boost::filesystem::exists(fileName)) {
+        return nullptr;
+    }
+    if (rtype == xmlreader::default_reader) {
         rtype = readerConfig::default_xml_reader;
     }
-    switch (rtype)
-    {
-    case xmlreader::tinyxml:
-    default:
-        return std::unique_ptr<gridDynSimulation> (
-          static_cast<gridDynSimulation *> (loadElementFile<tinyxmlReaderElement> (nullptr, fileName, ri)));
-    case xmlreader::tinyxml2:
-        return std::unique_ptr<gridDynSimulation> (
-          static_cast<gridDynSimulation *> (loadElementFile<tinyxml2ReaderElement> (nullptr, fileName, ri)));
+    switch (rtype) {
+        case xmlreader::tinyxml:
+        default:
+            return std::unique_ptr<gridDynSimulation>(static_cast<gridDynSimulation*>(
+                loadElementFile<tinyxmlReaderElement>(nullptr, fileName, ri)));
+        case xmlreader::tinyxml2:
+            return std::unique_ptr<gridDynSimulation>(static_cast<gridDynSimulation*>(
+                loadElementFile<tinyxml2ReaderElement>(nullptr, fileName, ri)));
     }
 }
-}//namespace griddyn
+}  //namespace griddyn

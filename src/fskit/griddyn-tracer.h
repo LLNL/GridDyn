@@ -15,7 +15,6 @@
 #define GRIDDYN_TRACER_H
 
 #include <fskit/tracer.h>
-#define GRIDDYN_TRACER(arg) FSKIT_TRACER (arg)
-
+#define GRIDDYN_TRACER(arg) FSKIT_TRACER(arg)
 
 #endif

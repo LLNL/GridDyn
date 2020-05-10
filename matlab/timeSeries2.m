@@ -11,9 +11,9 @@
 % LLNS Copyright End
 classdef timeSeries2 < handle
     %class to operate on a time series2 (and 1) data as generated from GridDyn
-    
+
     properties
-        
+
         description='';
         time=[];
         data=[];
@@ -21,7 +21,7 @@ classdef timeSeries2 < handle
         count=0;
         fields={''};
     end
-    
+
     methods
         function ts=timeSeries2(varargin)
             if (nargin==1)
@@ -39,7 +39,7 @@ classdef timeSeries2 < handle
                     ts.count=length(ts.time);
                 end
                 if isnumeric(varargin{2})
-                   
+
                     [r,c]=size(varargin{2});
                     if (r==ts.count)
                         ts.data=varargin{2};
@@ -50,7 +50,7 @@ classdef timeSeries2 < handle
                 end
             end
         end
-        
+
         function addData(ts,t,val,colnum)
             if (nargin<4)
                 colnum=1;
@@ -71,7 +71,7 @@ classdef timeSeries2 < handle
                 setCols(ts,size(ts.data,2));
             elseif (length(t)==size(val,2))
                 ep=length(t);
-                
+
                 ts.time(ts.count+1:ts.count+ep,1)=t;
                 ts.data(ts.count+1:ts.count+ep,colnum:colnum+size(val,1)-1)=val';
                 ts.count=ts.count+ep;
@@ -80,7 +80,7 @@ classdef timeSeries2 < handle
                 error('invalid data size');
             end
         end
-        
+
         function addColumn(ts,val,colnum)
              if (nargin<3)
                 colnum=1;
@@ -88,7 +88,7 @@ classdef timeSeries2 < handle
             if (size(val,1)==ts.count)
                 ts.data(:,colnum:colnum+size(val,2)-1)=val;
                 setCols(ts,size(ts.data,2))
-               
+
             elseif (size(val,2)==ts.count)
                ts.data(:,colnum:colnum+size(val,1)-1)=val';
                setCols(ts,size(ts.data,2))
@@ -96,39 +96,39 @@ classdef timeSeries2 < handle
                 error('invalid data size');
             end
         end
-        
+
         function setSize(ts,newSize)
             ts.count=newSize;
-           if (newSize>length(ts.time))  
+           if (newSize>length(ts.time))
                 ts.time(end:newSize)=NaN;
                 ts.data(end:newSize,:)=NaN;
             end
         end
         function setCapacity(ts,newSize)
-            if (newSize>length(ts.time))  
+            if (newSize>length(ts.time))
                 ts.time(end:newSize)=NaN;
                 ts.data(end:newSize,:)=NaN;
             end
         end
-        
+
         function setCols(ts,newCols)
             if (newCols>ts.cols)
-                
+
                 ts.data(:,end+1:newCols)=NaN;
                 [ts.fields{end+1:newCols}]=deal('');
             end
             ts.cols=newCols;
         end
-        
+
         function loadBinaryFile(ts,filename)
-            
+
             if (~exist(filename,'file'))
                 return;
             end
-            
+
             fid=fopen(filename,'rb');
             if (fid<0)
-                
+
                 return;
             end
             dflag=fread(fid,1,'int32');
@@ -141,7 +141,7 @@ classdef timeSeries2 < handle
                     return;
                 end
             end
-            
+
             dcount=fread(fid,1,'int32');
             if (dcount>0)
                 desc=fread(fid,dcount,'char=>char')';
@@ -178,25 +178,25 @@ classdef timeSeries2 < handle
                     end
                 end
             end
-            
+
             fclose(fid);
         end
-        
+
         function loadTextFile(ts,filename)
             if (~exist(filename,'file'))
                 return;
             end
             [nm,~,at]=sheetread(filename);
-            
+
             ts.description=at{1,1};
             ts.count=size(at,1)-2;
             ts.cols=size(at,2)-1;
             ts.time=nm(2:end,1);
             ts.data=nm(2:end,2:end);
             ts.fields=at(2,2:end);
-            
+
         end
-        
+
         function writeBinaryFile(ts,filename)
             [pth,name,ext]=fileparts(filename);
             if isempty(pth)
@@ -204,7 +204,7 @@ classdef timeSeries2 < handle
             else
                 fname=filename;
             end
-            
+
             fid=fopen(fname,'wb');
             if (fid<0)
                 error('unable to open file');
@@ -229,7 +229,7 @@ classdef timeSeries2 < handle
                     fwrite(fid,uint8(0),'uint8');
                 end
             end
-            
+
              fwrite(fid,ts.time,'double');
             for kk=1:ts.cols
                 fwrite(fid,ts.data(:,kk),'double');
@@ -238,7 +238,7 @@ classdef timeSeries2 < handle
         end
         function writeTextFile(ts,filename)
         end
-        
+
         function varargout=subsref(ts,s)
             switch (s(1).type)
                 case '.'

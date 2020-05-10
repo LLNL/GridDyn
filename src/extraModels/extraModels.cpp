@@ -11,22 +11,25 @@
  */
 
 #include "extraModels.h"
+
 #include "core/objectFactoryTemplates.hpp"
 #include "txLifeSpan.h"
 #include "txThermalModel.h"
-
 #include <memory>
 
-namespace griddyn
-{
+namespace griddyn {
 static std::vector<std::shared_ptr<objectFactory>> extraFactories;
 
-void loadExtraModels (const std::string & /*subset*/)
+void loadExtraModels(const std::string& /*subset*/)
 {
-    auto b = std::make_shared<childTypeFactory<extra::txThermalModel, Relay>> ("relay", stringVec{"thermaltx"});
-    extraFactories.push_back (b);
+    auto b =
+        std::make_shared<childTypeFactory<extra::txThermalModel, Relay>>("relay",
+                                                                         stringVec{"thermaltx"});
+    extraFactories.push_back(b);
 
-    auto c = std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>> ("relay", stringVec{"txaging", "txage"});
-    extraFactories.push_back (c);
+    auto c =
+        std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>>("relay",
+                                                                     stringVec{"txaging", "txage"});
+    extraFactories.push_back(c);
 }
-}//namespace griddyn
+}  //namespace griddyn

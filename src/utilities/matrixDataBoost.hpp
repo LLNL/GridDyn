@@ -15,115 +15,108 @@
 #pragma once
 
 #include "utilities/matrixData.hpp"
+
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
 /** @brief class implementing an expandable sparse matrix based on the boost matrices geared for Jacobian entries*/
-template <class type>
-class matrixDataBoost : public matrixData<type>
-{
+template<class type>
+class matrixDataBoost: public matrixData<type> {
   public:
     boost::numeric::ublas::mapped_matrix<type, boost::numeric::ublas::column_major>
-      m;  //!<boost matrix to interface
+        m;  //!<boost matrix to interface
   public:
     /** @brief constructor
     @param[in] R  number of rows
     @param[in] C  number of columns
     */
-    matrixDataBoost (count_t R, count_t C) : matrixData<type> (R, C), m (R, C){};
+    matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C){};
     /**
     * function to clear the data
     */
-    void clear () override { m.clear (); }
-    void assign (index_t X, index_t Y, const type &num) override
+    void clear() override { m.clear(); }
+    void assign(index_t X, index_t Y, const type& num) override
     {
-        m (X, Y) += num;
+        m(X, Y) += num;
         // printf("insert [%d,%d]=%f\n", X, Y, num);
     }
 
-    count_t size () const override { return static_cast<count_t> (m.nnz ()); }
-    count_t capacity () const override { return m.nnz_capacity (); }
+    count_t size() const override { return static_cast<count_t>(m.nnz()); }
+    count_t capacity() const override { return m.nnz_capacity(); }
     /**
     * @brief don't use this function
     */
-    matrixElement<type> element (index_t N) { return matrixElement<type> (); }
+    matrixElement<type> element(index_t N) { return matrixElement<type>(); }
     /**
     * @brief don't use this function
     */
-    matrixElement<type> start () override
+    matrixElement<type> start() override
     {
-        return {matrixData<type>::rowLim, matrixData<type>::colLim, type (0)};
+        return {matrixData<type>::rowLim, matrixData<type>::colLim, type(0)};
     }
     /**
     * @brief don't use this function
     */
-    matrixElement<type> next () override { return {matrixData<type>::rowLim, matrixData<type>::colLim, type (0)}; }
-    type at (index_t rowN, index_t colN) const override { return m (rowN, colN); }
-    auto begin () const { return matriIteratorBoost (this, 0); }
-    auto end () const { return matriIteratorBoost (this, size ()); }
+    matrixElement<type> next() override
+    {
+        return {matrixData<type>::rowLim, matrixData<type>::colLim, type(0)};
+    }
+    type at(index_t rowN, index_t colN) const override { return m(rowN, colN); }
+    auto begin() const { return matriIteratorBoost(this, 0); }
+    auto end() const { return matriIteratorBoost(this, size()); }
 
   protected:
-    class matrixIteratorBoost
-    {
+    class matrixIteratorBoost {
       public:
-        explicit matrixIteratorBoost (const matrixDataBoost<type> *matrixData, index_t start = 0)
+        explicit matrixIteratorBoost(const matrixDataBoost<type>* matrixData, index_t start = 0)
         {
-            if (start == 0)
-            {
-                cptr = mDB->m.begin1 ();
-                if (cptr == mDB->m.end1 ())
-                {
+            if (start == 0) {
+                cptr = mDB->m.begin1();
+                if (cptr == mDB->m.end1()) {
                     return;
                 }
-                cptr2 = cptr.begin ();
-                cptr2end = cptr.end ();
-                while (cptr2 == cptr2end)
-                {
+                cptr2 = cptr.begin();
+                cptr2end = cptr.end();
+                while (cptr2 == cptr2end) {
                     ++cptr;
-                    if (cptr == mDB->m.end1 ())
-                    {
+                    if (cptr == mDB->m.end1()) {
                         return;
                     }
-                    cptr2 = cptr.begin ();
-                    cptr2end = cptr.end ();
+                    cptr2 = cptr.begin();
+                    cptr2end = cptr.end();
                 }
-            }
-            else if (start == mDB->size ())
-            {
-                cptr = mDB->m.end1 ();
+            } else if (start == mDB->size()) {
+                cptr = mDB->m.end1();
             }
         }
 
-        matrixIteratorBoost &operator++ () override
+        matrixIteratorBoost& operator++() override
         {
             ++cptr2;
-            if (cptr2 == cptr2end)
-            {
+            if (cptr2 == cptr2end) {
                 ++cptr;
-                cptr2 = cptr.begin ();
-                cptr2end = cptr.end ();
-                while (cptr2 == cptr2end)
-                {
+                cptr2 = cptr.begin();
+                cptr2end = cptr.end();
+                while (cptr2 == cptr2end) {
                     ++cptr;
-                    if (cptr == mDB->m.end1 ())
-                    {
+                    if (cptr == mDB->m.end1()) {
                         return;
                     }
-                    cptr2 = cptr.begin ();
-                    cptr2end = cptr.end ();
+                    cptr2 = cptr.begin();
+                    cptr2end = cptr.end();
                 }
             }
         }
 
-        virtual matrixElement<type> operator* () const override
+        virtual matrixElement<type> operator*() const override
         {
-            return {cptr2.index1 (), cptr2.index2 (), *cptr2};
+            return {cptr2.index1(), cptr2.index2(), *cptr2};
         }
 
       private:
-        matrixDataBoost<type> *mDB = nullptr;
-        decltype (mDB->m.begin1 ()) cptr;
-        decltype (cptr->begin ()) cptr2;
-        decltype (cptr->end ()) cptr2end;
+        matrixDataBoost<type>* mDB = nullptr;
+        decltype(mDB->m.begin1()) cptr;
+        decltype(cptr->begin()) cptr2;
+        decltype(cptr->end()) cptr2end;
     };
 };
 

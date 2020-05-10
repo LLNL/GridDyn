@@ -5,25 +5,25 @@
       <angle>0</angle>
       <voltage>1</voltage>
       <generator name="gen1">
-	  <flags>isochronous</flags>
+      <flags>isochronous</flags>
         <model type="4"/>
-		<exciter type="basic"/>
-		<governor type="tgov1"/>
-		<recorder>
-		<file>datafile.dat</file>
-		<field>freq,p</field>
-		<period>0.1</period>
-		</recorder>
+        <exciter type="basic"/>
+        <governor type="tgov1"/>
+        <recorder>
+        <file>datafile.dat</file>
+        <field>freq,p</field>
+        <period>0.1</period>
+        </recorder>
       </generator>
-	  <recorder>
-	  <file>datafile.dat</file>
-		<field>angle</field>
-		<period>0.1</period>
-		</recorder>
-	</bus>
+      <recorder>
+      <file>datafile.dat</file>
+        <field>angle</field>
+        <period>0.1</period>
+        </recorder>
+    </bus>
 <bus>
-	<name>bus2</name>
-	  
+    <name>bus2</name>
+
      <load name="load3">
        <P>1.500</P>
        <Q>0</Q>
@@ -32,7 +32,7 @@
          <value>1.2</value>
          <time>2</time>
        </event>
-      
+
      </load>
    </bus>
  <link from="bus1" name="bus1_to_bus2" to="bus2">

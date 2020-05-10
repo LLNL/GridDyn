@@ -14,7 +14,7 @@
 #include "RungeKutta_Explicit.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|ccc}
   0&&&\\
@@ -24,10 +24,10 @@ namespace paradae {
   \end{array}
   \f]
  */
-class Kutta3 : public RungeKutta_Explicit{
-public:
-  Kutta3(Equation* eq);
-  virtual std::string GetName(){return "RK_Kutta_3";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Kutta3: public RungeKutta_Explicit {
+      public:
+        Kutta3(Equation* eq);
+        virtual std::string GetName() { return "RK_Kutta_3"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn

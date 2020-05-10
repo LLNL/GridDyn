@@ -10,15 +10,13 @@
 * LLNS Copyright End
 */
 
-
 #ifndef FMI_IMPORT_GD_H_
 #define FMI_IMPORT_GD_H_
 
-namespace griddyn
-{
+namespace griddyn {
 /** function to create the linkages from the FMI library into the object factory system
 */
 void loadFmiLibrary();
-}//namespace griddyn
+}  //namespace griddyn
 
 #endif

@@ -16,37 +16,38 @@
 
 #include "sourceModels/otherSources.h"
 
-class fncsSource :public rampSource
-{
-public:
-	enum fncs_source_flags
-	{
-		use_ramp = object_flag8,
-		predictive_ramp = object_flag9,
-		initial_query = object_flag10,
-	};
-protected:
-	std::string valKey; 	//!< time series containing the load information
-	gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the incoming data
-	gridUnits::units_t outputUnits = gridUnits::defUnit; //!< units of the outgoing data
-	double scaleFactor = 1.0;			//!< scaling factor on the load
-private:
-	double prevVal = 0;
-public:
-	explicit fncsSource(const std::string &objName = "fncsSource_$");
+class fncsSource: public rampSource {
+  public:
+    enum fncs_source_flags {
+        use_ramp = object_flag8,
+        predictive_ramp = object_flag9,
+        initial_query = object_flag10,
+    };
 
-	~fncsSource()
-	{
-	}
-	coreObject * clone(coreObject *obj = nullptr) const override;
-	virtual void dynObjectInitializeA(coreTime time0, unsigned long flags) override;
+  protected:
+    std::string valKey;  //!< time series containing the load information
+    gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the incoming data
+    gridUnits::units_t outputUnits = gridUnits::defUnit;  //!< units of the outgoing data
+    double scaleFactor = 1.0;  //!< scaling factor on the load
+  private:
+    double prevVal = 0;
 
-	virtual void updateA(coreTime time) override;
-	virtual void timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
-	virtual void setFlag(const std::string &param, bool val = true) override;
-	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-private:
-	void updateSubscription();
+  public:
+    explicit fncsSource(const std::string& objName = "fncsSource_$");
+
+    ~fncsSource() {}
+    coreObject* clone(coreObject* obj = nullptr) const override;
+    virtual void dynObjectInitializeA(coreTime time0, unsigned long flags) override;
+
+    virtual void updateA(coreTime time) override;
+    virtual void timestep(coreTime ttime, const IOdata& inputs, const solverMode& sMode) override;
+    virtual void setFlag(const std::string& param, bool val = true) override;
+    virtual void set(const std::string& param, const std::string& val) override;
+    virtual void set(const std::string& param,
+                     double val,
+                     gridUnits::units_t unitType = gridUnits::defUnit) override;
+
+  private:
+    void updateSubscription();
 };
 #endif

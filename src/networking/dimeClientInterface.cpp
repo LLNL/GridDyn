@@ -11,22 +11,24 @@
  */
 
 #include "dimeClientInterface.h"
+
 #include "zmqLibrary/zmqContextManager.h"
 
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4702)
-#include "json/json.h"
-#pragma warning(pop)
+#    pragma warning(push)
+#    pragma warning(disable : 4702)
+#    include "json/json.h"
+#    pragma warning(pop)
 #else
-#include "json/json.h"
+#    include "json/json.h"
 #endif
 
-dimeClientInterface::dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress)
-    : name (dimeName), address (dimeAddress)
+dimeClientInterface::dimeClientInterface(const std::string& dimeName,
+                                         const std::string& dimeAddress):
+    name(dimeName),
+    address(dimeAddress)
 {
-    if (address.empty ())
-    {
+    if (address.empty()) {
 #ifdef WIN32
         address = "tcp://127.0.0.1:5000";
 #else
@@ -35,14 +37,14 @@ dimeClientInterface::dimeClientInterface (const std::string &dimeName, const std
     }
 }
 
-dimeClientInterface::~dimeClientInterface () = default;
+dimeClientInterface::~dimeClientInterface() = default;
 
-void dimeClientInterface::init ()
+void dimeClientInterface::init()
 {
-    auto context = zmqlib::zmqContextManager::getContextPointer ();
+    auto context = zmqlib::zmqContextManager::getContextPointer();
 
-    socket = std::make_unique<zmq::socket_t> (context->getBaseContext (), zmq::socket_type::req);
-    socket->connect (address);
+    socket = std::make_unique<zmq::socket_t>(context->getBaseContext(), zmq::socket_type::req);
+    socket->connect(address);
 
     Json::Value outgoing;
     outgoing["command"] = "connect";
@@ -52,25 +54,23 @@ void dimeClientInterface::init ()
     Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
     builder["indentation"] = "   ";  // or whatever you like
-    auto writer = builder.newStreamWriter ();
+    auto writer = builder.newStreamWriter();
     std::stringstream sstr;
-    writer->write (outgoing, &sstr);
+    writer->write(outgoing, &sstr);
     delete writer;
 
-    socket->send (sstr.str ());
+    socket->send(sstr.str());
 
     char buffer[3] = {};
-    auto sz = socket->recv (buffer, 3, 0);
-    if ((sz != 2) || (strncmp (buffer, "OK", 3) != 0))
-    {
-        throw initFailure ();
+    auto sz = socket->recv(buffer, 3, 0);
+    if ((sz != 2) || (strncmp(buffer, "OK", 3) != 0)) {
+        throw initFailure();
     }
 }
 
-void dimeClientInterface::close ()
+void dimeClientInterface::close()
 {
-    if (socket)
-    {
+    if (socket) {
         Json::Value outgoing;
         outgoing["command"] = "exit";
         outgoing["name"] = name;
@@ -80,20 +80,20 @@ void dimeClientInterface::close ()
         Json::StreamWriterBuilder builder;
         builder["commentStyle"] = "None";
         builder["indentation"] = "   ";  // or whatever you like
-        auto writer = builder.newStreamWriter ();
-        writer->write (outgoing, &ss);
+        auto writer = builder.newStreamWriter();
+        writer->write(outgoing, &ss);
         delete writer;
 
-        socket->send (ss.str ());
+        socket->send(ss.str());
 
-        socket->close ();
+        socket->close();
     }
     socket = nullptr;
 }
 
-void dimeClientInterface::sync () {}
+void dimeClientInterface::sync() {}
 
-void encodeVariableMessage (Json::Value &data, double val)
+void encodeVariableMessage(Json::Value& data, double val)
 {
     Json::Value content;
     content["stdout"] = "";
@@ -106,16 +106,18 @@ void encodeVariableMessage (Json::Value &data, double val)
     response["success"] = true;
     data["args"] = response;
     // response = { 'content': {'stdout': '', 'figures' : [], 'datadir' : '/tmp MatlabData/'}, 'result' : value,
-    // 'success' : True } 	outgoing = { 'command': 'response', 'name' : self.name, 'meta' : {'var_name':
+    // 'success' : True }     outgoing = { 'command': 'response', 'name' : self.name, 'meta' : {'var_name':
     // var_name},
     //'args' : self.matlab.json_encode(response) }
 }
-void dimeClientInterface::send_var (const std::string &varName, double val, const std::string &recipient)
+void dimeClientInterface::send_var(const std::string& varName,
+                                   double val,
+                                   const std::string& recipient)
 {
     // outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
     Json::Value outgoing;
 
-    outgoing["command"] = (recipient.empty ()) ? "broadcast" : "send";
+    outgoing["command"] = (recipient.empty()) ? "broadcast" : "send";
 
     outgoing["name"] = name;
     outgoing["args"] = varName;
@@ -125,43 +127,45 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
     builder["indentation"] = "   ";  // or whatever you like
-    auto writer = builder.newStreamWriter ();
-    writer->write (outgoing, &ss);
+    auto writer = builder.newStreamWriter();
+    writer->write(outgoing, &ss);
     delete writer;
 
-    socket->send (ss.str ());
+    socket->send(ss.str());
 
     char buffer[3];
-    auto sz = socket->recv (buffer, 3, 0);
+    auto sz = socket->recv(buffer, 3, 0);
     // TODO check recv value
 
     Json::Value outgoingData;
     outgoingData["command"] = "response";
     outgoingData["name"] = name;
-    if (!recipient.empty ())
-    {
+    if (!recipient.empty()) {
         outgoingData["meta"]["recipient_name"] = recipient;
     }
 
     outgoingData["meta"]["var_name"] = varName;
-    encodeVariableMessage (outgoingData, val);
+    encodeVariableMessage(outgoingData, val);
 
-    std::stringstream ().swap (ss);  // reset ss
+    std::stringstream().swap(ss);  // reset ss
 
     builder["commentStyle"] = "None";
     builder["indentation"] = "   ";  // or whatever you like
-    writer = builder.newStreamWriter ();
-    writer->write (outgoing, &ss);
+    writer = builder.newStreamWriter();
+    writer->write(outgoing, &ss);
     delete writer;
-    socket->send (ss.str ());
+    socket->send(ss.str());
 
-    sz = socket->recv (buffer, 3, 0);
+    sz = socket->recv(buffer, 3, 0);
     if (sz != 2)  // TODO check for "OK"
     {
-        throw (sendFailure ());
+        throw(sendFailure());
     }
 }
 
-void dimeClientInterface::broadcast (const std::string &varName, double val) { send_var (varName, val); }
+void dimeClientInterface::broadcast(const std::string& varName, double val)
+{
+    send_var(varName, val);
+}
 
-void dimeClientInterface::get_devices () {}
+void dimeClientInterface::get_devices() {}

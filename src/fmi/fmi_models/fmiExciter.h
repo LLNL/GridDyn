@@ -16,22 +16,20 @@
 #include "fmiMEWrapper.hpp"
 #include "griddyn/Exciter.h"
 
-namespace griddyn
-{
-namespace fmi
-{
-class fmiMESubModel;
-/** class defining an exciter wrapper for an FMU*/
-class fmiExciter : public fmiMEWrapper<Exciter>
-{
-  public:
-    fmiExciter (const std::string &objName = "fmiExciter_#");
-    virtual coreObject *clone (coreObject *obj = nullptr) const override;
+namespace griddyn {
+namespace fmi {
+    class fmiMESubModel;
+    /** class defining an exciter wrapper for an FMU*/
+    class fmiExciter: public fmiMEWrapper<Exciter> {
+      public:
+        fmiExciter(const std::string& objName = "fmiExciter_#");
+        virtual coreObject* clone(coreObject* obj = nullptr) const override;
 
-    virtual void set (const std::string &param, const std::string &val) override;
-    virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
-};
+        virtual void set(const std::string& param, const std::string& val) override;
+        virtual void set(const std::string& param,
+                         double val,
+                         units::unit unitType = units::defunit) override;
+    };
 
 }  // namespace fmi
 }  // namespace griddyn

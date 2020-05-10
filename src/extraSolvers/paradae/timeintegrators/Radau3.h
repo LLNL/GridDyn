@@ -15,7 +15,7 @@
 #include "RungeKutta_Implicit.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
   \frac{1}{3}&\frac{5}{12}&-\frac{1}{12}\\
@@ -24,12 +24,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class Radau3 : public RungeKutta_Implicit{
-public:
-  Radau3(Equation* eq);
-  virtual std::string GetName(){return "RK_Radau_3";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Radau3: public RungeKutta_Implicit {
+      public:
+        Radau3(Equation* eq);
+        virtual std::string GetName() { return "RK_Radau_3"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

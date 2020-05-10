@@ -16,9 +16,9 @@ vtypes={'double','coreTime','int','index_t','count_t','std::string'};
 vArray=cell(0,4);
 for vv=1:length(vtypes)
     %get variables with comments
-    
+
     dvar=regexp(cblock,[vtypes{vv},'\s([\w]*)\s*=([^;]*);\s*//!<([^\n]*)'],'tokens');
-    
+
     for aa=1:length(dvar)
         val=str2double(dvar{aa}{2});
         if (isnan(val))
@@ -31,24 +31,24 @@ for vv=1:length(vtypes)
                continue;
            end
            val=transString(str,dvar{aa}{1});
-           
+
         end
         vArray{end+1,1}=strtrim(dvar{aa}{1});
         vArray{end,2}=val;
         vArray{end,3}=dvar{aa}{3};
         vArray{end,4}=vtypes{vv};
     end
-    
+
     %get variables with comments
-    
+
     dvar=regexp(cblock,[vtypes{vv},'\s([\w]*)\s*;\s*//!<([^\n]*)'],'tokens');
-    
+
     for aa=1:length(dvar)
         vArray{end+1,1}=strtrim(dvar{aa}{1});
         vArray{end,3}=dvar{aa}{2};
         vArray{end,4}=vtypes{vv};
     end
-    
+
     %get variables with no comment
     dvar=regexp(cblock,[vtypes{vv},'\s([\w]*)\s*=([^;$#]*);'],'tokens');
     csize=size(vArray,1);

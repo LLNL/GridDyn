@@ -27,14 +27,14 @@ if (WIN32)
         endif(CMAKE_SYSTEM_VERSION)
     endmacro(get_WIN32_WINNT)
 endif()
-    
-	
+
+
 cmake_dependent_option(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS
        "disable compiler warning for ${CMAKE_PROJECT_NAME} build" ON "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF)
 
 cmake_dependent_option(${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS
        "generate a compiler error for any warning encountered" OFF "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF)
-	   
+
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     mark_as_advanced(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     mark_as_advanced(${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS)
@@ -52,7 +52,7 @@ if(NOT TARGET compile_flags_target)
 endif()
 
 if (NOT TARGET build_flags_target)
-	add_library(build_flags_target INTERFACE)
+    add_library(build_flags_target INTERFACE)
 endif()
 
 target_compile_options(
@@ -91,7 +91,7 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     # target_compile_options(compile_flags_target INTERFACE
     # $<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
 
-   
+
     # this option produces a number of warnings in third party libraries
     # target_compile_options(compile_flags_target INTERFACE
     # $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wold-style-cast>>) this
@@ -145,16 +145,16 @@ if(MSVC)
     # these next two should be global
     add_compile_options(/EHsc /MP)
     target_compile_options(build_flags_target INTERFACE /EHsc)
-	
-	if (CMAKE_VERSION VERSION_GREATER 3.13.0)
-	   target_link_options(compile_flags_target INTERFACE /debug:fastlink /incremental)
-	endif()
+
+    if (CMAKE_VERSION VERSION_GREATER 3.13.0)
+       target_link_options(compile_flags_target INTERFACE /debug:fastlink /incremental)
+    endif()
     if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
         target_compile_options(compile_flags_target INTERFACE /W4 /sdl /wd4244 )
     endif(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
-	get_win32_winnt(COPTION_WIN32_WINNT_DEFAULT)
+    get_win32_winnt(COPTION_WIN32_WINNT_DEFAULT)
     target_compile_options(compile_flags_target INTERFACE "-D_WIN32_WINNT=${COPTION_WIN32_WINNT_DEFAULT}")
-	message(
+    message(
         STATUS
             "Detected _WIN32_WINNT from CMAKE_SYSTEM_VERSION: ${COPTION_WIN32_WINNT_DEFAULT}"
     )

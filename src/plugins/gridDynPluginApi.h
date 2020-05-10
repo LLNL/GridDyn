@@ -17,14 +17,13 @@
 
 #include <string>
 
-class gridDynPlugInApi
-{
+class gridDynPlugInApi {
   public:
-    virtual std::string name () const = 0;
-    virtual void load () = 0;
-    virtual void load (const std::string &sectionName) = 0;
+    virtual std::string name() const = 0;
+    virtual void load() = 0;
+    virtual void load(const std::string& sectionName) = 0;
 
-    virtual ~gridDynPlugInApi () {}
+    virtual ~gridDynPlugInApi() {}
 };
 
 #endif

@@ -23,7 +23,9 @@
 #include "griddyn/loads/zipLoad.h"
 #include "griddyn/simulation/diagnostics.h"
 #include <cmath>
+
 #include <boost/test/unit_test.hpp>
+
 #include <boost/test/floating_point_comparison.hpp>
 
 using namespace griddyn;
@@ -114,8 +116,7 @@ BOOST_AUTO_TEST_CASE(load_voltage_sweep)
     ld1->set("vpqmin", 0.75);
     ld1->set("vpqmax", 1.25);
 
-    for (double vt = 0.0; vt <= 1.5; vt += 0.001)
-    {
+    for (double vt = 0.0; vt <= 1.5; vt += 0.001) {
         v.push_back(vt);
         out.push_back(ld1->getRealPower(vt));
     }
@@ -129,7 +130,7 @@ BOOST_AUTO_TEST_CASE(load_voltage_sweep)
 BOOST_AUTO_TEST_CASE(ramp_load_test)
 {
     ld1 = new rampLoad();
-    auto ldT = dynamic_cast<rampLoad *>(ld1);
+    auto ldT = dynamic_cast<rampLoad*>(ld1);
     BOOST_REQUIRE((ldT));
     double val;
     // test P ramp
@@ -210,7 +211,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 BOOST_AUTO_TEST_CASE(random_load_test)
 {
     ld1 = new sourceLoad(sourceLoad::sourceType::random);
-    auto ldT = static_cast<sourceLoad *>(ld1);
+    auto ldT = static_cast<sourceLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
     // test P random
     ld1->set("p:trigger_dist", "constant");
@@ -258,7 +259,7 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 BOOST_AUTO_TEST_CASE(random_load_test2)
 {
     ld1 = new sourceLoad(sourceLoad::sourceType::random);
-    auto ldT = static_cast<sourceLoad *>(ld1);
+    auto ldT = static_cast<sourceLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
     double val;
     // test P ramp
@@ -293,7 +294,7 @@ BOOST_AUTO_TEST_CASE(random_load_test2)
 BOOST_AUTO_TEST_CASE(pulse_load_test2)
 {
     ld1 = new sourceLoad(sourceLoad::sourceType::pulse);
-    auto ldT = static_cast<sourceLoad *>(ld1);
+    auto ldT = static_cast<sourceLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
 
     // test P ramp
@@ -318,7 +319,7 @@ BOOST_AUTO_TEST_CASE(pulse_load_test2)
 BOOST_AUTO_TEST_CASE(file_load_test1)
 {
     ld1 = new fileLoad();
-    auto ldT = static_cast<fileLoad *>(ld1);
+    auto ldT = static_cast<fileLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
     std::string fileName = load_test_directory + "FileLoadInfo.bin";
     // test P ramp
@@ -337,7 +338,7 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
     delete ld1;
 
     ld1 = new fileLoad();
-    ldT = static_cast<fileLoad *>(ld1);
+    ldT = static_cast<fileLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
 
     // test P ramp
@@ -366,7 +367,7 @@ BOOST_AUTO_TEST_CASE(file_load_test2)
 {
     std::string fileName = load_test_directory + "testLoad.bin";
     ld1 = new fileLoad("fload", fileName);
-    auto ldT = static_cast<fileLoad *>(ld1);
+    auto ldT = static_cast<fileLoad*>(ld1);
     BOOST_REQUIRE(ldT != nullptr);
     ldT->set("column", "yp");
     ldT->set("scaling", 1.0);
@@ -386,7 +387,7 @@ BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
     auto gds = readSimXMLFile(fileName);
 
     auto bus = gds->getBus(1);
-    auto gld = dynamic_cast<gridLabDLoad *>(bus->getLoad());
+    auto gld = dynamic_cast<gridLabDLoad*>(bus->getLoad());
 
     BOOST_REQUIRE(gld != nullptr);
 
@@ -401,8 +402,8 @@ BOOST_AUTO_TEST_CASE(motor_test1)
 
     auto gds = readSimXMLFile(fileName);
 
-    gridBus *bus = gds->getBus(1);
-    auto mtld = dynamic_cast<motorLoad *>(bus->getLoad());
+    gridBus* bus = gds->getBus(1);
+    auto mtld = dynamic_cast<motorLoad*>(bus->getLoad());
 
     BOOST_REQUIRE(mtld != nullptr);
 
@@ -421,8 +422,8 @@ BOOST_AUTO_TEST_CASE(motor_test3)
 
     auto gds = readSimXMLFile(fileName);
 
-    gridBus *bus = gds->getBus(1);
-    auto mtld = dynamic_cast<motorLoad3 *>(bus->getLoad());
+    gridBus* bus = gds->getBus(1);
+    auto mtld = dynamic_cast<motorLoad3*>(bus->getLoad());
 
     BOOST_REQUIRE(mtld != nullptr);
     gds->pFlowInitialize();
@@ -446,8 +447,8 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
 
     auto gds = readSimXMLFile(fileName);
 
-    gridBus *bus = gds->getBus(1);
-    auto mtld = dynamic_cast<motorLoad3 *>(bus->getLoad());
+    gridBus* bus = gds->getBus(1);
+    auto mtld = dynamic_cast<motorLoad3*>(bus->getLoad());
 
     BOOST_REQUIRE(mtld != nullptr);
     gds->pFlowInitialize();
@@ -468,15 +469,15 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
 }
 
 #ifdef ENABLE_IN_DEVELOPMENT_CASES
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#    ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(motor_test5)
 {
     std::string fileName = std::string(LOAD_TEST_DIRECTORY "motorload_test5.xml");
     readerConfig::setPrintMode(0);
     auto gds = readSimXMLFile(fileName);
 
-    gridBus *bus = gds->getBus(1);
-    auto mtld = dynamic_cast<motorLoad5 *>(bus->getLoad());
+    gridBus* bus = gds->getBus(1);
+    auto mtld = dynamic_cast<motorLoad5*>(bus->getLoad());
 
     BOOST_REQUIRE(mtld != nullptr);
     gds->pFlowInitialize();
@@ -492,7 +493,7 @@ BOOST_AUTO_TEST_CASE(motor_test5)
     requireStates(gds->currentProcessState(), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 
-#endif
+#    endif
 #endif
 
 BOOST_AUTO_TEST_CASE(fdep_test)
@@ -501,8 +502,8 @@ BOOST_AUTO_TEST_CASE(fdep_test)
     readerConfig::setPrintMode(0);
     auto gds = readSimXMLFile(fileName);
 
-    gridBus *bus = gds->getBus(2);
-    auto mtld = dynamic_cast<fDepLoad *>(bus->getLoad());
+    gridBus* bus = gds->getBus(2);
+    auto mtld = dynamic_cast<fDepLoad*>(bus->getLoad());
 
     BOOST_REQUIRE(mtld != nullptr);
     gds->pFlowInitialize();

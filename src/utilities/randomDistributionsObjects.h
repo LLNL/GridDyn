@@ -1,8 +1,8 @@
 #pragma once
 #ifndef RANDOM_DISTRIBUTION_OBJECTS
-#define RANDOM_DISTRIBUTION_OBJECTS
+#    define RANDOM_DISTRIBUTION_OBJECTS
 
-#include "gridRandom.h"
+#    include "gridRandom.h"
 
-class constDistribution:public 
+class constDistribution: public
 #endif

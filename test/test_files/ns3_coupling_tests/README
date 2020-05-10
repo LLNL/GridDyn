@@ -18,12 +18,12 @@ CSV file will be present during the GridDyn simulation. Here's an explanation
 of the contents of ieee39_relays_geco_coupled.csv, on a line-by-line basis:
 
 9,2,auto_2,3_4,LINK#5   - This line represents the relay on the transmission
-                          line between busses 3 and 4, closest to bus 3.
+                          line between buses 3 and 4, closest to bus 3.
 10,2,auto_2,t2,LINK#5   - This line represents the relay on the transmission
-                          line between busses 3 and 4, closest to bus 4.
+                          line between buses 3 and 4, closest to bus 4.
 13,2,auto_2,t1,LINK#7   - This line represents the relay on the transmission
-                          line between busses 4 and 5, closest to bus 4.
+                          line between buses 4 and 5, closest to bus 4.
 14,2,auto_2,5_4,LINK#7  - This line represents the relay on the transmission
-                          line between busses 4 and 5, closest to bus 5.
+                          line between buses 4 and 5, closest to bus 5.
 16,2,auto_2,14_4,LINK#8 - This line represents the relay on the transmission
-                          line between busses 4 and 14, closest to bus 14.
+                          line between buses 4 and 14, closest to bus 14.

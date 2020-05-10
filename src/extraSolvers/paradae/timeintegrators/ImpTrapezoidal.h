@@ -15,7 +15,7 @@
 #include "RungeKutta_DIRK.h"
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
   0&&\\
@@ -24,12 +24,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class ImpTrapezoidal : public RungeKutta_DIRK {
-public:
-  ImpTrapezoidal(Equation* eq);
-  virtual std::string GetName(){return "RK_ImpTrap_2";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class ImpTrapezoidal: public RungeKutta_DIRK {
+      public:
+        ImpTrapezoidal(Equation* eq);
+        virtual std::string GetName() { return "RK_ImpTrap_2"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

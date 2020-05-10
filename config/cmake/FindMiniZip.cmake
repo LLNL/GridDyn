@@ -54,13 +54,13 @@ if (NOT MINIZIP_FOUND)
     HINTS ${MINIZIP_ROOT_DIR}
     PATH_SUFFIXES lib
     )
-	else (NOT NO_SYSTEM_MINIZIP)
-	find_path (MINIZIP_INCLUDES
+    else (NOT NO_SYSTEM_MINIZIP)
+    find_path (MINIZIP_INCLUDES
     NAMES minizip/minizip.h
     HINTS ${MINIZIP_ROOT_DIR}
     PATH_SUFFIXES include
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH
+    NO_CMAKE_SYSTEM_PATH
     )
 
   ##_____________________________________________________________________________
@@ -70,10 +70,10 @@ if (NOT MINIZIP_FOUND)
     NAMES libminizip minizip
     HINTS ${MINIZIP_ROOT_DIR}
     PATH_SUFFIXES lib
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH
+    NO_CMAKE_SYSTEM_PATH
     )
-	endif(NOT NO_SYSTEM_MINIZIP)
+    endif(NOT NO_SYSTEM_MINIZIP)
 
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
@@ -84,10 +84,10 @@ if (NOT MINIZIP_FOUND)
     set (MINIZIP_FOUND FALSE)
     if (NOT MINIZIP_FIND_QUIETLY)
       if (NOT MINIZIP_INCLUDES)
-	message (STATUS "Unable to find MINIZIP header files!")
+    message (STATUS "Unable to find MINIZIP header files!")
       endif (NOT MINIZIP_INCLUDES)
       if (NOT MINIZIP_LIBRARIES)
-	message (STATUS "Unable to find MINIZIP library files!")
+    message (STATUS "Unable to find MINIZIP library files!")
       endif (NOT MINIZIP_LIBRARIES)
     endif (NOT MINIZIP_FIND_QUIETLY)
   endif (MINIZIP_INCLUDES AND MINIZIP_LIBRARIES)

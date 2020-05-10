@@ -4,31 +4,31 @@
       <type>SLK</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	   <generator name="gen1">
+       <generator name="gen1">
         <model type="4"/>
-		<exciter type="basic"/>
-		<governor type="tgov1"/>
-		<P>0.4</P>
+        <exciter type="basic"/>
+        <governor type="tgov1"/>
+        <P>0.4</P>
       </generator>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
-	  <generator name="gen1">
+    <name>bus2</name>
+      <generator name="gen1">
         <model type="4"/>
-		<exciter type="basic"/>
-		<governor type="tgov1"/>
-		<P>0.4</P>
-		<Q>0.2</Q>
-		<source type="helics">
-		<key>gen</key>
-		<inputunits>MW</inputunits>
-		<outputunits>puMW</outputunits>
-		<period>4</period>
-		<valuetype>string</valuetype>
-		<value>0.4</value>
-		</source>
+        <exciter type="basic"/>
+        <governor type="tgov1"/>
+        <P>0.4</P>
+        <Q>0.2</Q>
+        <source type="helics">
+        <key>gen</key>
+        <inputunits>MW</inputunits>
+        <outputunits>puMW</outputunits>
+        <period>4</period>
+        <valuetype>string</valuetype>
+        <value>0.4</value>
+        </source>
       </generator>
-	 
+
      <load name="load3">
        <P>1.500</P>
        <Q>0.3</Q>
@@ -37,7 +37,7 @@
          <value>1.2</value>
          <time>2</time>
        </event>
-      
+
      </load>
    </bus>
  <link from="bus1" name="bus1_to_bus2" to="bus2">

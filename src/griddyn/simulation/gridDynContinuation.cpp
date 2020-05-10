@@ -10,6 +10,5 @@
  * LLNS Copyright End
  */
 
-namespace griddyn
-{
+namespace griddyn {
 }  // namespace griddyn

@@ -5,7 +5,7 @@
       <angle>0</angle>
       <voltage>1</voltage>
       <generator name="gen1">
-	  <P>0.4</P>
+      <P>0.4</P>
          <model>
             <type>fourthOrder</type>
             <D>1</D>
@@ -16,7 +16,7 @@
             <Xdp>0.350</Xdp>
             <Xq>1.75</Xq>
             <Xqp>0.6</Xqp>
-			<Xl>0.12</Xl>
+            <Xl>0.12</Xl>
          </model>
          <governor name="gov1">
             <type>tgov1</type>
@@ -24,8 +24,8 @@
             <T1>0.4</T1>
             <T2>2</T2>
             <T3>6</T3>
-			<pmax>0.86</pmax>
-			<pmin>0.3</pmin>
+            <pmax>0.86</pmax>
+            <pmin>0.3</pmin>
          </governor>
       </generator>
    </bus>
@@ -40,7 +40,7 @@
    <bus name="bus3">
       <type>infinite</type>
       <angle>0</angle>
-	  <voltage>1.0</voltage>
+      <voltage>1.0</voltage>
    </bus>
    <link from="bus1" name="bus1_to_bus2" to="bus2">
       <b>0</b>
@@ -51,18 +51,18 @@
       <b>0</b>
       <r>0.001</r>
       <x>0.2</x>
-	  <event>
-	  <time>2,2.15</time>
-	  <field>fault</field>
-	  <value>0.5,-1</value>
-	  </event>
+      <event>
+      <time>2,2.15</time>
+      <field>fault</field>
+      <value>0.5,-1</value>
+      </event>
    </link>
    <link from="bus2" name="bus2_to_bus3_b" to="bus3">
       <b>0</b>
       <r>0.001</r>
       <x>0.2</x>
    </link>
-  
+
    <basepower>100</basepower>
    <timestart>0</timestart>
    <timestop>10</timestop>

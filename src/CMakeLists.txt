@@ -23,8 +23,7 @@ endif(GRIDDYN_ENABLE_PLUGINS)
 # ------------------------------------------------------------
 # Enable compilation of extraModels?
 # ------------------------------------------------------------
-# If extra models are used enabled try to locate the libraries
-# link against them.
+# If extra models are used enabled try to locate the libraries link against them.
 if(GRIDDYN_ENABLE_EXTRA_MODELS)
     add_subdirectory(extraModels)
     target_link_libraries(griddyn_optional INTERFACE extraModelLibrary)
@@ -33,8 +32,7 @@ endif(GRIDDYN_ENABLE_EXTRA_MODELS)
 # ------------------------------------------------------------
 # Enable compilation of extraSolvers?
 # ------------------------------------------------------------
-# If extra solvers are used enabled try to locate the libraries
-# link against them.
+# If extra solvers are used enabled try to locate the libraries link against them.
 if(GRIDDYN_ENABLE_EXTRA_SOLVERS)
     add_subdirectory(extraSolvers)
     target_link_libraries(griddyn_optional INTERFACE extraSolverLibrary)

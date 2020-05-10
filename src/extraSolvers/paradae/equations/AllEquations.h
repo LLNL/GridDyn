@@ -13,9 +13,8 @@
 #pragma once
 
 #include "Equation.h"
-#include "Equation_ODE.h"
 #include "Equation_DAE.h"
 #include "Equation_DAE_full.h"
+#include "Equation_ODE.h"
 
 //#include "equations/EqGridDyn.h"
-

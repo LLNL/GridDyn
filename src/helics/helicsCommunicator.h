@@ -12,48 +12,46 @@
 #pragma once
 
 #include "griddyn/comms/Communicator.h"
-
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
-namespace griddyn
-{
-namespace helicsLib
-{
+namespace griddyn {
+namespace helicsLib {
 
-class helicsCoordinator;
+    class helicsCoordinator;
 
-/** class defining a Griddyn coordinator to communicate through HELICS*/
-class helicsCommunicator
-  : public griddyn::Communicator
-    
-{
-public:
+    /** class defining a Griddyn coordinator to communicate through HELICS*/
+    class helicsCommunicator:
+        public griddyn::Communicator
 
-    helicsCommunicator() = default;
-  explicit helicsCommunicator (const std::string &name);
-  helicsCommunicator (const std::string &m_name, std::uint64_t id);
+    {
+      public:
+        helicsCommunicator() = default;
+        explicit helicsCommunicator(const std::string& name);
+        helicsCommunicator(const std::string& m_name, std::uint64_t id);
 
-  virtual ~helicsCommunicator() = default;
+        virtual ~helicsCommunicator() = default;
 
-  virtual void transmit (const std::string &destName, std::shared_ptr<griddyn::commMessage> message) override;
+        virtual void transmit(const std::string& destName,
+                              std::shared_ptr<griddyn::commMessage> message) override;
 
-  virtual void transmit (std::uint64_t destID, std::shared_ptr<griddyn::commMessage> message) override;
+        virtual void transmit(std::uint64_t destID,
+                              std::shared_ptr<griddyn::commMessage> message) override;
 
-  virtual void initialize () override; //!< XXX: Must be called by client
-  virtual void disconnect() override;
+        virtual void initialize() override;  //!< XXX: Must be called by client
+        virtual void disconnect() override;
 
-  virtual void set(const std::string &param, const std::string &val) override;
-  virtual void set(const std::string &param, double val) override;
-private:
-    std::string target;
-    std::string coordName;
-    helicsCoordinator *coord = nullptr;
-    int32_t index = 0;
-};
+        virtual void set(const std::string& param, const std::string& val) override;
+        virtual void set(const std::string& param, double val) override;
 
+      private:
+        std::string target;
+        std::string coordName;
+        helicsCoordinator* coord = nullptr;
+        int32_t index = 0;
+    };
 
-} //namespace helicsLib
-} //namespace griddyn
+}  //namespace helicsLib
+}  //namespace griddyn

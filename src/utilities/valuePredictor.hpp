@@ -14,14 +14,12 @@
 #define VALUE_PREDICTOR_H_
 #pragma once
 
-namespace utilities
-{
+namespace utilities {
 /** @brief class implementing a prediction system
  *@details the base class does a linear prediction
  */
-template <typename InputType, typename OutputType = InputType, typename SlopeType = OutputType>
-class valuePredictor
-{
+template<typename InputType, typename OutputType = InputType, typename SlopeType = OutputType>
+class valuePredictor {
   private:
     InputType lastKnownInput_;  //!< the last known time
     OutputType lastKnownOutput_;  //!< the last known Value
@@ -33,30 +31,30 @@ class valuePredictor
     @param[in] output0 the initial output
     @param[in] slope0 [optional] the initial rate of change
     */
-    valuePredictor (InputType input0, OutputType output0, SlopeType slope0 = SlopeType (0))
-        : lastKnownInput_ (input0), lastKnownOutput_ (output0), slope_ (slope0)
+    valuePredictor(InputType input0, OutputType output0, SlopeType slope0 = SlopeType(0)):
+        lastKnownInput_(input0), lastKnownOutput_(output0), slope_(slope0)
     {
     }
-	/** destructor*/
-    virtual ~valuePredictor () = default;
+    /** destructor*/
+    virtual ~valuePredictor() = default;
     // default copy and copy constructors
-    valuePredictor (const valuePredictor &ref) = default;  //!< copy constructor does the default thing
+    valuePredictor(const valuePredictor& ref) =
+        default;  //!< copy constructor does the default thing
     /** move constructor*/
-	valuePredictor (valuePredictor &&ref) = default;
-	/** copy operator*/
-    valuePredictor &operator= (const valuePredictor &ref) = default;
-	/** move operator*/
-    valuePredictor &operator= (valuePredictor &&ref) = default;
+    valuePredictor(valuePredictor&& ref) = default;
+    /** copy operator*/
+    valuePredictor& operator=(const valuePredictor& ref) = default;
+    /** move operator*/
+    valuePredictor& operator=(valuePredictor&& ref) = default;
     /** update the known values
      *@details sets the known values and computes the ramp rate
      *The values input should correspond to the reduction in values so 0.0 for no saturation
      *@param[in] input  the actual input value
      *@param[in] output the actual output value
      */
-    virtual void update (InputType input, OutputType output)
+    virtual void update(InputType input, OutputType output)
     {
-        if (input - lastKnownInput_ > InputType{0})
-        {
+        if (input - lastKnownInput_ > InputType{0}) {
             slope_ = (output - lastKnownOutput_) / (input - lastKnownInput_);
         }
         lastKnownInput_ = input;
@@ -64,20 +62,20 @@ class valuePredictor
     }
     /** @brief set the rate at a user specified value
      */
-    virtual void setSlope (SlopeType newSlope) { slope_ = newSlope; }
+    virtual void setSlope(SlopeType newSlope) { slope_ = newSlope; }
     /** update the saturation type function by enumeration*/
-    virtual OutputType predict (InputType input) const
+    virtual OutputType predict(InputType input) const
     {
         return lastKnownOutput_ + (input - lastKnownInput_) * slope_;
     }
     /** update the saturation type function by enumeration*/
-    OutputType operator() (InputType input) const { return predict (input); }
+    OutputType operator()(InputType input) const { return predict(input); }
     /** getKnownInput*/
-    InputType getKnownInput () const { return lastKnownInput_; }
+    InputType getKnownInput() const { return lastKnownInput_; }
     /** getKnownOutput*/
-    OutputType getKnownOutput () const { return lastKnownOutput_; }
+    OutputType getKnownOutput() const { return lastKnownOutput_; }
     /** get the rate of change*/
-    SlopeType getSlope () const { return slope_; }
+    SlopeType getSlope() const { return slope_; }
 };
 }  // namespace utilities
 #endif

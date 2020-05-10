@@ -11,65 +11,60 @@
  */
 
 #include "../Area.h"
-#include "Condition.h"
 #include "../Generator.h"
 #include "../Link.h"
 #include "../Relay.h"
-
-#include "grabberInterpreter.hpp"
 #include "../gridBus.h"
 #include "../relays/sensor.h"
-#include "stateGrabber.h"
+#include "Condition.h"
 #include "gmlc/containers/mapOps.hpp"
+#include "grabberInterpreter.hpp"
+#include "stateGrabber.h"
 #include "utilities/matrixDataScale.hpp"
 #include "utilities/matrixDataTranslate.hpp"
 #include <algorithm>
 
-namespace griddyn
-{
-	using namespace gmlc::utilities;
+namespace griddyn {
+using namespace gmlc::utilities;
 
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber>
-  sgInterpret ([](const std::string &fld, coreObject *obj) { return std::make_unique<stateGrabber> (fld, obj); });
+    sgInterpret([](const std::string& fld, coreObject* obj) {
+        return std::make_unique<stateGrabber>(fld, obj);
+    });
 
-static const std::string specialChars (R"(:(+-/*\^?)");
-static const std::string sepChars (",;");
+static const std::string specialChars(R"(:(+-/*\^?)");
+static const std::string sepChars(",;");
 
-std::vector<std::unique_ptr<stateGrabber>> makeStateGrabbers (const std::string &command, coreObject *obj)
+std::vector<std::unique_ptr<stateGrabber>> makeStateGrabbers(const std::string& command,
+                                                             coreObject* obj)
 {
     std::vector<std::unique_ptr<stateGrabber>> v;
-    auto gsplit = stringOps::splitlineBracket (command, sepChars);
-    stringOps::trim (gsplit);
-    for (auto &cmd : gsplit)
-    {
-        if (cmd.find_first_of (specialChars) != std::string::npos)
-        {
-            auto sgb = sgInterpret.interpretGrabberBlock (cmd, obj);
-            if ((sgb) && (sgb->loaded))
-            {
-                v.push_back (std::move (sgb));
+    auto gsplit = stringOps::splitlineBracket(command, sepChars);
+    stringOps::trim(gsplit);
+    for (auto& cmd : gsplit) {
+        if (cmd.find_first_of(specialChars) != std::string::npos) {
+            auto sgb = sgInterpret.interpretGrabberBlock(cmd, obj);
+            if ((sgb) && (sgb->loaded)) {
+                v.push_back(std::move(sgb));
             }
-        }
-        else
-        {
-            auto sgb = std::make_unique<stateGrabber> (cmd, dynamic_cast<gridComponent *> (obj));
-            if ((sgb) && (sgb->loaded))
-            {
-                v.push_back (std::move (sgb));
+        } else {
+            auto sgb = std::make_unique<stateGrabber>(cmd, dynamic_cast<gridComponent*>(obj));
+            if ((sgb) && (sgb->loaded)) {
+                v.push_back(std::move(sgb));
             }
         }
     }
     return v;
 }
 
-stateGrabber::stateGrabber (coreObject *obj) : cobj (dynamic_cast<gridComponent *> (obj)) {}
-stateGrabber::stateGrabber (const std::string &fld, coreObject *obj) : stateGrabber (obj)
+stateGrabber::stateGrabber(coreObject* obj): cobj(dynamic_cast<gridComponent*>(obj)) {}
+stateGrabber::stateGrabber(const std::string& fld, coreObject* obj): stateGrabber(obj)
 {
-    stateGrabber::updateField (fld);
+    stateGrabber::updateField(fld);
 }
 
-stateGrabber::stateGrabber (index_t noffset, coreObject *obj)
-    : offset (noffset), cobj (dynamic_cast<gridComponent *> (obj))
+stateGrabber::stateGrabber(index_t noffset, coreObject* obj):
+    offset(noffset), cobj(dynamic_cast<gridComponent*>(obj))
 {
 }
 
@@ -79,7 +74,7 @@ std::unique_ptr<stateGrabber> stateGrabber::clone() const
     cloneTo(sg.get());
     return sg;
 }
-void stateGrabber::cloneTo (stateGrabber *ggb) const
+void stateGrabber::cloneTo(stateGrabber* ggb) const
 {
     ggb->field = field;
     ggb->fptr = fptr;
@@ -96,29 +91,20 @@ void stateGrabber::cloneTo (stateGrabber *ggb) const
     ggb->cobj = cobj;
 }
 
-void stateGrabber::updateField (const std::string &fld)
+void stateGrabber::updateField(const std::string& fld)
 {
     field = fld;
-    auto fd = convertToLowerCase (fld);
+    auto fd = convertToLowerCase(fld);
     loaded = true;
-    if (dynamic_cast<gridBus *> (cobj) != nullptr)
-    {
-        busLoadInfo (fd);
-    }
-    else if (dynamic_cast<Link *> (cobj) != nullptr)
-    {
-        linkLoadInfo (fd);
-    }
-    else if (dynamic_cast<gridSecondary *> (cobj) != nullptr)
-    {
-        secondaryLoadInfo (fd);
-    }
-    else if (dynamic_cast<Relay *> (cobj) != nullptr)
-    {
-        relayLoadInfo (fd);
-    }
-    else
-    {
+    if (dynamic_cast<gridBus*>(cobj) != nullptr) {
+        busLoadInfo(fd);
+    } else if (dynamic_cast<Link*>(cobj) != nullptr) {
+        linkLoadInfo(fd);
+    } else if (dynamic_cast<gridSecondary*>(cobj) != nullptr) {
+        secondaryLoadInfo(fd);
+    } else if (dynamic_cast<Relay*>(cobj) != nullptr) {
+        relayLoadInfo(fd);
+    } else {
         loaded = false;
     }
 }
@@ -126,92 +112,97 @@ void stateGrabber::updateField (const std::string &fld)
 using namespace units;
 
 /** map of all the alternate strings that can be used*/
-static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"},
-                                                                {"vol", "voltage"},
-                                                                {"link", "linkreal"},
-                                                                {"linkp", "linkreal"},
-                                                                {"loadq", "loadreactive"},
-                                                                {"loadreactivepower", "loadreactive"},
-                                                                {"load", "loadreal"},
-                                                                {"loadp", "loadreal"},
-                                                                {"reactivegen", "genreactive"},
-                                                                {"genq", "genreactive"},
-                                                                {"gen", "genreal"},
-                                                                {"generation", "genreal"},
-                                                                {"genp", "genreal"},
-                                                                {"realgen", "genreal"},
-                                                                {"f", "freq"},
-                                                                {"frequency", "freq"},
-                                                                {"omega", "freq"},
-                                                                {"a", "angle"},
-                                                                {"ang", "angle"},
-                                                                {"phase", "angle"},
-                                                                {"busgenerationreal", "busgenreal"},
-                                                                {"busp", "busgenreal"},
-                                                                {"busgen", "busgenreal"},
-                                                                {"busgenerationreactive", "busgenreactive"},
-                                                                {"busq", "busgenreactive"},
-                                                                {"linkrealpower", "linkreal"},
-                                                                {"linkp1", "linkreal"},
-                                                                {"linkq", "linkreactive"},
-                                                                {"linkreactivepower", "linkreactive"},
-                                                                {"linkrealpower1", "linkreal"},
-                                                                {"linkq1", "linkreactive"},
-                                                                {"linkreactivepower1", "linkreactive"},
-                                                                {"linkreal1", "linkreal"},
-                                                                {"linkreactive1", "linkreactive"},
-                                                                {"linkrealpower2", "linkreal2"},
-                                                                {"linkq2", "linkreactive2"},
-                                                                {"linkreactivepower2", "linkreactive2"},
-                                                                {"linkp2", "linkreal2"},
-                                                                {"p", "real"},
-                                                                {"q", "reactive"},
-                                                                {"impedance", "z"},
-                                                                {"admittance", "y"},
-                                                                {"impedance1", "z"},
-                                                                {"admittance1", "y"},
-                                                                {"z1", "z"},
-                                                                {"y1", "y"},
-                                                                {"impedance2", "z2"},
-                                                                {"admittance2", "y2"},
-                                                                {"status", "connected"},
-                                                                {"breaker", "switch"},
-                                                                {"breaker1", "switch"},
-                                                                {"switch1", "switch"},
-                                                                {"breaker2", "switch2"},
-                                                                {"i", "current"},
-                                                                {"i1", "current"},
-                                                                {"current1", "current"},
-                                                                {"i2", "current2"},
-                                                                {"imagcurrent1", "imagcurrent"},
-                                                                {"realcurrent1", "realcurrent"},
-                                                                {"lossreal", "loss"},
-                                                                {"angle1", "angle"},
-                                                                {"absangle1", "busangle"},
-                                                                {"voltage1", "voltage"},
-                                                                {"v1", "voltage"},
-                                                                {"v2", "voltage2"},
-                                                                {"output0", "output"},
-                                                                {"cv", "output"},
-                                                                {"o0", "output"},
-                                                                {"currentvalue", "output"},
-                                                                {"deriv0", "deriv"},
-                                                                {"dodt", "deriv"},
-                                                                {"dodt0", "deriv"},
-                                                                {"doutdt", "deriv"},
-                                                                {"doutdt0", "deriv"},
-                                                                {"busangle1","busangle"},
-                                                                { "absangle","busangle" },
-                                                                { "absangle1","busangle2" },
+static const std::map<std::string, std::string> stringTranslate{
+    {"v", "voltage"},
+    {"vol", "voltage"},
+    {"link", "linkreal"},
+    {"linkp", "linkreal"},
+    {"loadq", "loadreactive"},
+    {"loadreactivepower", "loadreactive"},
+    {"load", "loadreal"},
+    {"loadp", "loadreal"},
+    {"reactivegen", "genreactive"},
+    {"genq", "genreactive"},
+    {"gen", "genreal"},
+    {"generation", "genreal"},
+    {"genp", "genreal"},
+    {"realgen", "genreal"},
+    {"f", "freq"},
+    {"frequency", "freq"},
+    {"omega", "freq"},
+    {"a", "angle"},
+    {"ang", "angle"},
+    {"phase", "angle"},
+    {"busgenerationreal", "busgenreal"},
+    {"busp", "busgenreal"},
+    {"busgen", "busgenreal"},
+    {"busgenerationreactive", "busgenreactive"},
+    {"busq", "busgenreactive"},
+    {"linkrealpower", "linkreal"},
+    {"linkp1", "linkreal"},
+    {"linkq", "linkreactive"},
+    {"linkreactivepower", "linkreactive"},
+    {"linkrealpower1", "linkreal"},
+    {"linkq1", "linkreactive"},
+    {"linkreactivepower1", "linkreactive"},
+    {"linkreal1", "linkreal"},
+    {"linkreactive1", "linkreactive"},
+    {"linkrealpower2", "linkreal2"},
+    {"linkq2", "linkreactive2"},
+    {"linkreactivepower2", "linkreactive2"},
+    {"linkp2", "linkreal2"},
+    {"p", "real"},
+    {"q", "reactive"},
+    {"impedance", "z"},
+    {"admittance", "y"},
+    {"impedance1", "z"},
+    {"admittance1", "y"},
+    {"z1", "z"},
+    {"y1", "y"},
+    {"impedance2", "z2"},
+    {"admittance2", "y2"},
+    {"status", "connected"},
+    {"breaker", "switch"},
+    {"breaker1", "switch"},
+    {"switch1", "switch"},
+    {"breaker2", "switch2"},
+    {"i", "current"},
+    {"i1", "current"},
+    {"current1", "current"},
+    {"i2", "current2"},
+    {"imagcurrent1", "imagcurrent"},
+    {"realcurrent1", "realcurrent"},
+    {"lossreal", "loss"},
+    {"angle1", "angle"},
+    {"absangle1", "busangle"},
+    {"voltage1", "voltage"},
+    {"v1", "voltage"},
+    {"v2", "voltage2"},
+    {"output0", "output"},
+    {"cv", "output"},
+    {"o0", "output"},
+    {"currentvalue", "output"},
+    {"deriv0", "deriv"},
+    {"dodt", "deriv"},
+    {"dodt0", "deriv"},
+    {"doutdt", "deriv"},
+    {"doutdt0", "deriv"},
+    {"busangle1", "busangle"},
+    {"absangle", "busangle"},
+    {"absangle1", "busangle2"},
 };
 
-#define FUNCTION_SIGNATURE [](gridComponent * obj, const stateData &sD, const solverMode &sMode)
-#define FUNCTION_SIGNATURE_OBJ_ONLY [](gridComponent * obj, const stateData & /*sD*/, const solverMode & /*sMode*/)
+#define FUNCTION_SIGNATURE [](gridComponent * obj, const stateData& sD, const solverMode& sMode)
+#define FUNCTION_SIGNATURE_OBJ_ONLY                                                                \
+    [](gridComponent * obj, const stateData& /*sD*/, const solverMode& /*sMode*/)
 
-#define JAC_FUNCTION_SIGNATURE                                                                                    \
-    [](gridComponent * obj, const stateData &sD, matrixData<double> &md, const solverMode &sMode)
-#define JAC_FUNCTION_SIGNATURE_NO_STATE                                                                           \
-    [](gridComponent * obj, const stateData & /*sD*/, matrixData<double> &md, const solverMode &sMode)
+#define JAC_FUNCTION_SIGNATURE                                                                     \
+    [](gridComponent * obj, const stateData& sD, matrixData<double>& md, const solverMode& sMode)
+#define JAC_FUNCTION_SIGNATURE_NO_STATE                                                            \
+    [](gridComponent * obj,                                                                        \
+       const stateData& /*sD*/,                                                                    \
+       matrixData<double>& md,                                                                     \
+       const solverMode& sMode)
 
 // clang-format off
 static const std::map<std::string, fstateobjectPair> objectFunctions{
@@ -337,79 +328,62 @@ static const std::map<std::string, fstateobjectPair> linkFunctions{
 
 // clang-format on
 
-void stateGrabber::objectLoadInfo (const std::string &fld)
+void stateGrabber::objectLoadInfo(const std::string& fld)
 {
-    auto funcfind = objectFunctions.find (fld);
-    if (funcfind != objectFunctions.end ())
-    {
+    auto funcfind = objectFunctions.find(fld);
+    if (funcfind != objectFunctions.end()) {
         fptr = funcfind->second.first;
-    }
-    else
-    {
+    } else {
         std::string fieldStr;
-        int num = stringOps::trailingStringInt (fld, fieldStr, 0);
-        if ((fieldStr == "value") || (fieldStr == "output") || (fieldStr == "o"))
-        {
-            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                return comp->getOutput (noInputs, sD, sMode, static_cast<index_t> (num));
+        int num = stringOps::trailingStringInt(fld, fieldStr, 0);
+        if ((fieldStr == "value") || (fieldStr == "output") || (fieldStr == "o")) {
+            fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                return comp->getOutput(noInputs, sD, sMode, static_cast<index_t>(num));
             };
         }
-        if ((fieldStr == "deriv") || (fieldStr == "doutdt") || (fieldStr == "derivative"))
-        {
-            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                return comp->getDoutdt (noInputs, sD, sMode, static_cast<index_t> (num));
+        if ((fieldStr == "deriv") || (fieldStr == "doutdt") || (fieldStr == "derivative")) {
+            fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                return comp->getDoutdt(noInputs, sD, sMode, static_cast<index_t>(num));
             };
-        }
-        else
-        {
-
+        } else {
             auto index = cobj->lookupOutputIndex(fieldStr);
-            if (index != kNullLocation)
-            {
-                fptr = [index](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+            if (index != kNullLocation) {
+                fptr = [index](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
                     return comp->getOutput(noInputs, sD, sMode, index);
                 };
-            }
-            else
-            {
+            } else {
                 fptr = nullptr;
                 loaded = false;
             }
-
         }
     }
 }
 
-void stateGrabber::busLoadInfo (const std::string &fld)
+void stateGrabber::busLoadInfo(const std::string& fld)
 {
-    std::string nfstr = mapFind (stringTranslate, fld, fld);
+    std::string nfstr = mapFind(stringTranslate, fld, fld);
 
-    auto funcfind = busFunctions.find (nfstr);
-    if (funcfind != busFunctions.end ())
-    {
+    auto funcfind = busFunctions.find(nfstr);
+    if (funcfind != busFunctions.end()) {
         fptr = funcfind->second.first;
         inputUnits = funcfind->second.second;
         loaded = true;
-        auto jacfind = busJacFunctions.find (nfstr);
-        if (jacfind != busJacFunctions.end ())
-        {
+        auto jacfind = busJacFunctions.find(nfstr);
+        if (jacfind != busJacFunctions.end()) {
             jacIfptr = jacfind->second;
             jacMode = jacobian_mode::computed;
         }
-    }
-    else
-    {
-        objectLoadInfo (nfstr);
+    } else {
+        objectLoadInfo(nfstr);
     }
 }
 
-void stateGrabber::linkLoadInfo (const std::string &fld)
+void stateGrabber::linkLoadInfo(const std::string& fld)
 {
-    std::string nfstr = mapFind (stringTranslate, fld, fld);
+    std::string nfstr = mapFind(stringTranslate, fld, fld);
 
-    auto funcfind = linkFunctions.find (nfstr);
-    if (funcfind != linkFunctions.end ())
-    {
+    auto funcfind = linkFunctions.find(nfstr);
+    if (funcfind != linkFunctions.end()) {
         fptr = funcfind->second.first;
         inputUnits = funcfind->second.second;
         loaded = true;
@@ -421,178 +395,156 @@ void stateGrabber::linkLoadInfo (const std::string &fld)
             jacMode = jacobian_mode::computed;
         }
         */
-    }
-    else
-    {
-        objectLoadInfo (nfstr);
+    } else {
+        objectLoadInfo(nfstr);
     }
 }
-void stateGrabber::relayLoadInfo (const std::string &fld)
+void stateGrabber::relayLoadInfo(const std::string& fld)
 {
     std::string fieldStr;
-    int num = stringOps::trailingStringInt (fld, fieldStr, 0);
-    if ((fieldStr == "block") || (fieldStr == "b"))
-    {
-        if (dynamic_cast<sensor *> (cobj) != nullptr)
-        {
-            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                return static_cast<sensor *> (comp)->getBlockOutput (sD, sMode, num);
+    int num = stringOps::trailingStringInt(fld, fieldStr, 0);
+    if ((fieldStr == "block") || (fieldStr == "b")) {
+        if (dynamic_cast<sensor*>(cobj) != nullptr) {
+            fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                return static_cast<sensor*>(comp)->getBlockOutput(sD, sMode, num);
             };
-        }
-        else
-        {
+        } else {
             loaded = false;
         }
-    }
-    else if ((fld == "blockderiv") || (fld == "dblockdt") || (fld == "dbdt"))
-    {
-        if (dynamic_cast<sensor *> (cobj) != nullptr)
-        {
-            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                return static_cast<sensor *> (comp)->getBlockDerivOutput(sD, sMode, num);
+    } else if ((fld == "blockderiv") || (fld == "dblockdt") || (fld == "dbdt")) {
+        if (dynamic_cast<sensor*>(cobj) != nullptr) {
+            fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                return static_cast<sensor*>(comp)->getBlockDerivOutput(sD, sMode, num);
             };
-        }
-        else
-        {
+        } else {
             loaded = false;
         }
-    }
-    else if ((fieldStr == "input") || (fieldStr == "i"))
-    {
-        if (dynamic_cast<sensor *> (cobj) != nullptr)
-        {
-            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                return static_cast<sensor *> (comp)->getInput (sD, sMode, num);
+    } else if ((fieldStr == "input") || (fieldStr == "i")) {
+        if (dynamic_cast<sensor*>(cobj) != nullptr) {
+            fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                return static_cast<sensor*>(comp)->getInput(sD, sMode, num);
             };
-        }
-        else
-        {
+        } else {
             loaded = false;
         }
-    }
-    else if ((fieldStr == "condition") || (fieldStr == "c"))
-    {
+    } else if ((fieldStr == "condition") || (fieldStr == "c")) {
         // dgptr = &Link::getAngle;
-        fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-            return (static_cast<Relay *> (comp))->getCondition (num)->getVal (1, sD, sMode);
+        fptr = [num](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+            return (static_cast<Relay*>(comp))->getCondition(num)->getVal(1, sD, sMode);
         };
-    }
-    else
-    {
-         objectLoadInfo (fld);
+    } else {
+        objectLoadInfo(fld);
     }
 }
 
-void stateGrabber::secondaryLoadInfo (const std::string &fld)
+void stateGrabber::secondaryLoadInfo(const std::string& fld)
 {
-    if ((fld == "realpower") || (fld == "power") || (fld == "p"))
-    {
+    if ((fld == "realpower") || (fld == "power") || (fld == "p")) {
         cacheUpdateRequired = true;
-        fptr = [](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-            return static_cast<gridSecondary *> (comp)->getRealPower (noInputs, sD, sMode);
+        fptr = [](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+            return static_cast<gridSecondary*>(comp)->getRealPower(noInputs, sD, sMode);
         };
         jacMode = jacobian_mode::computed;
-        jacIfptr = [](gridComponent *comp, const stateData &sD, matrixData<double> &md, const solverMode &sMode) {
-            matrixDataTranslate<1, double> b (md);
-            b.setTranslation (PoutLocation, 0);
-            static_cast<gridSecondary *> (comp)->outputPartialDerivatives (noInputs, sD, b, sMode);
+        jacIfptr = [](gridComponent* comp,
+                      const stateData& sD,
+                      matrixData<double>& md,
+                      const solverMode& sMode) {
+            matrixDataTranslate<1, double> b(md);
+            b.setTranslation(PoutLocation, 0);
+            static_cast<gridSecondary*>(comp)->outputPartialDerivatives(noInputs, sD, b, sMode);
         };
-    }
-    else if ((fld == "reactivepower") || (fld == "reactive") || (fld == "q"))
-    {
+    } else if ((fld == "reactivepower") || (fld == "reactive") || (fld == "q")) {
         cacheUpdateRequired = true;
-        fptr = [](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-            return static_cast<gridSecondary *> (comp)->getReactivePower (noInputs, sD, sMode);
+        fptr = [](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+            return static_cast<gridSecondary*>(comp)->getReactivePower(noInputs, sD, sMode);
         };
         jacMode = jacobian_mode::computed;
-        jacIfptr = [](gridComponent *comp, const stateData &sD, matrixData<double> &md, const solverMode &sMode) {
-            matrixDataTranslate<1, double> b (md);
-            b.setTranslation (QoutLocation, 0);
-            static_cast<gridSecondary *> (comp)->outputPartialDerivatives (noInputs, sD, b, sMode);
+        jacIfptr = [](gridComponent* comp,
+                      const stateData& sD,
+                      matrixData<double>& md,
+                      const solverMode& sMode) {
+            matrixDataTranslate<1, double> b(md);
+            b.setTranslation(QoutLocation, 0);
+            static_cast<gridSecondary*>(comp)->outputPartialDerivatives(noInputs, sD, b, sMode);
         };
-    }
-    else
-    {
-        offset = static_cast<gridSecondary *> (cobj)->findIndex (fld, cLocalSolverMode);
-        if (offset != kInvalidLocation)
-        {
+    } else {
+        offset = static_cast<gridSecondary*>(cobj)->findIndex(fld, cLocalSolverMode);
+        if (offset != kInvalidLocation) {
             prevIndex = 1;
-            fptr = [this](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                if (sMode.offsetIndex != prevIndex)
-                {
-                    offset = static_cast<gridSecondary *> (comp)->findIndex (field, sMode);
+            fptr = [this](gridComponent* comp, const stateData& sD, const solverMode& sMode) {
+                if (sMode.offsetIndex != prevIndex) {
+                    offset = static_cast<gridSecondary*>(comp)->findIndex(field, sMode);
                     prevIndex = sMode.offsetIndex;
                 }
                 return (offset != kNullLocation) ? sD.state[offset] : kNullVal;
             };
             jacMode = jacobian_mode::computed;
-            jacIfptr = [this](gridComponent * /*comp*/, const stateData & /*sD*/, matrixData<double> &md,
-                           const solverMode & /*sMode*/) { md.assignCheckCol (0, offset, 1.0); };
-        }
-        else
-        {
+            jacIfptr = [this](gridComponent* /*comp*/,
+                              const stateData& /*sD*/,
+                              matrixData<double>& md,
+                              const solverMode& /*sMode*/) { md.assignCheckCol(0, offset, 1.0); };
+        } else {
             loaded = false;
         }
     }
 }
 
-void stateGrabber::areaLoadInfo (const std::string & /*fld*/) {}
-double stateGrabber::grabData (const stateData &sD, const solverMode &sMode)
+void stateGrabber::areaLoadInfo(const std::string& /*fld*/) {}
+double stateGrabber::grabData(const stateData& sD, const solverMode& sMode)
 {
-    if (loaded)
-    {
-        if (cacheUpdateRequired)
-        {
-            cobj->updateLocalCache (noInputs, sD, sMode);
+    if (loaded) {
+        if (cacheUpdateRequired) {
+            cobj->updateLocalCache(noInputs, sD, sMode);
         }
-        double val = fptr (cobj, sD, sMode);
-        val = std::fma (val, gain, bias);
+        double val = fptr(cobj, sD, sMode);
+        val = std::fma(val, gain, bias);
         return val;
     }
     return kNullVal;
 }
 
-void stateGrabber::updateObject (coreObject *obj, object_update_mode mode)
+void stateGrabber::updateObject(coreObject* obj, object_update_mode mode)
 {
-    if (mode == object_update_mode::direct)
-    {
-        cobj = dynamic_cast<gridComponent *> (obj);
-    }
-    else if (mode == object_update_mode::match)
-    {
-        cobj = dynamic_cast<gridComponent *> (findMatchingObject (cobj, obj));
+    if (mode == object_update_mode::direct) {
+        cobj = dynamic_cast<gridComponent*>(obj);
+    } else if (mode == object_update_mode::match) {
+        cobj = dynamic_cast<gridComponent*>(findMatchingObject(cobj, obj));
     }
 }
 
-coreObject *stateGrabber::getObject () const { return cobj; }
-void stateGrabber::getObjects (std::vector<coreObject *> &objects) const { objects.push_back (getObject ()); }
-void stateGrabber::outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode)
+coreObject* stateGrabber::getObject() const
 {
-    if (jacMode == jacobian_mode::none)
-    {
+    return cobj;
+}
+void stateGrabber::getObjects(std::vector<coreObject*>& objects) const
+{
+    objects.push_back(getObject());
+}
+void stateGrabber::outputPartialDerivatives(const stateData& sD,
+                                            matrixData<double>& md,
+                                            const solverMode& sMode)
+{
+    if (jacMode == jacobian_mode::none) {
         return;
     }
-    if (gain != 1.0)
-    {
-        matrixDataScale<double> bd (md, gain);
-        jacIfptr (cobj, sD, bd, sMode);
-    }
-    else
-    {
-        jacIfptr (cobj, sD, md, sMode);
+    if (gain != 1.0) {
+        matrixDataScale<double> bd(md, gain);
+        jacIfptr(cobj, sD, bd, sMode);
+    } else {
+        jacIfptr(cobj, sD, md, sMode);
     }
 }
 
-customStateGrabber::customStateGrabber (gridComponent *comp) : stateGrabber (comp) {}
-void customStateGrabber::setGrabberFunction (objStateGrabberFunction nfptr)
+customStateGrabber::customStateGrabber(gridComponent* comp): stateGrabber(comp) {}
+void customStateGrabber::setGrabberFunction(objStateGrabberFunction nfptr)
 {
-    fptr = std::move (nfptr);
+    fptr = std::move(nfptr);
     loaded = true;
 }
 
-void customStateGrabber::setGrabberJacFunction (objJacFunction nJfptr)
+void customStateGrabber::setGrabberJacFunction(objJacFunction nJfptr)
 {
-    jacIfptr = std::move (nJfptr);
+    jacIfptr = std::move(nJfptr);
     jacMode = (jacIfptr) ? jacobian_mode::computed : jacobian_mode::none;
 }
 
@@ -602,40 +554,33 @@ std::unique_ptr<stateGrabber> customStateGrabber::clone() const
     cloneTo(sg.get());
     return sg;
 }
-void customStateGrabber::cloneTo(stateGrabber *ggb) const
+void customStateGrabber::cloneTo(stateGrabber* ggb) const
 {
     stateGrabber::cloneTo(ggb);
-    auto csg = dynamic_cast<customStateGrabber *>(ggb);
-    if (csg == nullptr)
-    {
+    auto csg = dynamic_cast<customStateGrabber*>(ggb);
+    if (csg == nullptr) {
         return;
     }
 }
 
-
-stateFunctionGrabber::stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func)
-    : function_name (std::move (func))
+stateFunctionGrabber::stateFunctionGrabber(std::shared_ptr<stateGrabber> ggb, std::string func):
+    function_name(std::move(func))
 {
-    if (ggb)
-    {
-        bgrabber = std::move (ggb);
+    if (ggb) {
+        bgrabber = std::move(ggb);
     }
-    opptr = get1ArgFunction (function_name);
-    jacMode = (bgrabber->getJacobianMode ());
+    opptr = get1ArgFunction(function_name);
+    jacMode = (bgrabber->getJacobianMode());
     loaded = bgrabber->loaded;
 }
 
-void stateFunctionGrabber::updateField (const std::string &fld)
+void stateFunctionGrabber::updateField(const std::string& fld)
 {
-    if (!fld.empty ())
-    {
-        if (isFunctionName (fld, function_type::arg))
-        {
+    if (!fld.empty()) {
+        if (isFunctionName(fld, function_type::arg)) {
             function_name = fld;
-            opptr = get1ArgFunction (function_name);
-        }
-        else
-        {
+            opptr = get1ArgFunction(function_name);
+        } else {
             loaded = false;
         }
     }
@@ -650,22 +595,17 @@ std::unique_ptr<stateGrabber> stateFunctionGrabber::clone() const
     return sg;
 }
 
-void stateFunctionGrabber::cloneTo(stateGrabber *ggb) const
+void stateFunctionGrabber::cloneTo(stateGrabber* ggb) const
 {
     stateGrabber::cloneTo(ggb);
-    auto sfg= dynamic_cast<stateFunctionGrabber *>(ggb);
-    if (sfg == nullptr)
-    {
+    auto sfg = dynamic_cast<stateFunctionGrabber*>(ggb);
+    if (sfg == nullptr) {
         return;
     }
-    if (bgrabber)
-    {
-        if (sfg->bgrabber)
-        {
+    if (bgrabber) {
+        if (sfg->bgrabber) {
             bgrabber->cloneTo(sfg->bgrabber.get());
-        }
-        else
-        {
+        } else {
             sfg->bgrabber = bgrabber->clone();
         }
     }
@@ -673,69 +613,64 @@ void stateFunctionGrabber::cloneTo(stateGrabber *ggb) const
     sfg->opptr = opptr;
 }
 
-double stateFunctionGrabber::grabData (const stateData &sD, const solverMode &sMode)
+double stateFunctionGrabber::grabData(const stateData& sD, const solverMode& sMode)
 {
-    double val = opptr (bgrabber->grabData (sD, sMode));
-    val = std::fma (val, gain, bias);
+    double val = opptr(bgrabber->grabData(sD, sMode));
+    val = std::fma(val, gain, bias);
     return val;
 }
 
-void stateFunctionGrabber::updateObject (coreObject *obj, object_update_mode mode)
+void stateFunctionGrabber::updateObject(coreObject* obj, object_update_mode mode)
 {
-    if (bgrabber)
-    {
-        bgrabber->updateObject (obj, mode);
+    if (bgrabber) {
+        bgrabber->updateObject(obj, mode);
     }
 }
 
-coreObject *stateFunctionGrabber::getObject () const { return (bgrabber) ? bgrabber->getObject () : nullptr; }
-void stateFunctionGrabber::outputPartialDerivatives (const stateData &sD,
-                                                     matrixData<double> &md,
-                                                     const solverMode &sMode)
+coreObject* stateFunctionGrabber::getObject() const
 {
-    if (jacMode == jacobian_mode::none)
-    {
+    return (bgrabber) ? bgrabber->getObject() : nullptr;
+}
+void stateFunctionGrabber::outputPartialDerivatives(const stateData& sD,
+                                                    matrixData<double>& md,
+                                                    const solverMode& sMode)
+{
+    if (jacMode == jacobian_mode::none) {
         return;
     }
 
-    double temp = bgrabber->grabData (sD, sMode);
-    double t1 = opptr (temp);
-    double t2 = opptr (temp + 1e-7);
+    double temp = bgrabber->grabData(sD, sMode);
+    double t1 = opptr(temp);
+    double t2 = opptr(temp + 1e-7);
     double dodI = (t2 - t1) / 1e-7;
 
-    matrixDataScale<double> d1 (md, dodI * gain);
-    bgrabber->outputPartialDerivatives (sD, d1, sMode);
+    matrixDataScale<double> d1(md, dodI * gain);
+    bgrabber->outputPartialDerivatives(sD, d1, sMode);
 }
 
-stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1,
-                                std::shared_ptr<stateGrabber> ggb2,
-                                std::string op)
-    : op_name (std::move (op))
+stateOpGrabber::stateOpGrabber(std::shared_ptr<stateGrabber> ggb1,
+                               std::shared_ptr<stateGrabber> ggb2,
+                               std::string op):
+    op_name(std::move(op))
 {
-    if (ggb1)
-    {
-        bgrabber1 = std::move (ggb1);
+    if (ggb1) {
+        bgrabber1 = std::move(ggb1);
     }
-    if (ggb2)
-    {
-        bgrabber2 = std::move (ggb2);
+    if (ggb2) {
+        bgrabber2 = std::move(ggb2);
     }
-    opptr = get2ArgFunction (op_name);
-    jacMode = std::min (bgrabber1->getJacobianMode (), bgrabber2->getJacobianMode ());
+    opptr = get2ArgFunction(op_name);
+    jacMode = std::min(bgrabber1->getJacobianMode(), bgrabber2->getJacobianMode());
     loaded = ((bgrabber1->loaded) && (bgrabber2->loaded));
 }
 
-void stateOpGrabber::updateField (const std::string &opName)
+void stateOpGrabber::updateField(const std::string& opName)
 {
-    if (!opName.empty ())
-    {
-        if (isFunctionName (opName, function_type::arg2))
-        {
+    if (!opName.empty()) {
+        if (isFunctionName(opName, function_type::arg2)) {
             op_name = opName;
-            opptr = get2ArgFunction (op_name);
-        }
-        else
-        {
+            opptr = get2ArgFunction(op_name);
+        } else {
             loaded = false;
         }
     }
@@ -750,33 +685,24 @@ std::unique_ptr<stateGrabber> stateOpGrabber::clone() const
     return sg;
 }
 
-void stateOpGrabber::cloneTo(stateGrabber *ggb) const
+void stateOpGrabber::cloneTo(stateGrabber* ggb) const
 {
     stateGrabber::cloneTo(ggb);
-    auto sog = dynamic_cast<stateOpGrabber *>(ggb);
-    if (sog == nullptr)
-    {
+    auto sog = dynamic_cast<stateOpGrabber*>(ggb);
+    if (sog == nullptr) {
         return;
     }
-    if (bgrabber1)
-    {
-        if (sog->bgrabber1)
-        {
+    if (bgrabber1) {
+        if (sog->bgrabber1) {
             bgrabber1->cloneTo(sog->bgrabber1.get());
-        }
-        else
-        {
+        } else {
             sog->bgrabber1 = bgrabber1->clone();
         }
     }
-    if (bgrabber2)
-    {
-        if (sog->bgrabber2)
-        {
+    if (bgrabber2) {
+        if (sog->bgrabber2) {
             bgrabber2->cloneTo(sog->bgrabber2.get());
-        }
-        else
-        {
+        } else {
             sog->bgrabber2 = bgrabber2->clone();
         }
     }
@@ -784,82 +710,72 @@ void stateOpGrabber::cloneTo(stateGrabber *ggb) const
     sog->opptr = opptr;
 }
 
-double stateOpGrabber::grabData (const stateData &sD, const solverMode &sMode)
+double stateOpGrabber::grabData(const stateData& sD, const solverMode& sMode)
 {
-    double grabber1Data = bgrabber1->grabData (sD, sMode);
-    double grabber2Data = bgrabber2->grabData (sD, sMode);
-    double val = opptr (grabber1Data, grabber2Data);
-    val = std::fma (val, gain, bias);
+    double grabber1Data = bgrabber1->grabData(sD, sMode);
+    double grabber2Data = bgrabber2->grabData(sD, sMode);
+    double val = opptr(grabber1Data, grabber2Data);
+    val = std::fma(val, gain, bias);
     return val;
 }
 
-void stateOpGrabber::updateObject (coreObject *obj, object_update_mode mode)
+void stateOpGrabber::updateObject(coreObject* obj, object_update_mode mode)
 {
-    if (bgrabber1)
-    {
-        bgrabber1->updateObject (obj, mode);
+    if (bgrabber1) {
+        bgrabber1->updateObject(obj, mode);
     }
-    if (bgrabber2)
-    {
-        bgrabber2->updateObject (obj, mode);
+    if (bgrabber2) {
+        bgrabber2->updateObject(obj, mode);
     }
 }
 
-void stateOpGrabber::updateObject (coreObject *obj, int num)
+void stateOpGrabber::updateObject(coreObject* obj, int num)
 {
-    if (num == 1)
-    {
-        if (bgrabber1)
-        {
-            bgrabber1->updateObject (obj);
+    if (num == 1) {
+        if (bgrabber1) {
+            bgrabber1->updateObject(obj);
         }
-    }
-    else if (num == 2)
-    {
-        if (bgrabber2)
-        {
-            bgrabber2->updateObject (obj);
+    } else if (num == 2) {
+        if (bgrabber2) {
+            bgrabber2->updateObject(obj);
         }
     }
 }
 
-coreObject *stateOpGrabber::getObject () const
+coreObject* stateOpGrabber::getObject() const
 {
-    if (bgrabber1)
-    {
-        return bgrabber1->getObject ();
+    if (bgrabber1) {
+        return bgrabber1->getObject();
     }
-    if (bgrabber2)
-    {
-        return bgrabber2->getObject ();
+    if (bgrabber2) {
+        return bgrabber2->getObject();
     }
     return nullptr;
 }
 
-void stateOpGrabber::outputPartialDerivatives (const stateData &sD,
-                                               matrixData<double> &md,
-                                               const solverMode &sMode)
+void stateOpGrabber::outputPartialDerivatives(const stateData& sD,
+                                              matrixData<double>& md,
+                                              const solverMode& sMode)
 {
-    if (jacMode == jacobian_mode::none)
-    {
+    if (jacMode == jacobian_mode::none) {
         return;
     }
 
-    double grabber1Data = bgrabber1->grabData (sD, sMode);
-    double grabber2Data = bgrabber2->grabData (sD, sMode);
+    double grabber1Data = bgrabber1->grabData(sD, sMode);
+    double grabber2Data = bgrabber2->grabData(sD, sMode);
 
-    double t1 = opptr (grabber1Data, grabber2Data);
-    double t2 = opptr (grabber1Data + 1e-7, grabber2Data);
+    double t1 = opptr(grabber1Data, grabber2Data);
+    double t2 = opptr(grabber1Data + 1e-7, grabber2Data);
 
     double dodI = (t2 - t1) / 1e-7;
 
-    matrixDataScale<double> d1 (md, dodI * gain);
-    bgrabber1->outputPartialDerivatives (sD, d1, sMode);
+    matrixDataScale<double> d1(md, dodI * gain);
+    bgrabber1->outputPartialDerivatives(sD, d1, sMode);
 
-    double t3 = opptr (grabber1Data, grabber2Data + 1e-7);
+    double t3 = opptr(grabber1Data, grabber2Data + 1e-7);
     dodI = (t3 - t1) / 1e-7;
-    d1.setScale (dodI * gain);
-    bgrabber2->outputPartialDerivatives (sD, d1, sMode);
+    d1.setScale(dodI * gain);
+    bgrabber2->outputPartialDerivatives(sD, d1, sMode);
 }
 
 }  // namespace griddyn

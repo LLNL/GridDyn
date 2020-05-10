@@ -8,8 +8,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(
-    fmiImport_sources
+set(fmiImport_sources
     fmi_import/fmiImport.cpp
     fmi_import/fmiInfo.cpp
     fmi_import/fmi2Object.cpp
@@ -20,8 +19,7 @@ set(
     fmi_import/fmiLibraryManager.cpp
 )
 
-set(
-    fmiGD_sources
+set(fmiGD_sources
     fmiGDinfo.cpp
     fmi_models/fmiMESubModel.cpp
     fmi_models/fmiCoSimSubModel.cpp
@@ -36,8 +34,7 @@ set(
     fmi_models/CymeDistLoad.cpp
 )
 
-set(
-    fmiGD_headers
+set(fmiGD_headers
     fmi_models/fmiMESubModel.h
     fmi_models/fmiCoSimSubModel.h
     fmi_models/fmiMELoad.h
@@ -55,22 +52,12 @@ set(
     fmi_models/CymeDistLoad.h
     fmiGDinfo.h
 )
-set(
-    fmiImport_headers
-    fmi_import/fmiInfo.h
-    fmi_import/fmiImport.h
-    fmi_import/fmiObjects.h
-    fmi_import/fmiEnumDefinitions.h
-    fmi_import/fmiLibraryManager.h
+set(fmiImport_headers fmi_import/fmiInfo.h fmi_import/fmiImport.h fmi_import/fmiObjects.h
+                      fmi_import/fmiEnumDefinitions.h fmi_import/fmiLibraryManager.h
 )
 
 add_library(
-    fmiGDLibrary
-    STATIC
-    ${fmiGD_sources}
-    ${fmiImport_sources}
-    ${fmiImport_headers}
-    ${fmiGD_headers}
+    fmiGDLibrary STATIC ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers}
 )
 
 source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
@@ -80,16 +67,11 @@ set_target_properties(fmiGDLibrary PROPERTIES FOLDER fmi)
 
 target_link_libraries(fmiGDLibrary griddyn formatInterpreter)
 
-
 list(APPEND optional_library_key_headers fmi/fmiGDinfo.h)
 list(APPEND optional_library_functions loadFmiLibrary)
 
 set(optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set(optional_library_functions ${optional_library_functions} PARENT_SCOPE)
 
-list(
-    APPEND
-        optional_component_test_files
-        ${PROJECT_SOURCE_DIR}/test/componentTests/testFMI.cpp
-)
+list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/test/componentTests/testFMI.cpp)
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)

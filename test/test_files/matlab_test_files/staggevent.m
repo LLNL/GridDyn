@@ -2,7 +2,7 @@ function [event,buschange,linechange] = staggevent
 
 % staggevent
 % MatDyn event data file
-% 
+%
 % MatDyn
 % Copyright (C) 2009 Stijn Cole
 % Katholieke Universiteit Leuven
@@ -12,7 +12,7 @@ function [event,buschange,linechange] = staggevent
 
 %%
 % event = [time type]
-event=[0.0      1; 
+event=[0.0      1;
        0.0      1;
        0.1      1;
        0.1      1];

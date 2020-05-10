@@ -16,7 +16,7 @@
 
 namespace griddyn {
 namespace paradae {
-/*!
+    /*!
   Butcher tableau:
   \f[\begin{array}{c|ccc}
   1-\frac{\sqrt{2}}{2}&1-\frac{\sqrt{2}}{2}&&\\
@@ -27,12 +27,12 @@ namespace paradae {
   \end{array}
   \f]
  */
-class Billington_23 : public RungeKutta_SDIRK {
-public:
-  Billington_23(Equation* eq, bool variable_step=false);
-  virtual std::string GetName(){return "RK_ImpBi_23";};
-};
-} // namespace paradae
-} // namespace griddyn
+    class Billington_23: public RungeKutta_SDIRK {
+      public:
+        Billington_23(Equation* eq, bool variable_step = false);
+        virtual std::string GetName() { return "RK_ImpBi_23"; };
+    };
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif
