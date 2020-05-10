@@ -1,6 +1,6 @@
---- 
+---
 AccessModifierOffset: '-2'
-AlignAfterOpenBracket: AlwaysBreak
+AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: 'false'
 AlignConsecutiveDeclarations: 'false'
 #AlignConsecutiveMacros: 'true'
@@ -60,6 +60,13 @@ PenaltyReturnTypeOnItsOwnLine: '40'
 PointerAlignment: Left
 ReflowComments: 'false'
 SortIncludes: 'true'
+IncludeCategories:
+  - Regex:           '^<boost/test/unit_test.hpp'
+    Priority:        2
+  - Regex:           '(boost)/'
+    Priority:        3
+  - Regex:           '.*'
+    Priority:        1
 SortUsingDeclarations: 'true'
 SpaceAfterCStyleCast: 'false'
 #SpaceAfterLogicalNot: 'false'
@@ -71,7 +78,7 @@ SpaceBeforeInheritanceColon: 'false'
 SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: 'true'
 SpaceInEmptyParentheses: 'false'
-SpacesBeforeTrailingComments: '1'
+SpacesBeforeTrailingComments: '2'
 SpacesInAngles: 'false'
 SpacesInCStyleCastParentheses: 'false'
 SpacesInContainerLiterals: 'false'
