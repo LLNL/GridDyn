@@ -98,4 +98,3 @@ coreObject* loadElementFile(coreObject* parentObject, const std::string& fileNam
 }
 
 }  // namespace griddyn
-
