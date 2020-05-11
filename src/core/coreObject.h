@@ -59,7 +59,7 @@ class coreObject {
     coreTime lastUpdateTime = negTime;  //!<[s] the last update time
     coreTime updatePeriod = maxTime;  //!<[s]the update period
     coreTime updateDelay = timeZero;  //!<[s]the requested delay between updateA and
-                                      //!<updateB--requested is key here not guaranteed
+                                      //!< updateB--requested is key here not guaranteed
   private:
     // these shouldn't generate false shareing as one is static
     static std::atomic<id_type_t> s_obcnt;  //!< the global object counter

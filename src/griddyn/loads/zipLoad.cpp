@@ -355,8 +355,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             Vpqmax = convert(val, unitType, puV, systemBasePower, localBaseVoltage);
             trigVVhigh = 1.0 / (Vpqmax * Vpqmax);
         }
-    } else if (param == "pqlowvlimit")  
-    {
+    } else if (param == "pqlowvlimit") {
         // this is mostly a convenience flag for adaptive solving
         if (val > 0.1)  // not a flag
         {
@@ -368,7 +367,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             }
         }
     }
-  
+
     else if ((param == "basevoltage") || (param == "base vol")) {
         // SGS added to set the base voltage 2015-01-30
         localBaseVoltage = val;

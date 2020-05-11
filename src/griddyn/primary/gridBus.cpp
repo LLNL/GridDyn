@@ -831,8 +831,7 @@ int gridBus::propogatePower(bool /*makeSlack*/)
         if ((adjPSecondary == 0) && (adjQSecondary == 0)) {
             unfixed_line->fixPower(-Pexp, -Qexp, getID(), getID());
         }
-    } else 
-    {
+    } else {
         // no lines so adjust the generators and load
         if ((adjPSecondary == 1) && (adjQSecondary == 1)) {
             int found = 0;
@@ -862,8 +861,7 @@ int gridBus::propogatePower(bool /*makeSlack*/)
                     return 1;
                 }
             }
-        } else  
-        {
+        } else {
             // TODO::PT:deal with multiple adjustable controls
             return 0;
         }
