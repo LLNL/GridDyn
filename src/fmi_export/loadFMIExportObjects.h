@@ -13,13 +13,12 @@
 #ifndef _FMI_LOADEXPORTOBJECTS_H_
 #define _FMI_LOADEXPORTOBJECTS_H_
 
-namespace griddyn
-{
+namespace griddyn {
 class readerInfo;
 
-void loadFMIExportObjects ();
+void loadFMIExportObjects();
 
-void loadFmiExportReaderInfoDefinitions (readerInfo &ri);
+void loadFmiExportReaderInfoDefinitions(readerInfo& ri);
 
 }  // namespace griddyn
 #endif

@@ -10,17 +10,11 @@
 
 # project name gridDynInout
 
-set(
-    reader_sources
-    stringInterpret.cpp
-    readerHelper.cpp
-    fileInput.cpp
-    gridParameter.cpp
-    readerInfo.cpp
+set(reader_sources stringInterpret.cpp readerHelper.cpp fileInput.cpp gridParameter.cpp
+                   readerInfo.cpp
 )
 
-set(
-    elementReader_sources
+set(elementReader_sources
     readElementHelperFunctions.cpp
     readBusElement.cpp
     readEventElement.cpp
@@ -40,8 +34,7 @@ set(
     objectLoadHelperFunctions.cpp
 )
 
-set(
-    formattedfileInput_sources
+set(formattedfileInput_sources
     gridDynReadCDF.cpp
     gridDynReadRAW.cpp
     gridDynReadDYR.cpp
@@ -57,8 +50,7 @@ set(
     readXMLfile.cpp
 )
 
-set(
-    fileInput_headers
+set(fileInput_headers
     readElement.h
     readerHelper.h
     fileInput.h
@@ -68,13 +60,8 @@ set(
     readElementFile.h
 )
 
-set(
-    fileInput_sources
-    ${xml_sources}
-    ${reader_sources}
-    ${elementReader_sources}
-    ${formattedfileInput_sources}
-    ${fileInput_headers}
+set(fileInput_sources ${xml_sources} ${reader_sources} ${elementReader_sources}
+                      ${formattedfileInput_sources} ${fileInput_headers}
 )
 add_library(fileInput STATIC ${fileInput_sources})
 
@@ -85,8 +72,5 @@ source_group("general" FILES ${reader_sources})
 
 set_target_properties(fileInput PROPERTIES FOLDER libraries)
 
-#install(
-#    FILES ${fileInput_headers}
-#    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fileInput
-#    COMPONENT headers
-#)
+# install( FILES ${fileInput_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fileInput
+# COMPONENT headers )

@@ -13,39 +13,39 @@
 <governor/>
 </generator>
 <load name="gld">
-	  <type>gridlab</type>
-	  <period>2</period>
-	  <detail>triple</detail>
-	  <coupling>trigger</coupling>
-	  <file>Simple_3Bus_mod_meter_mix_Load.glm</file>
-	  <workdir>Simple_3Bus_mod_workdir</workdir>
-	  <load>
-	  <P units="MW">3.00001</P>
-	  <Q units="MVar">0.90003</Q>
-	  <Ip units="MW">3.00000</Ip>
-	  <Iq units="MVar">0.90002</Iq>
-	  <Yp units="MW">3.00000</Yp>
-	  <Yq units="MVar">0.90002</Yq>
-	  </load>
-	  </load>
-	  
-	  <load name="constLd">
-	  <P units="MW">3.00001</P>
-	  <Q units="MVar">0.90003</Q>
-	  <Ip units="MW">3.00000</Ip>
-	  <Iq units="MVar">0.90002</Iq>
-	  <Yp units="MW">3.00000</Yp>
-	  <Yq units="MVar">0.90002</Yq>
-	  </load>
+      <type>gridlab</type>
+      <period>2</period>
+      <detail>triple</detail>
+      <coupling>trigger</coupling>
+      <file>Simple_3Bus_mod_meter_mix_Load.glm</file>
+      <workdir>Simple_3Bus_mod_workdir</workdir>
+      <load>
+      <P units="MW">3.00001</P>
+      <Q units="MVar">0.90003</Q>
+      <Ip units="MW">3.00000</Ip>
+      <Iq units="MVar">0.90002</Iq>
+      <Yp units="MW">3.00000</Yp>
+      <Yq units="MVar">0.90002</Yq>
+      </load>
+      </load>
+
+      <load name="constLd">
+      <P units="MW">3.00001</P>
+      <Q units="MVar">0.90003</Q>
+      <Ip units="MW">3.00000</Ip>
+      <Iq units="MVar">0.90002</Iq>
+      <Yp units="MW">3.00000</Yp>
+      <Yq units="MVar">0.90002</Yq>
+      </load>
 </library>
    <bus name="bus1">
-	<basevoltage>12.5</basevoltage>
+    <basevoltage>12.5</basevoltage>
       <type>SLK</type>
       <angle>0</angle>
       <voltage>1.00</voltage>
       <generator name="gen1" ref="default">
       </generator>
-	  
+
    </bus>
    <bus name="bus2">
    <basevoltage>12.5</basevoltage>
@@ -55,30 +55,30 @@
       <generator name="gen1" ref="default">
           <P units="MW">9.2*garraySize</P>
       </generator>
-	  
-	  <array count="garraySize">
+
+      <array count="garraySize">
      <load name="gload2_$#index$" ref="gld"/>
-	 </array>
+     </array>
    </bus>
    <link from="bus1" to="bus2">
       <x>0.0004</x>
-	  <r>0.00005</r>
+      <r>0.00005</r>
    </link>
    <bus name="bus3">
    <basevoltage>12.5</basevoltage>
       <type>PV</type>
       <angle>0</angle>
       <voltage>1.00</voltage>
-	  <array count="garraySize">
+      <array count="garraySize">
      <load name="gload3_$#index$" ref="gld"/>
-	 </array>
-	   <generator name="gen1" ref="default">
+     </array>
+       <generator name="gen1" ref="default">
           <P units="MW">9*garraySize</P>
       </generator>
    </bus>
    <link from="bus3" to="bus2">
       <x>0.0004</x>
-	  <r>0.00005</r>
+      <r>0.00005</r>
    </link>
    <bus name="bus4">
    <basevoltage>12.5</basevoltage>
@@ -86,18 +86,18 @@
       <voltage>1.00</voltage>
      <array count="garraySize">
      <load name="gload4_$#index$" ref="gld"/>
-	 </array>
-	  <generator name="gen1" ref="default">
+     </array>
+      <generator name="gen1" ref="default">
           <P units="MW">9*garraySize</P>
       </generator>
    </bus>
    <link from="bus1" to="bus4">
       <x>0.0004</x>
-	  <r>0.00005</r>
+      <r>0.00005</r>
    </link>
    <link from="bus4" to="bus3">
       <x>0.0006</x>
-	  <r>0.00005</r>
+      <r>0.00005</r>
    </link>
    <basepower>30</basepower>
    <timestart>0</timestart>

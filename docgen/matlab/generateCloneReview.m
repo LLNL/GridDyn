@@ -33,7 +33,7 @@ cls=[];
 ignoreClasses={'gridObjectHolder','typeFactory','childTypeFactory','typeFactoryArg'};
 for ff=1:length(filedir)
     dlist=dir(fullfile(filedir{ff},'*.h'));
-    
+
     for nn=1:length(dlist)
         tempCls=getClassInfo(fullfile(filedir{ff},dlist(nn).name));
         for pp=1:length(tempCls)
@@ -49,7 +49,7 @@ for ff=1:length(filedir)
                 cls(end+1)=tempCls(pp);
             end
         end
-      
+
     end
 end
 %%

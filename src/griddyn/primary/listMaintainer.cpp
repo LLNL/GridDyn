@@ -1,380 +1,324 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "listMaintainer.h"
-#include "../Area.h"
 
+#include "../Area.h"
 #include "griddyn/griddyn-config.h"
 
-namespace griddyn
-{
-void fillList (const solverMode &sMode,
-               std::vector<gridPrimary *> &list,
-               std::vector<gridPrimary *> &partlist,
-               const std::vector<gridPrimary *> &possObjs);
+namespace griddyn {
+void fillList(const solverMode& sMode,
+              std::vector<gridPrimary*>& list,
+              std::vector<gridPrimary*>& partlist,
+              const std::vector<gridPrimary*>& possObjs);
 
-listMaintainer::listMaintainer () : objectLists (4), partialLists (4), sModeLists (4) {}
+listMaintainer::listMaintainer(): objectLists(4), partialLists(4), sModeLists(4) {}
 
-void listMaintainer::makeList (const solverMode &sMode, const std::vector<gridPrimary *> &possObjs)
+void listMaintainer::makeList(const solverMode& sMode, const std::vector<gridPrimary*>& possObjs)
 {
-    if (sMode.offsetIndex >= static_cast<index_t> (objectLists.size ()))
-    {
-        objectLists.resize (sMode.offsetIndex + 1);
-        partialLists.resize (sMode.offsetIndex + 1);
-        sModeLists.resize (sMode.offsetIndex + 1);
+    if (sMode.offsetIndex >= static_cast<index_t>(objectLists.size())) {
+        objectLists.resize(sMode.offsetIndex + 1);
+        partialLists.resize(sMode.offsetIndex + 1);
+        sModeLists.resize(sMode.offsetIndex + 1);
         sModeLists[sMode.offsetIndex] = sMode;
-        objectLists[sMode.offsetIndex].reserve (possObjs.size ());
-        partialLists[sMode.offsetIndex].reserve (possObjs.size ());
+        objectLists[sMode.offsetIndex].reserve(possObjs.size());
+        partialLists[sMode.offsetIndex].reserve(possObjs.size());
     }
-    objectLists[sMode.offsetIndex].clear ();
-    partialLists[sMode.offsetIndex].clear ();
-    fillList (sMode, objectLists[sMode.offsetIndex], partialLists[sMode.offsetIndex], possObjs);
+    objectLists[sMode.offsetIndex].clear();
+    partialLists[sMode.offsetIndex].clear();
+    fillList(sMode, objectLists[sMode.offsetIndex], partialLists[sMode.offsetIndex], possObjs);
     sModeLists[sMode.offsetIndex] = sMode;
 }
 
-void listMaintainer::appendList (const solverMode &sMode, const std::vector<gridPrimary *> &possObjs)
+void listMaintainer::appendList(const solverMode& sMode, const std::vector<gridPrimary*>& possObjs)
 {
-    if (sMode.offsetIndex >= static_cast<index_t> (objectLists.size ()))
-    {
-        objectLists.resize (sMode.offsetIndex + 1);
-        partialLists.resize (sMode.offsetIndex + 1);
-        sModeLists.resize (sMode.offsetIndex + 1);
+    if (sMode.offsetIndex >= static_cast<index_t>(objectLists.size())) {
+        objectLists.resize(sMode.offsetIndex + 1);
+        partialLists.resize(sMode.offsetIndex + 1);
+        sModeLists.resize(sMode.offsetIndex + 1);
         sModeLists[sMode.offsetIndex] = sMode;
-        objectLists[sMode.offsetIndex].reserve (possObjs.size ());
-        partialLists[sMode.offsetIndex].reserve (possObjs.size ());
+        objectLists[sMode.offsetIndex].reserve(possObjs.size());
+        partialLists[sMode.offsetIndex].reserve(possObjs.size());
     }
-    fillList (sMode, objectLists[sMode.offsetIndex], partialLists[sMode.offsetIndex], possObjs);
+    fillList(sMode, objectLists[sMode.offsetIndex], partialLists[sMode.offsetIndex], possObjs);
 }
 
-void fillList (const solverMode &sMode,
-               std::vector<gridPrimary *> &list,
-               std::vector<gridPrimary *> &partlist,
-               const std::vector<gridPrimary *> &possObjs)
+void fillList(const solverMode& sMode,
+              std::vector<gridPrimary*>& list,
+              std::vector<gridPrimary*>& partlist,
+              const std::vector<gridPrimary*>& possObjs)
 {
-    for (auto &obj : possObjs)
-    {
-        if (obj->checkFlag (preEx_requested))
-        {
-            if (obj->checkFlag (multipart_calculation_capable))
-            {
-                partlist.push_back (obj);
-                list.push_back (obj);
+    for (auto& obj : possObjs) {
+        if (obj->checkFlag(preEx_requested)) {
+            if (obj->checkFlag(multipart_calculation_capable)) {
+                partlist.push_back(obj);
+                list.push_back(obj);
+            } else if (obj->stateSize(sMode) > 0) {
+                list.push_back(obj);
             }
-            else if (obj->stateSize (sMode) > 0)
-            {
-                list.push_back (obj);
-            }
-        }
-        else if (obj->stateSize (sMode) > 0)
-        {
-            partlist.push_back (obj);
-            list.push_back (obj);
+        } else if (obj->stateSize(sMode) > 0) {
+            partlist.push_back(obj);
+            list.push_back(obj);
         }
     }
 }
 
-void listMaintainer::makePreList (const std::vector<gridPrimary *> &possObjs)
+void listMaintainer::makePreList(const std::vector<gridPrimary*>& possObjs)
 {
-    preExObjs.clear ();
-    for (auto &obj : possObjs)
-    {
-        if (obj->checkFlag (preEx_requested))
-        {
-            preExObjs.push_back (obj);
+    preExObjs.clear();
+    for (auto& obj : possObjs) {
+        if (obj->checkFlag(preEx_requested)) {
+            preExObjs.push_back(obj);
         }
     }
 }
 
-void listMaintainer::preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
+void listMaintainer::preEx(const IOdata& inputs, const stateData& sD, const solverMode& sMode)
 {
-    for (auto &obj : preExObjs)
-    {
-        obj->preEx (inputs, sD, sMode);
+    for (auto& obj : preExObjs) {
+        obj->preEx(inputs, sD, sMode);
     }
 }
 
-void listMaintainer::jacobianElements (const IOdata &inputs,
-                                       const stateData &sD,
-                                       matrixData<double> &md,
-                                       const IOlocs &inputLocs,
-                                       const solverMode &sMode)
+void listMaintainer::jacobianElements(const IOdata& inputs,
+                                      const stateData& sD,
+                                      matrixData<double>& md,
+                                      const IOlocs& inputLocs,
+                                      const solverMode& sMode)
 {
-    if (!isListValid (sMode))
-    {
+    if (!isListValid(sMode)) {
         return;
     }
 #ifdef ENABLE_OPENMP_GRIDDYN
-    if (parJac)
-    {
-        auto &vz = partialLists[sMode.offsetIndex];
-        int sz = static_cast<int> (vz.size ());
-#pragma omp parallel for
-        for (int kk = 0; kk < sz; ++kk)
-        {
-            vz[kk]->jacobianElements (inputs, sD, md, inputLocs, sMode);
+    if (parJac) {
+        auto& vz = partialLists[sMode.offsetIndex];
+        int sz = static_cast<int>(vz.size());
+#    pragma omp parallel for
+        for (int kk = 0; kk < sz; ++kk) {
+            vz[kk]->jacobianElements(inputs, sD, md, inputLocs, sMode);
         }
-    }
-    else
-    {
-        for (auto &obj : partialLists[sMode.offsetIndex])
-        {
-            obj->jacobianElements (inputs, sD, md, inputLocs, sMode);
+    } else {
+        for (auto& obj : partialLists[sMode.offsetIndex]) {
+            obj->jacobianElements(inputs, sD, md, inputLocs, sMode);
         }
     }
 
 #else
-    for (auto &obj : partialLists[sMode.offsetIndex])
-    {
-        obj->jacobianElements (inputs, sD, md, inputLocs, sMode);
+    for (auto& obj : partialLists[sMode.offsetIndex]) {
+        obj->jacobianElements(inputs, sD, md, inputLocs, sMode);
     }
 #endif
 }
 
-void listMaintainer::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
+void listMaintainer::residual(const IOdata& inputs,
+                              const stateData& sD,
+                              double resid[],
+                              const solverMode& sMode)
 {
-    if (!isListValid (sMode))
-    {
+    if (!isListValid(sMode)) {
         return;
     }
 
 #ifdef ENABLE_OPENMP_GRIDDYN
-    if (parResid)
-    {
-        auto &vz = partialLists[sMode.offsetIndex];
-        int sz = static_cast<index_t> (vz.size ());
-#pragma omp parallel for
-        for (index_t kk = 0; kk < sz; ++kk)
-        {
-            vz[kk]->residual (inputs, sD, resid, sMode);
+    if (parResid) {
+        auto& vz = partialLists[sMode.offsetIndex];
+        int sz = static_cast<index_t>(vz.size());
+#    pragma omp parallel for
+        for (index_t kk = 0; kk < sz; ++kk) {
+            vz[kk]->residual(inputs, sD, resid, sMode);
         }
-    }
-    else
-    {
-        for (auto &obj : partialLists[sMode.offsetIndex])
-        {
-            obj->residual (inputs, sD, resid, sMode);
+    } else {
+        for (auto& obj : partialLists[sMode.offsetIndex]) {
+            obj->residual(inputs, sD, resid, sMode);
         }
     }
 
 #else
-    for (auto &obj : partialLists[sMode.offsetIndex])
-    {
-        obj->residual (inputs, sD, resid, sMode);
+    for (auto& obj : partialLists[sMode.offsetIndex]) {
+        obj->residual(inputs, sD, resid, sMode);
     }
 #endif
-
 }
 
-void listMaintainer::algebraicUpdate (const IOdata &inputs,
-                                      const stateData &sD,
-                                      double update[],
-                                      const solverMode &sMode,
-                                      double alpha)
+void listMaintainer::algebraicUpdate(const IOdata& inputs,
+                                     const stateData& sD,
+                                     double update[],
+                                     const solverMode& sMode,
+                                     double alpha)
 {
-    if (!isListValid (sMode))
-    {
+    if (!isListValid(sMode)) {
         return;
     }
 
 #ifdef ENABLE_OPENMP_GRIDDYN
-	if (parAlgebraic)
-	{
-		auto &vz = partialLists[sMode.offsetIndex];
-		int sz = static_cast<index_t> (vz.size());
-#pragma omp parallel for
-		for (index_t kk = 0; kk < sz; ++kk)
-		{
-			vz[kk]->algebraicUpdate(inputs, sD, update, sMode, alpha);
-		}
-	}
-	else
-	{
-		for (auto &obj : partialLists[sMode.offsetIndex])
-		{
-			obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
-		}
-	}
+    if (parAlgebraic) {
+        auto& vz = partialLists[sMode.offsetIndex];
+        int sz = static_cast<index_t>(vz.size());
+#    pragma omp parallel for
+        for (index_t kk = 0; kk < sz; ++kk) {
+            vz[kk]->algebraicUpdate(inputs, sD, update, sMode, alpha);
+        }
+    } else {
+        for (auto& obj : partialLists[sMode.offsetIndex]) {
+            obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
+        }
+    }
 
 #else
-	for (auto &obj : partialLists[sMode.offsetIndex])
-	{
-		obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
-	}
+    for (auto& obj : partialLists[sMode.offsetIndex]) {
+        obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
+    }
 #endif
-
-
 }
 
-void listMaintainer::derivative (const IOdata &inputs,
-                                 const stateData &sD,
-                                 double deriv[],
-                                 const solverMode &sMode)
+void listMaintainer::derivative(const IOdata& inputs,
+                                const stateData& sD,
+                                double deriv[],
+                                const solverMode& sMode)
 {
-    if (!isListValid (sMode))
-    {
+    if (!isListValid(sMode)) {
         return;
     }
 #ifdef ENABLE_OPENMP_GRIDDYN
-    if (parDeriv)
-    {
-        auto &vz = partialLists[sMode.offsetIndex];
-        index_t sz = static_cast<index_t> (vz.size ());
-#pragma omp parallel for
-        for (index_t kk = 0; kk < sz; ++kk)
-        {
-            vz[kk]->derivative (inputs, sD, deriv, sMode);
+    if (parDeriv) {
+        auto& vz = partialLists[sMode.offsetIndex];
+        index_t sz = static_cast<index_t>(vz.size());
+#    pragma omp parallel for
+        for (index_t kk = 0; kk < sz; ++kk) {
+            vz[kk]->derivative(inputs, sD, deriv, sMode);
         }
-    }
-    else
-    {
-        for (auto &obj : partialLists[sMode.offsetIndex])
-        {
-            obj->derivative (inputs, sD, deriv, sMode);
+    } else {
+        for (auto& obj : partialLists[sMode.offsetIndex]) {
+            obj->derivative(inputs, sD, deriv, sMode);
         }
     }
 
 #else
-    for (auto &obj : partialLists[sMode.offsetIndex])
-    {
-        obj->derivative (inputs, sD, deriv, sMode);
+    for (auto& obj : partialLists[sMode.offsetIndex]) {
+        obj->derivative(inputs, sD, deriv, sMode);
     }
 #endif
 }
 
-void listMaintainer::delayedResidual (const IOdata &inputs,
-                                      const stateData &sD,
-                                      double resid[],
-                                      const solverMode &sMode)
+void listMaintainer::delayedResidual(const IOdata& inputs,
+                                     const stateData& sD,
+                                     double resid[],
+                                     const solverMode& sMode)
 {
-    for (auto &obj : preExObjs)
-    {
-        obj->delayedResidual (inputs, sD, resid, sMode);
+    for (auto& obj : preExObjs) {
+        obj->delayedResidual(inputs, sD, resid, sMode);
     }
 }
-void listMaintainer::delayedDerivative (const IOdata &inputs,
-                                        const stateData &sD,
-                                        double deriv[],
-                                        const solverMode &sMode)
+void listMaintainer::delayedDerivative(const IOdata& inputs,
+                                       const stateData& sD,
+                                       double deriv[],
+                                       const solverMode& sMode)
 {
-    for (auto &obj : preExObjs)
-    {
-        obj->delayedDerivative (inputs, sD, deriv, sMode);
-    }
-}
-
-void listMaintainer::delayedJacobian (const IOdata &inputs,
-                                      const stateData &sD,
-                                      matrixData<double> &md,
-                                      const IOlocs &inputLocs,
-                                      const solverMode &sMode)
-{
-    for (auto &obj : preExObjs)
-    {
-        obj->delayedJacobian (inputs, sD, md, inputLocs, sMode);
+    for (auto& obj : preExObjs) {
+        obj->delayedDerivative(inputs, sD, deriv, sMode);
     }
 }
 
-void listMaintainer::delayedAlgebraicUpdate (const IOdata &inputs,
-                                             const stateData &sD,
-                                             double update[],
-                                             const solverMode &sMode,
-                                             double alpha)
+void listMaintainer::delayedJacobian(const IOdata& inputs,
+                                     const stateData& sD,
+                                     matrixData<double>& md,
+                                     const IOlocs& inputLocs,
+                                     const solverMode& sMode)
 {
-    for (auto &obj : preExObjs)
-    {
-        obj->delayedAlgebraicUpdate (inputs, sD, update, sMode, alpha);
+    for (auto& obj : preExObjs) {
+        obj->delayedJacobian(inputs, sD, md, inputLocs, sMode);
     }
 }
 
-
-
-bool listMaintainer::isListValid (const solverMode &sMode) const
+void listMaintainer::delayedAlgebraicUpdate(const IOdata& inputs,
+                                            const stateData& sD,
+                                            double update[],
+                                            const solverMode& sMode,
+                                            double alpha)
 {
+    for (auto& obj : preExObjs) {
+        obj->delayedAlgebraicUpdate(inputs, sD, update, sMode, alpha);
+    }
+}
 
-	if (isValidIndex(sMode.offsetIndex,objectLists))
-    {
+bool listMaintainer::isListValid(const solverMode& sMode) const
+{
+    if (isValidIndex(sMode.offsetIndex, objectLists)) {
         return (sModeLists[sMode.offsetIndex].offsetIndex != kNullLocation);
     }
     return false;
 }
 
-void listMaintainer::invalidate (const solverMode &sMode)
+void listMaintainer::invalidate(const solverMode& sMode)
 {
-	if (isValidIndex(sMode.offsetIndex, objectLists))
-    {
-        sModeLists[sMode.offsetIndex] = solverMode ();
+    if (isValidIndex(sMode.offsetIndex, objectLists)) {
+        sModeLists[sMode.offsetIndex] = solverMode();
     }
 }
 
-void listMaintainer::invalidate ()
+void listMaintainer::invalidate()
 {
-    for (auto &sml : sModeLists)
-    {
-        sml = solverMode ();
+    for (auto& sml : sModeLists) {
+        sml = solverMode();
     }
 }
 
-decltype (listMaintainer::objectLists[0].begin ()) listMaintainer::begin (const solverMode &sMode)
+decltype(listMaintainer::objectLists[0].begin()) listMaintainer::begin(const solverMode& sMode)
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].begin ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].begin();
     }
-    return objectLists[0].end ();
+    return objectLists[0].end();
 }
 
-decltype (listMaintainer::objectLists[0].end ()) listMaintainer::end (const solverMode &sMode)
+decltype(listMaintainer::objectLists[0].end()) listMaintainer::end(const solverMode& sMode)
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].end ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].end();
     }
-    return objectLists[0].end ();
+    return objectLists[0].end();
 }
 
-decltype (listMaintainer::objectLists[0].cbegin ()) listMaintainer::cbegin (const solverMode &sMode) const
+decltype(listMaintainer::objectLists[0].cbegin())
+    listMaintainer::cbegin(const solverMode& sMode) const
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].cbegin ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].cbegin();
     }
-    return objectLists[0].cend ();
+    return objectLists[0].cend();
 }
 
-decltype (listMaintainer::objectLists[0].cend ()) listMaintainer::cend (const solverMode &sMode) const
+decltype(listMaintainer::objectLists[0].cend()) listMaintainer::cend(const solverMode& sMode) const
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].cend ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].cend();
     }
-    return objectLists[0].cend ();
+    return objectLists[0].cend();
 }
 
-decltype (listMaintainer::objectLists[0].rbegin ()) listMaintainer::rbegin (const solverMode &sMode)
+decltype(listMaintainer::objectLists[0].rbegin()) listMaintainer::rbegin(const solverMode& sMode)
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].rbegin ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].rbegin();
     }
-    return objectLists[0].rend ();
+    return objectLists[0].rend();
 }
 
-decltype (listMaintainer::objectLists[0].rend ()) listMaintainer::rend (const solverMode &sMode)
+decltype(listMaintainer::objectLists[0].rend()) listMaintainer::rend(const solverMode& sMode)
 {
-    if (isListValid (sMode))
-    {
-        return objectLists[sMode.offsetIndex].rend ();
+    if (isListValid(sMode)) {
+        return objectLists[sMode.offsetIndex].rend();
     }
-    return objectLists[0].rend ();
+    return objectLists[0].rend();
 }
 
 }  // namespace griddyn

@@ -2,7 +2,7 @@
 <!--xml file to test custom elements-->
 <griddyn name="customtest">
 <custom name="busarray" args="1">
-<array count="arg1"> 
+<array count="arg1">
   <bus>
     <voltage>rand(0.95,1.05)</voltage>
   </bus>

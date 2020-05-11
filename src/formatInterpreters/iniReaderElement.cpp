@@ -11,296 +11,297 @@
  */
 
 #include "iniReaderElement.h"
-#include "inih/INIReader.h"
+
 #include "gmlc/utilities/stringConversion.h"
+#include "inih/INIReader.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
 
 static const std::string nullStr;
 
-iniReaderElement::iniReaderElement () = default;
-iniReaderElement::iniReaderElement (const std::string &fileName) { iniReaderElement::loadFile (fileName); }
-void iniReaderElement::clear () { currentSection.clear (); }
+iniReaderElement::iniReaderElement() = default;
+iniReaderElement::iniReaderElement(const std::string& fileName)
+{
+    iniReaderElement::loadFile(fileName);
+}
+void iniReaderElement::clear()
+{
+    currentSection.clear();
+}
 
 static const std::string invalidString = ";";
 
-bool iniReaderElement::isValid () const { return (currentSection != invalidString); }
-bool iniReaderElement::isDocument () const { return ((doc) && currentSection.empty ()); }
-
-std::shared_ptr<readerElement> iniReaderElement::clone () const
+bool iniReaderElement::isValid() const
 {
-    auto ret = std::make_shared<iniReaderElement> ();
+    return (currentSection != invalidString);
+}
+bool iniReaderElement::isDocument() const
+{
+    return ((doc) && currentSection.empty());
+}
+
+std::shared_ptr<readerElement> iniReaderElement::clone() const
+{
+    auto ret = std::make_shared<iniReaderElement>();
     ret->doc = doc;
     ret->currentSection = currentSection;
     ret->iteratorIndex = iteratorIndex;
     return ret;
 }
 
-bool iniReaderElement::loadFile (const std::string &fileName)
+bool iniReaderElement::loadFile(const std::string& fileName)
 {
-    std::ifstream file (fileName);
-    if (file.is_open ())
-    {
-        doc = std::make_shared<INIReader> (fileName);
-        currentSection = std::string ();
+    std::ifstream file(fileName);
+    if (file.is_open()) {
+        doc = std::make_shared<INIReader>(fileName);
+        currentSection = std::string();
         iteratorIndex = 0;
         return true;
     }
 
     std::cerr << "unable to open file " << fileName << '\n';
     doc = nullptr;
-    clear ();
+    clear();
     return false;
 }
 
-bool iniReaderElement::parse (const std::string & /*inputString*/) { return false; }
-
-std::string iniReaderElement::getName () const
+bool iniReaderElement::parse(const std::string& /*inputString*/)
 {
-    if (currentSection.empty ())
-    {
+    return false;
+}
+
+std::string iniReaderElement::getName() const
+{
+    if (currentSection.empty()) {
         return "root";
     }
     return currentSection;
 }
 
-double iniReaderElement::getValue () const { return readerNullVal; }
-
-std::string iniReaderElement::getText () const { return nullStr; }
-
-std::string iniReaderElement::getMultiText (const std::string & /*sep*/) const { return nullStr; }
-
-bool iniReaderElement::hasAttribute (const std::string &attributeName) const
+double iniReaderElement::getValue() const
 {
-    if (!isValid ())
-    {
-        return false;
-    }
-    auto &val = doc->Get (currentSection, attributeName);
-
-    return !(val.empty ());
+    return readerNullVal;
 }
 
-bool iniReaderElement::hasElement (const std::string &elementName) const
+std::string iniReaderElement::getText() const
 {
-    if (!currentSection.empty ())
-    {
-        return false;
-    }
-    auto &sec = doc->Sections ();
-    return (sec.find (elementName) != sec.end ());
+    return nullStr;
 }
 
-readerAttribute iniReaderElement::getFirstAttribute ()
+std::string iniReaderElement::getMultiText(const std::string& /*sep*/) const
 {
-    if (!isValid ())
-    {
-        return readerAttribute ();
+    return nullStr;
+}
+
+bool iniReaderElement::hasAttribute(const std::string& attributeName) const
+{
+    if (!isValid()) {
+        return false;
     }
-    auto &att = doc->getAttribute (currentSection, 0);
+    auto& val = doc->Get(currentSection, attributeName);
+
+    return !(val.empty());
+}
+
+bool iniReaderElement::hasElement(const std::string& elementName) const
+{
+    if (!currentSection.empty()) {
+        return false;
+    }
+    auto& sec = doc->Sections();
+    return (sec.find(elementName) != sec.end());
+}
+
+readerAttribute iniReaderElement::getFirstAttribute()
+{
+    if (!isValid()) {
+        return readerAttribute();
+    }
+    auto& att = doc->getAttribute(currentSection, 0);
     iteratorIndex = 0;
-    if ((!att.first.empty ()) && (!att.second.empty ()))
-    {
-        return readerAttribute (att.first, att.second);
+    if ((!att.first.empty()) && (!att.second.empty())) {
+        return readerAttribute(att.first, att.second);
     }
-    return readerAttribute ();
+    return readerAttribute();
 }
 
-readerAttribute iniReaderElement::getNextAttribute ()
+readerAttribute iniReaderElement::getNextAttribute()
 {
-    if (!isValid ())
-    {
-        return readerAttribute ();
+    if (!isValid()) {
+        return readerAttribute();
     }
 
-    auto &att = doc->getAttribute (currentSection, iteratorIndex + 1);
+    auto& att = doc->getAttribute(currentSection, iteratorIndex + 1);
     ++iteratorIndex;
-    if ((!att.first.empty ()) && (!att.second.empty ()))
-    {
-        return readerAttribute (att.first, att.second);
+    if ((!att.first.empty()) && (!att.second.empty())) {
+        return readerAttribute(att.first, att.second);
     }
-    return readerAttribute ();
+    return readerAttribute();
 }
 
-readerAttribute iniReaderElement::getAttribute (const std::string &attributeName) const
+readerAttribute iniReaderElement::getAttribute(const std::string& attributeName) const
 {
-    if (!isValid ())
-    {
-        return readerAttribute ();
+    if (!isValid()) {
+        return readerAttribute();
     }
-    auto &val = doc->Get (currentSection, attributeName);
-    if (!val.empty ())
-    {
-        return readerAttribute (attributeName, val);
+    auto& val = doc->Get(currentSection, attributeName);
+    if (!val.empty()) {
+        return readerAttribute(attributeName, val);
     }
-    return readerAttribute ();
+    return readerAttribute();
 }
 
-std::string iniReaderElement::getAttributeText (const std::string &attributeName) const
+std::string iniReaderElement::getAttributeText(const std::string& attributeName) const
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return nullStr;
     }
-    return doc->Get (currentSection, attributeName);
+    return doc->Get(currentSection, attributeName);
 }
 
-double iniReaderElement::getAttributeValue (const std::string &attributeName) const
+double iniReaderElement::getAttributeValue(const std::string& attributeName) const
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return readerNullVal;
     }
-    return gmlc::utilities::numeric_conversionComplete (doc->Get (currentSection, attributeName), readerNullVal);
+    return gmlc::utilities::numeric_conversionComplete(doc->Get(currentSection, attributeName),
+                                                       readerNullVal);
 }
 
-std::shared_ptr<readerElement> iniReaderElement::firstChild () const
+std::shared_ptr<readerElement> iniReaderElement::firstChild() const
 {
-    auto newElement = clone ();
-    newElement->moveToFirstChild ();
+    auto newElement = clone();
+    newElement->moveToFirstChild();
     return newElement;
 }
 
-std::shared_ptr<readerElement> iniReaderElement::firstChild (const std::string &childName) const
+std::shared_ptr<readerElement> iniReaderElement::firstChild(const std::string& childName) const
 {
-    auto newElement = clone ();
-    newElement->moveToFirstChild (childName);
+    auto newElement = clone();
+    newElement->moveToFirstChild(childName);
     return newElement;
 }
 
-void iniReaderElement::moveToFirstChild ()
+void iniReaderElement::moveToFirstChild()
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return;
     }
     sectionIndex = 0;
     iteratorIndex = 0;
     // ini files only have one level of hierarchy
-    if (!currentSection.empty ())
-    {
+    if (!currentSection.empty()) {
         currentSection = ';';
         return;
     }
-    auto &sec = doc->Sections ();
-    if (sec.empty ())
-    {
+    auto& sec = doc->Sections();
+    if (sec.empty()) {
         currentSection = ';';
         return;
     }
-    currentSection = *sec.begin ();
+    currentSection = *sec.begin();
 }
 
-void iniReaderElement::moveToFirstChild (const std::string &childName)
+void iniReaderElement::moveToFirstChild(const std::string& childName)
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return;
     }
     sectionIndex = 0;
     iteratorIndex = 0;
     // ini files only have one level of hierarchy
-    if (!currentSection.empty ())
-    {
+    if (!currentSection.empty()) {
         currentSection = ';';
         return;
     }
-    auto &sec = doc->Sections ();
-    if (sec.empty ())
-    {
+    auto& sec = doc->Sections();
+    if (sec.empty()) {
         currentSection = ';';
         return;
     }
-    auto sptr = sec.begin ();
-    while (sptr != sec.end ())
-    {
-        if (sptr->find (childName) == 0)
-        {
+    auto sptr = sec.begin();
+    while (sptr != sec.end()) {
+        if (sptr->find(childName) == 0) {
             currentSection = *sptr;
         }
         ++sectionIndex;
     }
 }
 
-void iniReaderElement::moveToNextSibling ()
+void iniReaderElement::moveToNextSibling()
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return;
     }
-    if (currentSection.empty ())
-    {
+    if (currentSection.empty()) {
         currentSection = ';';
         return;
     }
     ++sectionIndex;
     iteratorIndex = 0;
-    auto &secs = doc->Sections ();
-    if (sectionIndex >= static_cast<int> (secs.size ()))
-    {
+    auto& secs = doc->Sections();
+    if (sectionIndex >= static_cast<int>(secs.size())) {
         currentSection = ';';
         return;
     }
     int ccnt = 0;
 
-    auto csec = secs.begin ();
-    while (ccnt < sectionIndex)
-    {
+    auto csec = secs.begin();
+    while (ccnt < sectionIndex) {
         ++ccnt;
         ++csec;
     }
     currentSection = *csec;
 }
 
-void iniReaderElement::moveToNextSibling (const std::string &siblingName)
+void iniReaderElement::moveToNextSibling(const std::string& siblingName)
 {
-    if (!isValid ())
-    {
+    if (!isValid()) {
         return;
     }
-    moveToNextSibling ();
-    if (!isValid ())
-    {
+    moveToNextSibling();
+    if (!isValid()) {
         return;
     }
-    if (currentSection.find (siblingName) != 0)
-    {
+    if (currentSection.find(siblingName) != 0) {
         currentSection = ';';
         return;
     }
 }
 
-void iniReaderElement::moveToParent ()
+void iniReaderElement::moveToParent()
 {
     currentSection = "";
     sectionIndex = 0;
     iteratorIndex = 0;
 }
 
-std::shared_ptr<readerElement> iniReaderElement::nextSibling () const
+std::shared_ptr<readerElement> iniReaderElement::nextSibling() const
 {
-    auto newElement = clone ();
-    newElement->moveToNextSibling ();
+    auto newElement = clone();
+    newElement->moveToNextSibling();
     return newElement;
 }
 
-std::shared_ptr<readerElement> iniReaderElement::nextSibling (const std::string &siblingName) const
+std::shared_ptr<readerElement> iniReaderElement::nextSibling(const std::string& siblingName) const
 {
-    auto newElement = clone ();
-    newElement->moveToNextSibling (siblingName);
+    auto newElement = clone();
+    newElement->moveToNextSibling(siblingName);
     return newElement;
 }
 
-void iniReaderElement::bookmark () { bookmarks.emplace_back (currentSection, sectionIndex); }
-
-void iniReaderElement::restore ()
+void iniReaderElement::bookmark()
 {
-    if (bookmarks.empty ())
-    {
+    bookmarks.emplace_back(currentSection, sectionIndex);
+}
+
+void iniReaderElement::restore()
+{
+    if (bookmarks.empty()) {
         return;
     }
-    currentSection = bookmarks.back ().first;
-    sectionIndex = bookmarks.back ().second;
-    bookmarks.pop_back ();
+    currentSection = bookmarks.back().first;
+    sectionIndex = bookmarks.back().second;
+    bookmarks.pop_back();
 }

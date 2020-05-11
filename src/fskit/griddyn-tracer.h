@@ -1,4 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
  * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
@@ -9,13 +10,12 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef GRIDDYN_TRACER_H
 #define GRIDDYN_TRACER_H
 
 #include <fskit/tracer.h>
-#define GRIDDYN_TRACER(arg) FSKIT_TRACER (arg)
-
+#define GRIDDYN_TRACER(arg) FSKIT_TRACER(arg)
 
 #endif

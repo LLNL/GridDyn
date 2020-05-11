@@ -2,9 +2,10 @@
 Copyright (C) 2017, Battelle Memorial Institute
 All rights reserved.
 
-This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute;
-the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence
-Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle
+Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for
+Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence
+Livermore National Security, LLC.
 */
 
 /*
@@ -21,28 +22,25 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
 
 #include "zmqSocketDescriptor.h"
 
-namespace zmqlib
+namespace zmqlib {
+zmq::socket_t zmqSocketDescriptor::makeSocket(zmq::context_t& ctx) const
 {
-    zmq::socket_t zmqSocketDescriptor::makeSocket(zmq::context_t &ctx) const
-    {
-        zmq::socket_t sock(ctx, type);
-        modifySocket(sock);
-        return sock;
-    }
+    zmq::socket_t sock(ctx, type);
+    modifySocket(sock);
+    return sock;
+}
 
-    std::unique_ptr<zmq::socket_t> zmqSocketDescriptor::makeSocketPtr(zmq::context_t &ctx) const
-    {
-        auto sock = std::make_unique<zmq::socket_t>(ctx, type);
-        modifySocket(*sock);
-        return sock;
-    }
+std::unique_ptr<zmq::socket_t> zmqSocketDescriptor::makeSocketPtr(zmq::context_t& ctx) const
+{
+    auto sock = std::make_unique<zmq::socket_t>(ctx, type);
+    modifySocket(*sock);
+    return sock;
+}
 
-    void zmqSocketDescriptor::modifySocket(zmq::socket_t &sock) const
-    {
-        for (auto &op : ops)
-        {
-            switch (op.first)
-            {
+void zmqSocketDescriptor::modifySocket(zmq::socket_t& sock) const
+{
+    for (auto& op : ops) {
+        switch (op.first) {
             case socket_ops::bind:
                 sock.bind(op.second);
                 break;
@@ -56,21 +54,19 @@ namespace zmqlib
                 sock.disconnect(op.second);
                 break;
             case socket_ops::subscribe:
-                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
-                {
+                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub)) {
                     sock.setsockopt(ZMQ_SUBSCRIBE, op.second);
                 }
                 break;
             case socket_ops::unsubscribe:
-                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
-                {
+                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub)) {
                     sock.setsockopt(ZMQ_UNSUBSCRIBE, op.second);
                 }
                 break;
             default:
                 break;
-            }
         }
     }
+}
 
-} //namespace zmqlib
+}  // namespace zmqlib

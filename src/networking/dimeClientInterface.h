@@ -18,39 +18,36 @@
 #include <memory>
 #include <string>
 
-class initFailure : public std::exception
-{
+class initFailure: public std::exception {
   public:
-    initFailure (){};
+    initFailure(){};
 };
 
-class sendFailure : public std::exception
-{
+class sendFailure: public std::exception {
   public:
-    sendFailure (){};
+    sendFailure(){};
 };
 
-class dimeClientInterface
-{
+class dimeClientInterface {
   private:
     std::string name;
     std::string address;
 
   public:
-    dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress = "");
+    dimeClientInterface(const std::string& dimeName, const std::string& dimeAddress = "");
 
-    ~dimeClientInterface ();
+    ~dimeClientInterface();
     /** initialize the connection*/
-    void init ();
+    void init();
     /** close the connection*/
-    void close ();
+    void close();
     /** sync with the server*/
-    void sync ();
+    void sync();
     /** send a variable to server*/
-    void send_var (const std::string &varName, double val, const std::string &recipient = "");
-    void broadcast (const std::string &varName, double val);
+    void send_var(const std::string& varName, double val, const std::string& recipient = "");
+    void broadcast(const std::string& varName, double val);
 
-    void get_devices ();
+    void get_devices();
 
   private:
     std::unique_ptr<zmq::socket_t> socket;

@@ -10,8 +10,7 @@
 
 # project name
 
-set(
-    utilities_sources
+set(utilities_sources
     gridRandom.cpp
     saturation.cpp
     ThreePhaseFunctions.cpp
@@ -20,14 +19,13 @@ set(
     zipUtilities.cpp
     matrixCreation.cpp
     logger.cpp
-	loggerCore.cpp
+    loggerCore.cpp
     matrixDataSparse.cpp
     OperatingBoundary.cpp
-	GlobalWorkQueue.cpp
+    GlobalWorkQueue.cpp
 )
 
-set(
-    utilities_headers
+set(utilities_headers
     dataDictionary.hpp
     ThreePhaseFunctions.h
     gridRandom.h
@@ -53,18 +51,20 @@ set(
     matrixCreation.h
     indexTypes.hpp
     logger.h
-	loggerCore.hpp
+    loggerCore.hpp
     OperatingBoundary.h
-	GlobalWorkQueue.hpp
+    GlobalWorkQueue.hpp
 )
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
 set(SKIP_INSTALL_LIBRARIES ON)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJECT_BINARY_DIR}/Zlib EXCLUDE_FROM_ALL)
+add_subdirectory(
+    ${PROJECT_SOURCE_DIR}/ThirdParty/Zlib/zlib-1.2.6 ${PROJECT_BINARY_DIR}/Zlib EXCLUDE_FROM_ALL
+)
 
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/Minizip ${PROJECT_BINARY_DIR}/Minizip EXCLUDE_FROM_ALL)
-
+add_subdirectory(
+    ${PROJECT_SOURCE_DIR}/ThirdParty/Minizip ${PROJECT_BINARY_DIR}/Minizip EXCLUDE_FROM_ALL
+)
 
 target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib gmlc_utilities griddyn_base)
 
@@ -76,4 +76,3 @@ endif(ENABLE_64_BIT_INDEXING)
 if(UNSIGNED_INDEXING)
     target_compile_definitions(utilities PUBLIC -DUNSIGNED_INDEXING)
 endif(UNSIGNED_INDEXING)
-

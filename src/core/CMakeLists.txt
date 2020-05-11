@@ -8,8 +8,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(
-    coreObject_headers
+set(coreObject_headers
     coreDefinitions.hpp
     coreExceptions.h
     coreObject.h
@@ -27,8 +26,7 @@ set(
     propertyBuffer.h
 )
 
-set(
-    coreObject_sources
+set(coreObject_sources
     coreExceptions.cpp
     coreObject.cpp
     coreObjectList.cpp
@@ -48,5 +46,5 @@ target_include_directories(
     coreObjects
     # target_link_libraries(this, extra_includes::variant) when available
     PUBLIC # TODO stop leaking the variant include, make this private
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
-
+           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+)

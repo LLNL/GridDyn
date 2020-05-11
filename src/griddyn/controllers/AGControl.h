@@ -16,25 +16,21 @@
 #include "core/coreOwningPtr.hpp"
 #include "griddyn/gridSubModel.h"
 
-namespace griddyn
-{
+namespace griddyn {
 class Area;
 class schedulerReg;
 class Generator;
 class battery;
-namespace blocks
-{
-class pidBlock;
-class delayBlock;
-class deadbandBlock;
+namespace blocks {
+    class pidBlock;
+    class delayBlock;
+    class deadbandBlock;
 }  // namespace blocks
 
 class Communicator;
-class AGControl : public gridSubModel
-{
+class AGControl: public gridSubModel {
   public:
-    enum agcType
-    {
+    enum agcType {
         basicAGC,
         batteryAGC,
         battDR,
@@ -62,38 +58,41 @@ class AGControl : public gridSubModel
 
     count_t schedCount = 0;
 
-    std::vector<schedulerReg *> schedList;
+    std::vector<schedulerReg*> schedList;
     std::vector<double> upRat;
     std::vector<double> downRat;
     std::shared_ptr<Communicator> comms;
 
   public:
-    AGControl (const std::string &objName = "AGC_#");
-    virtual coreObject *clone (coreObject *obj = nullptr) const override;
-    virtual ~AGControl ();
+    AGControl(const std::string& objName = "AGC_#");
+    virtual coreObject* clone(coreObject* obj = nullptr) const override;
+    virtual ~AGControl();
 
+    virtual void dynObjectInitializeB(const IOdata& inputs,
+                                      const IOdata& desiredOutput,
+                                      IOdata& fieldSet) override;
+
+    virtual void updateA(coreTime time) override;
+
+    virtual void timestep(coreTime time, const IOdata& inputs, const solverMode& sMode) override;
+
+    virtual double getOutput(const IOdata& inputs,
+                             const stateData& sD,
+                             const solverMode& sMode,
+                             index_t num = 0) const override;
+
+    virtual double getOutput(index_t /*num*/ = 0) const override;
+    virtual void add(coreObject* obj) override;
+    virtual void add(schedulerReg* sched);
+    virtual void remove(coreObject* obj) override;
+    virtual void set(const std::string& param, const std::string& val) override;
     virtual void
-    dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
+        set(const std::string& param, double val, units::unit unitType = units::defunit) override;
 
-    virtual void updateA (coreTime time) override;
+    double getACE() { return ACE; }
+    double getfACE() { return fACE; }
 
-    virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
-
-    virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
-
-    virtual double getOutput (index_t /*num*/ = 0) const override;
-    virtual void add (coreObject *obj) override;
-    virtual void add (schedulerReg *sched);
-    virtual void remove (coreObject *obj) override;
-    virtual void set (const std::string &param, const std::string &val) override;
-    virtual void
-    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
-
-    double getACE () { return ACE; }
-    double getfACE () { return fACE; }
-
-    virtual void regChange ();
+    virtual void regChange();
 };
 
 /*
@@ -128,7 +127,8 @@ public:
         virtual void addGen(schedulerReg *sched);
         virtual void removeSched(schedulerReg *sched);
         virtual void set (const std::string &param, std::string val);
-        virtual void set (const std::string &param, double val, units::unit unitType = units::defunit);
+        virtual void set (const std::string &param, double val, units::unit unitType =
+units::defunit);
 
         virtual void regChange();
 protected:

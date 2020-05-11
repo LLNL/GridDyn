@@ -15,56 +15,55 @@
 
 #include <memory>
 
-namespace griddyn
-{
+namespace griddyn {
 class gridDynSimulation;
 class SolverInterface;
 
-/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic simulations*/
-class dynamicInitialConditionRecovery
-{
+/** @brief the purpose of this class is to try to recover a valid initial condition for dynamic
+ * simulations*/
+class dynamicInitialConditionRecovery {
   public:
     /** @brief constructor
     @param[in] gds the gridDynSimulation object to work from
     @param[in] sd the SolverInterface object to work from
     */
-    dynamicInitialConditionRecovery (gridDynSimulation *gds, std::shared_ptr<SolverInterface> sd);
+    dynamicInitialConditionRecovery(gridDynSimulation* gds, std::shared_ptr<SolverInterface> sd);
 
     /** @brief virtual destructor*/
-    virtual ~dynamicInitialConditionRecovery ();
+    virtual ~dynamicInitialConditionRecovery();
 
     /** @brief attempt the various fixes in order
     @return recovery_return_codes::more_options if attemptFix can be called again without reset
-    recovery_return_codes::out_of_options if no more fix attemps are available
+    recovery_return_codes::out_of_options if no more fix attempts are available
     */
-    virtual int attemptFix ();
+    virtual int attemptFix();
 
     /** @brief reset the fix counter so it can try again*/
-    void reset ();
+    void reset();
     /** @brief update recovery mechanism to use a different solver
     @param[in] sd the new solver Data object to use
     */
-    void updateInfo (std::shared_ptr<SolverInterface> sd);
+    void updateInfo(std::shared_ptr<SolverInterface> sd);
 
     /** @brief return the number of attempts taken so far
     @return the number of attempts
     */
-    int attempts () const;
+    int attempts() const;
 
-    bool hasMoreFixes () const;
+    bool hasMoreFixes() const;
 
   protected:
     int attempt_number = 0;  //!< the current attempt number
-    gridDynSimulation *sim;  //!< the gridDynsimulation to work from
+    gridDynSimulation* sim;  //!< the gridDynsimulation to work from
     std::shared_ptr<SolverInterface> solver;  //!< the SolverInterface to use
 
-    int dynamicFix1 ();
-    int dynamicFix2 ();
-    int dynamicFix3 ();
-    int dynamicFix4 ();
-    int dynamicFix5 ();
+    int dynamicFix1();
+    int dynamicFix2();
+    int dynamicFix3();
+    int dynamicFix4();
+    int dynamicFix5();
 
-    int lowVoltageCheck ();
+    int lowVoltageCheck();
 };
 
 }  // namespace griddyn

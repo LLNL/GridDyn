@@ -13,13 +13,12 @@
 #ifndef DIME_INTERFACE_HEADER_
 #define DIME_INTERFACE_HEADER_
 
-namespace griddyn
-{
+namespace griddyn {
 class readerInfo;
 
-void loadDimeLibrary ();
+void loadDimeLibrary();
 
-void loadDimeReaderInfoDefinitions (readerInfo &ri);
+void loadDimeReaderInfoDefinitions(readerInfo& ri);
 }  // namespace griddyn
 
 #endif

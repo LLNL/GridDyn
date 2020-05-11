@@ -4,12 +4,12 @@
       <type>infinite</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
+    <name>bus2</name>
      <load name="load3" type="motor3">
        <a>0.7</a>
-	   <p>0.7</p>
+       <p>0.7</p>
        <event>
          <field>a</field>
          <value>0.9,0.7</value>
@@ -29,5 +29,5 @@
     <recorder field="auto,bus2:loadreactive,bus2::load3:slip" period="0.01">
    <file>motorChange.dat</file>
    </recorder>
-   
+
 </griddyn>

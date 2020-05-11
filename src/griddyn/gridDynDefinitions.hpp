@@ -13,11 +13,10 @@
 #pragma once
 #include "../core/coreDefinitions.hpp"
 
-namespace griddyn
-{
-constexpr double kPI (3.1415926535897931);  // defining a Pi constant
-constexpr double kWS (60.0 * 2.0 * kPI);  // radians per second at 60 Hz
-constexpr double kWS50 (50.0 * 2.0 * kPI);  // radians per second at 50 Hz
+namespace griddyn {
+constexpr double kPI(3.1415926535897931);  // defining a Pi constant
+constexpr double kWS(60.0 * 2.0 * kPI);  // radians per second at 60 Hz
+constexpr double kWS50(50.0 * 2.0 * kPI);  // radians per second at 50 Hz
 
 // A few ERROR codes
 #define NO_SLACK_BUS_FOUND (-2)
@@ -65,10 +64,9 @@ constexpr double kWS50 (50.0 * 2.0 * kPI);  // radians per second at 50 Hz
 #define BREAKER1_RECLOSE (88)
 #define BREAKER2_RECLOSE (89)
 
-constexpr double kMin_Res (1e-7);
+constexpr double kMin_Res(1e-7);
 /** @brief enumeration of object changes that can occur throughout the simulation */
-enum class change_code
-{
+enum class change_code {
     not_triggered = -2,  //!< no potential change was triggered
     execution_failure = -1,  //!< the execution has failed
     no_change = 0,  //!< there was no change
@@ -79,44 +77,42 @@ enum class change_code
     state_count_change = 5,  //!< a change in the number of states occurred
 };
 
-/* May at some point in the future convert all the set/get functions to use this in the function prototypes
-to facilitate transfer to a different type*/
-using parameterName = const std::string &;
+/* May at some point in the future convert all the set/get functions to use this in the function
+prototypes to facilitate transfer to a different type*/
+using parameterName = const std::string&;
 
-/* may at some point use this type alias to convert all object parameters to this type and then move them to a new
-class to enable additional functionality*/
+/* may at some point use this type alias to convert all object parameters to this type and then move
+them to a new class to enable additional functionality*/
 using model_parameter = double;
 
 /* define the basic vector types*/
 }  // namespace griddyn
 #include <boost/version.hpp>
 #if BOOST_VERSION / 100 % 1000 >= 58
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#include <boost/container/small_vector.hpp>
-#pragma GCC diagnostic pop
-#else
-#include <boost/container/small_vector.hpp>
-#endif
+#    ifdef __GNUC__
+#        pragma GCC diagnostic push
+#        pragma GCC diagnostic ignored "-Wshadow"
+#        include <boost/container/small_vector.hpp>
+#        pragma GCC diagnostic pop
+#    else
+#        include <boost/container/small_vector.hpp>
+#    endif
 
-namespace griddyn
-{
+namespace griddyn {
 using IOdata = boost::container::small_vector<double, 4>;
 using IOlocs = boost::container::small_vector<index_t, 4>;
 
-template <typename X>
+template<typename X>
 using objVector = std::vector<X>;
 // template<typename X>
 // using objVector = boost::container::small_vector<X,4>;
 
 #else
-namespace griddyn
-{
+namespace griddyn {
 using IOdata = std::vector<double>;
 using IOlocs = std::vector<index_t>;
 
-template <typename X>
+template<typename X>
 using objVector = std::vector<X>;
 
 #endif

@@ -1,4 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
  * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
@@ -9,7 +10,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 /*
  * GhostSwingBusManager.h
@@ -21,11 +22,9 @@
 #ifndef GHOSTSWINGBUS_H_
 #define GHOSTSWINGBUS_H_
 
-class GhostSwingBus
-{
-
-private:
-public:
+class GhostSwingBus {
+  private:
+  public:
 };
 
 #endif /* GHOSTSWINGBUS_H_ */

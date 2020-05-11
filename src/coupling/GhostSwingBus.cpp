@@ -1,6 +1,7 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,7 +10,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 /*
  * GhostSwingBusManager.cpp
@@ -18,14 +19,10 @@
  *      Author: banks12
  */
 
-#include <stddef.h>
-#include <iostream>
 #include "GhostSwingBus.h"
+
+#include <iostream>
+#include <stddef.h>
 using namespace std;
 
-GhostSwingBus::GhostSwingBus ()
-{
-
-}
-
-
+GhostSwingBus::GhostSwingBus() {}

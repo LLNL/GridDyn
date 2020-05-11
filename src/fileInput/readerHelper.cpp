@@ -11,6 +11,7 @@
  */
 
 #include "readerHelper.h"
+
 #include "fileInput.h"
 
 #include <boost/filesystem.hpp>
@@ -18,25 +19,21 @@
 // library for printf debug statements
 
 #include <cmath>
-namespace griddyn
-{
+namespace griddyn {
 using namespace readerConfig;
 
-void paramStringProcess (gridParameter &param, readerInfo &ri)
+void paramStringProcess(gridParameter& param, readerInfo& ri)
 {
-    if (!param.stringType)
-    {
+    if (!param.stringType) {
         return;
     }
-    double val = interpretString (param.strVal, ri);
-    if (!(std::isnan (val)))
-    {
+    double val = interpretString(param.strVal, ri);
+    if (!(std::isnan(val))) {
         param.value = val;
         param.stringType = false;
-    }
-    else  // can't be interpreted as a number so do a last check for string redefinitions
+    } else  // can't be interpreted as a number so do a last check for string redefinitions
     {
-        param.strVal = ri.checkDefines (param.strVal);
+        param.strVal = ri.checkDefines(param.strVal);
     }
 }
 
