@@ -53,15 +53,15 @@ coreObject* gridDynOptimization::clone(coreObject* obj) const
 
 void gridDynOptimization::setupOptOffsets(const optimMode& oMode, int setupMode)
 {
-    if (setupMode == 0)  {// no distinction between Voltage, angle, and others
+    if (setupMode == 0) {  // no distinction between Voltage, angle, and others
         areaOpt->setOffset(1, 0, oMode);
         return;
     }
     optimOffsets baseOffset;
-    if (setupMode == 1)  {// use all the distinct categories
+    if (setupMode == 1) {  // use all the distinct categories
         baseOffset.setOffset(1);
         baseOffset.constraintOffset = 0;
-    } else if (setupMode == 2)  {// discriminate continuous and discrete objective variables
+    } else if (setupMode == 2) {  // discriminate continuous and discrete objective variables
         baseOffset.constraintOffset = 0;
         baseOffset.contOffset = 1;
         baseOffset.intOffset = 0;
@@ -86,8 +86,7 @@ void gridDynOptimization::set(const std::string& param, const std::string& val)
             defaultOptMode = val;
             ocf->setDefaultType(val);
         }
-    }
-    else if (param == "optimization_mode") {
+    } else if (param == "optimization_mode") {
         /*default_solution,
     dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
     steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
@@ -134,8 +133,7 @@ void gridDynOptimization::set(const std::string& param, double val, units::unit 
 {
     if (param == "optimtol") {
         tols.rtol = val;
-    }
-    else {
+    } else {
         // out = setFlags (param, val);
         try {
             gridDynSimulation::set(param, val, unitType);

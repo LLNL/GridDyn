@@ -323,8 +323,7 @@ void loadRAW(coreObject* parentObject, const std::string& fileName, const basicR
                         } else {
                             moreData = false;
                         }
-                    }
-                    else {
+                    } else {
                         temp1 = txlines[4];
                         trimString(temp1);
                         if (temp1[0] == '0') {
