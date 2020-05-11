@@ -8,17 +8,9 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(
-    fmiShared_headers
-    fmiRunner.h
-    fmiCoordinator.h
-    fmiCollector.h
-    fmiEvent.h
-    loadFMIExportObjects.h
-)
+set(fmiShared_headers fmiRunner.h fmiCoordinator.h fmiCollector.h fmiEvent.h loadFMIExportObjects.h)
 
-set(
-    fmiShared_sources
+set(fmiShared_sources
     fmiGridDynExport.cpp
     fmiRunner.cpp
     fmiCoordinator.cpp
@@ -27,8 +19,7 @@ set(
     loadFMIExportObjects.cpp
 )
 
-set(
-    fmiBuilder_headers
+set(fmiBuilder_headers
     fmiCoordinator.h
     fmiCollector.h
     fmiEvent.h
@@ -37,8 +28,7 @@ set(
     fmiRunner.h
 )
 
-set(
-    fmiBuilder_sources
+set(fmiBuilder_sources
     fmiCoordinator.cpp
     fmiCollector.cpp
     fmiEvent.cpp
@@ -48,20 +38,10 @@ set(
     fmiGridDynExport.cpp
 )
 
-add_library(
-    fmiGridDynSharedLib
-    SHARED
-    ${fmiShared_sources}
-    ${fmiShared_headers}
-)
+add_library(fmiGridDynSharedLib SHARED ${fmiShared_sources} ${fmiShared_headers})
 
 set_target_properties(
-    fmiGridDynSharedLib
-    PROPERTIES
-        CXX_VISIBILITY_PRESET
-        hidden
-        C_VISIBILITY_PRESET
-        hidden
+    fmiGridDynSharedLib PROPERTIES CXX_VISIBILITY_PRESET hidden C_VISIBILITY_PRESET hidden
 )
 
 set_target_properties(fmiGridDynSharedLib PROPERTIES FOLDER fmi)
@@ -77,71 +57,54 @@ target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 
 install(
-    TARGETS fmiGridDynSharedLib
-    ${GRIDDYN_EXPORT_COMMAND}
+    TARGETS fmiGridDynSharedLib ${GRIDDYN_EXPORT_COMMAND}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-# Todo when minimum CMake version becomes 3.6: re-add EXCLUDE_FROM_ALL to these two install FILES commands for fmiGridDynSharedLib
-install(
-    FILES $<TARGET_FILE:fmiGridDynSharedLib>
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT
-    RUNTIME
+# Todo when minimum CMake version becomes 3.6: re-add EXCLUDE_FROM_ALL to these two install FILES
+# commands for fmiGridDynSharedLib
+install(FILES $<TARGET_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT RUNTIME
 )
-install(
-    FILES $<TARGET_LINKER_FILE:fmiGridDynSharedLib>
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
+install(FILES $<TARGET_LINKER_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT libraries
 )
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-        install(
-            TARGETS fmiGridDynSharedLib
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/win64/ COMPONENT
-            RUNTIME
+        install(TARGETS fmiGridDynSharedLib RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/win64/
+                                                    COMPONENT RUNTIME
         )
         set(FMILIBRARY_TYPE win64)
     else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-        install(
-            TARGETS fmiGridDynSharedLib
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/win32/ COMPONENT
-            RUNTIME
+        install(TARGETS fmiGridDynSharedLib RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/win32/
+                                                    COMPONENT RUNTIME
         )
         set(FMILIBRARY_TYPE win32)
     endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 else(WIN32)
     if(UNIX)
         if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-            install(
-                TARGETS fmiGridDynSharedLib
-                LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}/linux64/ COMPONENT
-                RUNTIME
+            install(TARGETS fmiGridDynSharedLib LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}/linux64/
+                                                        COMPONENT RUNTIME
             )
             set(FMILIBRARY_TYPE linux64)
         else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-            install(
-                TARGETS fmiGridDynSharedLib
-                LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}/linux32/ COMPONENT
-                RUNTIME
+            install(TARGETS fmiGridDynSharedLib LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}/linux32/
+                                                        COMPONENT RUNTIME
             )
             set(FMILIBRARY_TYPE linux32)
         endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
     else(UNIX)
         if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-            install(
-                TARGETS fmiGridDynSharedLib
-                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/darwin64/ COMPONENT
-                RUNTIME
+            install(TARGETS fmiGridDynSharedLib
+                    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/darwin64/ COMPONENT RUNTIME
             )
             set(FMILIBRARY_TYPE darwin64)
         else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-            install(
-                TARGETS fmiGridDynSharedLib
-                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/darwin32/ COMPONENT
-                RUNTIME
+            install(TARGETS fmiGridDynSharedLib
+                    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/darwin32/ COMPONENT RUNTIME
             )
             set(FMILIBRARY_TYPE darwin32)
         endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
@@ -149,22 +112,13 @@ else(WIN32)
 endif(WIN32)
 
 target_compile_definitions(
-    fmiBuilder PRIVATE
-    -DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}"
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}"
 )
-target_compile_definitions(
-    fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}"
-)
+target_compile_definitions(fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")
 
-list(
-    APPEND
-        optional_component_test_files
-        ${CMAKE_CURRENT_SOURCE_DIR}/testFMIExport.cpp
-)
+list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/testFMIExport.cpp)
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-install(
-    FILES ${fmiBuilder_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fmi_export
-    COMPONENT headers
+install(FILES ${fmiBuilder_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fmi_export
+        COMPONENT headers
 )

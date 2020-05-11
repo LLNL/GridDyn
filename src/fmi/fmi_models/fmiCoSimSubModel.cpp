@@ -11,67 +11,66 @@
  */
 
 #include "fmiCoSimSubModel.h"
+
 #include "../fmi_import/fmiLibraryManager.h"
 #include "../fmi_import/fmiObjects.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "outputEstimator.h"
-#include "utilities/matrixData.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "gmlc/utilities/vectorOps.hpp"
-
+#include "outputEstimator.h"
+#include "utilities/matrixData.hpp"
 #include <algorithm>
 
-namespace griddyn
-{
-namespace fmi
-{
-static const bool unimplemented = false;
+namespace griddyn {
+namespace fmi {
+    static const bool unimplemented = false;
 
-fmiCoSimSubModel::fmiCoSimSubModel (const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi)
-    : gridSubModel (newName), cs (std::move (fmi))
-{
-}
-
-fmiCoSimSubModel::fmiCoSimSubModel (std::shared_ptr<fmi2CoSimObject> fmi) : cs (std::move (fmi)) {}
-
-fmiCoSimSubModel::~fmiCoSimSubModel () = default;
-
-coreObject *fmiCoSimSubModel::clone (coreObject *obj) const
-{
-    auto *gco = cloneBase<fmiCoSimSubModel, gridSubModel> (this, obj);
-    if (gco == nullptr)
+    fmiCoSimSubModel::fmiCoSimSubModel(const std::string& newName,
+                                       std::shared_ptr<fmi2CoSimObject> fmi):
+        gridSubModel(newName),
+        cs(std::move(fmi))
     {
-        return obj;
     }
 
-    return gco;
-}
+    fmiCoSimSubModel::fmiCoSimSubModel(std::shared_ptr<fmi2CoSimObject> fmi): cs(std::move(fmi)) {}
 
-bool fmiCoSimSubModel::isLoaded () const { return static_cast<bool> (cs); }
+    fmiCoSimSubModel::~fmiCoSimSubModel() = default;
 
-void fmiCoSimSubModel::dynObjectInitializeA (coreTime time, std::uint32_t flags)
-{
-    if (CHECK_CONTROLFLAG (force_constant_pflow_initialization, flags))
+    coreObject* fmiCoSimSubModel::clone(coreObject* obj) const
     {
-        opFlags.set (pflow_init_required);
+        auto* gco = cloneBase<fmiCoSimSubModel, gridSubModel>(this, obj);
+        if (gco == nullptr) {
+            return obj;
+        }
+
+        return gco;
     }
-    prevTime = time;
-}
 
-void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
-{
-    if (opFlags[pflow_init_required])
+    bool fmiCoSimSubModel::isLoaded() const { return static_cast<bool>(cs); }
+
+    void fmiCoSimSubModel::dynObjectInitializeA(coreTime time, std::uint32_t flags)
     {
-        if (opFlags[pFlow_initialized])
-        {
-            /*
+        if (CHECK_CONTROLFLAG(force_constant_pflow_initialization, flags)) {
+            opFlags.set(pflow_init_required);
+        }
+        prevTime = time;
+    }
+
+    void fmiCoSimSubModel::dynObjectInitializeB(const IOdata& inputs,
+                                                const IOdata& desiredOutput,
+                                                IOdata& fieldSet)
+    {
+        if (opFlags[pflow_init_required]) {
+            if (opFlags[pFlow_initialized]) {
+                /*
             cs->getStates(m_state.data());
             cs->setTime(prevTime - 0.01);
 
             if (opFlags[use_output_estimator])
             {
-            //  if we require the use of output estimators flag that to the simulation and load the information
+            //  if we require the use of output estimators flag that to the simulation and load the
+            information
             // for the estimator
             alert(this, SINGLE_STEP_REQUIRED);
             double val;
@@ -87,23 +86,20 @@ void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata 
 
             }
             */
-            opFlags.set (dyn_initialized);
-        }
-        else  // in pflow mode
-        {
-            cs->setMode (fmuMode::initializationMode);
+                opFlags.set(dyn_initialized);
+            } else  // in pflow mode
+            {
+                cs->setMode(fmuMode::initializationMode);
 
-            cs->setInputs (inputs.data ());
-            cs->setMode (fmuMode::continuousTimeMode);
-            estimators.resize (m_outputSize);
-            // probeFMU();
-            opFlags.set (pFlow_initialized);
-        }
-    }
-    else
-    {
-        assert (unimplemented);
-        /*
+                cs->setInputs(inputs.data());
+                cs->setMode(fmuMode::continuousTimeMode);
+                estimators.resize(m_outputSize);
+                // probeFMU();
+                opFlags.set(pFlow_initialized);
+            }
+        } else {
+            assert(unimplemented);
+            /*
         cs->setMode (fmuMode::initializationMode);
 
         cs->setInputs (inputs.data ());
@@ -114,230 +110,203 @@ void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata 
         probeFMU ();  // probe the fmu
         if (opFlags[use_output_estimator])
         {
-            // if we require the use of output estimators flag that to the simulation and load the information
+            // if we require the use of output estimators flag that to the simulation and load the
+        information
             // for the estimator
             alert (this, SINGLE_STEP_REQUIRED);
             loadOutputJac ();
         }
         cs->setTime (prevTime - 0.01);
         */
+        }
     }
-}
 
-static const std::string paramString ("params");
-static const std::string inputString ("inputs");
+    static const std::string paramString("params");
+    static const std::string inputString("inputs");
 
-void fmiCoSimSubModel::getParameterStrings (stringVec &pstr, paramStringType pstype) const
-{
-    int strpcnt = 0;
-    auto info = cs->fmuInformation ();
-    auto vcnt = info->getCounts ("variables");
-    switch (pstype)
+    void fmiCoSimSubModel::getParameterStrings(stringVec& pstr, paramStringType pstype) const
     {
-    case paramStringType::all:
-        pstr.reserve (pstr.size () + info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
+        int strpcnt = 0;
+        auto info = cs->fmuInformation();
+        auto vcnt = info->getCounts("variables");
+        switch (pstype) {
+            case paramStringType::all:
+                pstr.reserve(pstr.size() + info->getCounts(paramString) +
+                             info->getCounts(inputString) - m_inputSize);
 
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (info->getVariableInfo (kk).type == fmi_variable_type_t::string)
-            {
-                ++strpcnt;
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (info->getVariableInfo(kk).type == fmi_variable_type_t::string) {
+                        ++strpcnt;
+                    } else if (checkType(info->getVariableInfo(kk),
+                                         fmi_variable_type_t::numeric,
+                                         fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+
+                gridSubModel::getParameterStrings(pstr, paramStringType::numeric);
+                pstr.reserve(pstr.size() + strpcnt + 1);
+                pstr.push_back("#");
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::string,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                gridSubModel::getParameterStrings(pstr, paramStringType::str);
+                break;
+            case paramStringType::localnum:
+                pstr.reserve(info->getCounts(paramString) + info->getCounts(inputString) -
+                             m_inputSize);
+                pstr.resize(0);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::numeric,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                break;
+            case paramStringType::localstr:
+                pstr.reserve(info->getCounts(paramString) + info->getCounts(inputString) -
+                             m_inputSize);
+                pstr.resize(0);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::string,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                break;
+            case paramStringType::localflags:
+                pstr.reserve(info->getCounts(paramString) + info->getCounts(inputString) -
+                             m_inputSize);
+                pstr.resize(0);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::boolean,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                break;
+            case paramStringType::numeric:
+                pstr.reserve(pstr.size() + info->getCounts(paramString) +
+                             info->getCounts(inputString) - m_inputSize);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::numeric,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                gridSubModel::getParameterStrings(pstr, paramStringType::numeric);
+                break;
+            case paramStringType::str:
+                pstr.reserve(pstr.size() + info->getCounts(paramString) +
+                             info->getCounts(inputString) - m_inputSize);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::string,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                gridSubModel::getParameterStrings(pstr, paramStringType::str);
+                break;
+            case paramStringType::flags:
+                pstr.reserve(pstr.size() + info->getCounts(paramString) +
+                             info->getCounts(inputString) - m_inputSize);
+                for (int kk = 0; kk < vcnt; ++kk) {
+                    if (checkType(info->getVariableInfo(kk),
+                                  fmi_variable_type_t::boolean,
+                                  fmi_causality_type_t::parameter)) {
+                        pstr.push_back(info->getVariableInfo(kk).name);
+                    }
+                }
+                gridSubModel::getParameterStrings(pstr, paramStringType::flags);
+                break;
+        }
+    }
+
+    stringVec fmiCoSimSubModel::getOutputNames() const { return cs->getOutputNames(); }
+
+    stringVec fmiCoSimSubModel::getInputNames() const { return cs->getInputNames(); }
+
+    void fmiCoSimSubModel::set(const std::string& param, const std::string& val)
+    {
+        using namespace gmlc::utilities;
+
+        if ((param == "fmu") || (param == "file")) {
+            if (!(cs)) {
+                cs = fmiLibraryManager::instance().createCoSimulationObject(val, getName());
+            } else {
+                // return INVALID_PARAMETER_VALUE;
+                return;
             }
-            else if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::numeric,
-                                fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
+        } else if (param == "outputs") {
+            auto ssep = stringOps::splitline(val);
+            stringOps::trim(ssep);
+            cs->setOutputVariables(ssep);
+            m_outputSize = cs->outputSize();
+        } else if (param == inputString) {
+            auto ssep = stringOps::splitline(val);
+            stringOps::trim(ssep);
+            cs->setInputVariables(ssep);
+            m_inputSize = cs->inputSize();
+            //    updateDependencyInfo();
+        } else {
+            bool isparam = cs->isParameter(param, fmi_variable_type_t::string);
+            if (isparam) {
+                makeSettableState();
+                cs->set(param, val);
+                resetState();
+            } else {
+                gridSubModel::set(param, val);
             }
         }
+    }
+    static const std::string localIntegrationtimeString("localintegrationtime");
+    void fmiCoSimSubModel::set(const std::string& param, double val, units::unit unitType)
+    {
+        if ((param == "timestep") || (param == localIntegrationtimeString)) {
+            localIntegrationTime = val;
+        } else {
+            bool isparam = cs->isParameter(param, fmi_variable_type_t::numeric);
+            if (isparam) {
+                makeSettableState();
+                cs->set(param, val);
+                resetState();
+            } else {
+                gridSubModel::set(param, val);
+            }
+        }
+    }
 
-        gridSubModel::getParameterStrings (pstr, paramStringType::numeric);
-        pstr.reserve (pstr.size () + strpcnt + 1);
-        pstr.push_back ("#");
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::string,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
+    double fmiCoSimSubModel::get(const std::string& param, units::unit unitType) const
+    {
+        if (param == localIntegrationtimeString) {
+            return localIntegrationTime;
         }
-        gridSubModel::getParameterStrings (pstr, paramStringType::str);
-        break;
-    case paramStringType::localnum:
-        pstr.reserve (info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        pstr.resize (0);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::numeric,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
+        if (cs->isVariable(param, fmi_variable_type_t::numeric)) {
+            return cs->get<double>(param);
         }
-        break;
-    case paramStringType::localstr:
-        pstr.reserve (info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        pstr.resize (0);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::string,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
-        }
-        break;
-    case paramStringType::localflags:
-        pstr.reserve (info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        pstr.resize (0);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::boolean,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
-        }
-        break;
-    case paramStringType::numeric:
-        pstr.reserve (pstr.size () + info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::numeric,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
-        }
-        gridSubModel::getParameterStrings (pstr, paramStringType::numeric);
-        break;
-    case paramStringType::str:
-        pstr.reserve (pstr.size () + info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::string,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
-        }
-        gridSubModel::getParameterStrings (pstr, paramStringType::str);
-        break;
-    case paramStringType::flags:
-        pstr.reserve (pstr.size () + info->getCounts (paramString) + info->getCounts (inputString) - m_inputSize);
-        for (int kk = 0; kk < vcnt; ++kk)
-        {
-            if (checkType (info->getVariableInfo (kk), fmi_variable_type_t::boolean,
-                           fmi_causality_type_t::parameter))
-            {
-                pstr.push_back (info->getVariableInfo (kk).name);
-            }
-        }
-        gridSubModel::getParameterStrings (pstr, paramStringType::flags);
-        break;
+        return gridSubModel::get(param, unitType);
     }
-}
 
-stringVec fmiCoSimSubModel::getOutputNames () const { return cs->getOutputNames (); }
-
-stringVec fmiCoSimSubModel::getInputNames () const { return cs->getInputNames (); }
-
-void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
-{
-	using namespace gmlc::utilities;
-
-    if ((param == "fmu") || (param == "file"))
+    double fmiCoSimSubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
     {
-        if (!(cs))
-        {
-            cs = fmiLibraryManager::instance ().createCoSimulationObject (val, getName ());
-        }
-        else
-        {
-            // return INVALID_PARAMETER_VALUE;
-            return;
-        }
-    }
-    else if (param == "outputs")
-    {
-        auto ssep = stringOps::splitline (val);
-        stringOps::trim (ssep);
-        cs->setOutputVariables (ssep);
-        m_outputSize = cs->outputSize ();
-    }
-    else if (param == inputString)
-    {
-        auto ssep = stringOps::splitline (val);
-        stringOps::trim (ssep);
-        cs->setInputVariables (ssep);
-        m_inputSize = cs->inputSize ();
-        //	updateDependencyInfo();
-    }
-    else
-    {
-        bool isparam = cs->isParameter (param, fmi_variable_type_t::string);
-        if (isparam)
-        {
-            makeSettableState ();
-            cs->set (param, val);
-            resetState ();
-        }
-        else
-        {
-            gridSubModel::set (param, val);
-        }
-    }
-}
-static const std::string localIntegrationtimeString ("localintegrationtime");
-void fmiCoSimSubModel::set (const std::string &param, double val, units::unit unitType)
-{
-    if ((param == "timestep") || (param == localIntegrationtimeString))
-    {
-        localIntegrationTime = val;
-    }
-    else
-    {
-        bool isparam = cs->isParameter (param, fmi_variable_type_t::numeric);
-        if (isparam)
-        {
-            makeSettableState ();
-            cs->set (param, val);
-            resetState ();
-        }
-        else
-        {
-            gridSubModel::set (param, val);
-        }
-    }
-}
-
-double fmiCoSimSubModel::get (const std::string &param, units::unit unitType) const
-{
-    if (param == localIntegrationtimeString)
-    {
-        return localIntegrationTime;
-    }
-    if (cs->isVariable (param, fmi_variable_type_t::numeric))
-    {
-        return cs->get<double> (param);
-    }
-    return gridSubModel::get (param, unitType);
-}
-
-double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t mode)
-{
-    double res = 0.0;
-    double ich = 1.0;
-    fmiVariableSet vx = cs->getVariableSet (depIndex);
-    fmiVariableSet vy = cs->getVariableSet (refIndex);
-    if (opFlags[has_derivative_function])
-    {
-        res = cs->getPartialDerivative (depIndex, refIndex, ich);
-    }
-    else
-    {
-        assert (unimplemented);
-        /*
+        double res = 0.0;
+        double ich = 1.0;
+        fmiVariableSet vx = cs->getVariableSet(depIndex);
+        fmiVariableSet vy = cs->getVariableSet(refIndex);
+        if (opFlags[has_derivative_function]) {
+            res = cs->getPartialDerivative(depIndex, refIndex, ich);
+        } else {
+            assert(unimplemented);
+            /*
         const double gap = 1e-8;
         double out1, out2;
         double val1, val2;
@@ -435,14 +404,14 @@ double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t mode)
 
         }
         */
+        }
+        return res;
     }
-    return res;
-}
 
-void fmiCoSimSubModel::timestep (coreTime time, const IOdata &inputs, const solverMode &sMode)
-{
-    assert(unimplemented);
-    /*
+    void fmiCoSimSubModel::timestep(coreTime time, const IOdata& inputs, const solverMode& sMode)
+    {
+        assert(unimplemented);
+        /*
     double h = localIntegrationTime;
     int sv = 0;
     double aval = 0.95;
@@ -488,16 +457,16 @@ void fmiCoSimSubModel::timestep (coreTime time, const IOdata &inputs, const solv
 
     return out;
     */
-}
+    }
 
-void fmiCoSimSubModel::ioPartialDerivatives (const IOdata &inputs,
-                                             const stateData &sD,
-                                             matrixData<double> &md,
-                                             const IOlocs &inputLocs,
-                                             const solverMode &sMode)
-{
-    assert(unimplemented);
-    /*
+    void fmiCoSimSubModel::ioPartialDerivatives(const IOdata& inputs,
+                                                const stateData& sD,
+                                                matrixData<double>& md,
+                                                const IOlocs& inputLocs,
+                                                const solverMode& sMode)
+    {
+        assert(unimplemented);
+        /*
     updateInfo (inputs, sD, sMode);
     double res;
     double ich = 1.0;
@@ -533,84 +502,82 @@ void fmiCoSimSubModel::ioPartialDerivatives (const IOdata &inputs,
         }
     }
     */
-}
+    }
 
-IOdata fmiCoSimSubModel::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
-{
-    IOdata out (m_outputSize, 0);
-    if (cs->getCurrentMode () >= fmuMode::initializationMode)
+    IOdata fmiCoSimSubModel::getOutputs(const IOdata& inputs,
+                                        const stateData& sD,
+                                        const solverMode& sMode) const
     {
-        // updateInfo(inputs, sD, sMode);
-        cs->getOutputs (out.data ());
-        printf ("time=%f, out1 =%f, out 2=%f\n", static_cast<double> ((!sD.empty ()) ? sD.time : prevTime), out[0],
-                out[1]);
-        if ((opFlags[use_output_estimator]) && (!sD.empty ()) && (!opFlags[fixed_output_interval]) &&
-            (isDynamic (sMode)))
-        {
-            for (index_t pp = 0; pp < m_outputSize; ++pp)
-            {
-                /*
+        IOdata out(m_outputSize, 0);
+        if (cs->getCurrentMode() >= fmuMode::initializationMode) {
+            // updateInfo(inputs, sD, sMode);
+            cs->getOutputs(out.data());
+            printf("time=%f, out1 =%f, out 2=%f\n",
+                   static_cast<double>((!sD.empty()) ? sD.time : prevTime),
+                   out[0],
+                   out[1]);
+            if ((opFlags[use_output_estimator]) && (!sD.empty()) &&
+                (!opFlags[fixed_output_interval]) && (isDynamic(sMode))) {
+                for (index_t pp = 0; pp < m_outputSize; ++pp) {
+                    /*
                 if (outputInformation[pp].refMode >= refMode_t::level4)
                 {
                     const double res = oEst[pp]->estimate(sD.time, inputs, sD.state +
                         offsets.getDiffOffset(sMode)); out[pp] = res;
                 }
                 */
+                }
             }
         }
+        return out;
     }
-    return out;
-}
 
-double fmiCoSimSubModel::getDoutdt (const IOdata & /*inputs*/,
-                                    const stateData &sD,
-                                    const solverMode &sMode,
-                                    index_t outputNum) const
-{
-    return 0;
-}
-
-double fmiCoSimSubModel::getOutput (const IOdata &inputs,
-                                    const stateData &sD,
-                                    const solverMode &sMode,
-                                    index_t outputNum) const
-{
-    double out = kNullVal;
-    if (cs->getCurrentMode () >= fmuMode::initializationMode)
+    double fmiCoSimSubModel::getDoutdt(const IOdata& /*inputs*/,
+                                       const stateData& sD,
+                                       const solverMode& sMode,
+                                       index_t outputNum) const
     {
-        // updateInfo(inputs, sD, sMode);
+        return 0;
+    }
 
-        if ((opFlags[use_output_estimator]) && (!sD.empty ()) && (!opFlags[fixed_output_interval]) &&
-            (isDynamic (sMode)))
-        {
-            /*
+    double fmiCoSimSubModel::getOutput(const IOdata& inputs,
+                                       const stateData& sD,
+                                       const solverMode& sMode,
+                                       index_t outputNum) const
+    {
+        double out = kNullVal;
+        if (cs->getCurrentMode() >= fmuMode::initializationMode) {
+            // updateInfo(inputs, sD, sMode);
+
+            if ((opFlags[use_output_estimator]) && (!sD.empty()) &&
+                (!opFlags[fixed_output_interval]) && (isDynamic(sMode))) {
+                /*
             if (outputInformation[num].refMode >= refMode_t::level4)
             {
                 out = oEst[num]->estimate(sD.time, inputs, sD.state + offsets.getDiffOffset(sMode));
             }
             */
+            } else {
+                out = cs->getOutput(outputNum);
+            }
         }
-        else
-        {
-            out = cs->getOutput (outputNum);
-        }
+        return out;
     }
-    return out;
-}
 
-double fmiCoSimSubModel::getOutput (index_t outputNum) const
-{
-    double out = kNullVal;
-    if (cs->getCurrentMode () >= fmuMode::initializationMode)
+    double fmiCoSimSubModel::getOutput(index_t outputNum) const
     {
-        out = cs->getOutput (outputNum);
+        double out = kNullVal;
+        if (cs->getCurrentMode() >= fmuMode::initializationMode) {
+            out = cs->getOutput(outputNum);
+        }
+        return out;
     }
-    return out;
-}
 
-void fmiCoSimSubModel::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
-{
-    /*
+    void fmiCoSimSubModel::updateLocalCache(const IOdata& inputs,
+                                            const stateData& sD,
+                                            const solverMode& sMode)
+    {
+        /*
     fmi2Boolean eventMode;
     fmi2Boolean terminateSim;
     if (!sD.empty())
@@ -656,35 +623,32 @@ void fmiCoSimSubModel::updateLocalCache (const IOdata &inputs, const stateData &
         }
     }
     */
-}
-
-void fmiCoSimSubModel::makeSettableState ()
-{
-    if (opFlags[dyn_initialized])
-    {
-        // prevFmiState = cs->getCurrentMode();
-        cs->setMode (fmuMode::eventMode);
     }
-}
-void fmiCoSimSubModel::resetState ()
-{
-    if (opFlags[dyn_initialized])
+
+    void fmiCoSimSubModel::makeSettableState()
     {
-        // if (prevFmiState == cs->getCurrentMode())
-        {
-            return;
+        if (opFlags[dyn_initialized]) {
+            // prevFmiState = cs->getCurrentMode();
+            cs->setMode(fmuMode::eventMode);
         }
-        // cs->setMode(prevFmiState);
     }
-}
-
-void fmiCoSimSubModel::loadOutputJac (int index)
-{
-    // double pd;
-    // int ct = 0;
-    if (index == -1)
+    void fmiCoSimSubModel::resetState()
     {
-        /*
+        if (opFlags[dyn_initialized]) {
+            // if (prevFmiState == cs->getCurrentMode())
+            {
+                return;
+            }
+            // cs->setMode(prevFmiState);
+        }
+    }
+
+    void fmiCoSimSubModel::loadOutputJac(int index)
+    {
+        // double pd;
+        // int ct = 0;
+        if (index == -1) {
+            /*
         for (auto &out : outputInformation)
         {
             if (out.refMode >= refMode_t::level4)
@@ -706,10 +670,8 @@ void fmiCoSimSubModel::loadOutputJac (int index)
             }
         }
         */
-    }
-    else
-    {
-        /*
+        } else {
+            /*
         if (outputInformation[index].refMode >= refMode_t::level4)
         {
             ct = 0;
@@ -730,8 +692,8 @@ void fmiCoSimSubModel::loadOutputJac (int index)
             }
         }
         */
+        }
     }
-}
 
 }  // namespace fmi
 }  // namespace griddyn

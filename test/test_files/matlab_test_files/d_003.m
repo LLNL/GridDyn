@@ -4,7 +4,7 @@
 % E-mail:   fmilano@thunderbox.uwaterloo.ca
 % Web-site: http://thunderbox.uwaterloo.ca/~fmilano
 % ------------------------------------------------------------------------------
-%  01/04/06 PSAT ARCHIVE         100.00 2006 W 3-Bus 3-Line System                                                                
+%  01/04/06 PSAT ARCHIVE         100.00 2006 W 3-Bus 3-Line System
 
 
 Bus.con = [ ...
@@ -38,4 +38,3 @@ Areas.con = [ ...
 
 Varname.bus = { ...
   ' Bus1'; ' Bus2'; ' Bus3'};
-

@@ -11,6 +11,7 @@
  */
 
 #include "scheduler.h"
+
 #include "../comms/Communicator.h"
 #include "../comms/schedulerMessage.h"
 #include "core/coreObjectTemplates.hpp"
@@ -18,37 +19,74 @@
 #include "gmlc/utilities/TimeSeries.hpp"
 #include "griddyn/griddyn-config.h"
 
-namespace griddyn
-{
+namespace griddyn {
 using namespace units;
 
 // operator overloads for Tsched object
-bool operator<(const tsched &td1, const tsched &td2) { return (td1.time < td2.time); }
-bool operator<=(const tsched &td1, const tsched &td2) { return (td1.time <= td2.time); }
-bool operator>(const tsched &td1, const tsched &td2) { return (td1.time > td2.time); }
-bool operator>=(const tsched &td1, const tsched &td2) { return (td1.time >= td2.time); }
-bool operator==(const tsched &td1, const tsched &td2) { return (td1.time == td2.time); }
-bool operator!=(const tsched &td1, const tsched &td2) { return (td1.time != td2.time); }
-bool operator<(const tsched &td1, coreTime timeC) { return (td1.time < timeC); }
-bool operator<=(const tsched &td1, coreTime timeC) { return (td1.time <= timeC); }
-bool operator>(const tsched &td1, coreTime timeC) { return (td1.time > timeC); }
-bool operator>=(const tsched &td1, coreTime timeC) { return (td1.time >= timeC); }
-bool operator==(const tsched &td1, coreTime timeC) { return (td1.time == timeC); }
-bool operator!=(const tsched &td1, coreTime timeC) { return (td1.time != timeC); }
+bool operator<(const tsched& td1, const tsched& td2)
+{
+    return (td1.time < td2.time);
+}
+bool operator<=(const tsched& td1, const tsched& td2)
+{
+    return (td1.time <= td2.time);
+}
+bool operator>(const tsched& td1, const tsched& td2)
+{
+    return (td1.time > td2.time);
+}
+bool operator>=(const tsched& td1, const tsched& td2)
+{
+    return (td1.time >= td2.time);
+}
+bool operator==(const tsched& td1, const tsched& td2)
+{
+    return (td1.time == td2.time);
+}
+bool operator!=(const tsched& td1, const tsched& td2)
+{
+    return (td1.time != td2.time);
+}
+bool operator<(const tsched& td1, coreTime timeC)
+{
+    return (td1.time < timeC);
+}
+bool operator<=(const tsched& td1, coreTime timeC)
+{
+    return (td1.time <= timeC);
+}
+bool operator>(const tsched& td1, coreTime timeC)
+{
+    return (td1.time > timeC);
+}
+bool operator>=(const tsched& td1, coreTime timeC)
+{
+    return (td1.time >= timeC);
+}
+bool operator==(const tsched& td1, coreTime timeC)
+{
+    return (td1.time == timeC);
+}
+bool operator!=(const tsched& td1, coreTime timeC)
+{
+    return (td1.time != timeC);
+}
 
-scheduler::scheduler(const std::string &objName, double initialValue)
-    : Source(objName, initialValue), PCurr(initialValue)
+scheduler::scheduler(const std::string& objName, double initialValue):
+    Source(objName, initialValue), PCurr(initialValue)
 {
     prevTime = negTime;  // override default setting
 }
 
-scheduler::scheduler(double initialValue, const std::string &objName) : scheduler(objName, initialValue) {}
-
-coreObject *scheduler::clone(coreObject *obj) const
+scheduler::scheduler(double initialValue, const std::string& objName):
+    scheduler(objName, initialValue)
 {
-    auto *nobj = cloneBase<scheduler, Source>(this, obj);
-    if (nobj == nullptr)
-    {
+}
+
+coreObject* scheduler::clone(coreObject* obj) const
+{
+    auto* nobj = cloneBase<scheduler, Source>(this, obj);
+    if (nobj == nullptr) {
         return obj;
     }
     nobj->Pmax = Pmax;
@@ -59,51 +97,56 @@ coreObject *scheduler::clone(coreObject *obj) const
     return nobj;
 }
 
-scheduler::~scheduler() { clearSchedule(); }
+scheduler::~scheduler()
+{
+    clearSchedule();
+}
 
-void scheduler::setTarget(double target) { insertTarget(tsched(prevTime, target)); }
+void scheduler::setTarget(double target)
+{
+    insertTarget(tsched(prevTime, target));
+}
 
-void scheduler::setTarget(coreTime time, double target) { insertTarget(tsched(time, target)); }
+void scheduler::setTarget(coreTime time, double target)
+{
+    insertTarget(tsched(time, target));
+}
 
-void scheduler::setTarget(std::vector<double> &time, std::vector<double> &target)
+void scheduler::setTarget(std::vector<double>& time, std::vector<double>& target)
 {
     auto tm = time.begin();
     auto tg = target.begin();
     auto tme = time.end();
     auto tge = target.end();
     std::list<tsched> flist;
-    while ((tm != tme) && (tg != tge))
-    {
+    while ((tm != tme) && (tg != tge)) {
         // pTarget.push_back (tsched (*tm, *tg));
         pTarget.emplace_back(*tm, *tg);
         ++tm;
         ++tg;
     }
     pTarget.sort();
-    if (pTarget.front().time != nextUpdateTime)
-    {
+    if (pTarget.front().time != nextUpdateTime) {
         nextUpdateTime = (pTarget.front()).time;
         alert(this, UPDATE_TIME_CHANGE);
     }
 }
 
-void scheduler::setTarget(const std::string &fileName)
+void scheduler::setTarget(const std::string& fileName)
 {
     gmlc::utilities::TimeSeries<double, coreTime> targets;
     targets.loadFile(fileName);
 
     std::list<tsched> flist;
     auto Ntargets = static_cast<int>(targets.size());
-    for (int kk = 0; kk < Ntargets; ++kk)
-    {
+    for (int kk = 0; kk < Ntargets; ++kk) {
         // flist.push_back (tsched (targets.time(kk), targets.data(kk)));
         flist.emplace_back(targets.time(kk), targets.data(kk));
         // setTarget(targets.time[kk],targets.data[kk]);
     }
     flist.sort();
     pTarget.merge(flist);
-    if (pTarget.front().time != nextUpdateTime)
-    {
+    if (pTarget.front().time != nextUpdateTime) {
         nextUpdateTime = (pTarget.front()).time;
         alert(this, UPDATE_TIME_CHANGE);
     }
@@ -112,27 +155,20 @@ void scheduler::setTarget(const std::string &fileName)
 void scheduler::updateA(coreTime time)
 {
     auto dt = (time - prevTime);
-    if (dt == timeZero)
-    {
+    if (dt == timeZero) {
         return;
     }
-    if (time >= nextUpdateTime)
-    {
-        while (time >= pTarget.front().time)
-        {
+    if (time >= nextUpdateTime) {
+        while (time >= pTarget.front().time) {
             PCurr = (pTarget.front()).target;
-            if (PCurr > Pmax)
-            {
+            if (PCurr > Pmax) {
                 PCurr = Pmax;
-            }
-            else if (PCurr < Pmin)
-            {
+            } else if (PCurr < Pmin) {
                 PCurr = Pmin;
             }
 
             pTarget.pop_front();
-            if (pTarget.empty())
-            {
+            if (pTarget.empty()) {
                 nextUpdateTime = maxTime;
 
                 break;
@@ -148,15 +184,11 @@ void scheduler::updateA(coreTime time)
 double scheduler::predict(coreTime time)
 {
     double out = m_output;
-    if (time >= nextUpdateTime)
-    {
+    if (time >= nextUpdateTime) {
         out = (pTarget.front()).target;
-        if (out > Pmax)
-        {
+        if (out > Pmax) {
             out = Pmax;
-        }
-        else if (out < Pmin)
-        {
+        } else if (out < Pmin) {
             out = Pmin;
         }
     }
@@ -168,18 +200,19 @@ void scheduler::dynObjectInitializeA(coreTime time0, std::uint32_t /*flags*/)
     commLink = cManager.build();
 
     commLink->registerReceiveCallback(
-      [this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) { receiveMessage(sourceID, message); });
+        [this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
+            receiveMessage(sourceID, message);
+        });
     prevTime = time0;
 }
 
-void scheduler::dynObjectInitializeB(const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata & /*fieldSet*/)
+void scheduler::dynObjectInitializeB(const IOdata& /*inputs*/,
+                                     const IOdata& desiredOutput,
+                                     IOdata& /*fieldSet*/)
 {
-    if (desiredOutput[0] > Pmax)
-    {
+    if (desiredOutput[0] > Pmax) {
         Pmax = desiredOutput[0];
-    }
-    else if (desiredOutput[0] < Pmin)
-    {
+    } else if (desiredOutput[0] < Pmin) {
         Pmin = desiredOutput[0];
     }
 
@@ -189,82 +222,69 @@ void scheduler::dynObjectInitializeB(const IOdata & /*inputs*/, const IOdata &de
     m_output = PCurr;
 }
 
-double scheduler::getTarget() const { return (pTarget.empty()) ? PCurr : (pTarget.front()).target; }
-
-double scheduler::getMax(coreTime /*time*/) const { return Pmax; }
-
-double scheduler::getMin(coreTime /*time*/) const { return Pmin; }
-
-void scheduler::set(const std::string &param, const std::string &val)
+double scheduler::getTarget() const
 {
-    if (param[0] == '#')
-    {
-    }
-    else
-    {
-        if (!cManager.set(param, val))
-        {
+    return (pTarget.empty()) ? PCurr : (pTarget.front()).target;
+}
+
+double scheduler::getMax(coreTime /*time*/) const
+{
+    return Pmax;
+}
+
+double scheduler::getMin(coreTime /*time*/) const
+{
+    return Pmin;
+}
+
+void scheduler::set(const std::string& param, const std::string& val)
+{
+    if (param[0] == '#') {
+    } else {
+        if (!cManager.set(param, val)) {
             Source::set(param, val);
         }
     }
 }
 
-void scheduler::set(const std::string &param, double val, unit unitType)
+void scheduler::set(const std::string& param, double val, unit unitType)
 {
-    if (param == "min")
-    {
+    if (param == "min") {
         Pmin = convert(val, unitType, puMW, m_Base);
-        if (PCurr < Pmin)
-        {
+        if (PCurr < Pmin) {
             PCurr = Pmin;
         }
-    }
-    else if (param == "max")
-    {
+    } else if (param == "max") {
         Pmax = convert(val, unitType, puMW, m_Base);
-        if (PCurr > Pmax)
-        {
+        if (PCurr > Pmax) {
             PCurr = Pmax;
         }
-    }
-    else if (param == "base")
-    {
+    } else if (param == "base") {
         m_Base = convert(val, unitType, MW, systemBasePower);
-    }
-    else if (param == "target")
-    {
+    } else if (param == "target") {
         setTarget(convert(val, unitType, puMW, m_Base));
-    }
-    else
-    {
-        if (!cManager.set(param, val))
-        {
+    } else {
+        if (!cManager.set(param, val)) {
             Source::set(param, val, unitType);
         }
     }
 }
 
-void scheduler::setFlag(const std::string &flag, bool val)
+void scheduler::setFlag(const std::string& flag, bool val)
 {
-    if (!cManager.setFlag(flag, val))
-    {
+    if (!cManager.setFlag(flag, val)) {
         Source::setFlag(flag, val);
     }
 }
 
-double scheduler::get(const std::string &param, unit unitType) const
+double scheduler::get(const std::string& param, unit unitType) const
 {
     double val = kNullVal;
-    if (param == "min")
-    {
+    if (param == "min") {
         val = convert(Pmin, puMW, unitType, m_Base);
-    }
-    else if (param == "max")
-    {
+    } else if (param == "max") {
         val = convert(Pmax, puMW, unitType, m_Base);
-    }
-    else
-    {
+    } else {
         val = Source::get(param, unitType);
     }
     return val;
@@ -272,8 +292,7 @@ double scheduler::get(const std::string &param, unit unitType) const
 
 void scheduler::clearSchedule()
 {
-    if (!pTarget.empty())
-    {
+    if (!pTarget.empty()) {
         pTarget.resize(0);
         nextUpdateTime = maxTime;
         alert(this, UPDATE_TIME_CHANGE);
@@ -282,14 +301,11 @@ void scheduler::clearSchedule()
 
 void scheduler::insertTarget(tsched ts)
 {
-    if (ts < nextUpdateTime)
-    {
+    if (ts < nextUpdateTime) {
         pTarget.push_front(ts);
         nextUpdateTime = ts.time;
         alert(this, UPDATE_TIME_CHANGE);
-    }
-    else
-    {
+    } else {
         pTarget.push_back(ts);
         pTarget.sort();
     }
@@ -299,34 +315,32 @@ void scheduler::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessa
 {
     using namespace comms;
     auto sm = message->getPayload<schedulerMessagePayload>();
-    switch (message->getMessageType())
-    {
-    case schedulerMessagePayload::CLEAR_TARGETS:
-        clearSchedule();
-        break;
-    case schedulerMessagePayload::SHUTDOWN:
-        break;
-    case schedulerMessagePayload::STARTUP:
-        break;
-    case schedulerMessagePayload::UPDATE_TARGETS:
-        clearSchedule();
-        FALLTHROUGH
-    case schedulerMessagePayload::ADD_TARGETS:
-        setTarget(sm->m_time, sm->m_target);
-        break;
-    case schedulerMessagePayload::REGISTER_DISPATCHER:
-        dispatcher_id = sourceID;
-        break;
-    default:
-        break;
+    switch (message->getMessageType()) {
+        case schedulerMessagePayload::CLEAR_TARGETS:
+            clearSchedule();
+            break;
+        case schedulerMessagePayload::SHUTDOWN:
+            break;
+        case schedulerMessagePayload::STARTUP:
+            break;
+        case schedulerMessagePayload::UPDATE_TARGETS:
+            clearSchedule();
+            FALLTHROUGH
+        case schedulerMessagePayload::ADD_TARGETS:
+            setTarget(sm->m_time, sm->m_target);
+            break;
+        case schedulerMessagePayload::REGISTER_DISPATCHER:
+            dispatcher_id = sourceID;
+            break;
+        default:
+            break;
     }
 }
 
 void scheduler::dispatcherLink()
 {
-    auto dispatch = static_cast<dispatcher *>(getParent()->find("dispatcher"));
-    if (dispatch != nullptr)
-    {
+    auto dispatch = static_cast<dispatcher*>(getParent()->find("dispatcher"));
+    if (dispatch != nullptr) {
         dispatch->add(this);
     }
 }

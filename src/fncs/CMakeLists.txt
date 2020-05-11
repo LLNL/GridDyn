@@ -11,8 +11,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(
-    griddynFNCS_sources
+set(griddynFNCS_sources
     gridDynFNCS.cpp
     fncsSource.cpp
     fncsCollector.cpp
@@ -23,8 +22,7 @@ set(
     test/fncsTest.cpp
 )
 
-set(
-    griddynFNCS_headers
+set(griddynFNCS_headers
     fncsLibrary.h
     fncsSource.h
     fncsCollector.h
@@ -76,19 +74,11 @@ endif(USE_DUMMY_FNCS)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
 
 if(WIN32)
-    # there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4
-    # to get the regex to work and I need two for visual studio to actually print it.
-    # thus to it looks like this to replace '\' with '\\'
-    # this will probably fail on macs yet
+    # there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4 to get the
+    # regex to work and I need two for visual studio to actually print it. thus to it looks like
+    # this to replace '\' with '\\' this will probably fail on macs yet
 
-    string(
-        REGEX
-        REPLACE
-            "\\\\"
-            "\\\\\\\\"
-            test_dir
-            ${test_dir}
-    )
+    string(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
 endif(WIN32)
 # message(${test_dir})
 
@@ -108,13 +98,10 @@ endif(USE_DUMMY_FNCS)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
     add_custom_command(
-        TARGET
-        griddynFNCS
+        TARGET griddynFNCS
         POST_BUILD # Adds a post-build event to griddynFNCS
         COMMAND
-            ${CMAKE_COMMAND}
-            -E
-            copy_if_different # which executes "cmake - E copy_if_different..."
+            ${CMAKE_COMMAND} -E copy_if_different # which executes "cmake - E copy_if_different..."
             "${keyfile}" # <--this is in-file
             $<TARGET_FILE_DIR:griddynFNCS>
     ) # <--this is out-file path

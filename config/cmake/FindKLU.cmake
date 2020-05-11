@@ -97,7 +97,7 @@ if (KLU_DIR)
                         message(FATAL_ERROR "Could not find required KLU library : ${TEST_LIB}")
                     endif(KLU_LIB)
                 endif(KLU_LIB)
-                
+
             endif(KLU_LIB)
         endif(KLU_LIB)
         message(STATUS "KLU_LIB=${KLU_LIB}")

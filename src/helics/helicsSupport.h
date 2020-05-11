@@ -16,17 +16,15 @@
 #include <complex>
 #include <future>
 
-namespace griddyn
-{
-namespace helicsLib
-{
-helics::Time gd2helicsTime (coreTime evntTime);
+namespace griddyn {
+namespace helicsLib {
+    helics::Time gd2helicsTime(coreTime evntTime);
 
-coreTime helics2gdTime (helics::Time ftime);
+    coreTime helics2gdTime(helics::Time ftime);
 
-std::future<int> runBroker (const std::string &cmd_args);
-std::future<int> runPlayer (const std::string &cmd_args);
-std::future<int> runRecorder (const std::string &cmd_args);
+    std::future<int> runBroker(const std::string& cmd_args);
+    std::future<int> runPlayer(const std::string& cmd_args);
+    std::future<int> runRecorder(const std::string& cmd_args);
 
 }  // namespace helicsLib
 }  // namespace griddyn

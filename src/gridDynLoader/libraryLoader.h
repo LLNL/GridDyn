@@ -13,8 +13,7 @@
 #ifndef LIBRARY_LOADER_H_
 #define LIBRARY_LOADER_H_
 
-namespace griddyn
-{
-void loadLibraries ();
+namespace griddyn {
+void loadLibraries();
 }  // namespace griddyn
 #endif

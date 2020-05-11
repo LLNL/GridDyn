@@ -1,4 +1,4 @@
-# This function is used to force a build on a dependant project at cmake configuration phase.
+# This function is used to force a build on a dependent project at cmake configuration phase.
 #
 
 function (build_zlib)

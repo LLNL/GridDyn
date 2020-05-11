@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -13,15 +13,16 @@
 // test case for element readers
 
 #include "../exeTestHelper.h"
-#include "runner/gridDynRunner.h"
 #include "../testHelper.h"
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
+#include "runner/gridDynRunner.h"
 #include <cstdlib>
 #include <iostream>
 
-BOOST_AUTO_TEST_SUITE (runner_tests)
+#include <boost/test/unit_test.hpp>
 
+#include <boost/test/tools/floating_point_comparison.hpp>
 
-BOOST_AUTO_TEST_CASE (runner_test1) {}
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_SUITE(runner_tests)
+
+BOOST_AUTO_TEST_CASE(runner_test1) {}
+BOOST_AUTO_TEST_SUITE_END()

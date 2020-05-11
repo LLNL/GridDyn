@@ -10,8 +10,7 @@
 
 # project name
 
-set(
-    elementReader_headers
+set(elementReader_headers
     jsonReaderElement.h
     jsonElement.h
     tinyxml2ReaderElement.h
@@ -22,8 +21,7 @@ set(
     iniReaderElement.h
 )
 
-set(
-    elementReader_files
+set(elementReader_files
     jsonReaderElement.cpp
     jsonElement.cpp
     tinyxml2ReaderElement.cpp
@@ -44,7 +42,9 @@ if(ENABLE_YAML)
     include(buildYAML)
     set(YAML_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-    if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
+    if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS
+                                   ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake
+    )
         build_yaml()
     endif()
     include(${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
@@ -56,10 +56,8 @@ if(YAML_FOUND)
 
     list(APPEND elementReader_headers yamlReaderElement.h yamlElement.h)
 
-    list(
-        APPEND
-            optional_library_test_files
-            ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp
+    list(APPEND optional_library_test_files
+         ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp
     )
     set(optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
 
@@ -77,11 +75,8 @@ file(GLOB ticppfiles ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.cpp)
 file(GLOB ticpp_headers ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.h)
 
 add_library(
-    tinyxml
-    STATIC
-    ${ticppfiles}
-    ${ticpp_headers}
-    ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
+    tinyxml STATIC
+    ${ticppfiles} ${ticpp_headers} ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
     ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.h
 )
 
@@ -95,18 +90,12 @@ endif()
 
 set_target_properties(tinyxml PROPERTIES FOLDER libraries)
 
-add_library(
-    formatInterpreter
-    STATIC
-    ${elementReader_files}
-    ${elementReader_headers}
-)
+add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers})
 
 target_include_directories(
     # target_link_libraries(this, jsoncpp::jsoncpp) when available
-    formatInterpreter
-    PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
+    formatInterpreter PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+)
 
 target_link_libraries(formatInterpreter PUBLIC tinyxml utilities)
 
@@ -118,8 +107,6 @@ if(YAML_FOUND)
 
 endif(YAML_FOUND)
 
-install(
-    FILES ${elementReader_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-    COMPONENT headers
+install(FILES ${elementReader_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
+        COMPONENT headers
 )

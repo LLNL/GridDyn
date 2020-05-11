@@ -17,12 +17,10 @@
 #include "core/objectOperatorInterface.hpp"
 #include <functional>
 
-namespace griddyn
-{
+namespace griddyn {
 class grabberSet;
 /** enumeration of the available comparison types*/
-enum class comparison_type
-{
+enum class comparison_type {
     eq,
     ne,
     gt,
@@ -32,15 +30,14 @@ enum class comparison_type
     null,
 };
 /** generate a value of the comparison type enumeration from a string*/
-comparison_type comparisonFromString (const std::string &compStr);
+comparison_type comparisonFromString(const std::string& compStr);
 /** convert the comparison type to a string description*/
-std::string to_string (comparison_type comp);
+std::string to_string(comparison_type comp);
 
 /**
  *condition class:  sets up a comparison operator for both states and regular grabbers
  **/
-class Condition : public objectOperatorInterface
-{
+class Condition: public objectOperatorInterface {
   protected:
     double m_constant = 0.0;  //!< right hand side constant
     double m_margin = 0.0;  //!< the margin around the conditions
@@ -54,75 +51,78 @@ class Condition : public objectOperatorInterface
     @param[in] valGrabber the grabber for the LHS of the equation
     @param[in] valGrabberSt the state portion of the grabber for the LHS of the equation
     */
-    explicit Condition (std::shared_ptr<grabberSet> valGrabber = nullptr);
+    explicit Condition(std::shared_ptr<grabberSet> valGrabber = nullptr);
     /** destructor*/
-    virtual ~Condition ();
+    virtual ~Condition();
     /** clone the condition
     @return a new Condition object with identical to the original
     */
-    virtual std::unique_ptr<Condition> clone () const;
+    virtual std::unique_ptr<Condition> clone() const;
     /** clone the condition to a given object
     @param[out] pointer to a Condition object to clone the information to
     */
-    virtual void cloneTo (Condition *cond) const;
+    virtual void cloneTo(Condition* cond) const;
     /** load the grabbers for the Left hand side of the condition equation
     @param[in] valGrabber a gridGrabber
     @param[in] valGrabberSt a stateGrabber default nullptr
     */
-    void setConditionLHS (std::shared_ptr<grabberSet> valGrabber);
+    void setConditionLHS(std::shared_ptr<grabberSet> valGrabber);
     /** load the grabbers for the Right hand side of the condition equation
     @param[in] valGrabber a gridGrabber
     @param[in] valGrabberSt a stateGrabber default nullptr
     */
-    void setConditionRHS (std::shared_ptr<grabberSet> valGrabber);
+    void setConditionRHS(std::shared_ptr<grabberSet> valGrabber);
     /**run the comparison between condition sides from gridGrabbers
-     * @return returns a difference between the condition and parameter designed to go negative if the condition is
-     *met
+     * @return returns a difference between the condition and parameter designed to go negative if
+     *the condition is met
      **/
-    virtual double evalCondition ();
+    virtual double evalCondition();
     /**
      *run the comparison between for state grabbers
-     * @return returns a difference between the condition and parameter designed to go negative if the condition is
-     *met
+     * @return returns a difference between the condition and parameter designed to go negative if
+     *the condition is met
      **/
-    virtual double evalCondition (const stateData &sD, const solverMode &sMode);
+    virtual double evalCondition(const stateData& sD, const solverMode& sMode);
     /**
     *get the value for which the comparison is made
     @param[in] side either 1 for left hand side or 2 for right hand side
     @param[in] sD the state data from which to get the values
     @param[in] sMode the solverMode related to the state data
-    * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
+    * @return returns the value for the comparison side=1 is left hand side, side=2 is the right
+    hand side
     **/
-    double getVal (int side, const stateData &sD, const solverMode &sMode) const;
+    double getVal(int side, const stateData& sD, const solverMode& sMode) const;
     /**
      *get the value for which the comparison is made
-     * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
+     * @return returns the value for the comparison side=1 is left hand side, side=2 is the right
+     *hand side
      **/
-    double getVal (int side) const;
+    double getVal(int side) const;
 
-    virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+    virtual void updateObject(coreObject* obj,
+                              object_update_mode mode = object_update_mode::direct) override;
 
     /** evaluation the condition based on object data
     @return true if the condition evaluates true
     */
-    virtual bool checkCondition () const;
+    virtual bool checkCondition() const;
     /** evaluation the condition based on state data
     @param[in] sD the state data
     @param[in] sMode the solver mode related to the data
     @return true if the condition evaluates true
     */
-    virtual bool checkCondition (const stateData &sD, const solverMode &sMode) const;
+    virtual bool checkCondition(const stateData& sD, const solverMode& sMode) const;
     /** set the comparison operator
     @param[in] ct the comparison type*/
-    void setComparison (comparison_type ct);
+    void setComparison(comparison_type ct);
     /** set the comparison operator
     @param[in] compStr the comparison type as a string*/
-    void setComparison (const std::string &compStr);
+    void setComparison(const std::string& compStr);
 
     /** set the level of the right side of the condition operate as a constant value
     @param[in] val the threshold
     */
-    void setConditionRHS (double val)
+    void setConditionRHS(double val)
     {
         m_constRHS = true;
         m_constant = val;
@@ -130,23 +130,24 @@ class Condition : public objectOperatorInterface
     /** set the margin level for equality conditions
     @param[in] val the new margin
     */
-    virtual void setMargin (double val);
+    virtual void setMargin(double val);
     /** change the margin setting functionality
-    @param[in] margin_on  a boolean true if the condition operator should use margins, false otherwise
+    @param[in] margin_on  a boolean true if the condition operator should use margins, false
+    otherwise
     */
-    virtual void useMargin (bool margin_on)
+    virtual void useMargin(bool margin_on)
     {
         m_curr_margin = (margin_on) ? (m_margin) : 0.0;
         use_margin = margin_on;
     }
 
-    virtual coreObject *getObject () const override;
+    virtual coreObject* getObject() const override;
 
-    virtual void getObjects (std::vector<coreObject *> &objects) const override;
+    virtual void getObjects(std::vector<coreObject*>& objects) const override;
 
   private:
     std::function<double(double A, double B, double margin)>
-      evalf;  //!< the function evaluation used in the condition
+        evalf;  //!< the function evaluation used in the condition
     comparison_type comp = comparison_type::gt;  //!< the condition operator
 };
 
@@ -155,7 +156,7 @@ class Condition : public objectOperatorInterface
  * @param[in] condString a condition string  like bus1:Voltage>bus2::voltage
  * @param[in] rootObject the root object to find the other objects
  */
-std::unique_ptr<Condition> make_condition (const std::string &condString, coreObject *rootObject);
+std::unique_ptr<Condition> make_condition(const std::string& condString, coreObject* rootObject);
 /** make a condition object
 * function to create a condition object from a field a comparison type and threshold
 * @param field the field to get from the rootObject
@@ -163,26 +164,28 @@ std::unique_ptr<Condition> make_condition (const std::string &condString, coreOb
 @param level the threshold level for the comparson
 * @param[in] rootObject the root object to find the other objects
 */
-std::unique_ptr<Condition>
-make_condition (const std::string &field, const std::string &compare, double level, coreObject *rootObject);
+std::unique_ptr<Condition> make_condition(const std::string& field,
+                                          const std::string& compare,
+                                          double level,
+                                          coreObject* rootObject);
 /** make a condition object
 * function to create a condition object from a field a comparison type and threshold
 * @param field the field to get from the rootObject
-@param comp a value in the comparsion enumeration
+@param comp a value in the comparison enumeration
 @param level the threshold level for the comparson
 * @param[in] rootObject the root object to find the other objects
 */
-std::unique_ptr<Condition>
-make_condition (const std::string &field, comparison_type comp, double level, coreObject *rootObject);
+std::unique_ptr<Condition> make_condition(const std::string& field,
+                                          comparison_type comp,
+                                          double level,
+                                          coreObject* rootObject);
 
 /** evaluate a compound condition consisting of multiple individual conditions
  */
-class compoundCondition : public Condition
-{
+class compoundCondition: public Condition {
   public:
     /** enumeration of the possible compounding modes*/
-    enum class compound_mode
-    {
+    enum class compound_mode {
         c_and,  //!< all conditions are true
         c_all,  //!< same as c_and  all conditions are true
         c_or,  //!< any of the conditions are true
@@ -205,21 +208,21 @@ class compoundCondition : public Condition
     std::vector<std::shared_ptr<Condition>> conditions;  //!< vector of pointers to the conditions
     compound_mode mode = compound_mode::c_and;  //!< the compounding mode to use
   public:
-    compoundCondition () = default;
+    compoundCondition() = default;
 
-    virtual double evalCondition () override;
-    virtual double evalCondition (const stateData &sD, const solverMode &sMode) override;
-    virtual bool checkCondition () const override;
-    virtual bool checkCondition (const stateData &sD, const solverMode &sMode) const override;
+    virtual double evalCondition() override;
+    virtual double evalCondition(const stateData& sD, const solverMode& sMode) override;
+    virtual bool checkCondition() const override;
+    virtual bool checkCondition(const stateData& sD, const solverMode& sMode) const override;
     /** add a condition to the set of conditions to evaluate*/
-    void add (std::shared_ptr<Condition> gc);
+    void add(std::shared_ptr<Condition> gc);
     /** set the compounding mode
      */
-    void setMode (compound_mode newMode);
+    void setMode(compound_mode newMode);
 
   private:
-    /** evalutate the compounding based on the number of true values encountered*/
-    bool evalCombinations (count_t trueCount) const;
+    /** evaluate the compounding based on the number of true values encountered*/
+    bool evalCombinations(count_t trueCount) const;
 };
 
 }  // namespace griddyn

@@ -10,7 +10,7 @@
    <param name="iq(MW)" value="32"/>
    <yp>0.5</yp>
    </load>
-   
+
     <load yq="0.74" >
    <p units="puMW"> 0.31</p>
    <param>q(MW)=14.8</param>

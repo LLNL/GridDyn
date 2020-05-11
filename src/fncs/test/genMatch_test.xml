@@ -78,11 +78,11 @@
    <field>bus#0:angle(deg)</field>
    <field>bus#1:angle(deg)</field>
    </recorder>
-   
+
   <collector type="fncs" period=1>
    <field>bus#0:genp as genDispatch</field>
    </collector>
-   
+
    <timestart>0</timestart>
    <timestop>100</timestop>
 </griddyn>

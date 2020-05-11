@@ -18,5 +18,5 @@ cp griddyn.py /software/anaconda2/envs/gridDyn/lib/python2.7/site-packages/gridd
 cp _griddyn.so /software/anaconda2/envs/gridDyn/lib/python2.7/site-packages/griddyn/
 
 swig  -I/software/griddyn/src/griddyn_shared  -matlab  griddyn.i
-g++ -shared -fPIC -DBUILD_DLL griddyn_wrap.cxx -I /export/software/matlab/R2017b/extern/include/ -I../src/griddyn_shared  -I${INCPYTHON}  -I${CONFIGH}   -I${INC} -shared -o griddynMEX.mexa64 -L/software/anaconda2/envs/gridDyn/lib/ -lgriddyn_shared_lib -L/export/software/matlab/R2017b/bin/glnxa64  -lmx  -lmex 
+g++ -shared -fPIC -DBUILD_DLL griddyn_wrap.cxx -I /export/software/matlab/R2017b/extern/include/ -I../src/griddyn_shared  -I${INCPYTHON}  -I${CONFIGH}   -I${INC} -shared -o griddynMEX.mexa64 -L/software/anaconda2/envs/gridDyn/lib/ -lgriddyn_shared_lib -L/export/software/matlab/R2017b/bin/glnxa64  -lmx  -lmex
 # export LD_LIBRARY_PATH=/software/anaconda2/envs/gridDyn/lib:/export/software/matlab/R2017b/bin/glnxa64

@@ -29,5 +29,3 @@ title('Voltages');
 figure(2);
 plot(Tm1.time,sum(Tm1(:,716-179:716),2))
 title('Total load')
-
-

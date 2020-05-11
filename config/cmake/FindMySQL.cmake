@@ -33,49 +33,49 @@
 #  MYSQL_LFLAGS     = Linker flags (optional)
 
 if (NOT MYSQL_FOUND)
-    
+
   if (NOT MYSQL_ROOT_DIR)
     set (MYSQL_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT MYSQL_ROOT_DIR)
-  
+
   ##_____________________________________________________________________________
   ## Check for the header files
-  
+
   find_path (MYSQL_INCLUDES mysql.h
     HINTS ${MYSQL_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
     PATH_SUFFIXES include mysql include/mysql mysql5/mysql
     )
-  
+
   ##_____________________________________________________________________________
   ## Check for the library
-  
+
   find_library (MYSQL_LIBRARIES mysqlclient
     HINTS ${MYSQL_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
     PATH_SUFFIXES lib mysql lib/mysql mysql5/mysql
     )
-  
+
   ## Extract the library path
   if (MYSQL_LIBRARIES)
     get_filename_component (MYSQL_LIBRARY_PATH ${MYSQL_LIBRARIES} PATH)
   endif (MYSQL_LIBRARIES)
-  
+
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
-  
+
   if (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
     set (MYSQL_FOUND TRUE)
   else (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
     set (MYSQL_FOUND FALSE)
     if (NOT MYSQL_FIND_QUIETLY)
       if (NOT MYSQL_INCLUDES)
-	message (STATUS "Unable to find MYSQL header files!")
+    message (STATUS "Unable to find MYSQL header files!")
       endif (NOT MYSQL_INCLUDES)
       if (NOT MYSQL_LIBRARIES)
-	message (STATUS "Unable to find MYSQL library files!")
+    message (STATUS "Unable to find MYSQL library files!")
       endif (NOT MYSQL_LIBRARIES)
     endif (NOT MYSQL_FIND_QUIETLY)
   endif (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
-  
+
   if (MYSQL_FOUND)
     if (NOT MYSQL_FIND_QUIETLY)
       message (STATUS "Found components for MYSQL")
@@ -88,14 +88,14 @@ if (NOT MYSQL_FOUND)
       message (FATAL_ERROR "Could not find MYSQL!")
     endif (MYSQL_FIND_REQUIRED)
   endif (MYSQL_FOUND)
-  
+
   ##_____________________________________________________________________________
   ## Mark advanced variables
-  
+
   mark_as_advanced (
     MYSQL_ROOT_DIR
     MYSQL_INCLUDES
     MYSQL_LIBRARIES
     )
-  
+
 endif (NOT MYSQL_FOUND)

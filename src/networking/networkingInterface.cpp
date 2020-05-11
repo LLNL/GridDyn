@@ -13,25 +13,22 @@
 #include "griddyn/griddyn-config.h"
 
 #ifdef ENABLE_ZMQ
-#include "zmqInterface.h"
+#    include "zmqInterface.h"
 #endif
 #ifdef ENABLE_TCP
-#include "tcpInterface.h"
+#    include "tcpInterface.h"
 #endif
 
-
-namespace griddyn
-{
-void loadNetworkingLibrary ()
+namespace griddyn {
+void loadNetworkingLibrary()
 {
 #ifdef ENABLE_ZMQ
-    loadZMQLibrary ();
+    loadZMQLibrary();
 #endif
 
 #ifdef ENABLE_TCP
-    loadTcpLibrary ();
+    loadTcpLibrary();
 #endif
-
 }
 
 }  // namespace griddyn

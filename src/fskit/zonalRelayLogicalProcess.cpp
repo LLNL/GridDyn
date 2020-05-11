@@ -1,6 +1,7 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*-
+ */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,9 +10,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
-
-
+ */
 
 #include "zonalRelayLogicalProcess.h"
 
@@ -19,20 +18,17 @@
 
 #define GRIDDYN_RANK 0
 
-ZonalRelayLogicalProcess::ZonalRelayLogicalProcess (const std::string &id)
-  : LogicalProcess (
-      fskit::GlobalLogicalProcessId (
-        fskit::FederatedSimulatorId ("gridDyn"), GRIDDYN_RANK,
-        fskit::LocalLogicalProcessId (id)))
+ZonalRelayLogicalProcess::ZonalRelayLogicalProcess(const std::string& id):
+    LogicalProcess(fskit::GlobalLogicalProcessId(fskit::FederatedSimulatorId("gridDyn"),
+                                                 GRIDDYN_RANK,
+                                                 fskit::LocalLogicalProcessId(id)))
 {
 }
 
 ZonalRelayLogicalProcess::~ZonalRelayLogicalProcess() = default;
 
-
-void ZonalRelayLogicalProcess::ProcessEventMessage (const fskit::EventMessage& eventMessage)
+void ZonalRelayLogicalProcess::ProcessEventMessage(const fskit::EventMessage& eventMessage)
 {
-  std::cout << "Received event message from ID "
-            << eventMessage.GetGlobalLogicalProcessId () << std::endl;
+    std::cout << "Received event message from ID " << eventMessage.GetGlobalLogicalProcessId()
+              << std::endl;
 }
-

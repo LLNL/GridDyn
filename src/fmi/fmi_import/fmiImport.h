@@ -11,29 +11,25 @@
  */
 #pragma once
 
-#include "fmiInfo.h"
-
-#include <memory>
-#include <boost/filesystem.hpp>
-
 #include "../FMI2/fmi2FunctionTypes.h"
+#include "fmiInfo.h"
 #include <functional>
+#include <memory>
+
+#include <boost/filesystem.hpp>
 
 class readerElement;
 
 class fmi2functions;
 
-namespace boost
-{
-namespace dll
-{
-class shared_library;
+namespace boost {
+namespace dll {
+    class shared_library;
 }
 }  // namespace boost
 
 /** an editable version of the fmi callback structure */
-typedef struct
-{
+typedef struct {
     fmi2CallbackLogger logger;
     fmi2CallbackAllocateMemory allocateMemory;
     fmi2CallbackFreeMemory freeMemory;
@@ -42,8 +38,7 @@ typedef struct
 } fmi2CallbackFunctions_nc;
 
 /**container class that do not require an fmi2Component*/
-class fmiBaseFunctions
-{
+class fmiBaseFunctions {
   public:
     std::function<fmi2GetTypesPlatformTYPE> fmi2GetTypesPlatform;
     std::function<fmi2GetVersionTYPE> fmi2GetVersion;
@@ -51,8 +46,7 @@ class fmiBaseFunctions
 };
 
 /**container class for functions that are common to all FMU's*/
-class fmiCommonFunctions
-{
+class fmiCommonFunctions {
   public:
     std::function<fmi2SetDebugLoggingTYPE> fmi2SetDebugLogging;
 
@@ -92,8 +86,7 @@ class fmiCommonFunctions
 };
 
 /**container class for functions that are specific to model exchange*/
-class fmiModelExchangeFunctions
-{
+class fmiModelExchangeFunctions {
   public:
     std::function<fmi2EnterEventModeTYPE> fmi2EnterEventMode;
     std::function<fmi2NewDiscreteStatesTYPE> fmi2NewDiscreteStates;
@@ -114,8 +107,7 @@ class fmiModelExchangeFunctions
 };
 
 /**container class for functions that are specific to coSimuluation*/
-class fmiCoSimFunctions
-{
+class fmiCoSimFunctions {
   public:
     std::function<fmi2SetRealInputDerivativesTYPE> fmi2SetRealInputDerivatives;
     std::function<fmi2GetRealOutputDerivativesTYPE> fmi2GetRealOutputDerivatives;
@@ -140,58 +132,57 @@ class fmi2CoSimObject;
 /** @brief class for loading an fmu file information
  *@details class extracts and FMU if needed then searches for the xml file and loads the information
  */
-class fmiLibrary
-{
+class fmiLibrary {
   public:
-    fmiLibrary ();
-    ~fmiLibrary ();
+    fmiLibrary();
+    ~fmiLibrary();
     /** construct an fmilibrary object from the fmu path
     @param[in] the path to the fmu
     */
-    explicit fmiLibrary (const std::string &fmupath);
+    explicit fmiLibrary(const std::string& fmupath);
     /** construct an fmilibrary object from the fmu path
     @param[in] fmupath the path to the fmu
     @param[in] extractPath the extraction path for the fmu
     */
-    fmiLibrary (const std::string &fmupath, const std::string &extractPath);
+    fmiLibrary(const std::string& fmupath, const std::string& extractPath);
     /** check if the xml file for the fmu has been loaded
     @return true if loaded false if not*/
-    bool isXmlLoaded () const { return xmlLoaded; }
+    bool isXmlLoaded() const { return xmlLoaded; }
     /** check if the shared object file for the fmu has been loaded
     @return true if loaded false if not*/
-    bool isSoLoaded (fmutype_t type = fmutype_t::unknown) const;
+    bool isSoLoaded(fmutype_t type = fmutype_t::unknown) const;
     /** load the FMU from the fmu path
     @param[in] path the fmu*/
-    void loadFMU (const std::string &fmupath);
+    void loadFMU(const std::string& fmupath);
     /** load the FMU from the fmu path
     @param[in] fmupath the fmu
     @param[in] extractPath the path to extract the fmu to
     */
-    void loadFMU (const std::string &fmupath, const std::string &extractPath);
-    std::shared_ptr<fmiInfo> getInfo () const { return information; }
-    void close ();
-    const std::string &getName () const { return modelName; }
-    int getCounts (const std::string &countType) const;
-    void loadSharedLibrary (fmutype_t type = fmutype_t::unknown);
+    void loadFMU(const std::string& fmupath, const std::string& extractPath);
+    std::shared_ptr<fmiInfo> getInfo() const { return information; }
+    void close();
+    const std::string& getName() const { return modelName; }
+    int getCounts(const std::string& countType) const;
+    void loadSharedLibrary(fmutype_t type = fmutype_t::unknown);
 
-    bool checkFlag (fmuCapabilityFlags flag) const;
+    bool checkFlag(fmuCapabilityFlags flag) const;
 
-    std::unique_ptr<fmi2ModelExchangeObject> createModelExchangeObject (const std::string &name);
-    std::unique_ptr<fmi2CoSimObject> createCoSimulationObject (const std::string &name);
-    std::string getTypes ();
-    std::string getVersion ();
+    std::unique_ptr<fmi2ModelExchangeObject> createModelExchangeObject(const std::string& name);
+    std::unique_ptr<fmi2CoSimObject> createCoSimulationObject(const std::string& name);
+    std::string getTypes();
+    std::string getVersion();
 
   private:  // private functions
-    void loadInformation ();
-    int extract ();
+    void loadInformation();
+    int extract();
 
-    boost::filesystem::path findSoPath (fmutype_t type = fmutype_t::unknown);
-    void loadBaseFunctions ();
-    void loadCommonFunctions ();
-    void loadModelExchangeFunctions ();
-    void loadCoSimFunctions ();
+    boost::filesystem::path findSoPath(fmutype_t type = fmutype_t::unknown);
+    void loadBaseFunctions();
+    void loadCommonFunctions();
+    void loadModelExchangeFunctions();
+    void loadCoSimFunctions();
 
-    void makeCallbackFunctions ();
+    void makeCallbackFunctions();
 
   private:  // private Variables
     boost::filesystem::path extractDirectory;  //!< the path to the extracted directory
@@ -199,12 +190,15 @@ class fmiLibrary
     boost::filesystem::path resourceDir;  //!< the path to the resource Directory
     bool error = false;  //!< flag indicating that the fmuLibrary has an error
     bool xmlLoaded = false;  //!< flag indicating that the FMU information has been loaded
-    bool soMeLoaded = false;  //!< flag indicating that the Shared Library has been loaded for modelExchange
-    bool soCoSimLoaded = false;  //!< flag indicating that the shared library has been loaded for CoSimulation;
+    bool soMeLoaded =
+        false;  //!< flag indicating that the Shared Library has been loaded for modelExchange
+    bool soCoSimLoaded =
+        false;  //!< flag indicating that the shared library has been loaded for CoSimulation;
     std::string modelName;  //!< the name of the model
     int mecount = 0;  //!< counter for the number of created model exchange objects
     int cosimcount = 0;  //!< counter for the number of created co-simulation objects
-    std::shared_ptr<fmiInfo> information;  //!< an object containing information derived from the FMU XML file
+    std::shared_ptr<fmiInfo>
+        information;  //!< an object containing information derived from the FMU XML file
 
     std::shared_ptr<boost::dll::shared_library> lib;
     std::shared_ptr<fmi2CallbackFunctions_nc> callbacks;
@@ -221,9 +215,9 @@ class fmiLibrary
 @param[in] status the status of the message
 @param[in] message
 */
-void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
-                 fmi2String /* instanceName */,
-                 fmi2Status /* status */,
-                 fmi2String /* category */,
-                 fmi2String message,
-                 ...);
+void loggerFunc(fmi2ComponentEnvironment /* compEnv */,
+                fmi2String /* instanceName */,
+                fmi2Status /* status */,
+                fmi2String /* category */,
+                fmi2String message,
+                ...);
