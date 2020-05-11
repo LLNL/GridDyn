@@ -20,7 +20,6 @@ GridDyn uses C++11 extensively and will make use of some C++14 features in the n
 - clang 3.5 or higher (openMP must be turned off to use 3.4)
 - Intel 16.0 (not thoroughly tested as of yet)
 
-
 ## CMake options
 
 - **BOOST_ROOT** if boost is not found in the system directories or a different version is desired the root location of boost can be specified in BOOST_ROOT
@@ -79,8 +78,8 @@ GridDyn on Mac OS X
 3. Download [SuiteSparse 4.2.1](http://faculty.cse.tamu.edu/davis/suitesparse.html)
 4. Build/install SuiteSparse
 5. Download [SUNDIALS 2.6.2](http://computation.llnl.gov/projects/SUNDIALS-suite-nonlinear-differential-algebraic-equation-solvers/download/SUNDIALS-2.6.2.tar.gz) you may have submit some information first- don't build dynamic libs because they caused issue with GridDyn runtime
-6. Configure/build/install SUNDIALS (cd SUNDIALS-2.6.2; mkdir build; ccmake ..; update paths for your install location (prefix, klu lib and include dirs), set KLU\_ENABLE to ON); make; make install)
-8. Configure GridDyn (cd transmission; mkdir build; cd build; ccmake -DKLU\_DIR=$<\hdots>$ -DBoost\_INCLUDE\_DIR=$<\hdots>$ -DBoost\_LIBRARY\_DIRS=$<\hdots>$; ) or use cmake-gui
+6. Configure/build/install SUNDIALS (cd SUNDIALS-2.6.2; mkdir build; ccmake ..; update paths for your install location (prefix, klu lib and include dirs), set KLU_ENABLE to ON); make; make install)
+7. Configure GridDyn (cd transmission; mkdir build; cd build; ccmake -DKLU_DIR=$<\hdots>$ -DBoost_INCLUDE_DIR=$<\hdots>$ -DBoost_LIBRARY_DIRS=$<\hdots>$; ) or use cmake-gui
 
 ### Linux
 
