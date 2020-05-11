@@ -51,3 +51,4 @@ workflows:
     jobs:
       - build_gcc8
       - build_gcc7
+      - build_clang9
