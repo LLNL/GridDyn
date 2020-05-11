@@ -1,4 +1,4 @@
-#Quick Start Guide
+# Quick Start Guide
 
 See the [installation guide](installation.md) or the [Users Guide](docs/manuals/GridDynUserManual.pdf) for installation instructions
 
@@ -8,7 +8,7 @@ There are a few test programs built with GridDyn if enabled. They can be found i
 are testLibrary which tests out functionality in the libraries that GridDyn uses, testComponents which tests out component models, testSystem which test complete system execution.
 There is also testExtra which runs some scaling studies and timing tests and is not used as part of the unit testing system.
 
-```
+```sh
 $ ./testLibrary
 Running 59 test cases...
 unable to open file C:/Users/top1/Documents/codeProjects/GridDyn/test/test_files/element_reader_tests/xmlElementReader_missing_file.xml
@@ -42,7 +42,7 @@ The others should produce output with several message including some labeled war
 In the install/bin folder there is an executable named gridDynMain
 there also should be several example files in the install/examples directory
 
-```
+```sh
 $ ./griddynMain.exe ../examples/two_bus_example.xml
 area count =0 buses=2 links= 1 gens= 1
 (PRESTART)[sim]::GridDyn version 0.5.0 2016-08-20
@@ -53,7 +53,7 @@ simulation final Power flow statesize= 4, 10 non zero elements in Jacobian
 
 Running this with an output file produces
 
-```
+```sh
 $ ./griddynMain.exe ../examples/two_bus_example.xml --powerflow-output=output.txt
 area count =0 buses=2 links= 1 gens= 1
 (PRESTART)[sim]::GridDyn version 0.5.0 2016-08-20
@@ -64,7 +64,7 @@ simulation final Power flow statesize= 4, 10 non zero elements in Jacobian
 
 and an output file output.txt
 
-```
+```text
 gridDynSim_103 basepower=100.000000
 Simulation 2 buses 1 lines
 ===============BUS INFORMATION=====================
@@ -81,7 +81,7 @@ Area#    Area Name                Gen Real     Gen Reactive     Load Real     Lo
 
 Running a dynamic simulation is similar
 
-```
+```sh
 $ ./griddynMain.exe ../examples/two_bus_dynamic_example.xml
 area count =0 buses=2 links= 1 gens= 1
 (PRESTART)[sim]::GridDyn version 0.5.0 2016-08-20
@@ -96,7 +96,7 @@ There is also a small rise in the bus voltages.
 The resulting output file is a CSV file so it can be read in a variety of software packages. In the Matlab folder of the repo is a Matlab class name timeSeries2 that can read both the csv and binary output
 files from the recorders in GridDyn dynamic simulations.
 
-```
+```matlab
 >>ts=timeSeries2('C:\msys64\home\top1\GridDyn\install\bin\twobusdynout.csv');
 >> ts
 

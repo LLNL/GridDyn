@@ -22,7 +22,7 @@ GridDyn uses C++11 extensively and will make use of some C++14 features in the n
 
 At present GridDyn will likely compile on gcc 4.8 and visual studio 2013 but that is expected to change with future updates.
 
-# cmake options
+## cmake options
 
 - **BOOST_ROOT** if boost is not found in the system directories or a different version is desired the root location of boost can be specified in BOOST_ROOT
 - **BUILD_SERVERMODE** the servermode for GridDyn is a work in progress, it is recommended that this option be disabled pending further progress
@@ -68,9 +68,10 @@ At present GridDyn will likely compile on gcc 4.8 and visual studio 2013 but tha
 - **ENABLE_DIME** enable connection with DIME. Depends on Networking
 - **ENABLE_ZMQ** enable ZMQ connection library. Depends on Networking
 
-# Installation notes
+## Installation notes
 
-##Mac
+### Mac
+
 Example of successful build on a mac OS X
 GridDyn on Mac OS X
 
@@ -83,11 +84,13 @@ GridDyn on Mac OS X
     7. Download/configure/build/install BOOST
     8. Configure GridDyn (cd transmission; mkdir build; cd build; ccmake -DKLU\_DIR=$<\hdots>$ -DBoost\_INCLUDE\_DIR=$<\hdots>$ -DBoost\_LIBRARY\_DIRS=$<\hdots>$; ) or use cmake-gui
 
-##Linux
+### Linux
+
 Depending on the distribution, Boost or an updated version of it may need to be installed. SUNDIALS and KLU may need to be installed as well. Typically camke is used to generate makefiles thought it has been used to generate Eclipse projects. BOOST_ROOT, SUNDIALS_INSTALLATION_DIR, and KLU_INSTALL_DIR may need to be user specified if they are not in the system directories. This can be done in the cmake-gui or through the command line tools. Them running make will compile the program.
 Running make install will copy the executables and libraries to the install directory.
 
-##Windows
+### Windows
+
 GridDyn has been successfully built with Visual Studio 2015 and on Msys2. The msys2 build is much like building on linux. This works fine with gcc, the current clang version on msys2 has library incompatibilities with some of the boost libraries due to changes in gcc. I don't fully follow what the exact issue is on but clang won't work on Msys2 to compile GridDyn unless SUNDIALS, boost, and KLU are compiled with the same compiler, I suspect the same issue is also present in some other linux platforms that use gcc 5.0 or greater as the default compiler. The suitesparse version available through pacman on msys2 seems to work fine.
 
 For compilation with Visual Studio boost will need to built with the same version as is used to compile GridDyn. Otherwise follow the same instructions.

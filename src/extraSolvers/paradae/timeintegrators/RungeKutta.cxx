@@ -54,7 +54,7 @@ namespace paradae {
 
         SMultiVector allK(
             nb_steps,
-            size_x);  // TODO : put allK in the calss, allocate in constr, reinit to 0 here.
+            size_x);  // TODO : put allK in the class, allocate in constr, reinit to 0 here.
         PVector Ki;
         // Set dxprev as a good initial guess for Ki
         for (int i = 0; i < nb_steps; i++) {

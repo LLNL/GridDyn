@@ -1,6 +1,6 @@
 # GridDyn: CPack/NSIS Installer & Automated Testing
 
-#### Quick Links
+## Table of Contents
 
 - [Included Files](https://github.com/jspero/LLNL#included-files)
 - [Rebuilding the Installer](https://github.com/jspero/LLNL#rebuilding-the-installer)
