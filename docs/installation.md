@@ -20,9 +20,8 @@ GridDyn uses C++11 extensively and will make use of some C++14 features in the n
 - clang 3.5 or higher (openMP must be turned off to use 3.4)
 - Intel 16.0 (not thoroughly tested as of yet)
 
-At present GridDyn will likely compile on gcc 4.8 and visual studio 2013 but that is expected to change with future updates.
 
-## cmake options
+## CMake options
 
 - **BOOST_ROOT** if boost is not found in the system directories or a different version is desired the root location of boost can be specified in BOOST_ROOT
 - **BUILD_SERVERMODE** the servermode for GridDyn is a work in progress, it is recommended that this option be disabled pending further progress
@@ -30,8 +29,8 @@ At present GridDyn will likely compile on gcc 4.8 and visual studio 2013 but tha
 - **ENABLE_GRIDDYN_TRACE_LOGGING** unselecting disables all TRACE log messages from getting compiled
 - **DOXYGEN_OUTPUT_DIR** location for the generated doxygen documentation
 - **ENABLE_64_BIT_INDEXING** select if you want support inside GridDyn for more than $2^{32}-2$ states or objects (I find this unlikely at this time)
-- **ENABLE_EXPERIMENTAL_TEST_CASES** select to enable some experiemental test cases in the test suite
-- **ENABLE_FMI** enable experiemental support for FMI objects. This is in development, recommended to leave unselected unless you are developing
+- **ENABLE_EXPERIMENTAL_TEST_CASES** select to enable some experimental test cases in the test suite
+- **ENABLE_FMI** enable experimental support for FMI objects. This is in development, recommended to leave unselected unless you are developing
 - **ENABLE_FMI_EXPORT** build a FMI shared library for GridDyn
 - **ENABLE_FSKIT** enable to build additional libraries and support for integration into FSKIT and PARGRID for tool coupling
 - **ENABLE_GRIDDYN_DOXYGEN** select to create a case to build the doxygen docs
@@ -75,18 +74,17 @@ At present GridDyn will likely compile on gcc 4.8 and visual studio 2013 but tha
 Example of successful build on a mac OS X
 GridDyn on Mac OS X
 
-    1. Install MacPorts
-    2. Install cmake port
-    3.    Download [SuiteSparse 4.2.1](http://faculty.cse.tamu.edu/davis/suitesparse.html)
-    4. Build/install SuiteSparse
-    5. Download [SUNDIALS 2.6.2](http://computation.llnl.gov/projects/SUNDIALS-suite-nonlinear-differential-algebraic-equation-solvers/download/SUNDIALS-2.6.2.tar.gz) you may have submit some information first- don't build dynamic libs because they caused issue with GridDyn runtime
-    6. Configure/build/install SUNDIALS (cd SUNDIALS-2.6.2; mkdir build; ccmake ..; update paths for your install location (prefix, klu lib and include dirs), set KLU\_ENABLE to ON); make; make install)
-    7. Download/configure/build/install BOOST
-    8. Configure GridDyn (cd transmission; mkdir build; cd build; ccmake -DKLU\_DIR=$<\hdots>$ -DBoost\_INCLUDE\_DIR=$<\hdots>$ -DBoost\_LIBRARY\_DIRS=$<\hdots>$; ) or use cmake-gui
+1. Install MacPorts
+2. Install cmake port
+3. Download [SuiteSparse 4.2.1](http://faculty.cse.tamu.edu/davis/suitesparse.html)
+4. Build/install SuiteSparse
+5. Download [SUNDIALS 2.6.2](http://computation.llnl.gov/projects/SUNDIALS-suite-nonlinear-differential-algebraic-equation-solvers/download/SUNDIALS-2.6.2.tar.gz) you may have submit some information first- don't build dynamic libs because they caused issue with GridDyn runtime
+6. Configure/build/install SUNDIALS (cd SUNDIALS-2.6.2; mkdir build; ccmake ..; update paths for your install location (prefix, klu lib and include dirs), set KLU\_ENABLE to ON); make; make install)
+8. Configure GridDyn (cd transmission; mkdir build; cd build; ccmake -DKLU\_DIR=$<\hdots>$ -DBoost\_INCLUDE\_DIR=$<\hdots>$ -DBoost\_LIBRARY\_DIRS=$<\hdots>$; ) or use cmake-gui
 
 ### Linux
 
-Depending on the distribution, Boost or an updated version of it may need to be installed. SUNDIALS and KLU may need to be installed as well. Typically camke is used to generate makefiles thought it has been used to generate Eclipse projects. BOOST_ROOT, SUNDIALS_INSTALLATION_DIR, and KLU_INSTALL_DIR may need to be user specified if they are not in the system directories. This can be done in the cmake-gui or through the command line tools. Them running make will compile the program.
+Depending on the distribution, Boost or an updated version of it may need to be installed. SUNDIALS and KLU may need to be installed as well. Typically cmake is used to generate makefiles thought it has been used to generate Eclipse projects. BOOST_ROOT, SUNDIALS_INSTALLATION_DIR, and KLU_INSTALL_DIR may need to be user specified if they are not in the system directories. This can be done in the cmake-gui or through the command line tools. Them running make will compile the program.
 Running make install will copy the executables and libraries to the install directory.
 
 ### Windows
