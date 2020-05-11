@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,47 +8,51 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../testHelper.h"
 #include "gmlc/utilities/TimeSeries.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
 #include <cstdio>
+
+#include <boost/test/unit_test.hpp>
+
+#include <boost/test/tools/floating_point_comparison.hpp>
 // test case for coreObject object
 
 using namespace griddyn;
 #define ROOTS_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/rootFinding_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (root_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
+BOOST_FIXTURE_TEST_SUITE(root_tests,
+                         gridDynSimulationTestFixture,
+                         *boost::unit_test::label("quick"))
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
-BOOST_AUTO_TEST_CASE (root_test1)
+BOOST_AUTO_TEST_CASE(root_test1)
 {
-    std::string fileName = std::string (ROOTS_TEST_DIRECTORY "test_roots1.xml");
+    std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_roots1.xml");
 
-    gds = readSimXMLFile (fileName);
-    BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+    gds = readSimXMLFile(fileName);
+    BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 
-    //	gds->consolePrintLevel=0;
+    //    gds->consolePrintLevel=0;
 
-    gds->powerflow ();
-    BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+    gds->powerflow();
+    BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-    gds->run (30);
-    int alerts = gds->getInt ("alertcount");
+    gds->run(30);
+    int alerts = gds->getInt("alertcount");
 
-    BOOST_CHECK_EQUAL (alerts, 2);
-    BOOST_CHECK (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+    BOOST_CHECK_EQUAL(alerts, 2);
+    BOOST_CHECK(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 #endif
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
-BOOST_AUTO_TEST_CASE (test_RampLoadChange2)
+BOOST_AUTO_TEST_CASE(test_RampLoadChange2)
 {
-    std::string fileName = std::string (ROOTS_TEST_DIRECTORY "test_rampLoadChange2.xml");
-    simpleRunTestXML (fileName);
+    std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_rampLoadChange2.xml");
+    simpleRunTestXML(fileName);
 }
 #endif
 /* TODO :: getting this working again will require finishing the updates to governors
@@ -86,10 +90,10 @@ BOOST_AUTO_TEST_CASE(test_governor_roots)
 */
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
-BOOST_AUTO_TEST_CASE (test_bus_disable)
+BOOST_AUTO_TEST_CASE(test_bus_disable)
 {
-    std::string fileName = std::string (ROOTS_TEST_DIRECTORY "test_bus_disable.xml");
-    simpleRunTestXML (fileName);
+    std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_bus_disable.xml");
+    simpleRunTestXML(fileName);
 }
 #endif
-BOOST_AUTO_TEST_SUITE_END ()
+BOOST_AUTO_TEST_SUITE_END()

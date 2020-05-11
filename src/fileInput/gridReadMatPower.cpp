@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,171 +8,148 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
-
-#include "griddyn/griddyn-config.h"
-#include "fileInput.h"
-#include "readerHelper.h"
+ */
 
 #include "core/objectFactoryTemplates.hpp"
+#include "fileInput.h"
 #include "griddyn/Generator.h"
 #include "griddyn/gridBus.h"
+#include "griddyn/griddyn-config.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/loads/zipLoad.h"
+#include "readerHelper.h"
 
 #ifdef ENABLE_OPTIMIZATION_LIBRARY
-#include "optimization/gridDynOpt.h"
-#include "optimization/models/gridGenOpt.h"
-#include "optimization/optObjectFactory.h"
+#    include "optimization/gridDynOpt.h"
+#    include "optimization/models/gridGenOpt.h"
+#    include "optimization/optObjectFactory.h"
 #else
-#include "griddyn/simulation/gridSimulation.h"
+#    include "griddyn/simulation/gridSimulation.h"
 #endif
 
 #include "gmlc/utilities/stringConversion.h"
-
 #include <cstdlib>
 
-namespace griddyn
-{
+namespace griddyn {
 using namespace units;
 using namespace gmlc::utilities;
 
 using mArray = std::vector<std::vector<double>>;
 
-void loadBusArray (coreObject *parentObject,
-                   double basepower,
-                   mArray &buses,
-                   std::vector<gridBus *> &busList,
-                   const basicReaderInfo &bri);
-int loadGenArray (coreObject *parentObject,
-                  mArray &gens,
-                  std::vector<gridBus *> &busList,
-                  const basicReaderInfo &bri);
-void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount);
-void loadLinkArray (coreObject *parentObject,
-                    mArray &lnks,
-                    std::vector<gridBus *> &busList,
-                    const basicReaderInfo &bri);
+void loadBusArray(coreObject* parentObject,
+                  double basepower,
+                  mArray& buses,
+                  std::vector<gridBus*>& busList,
+                  const basicReaderInfo& bri);
+int loadGenArray(coreObject* parentObject,
+                 mArray& gens,
+                 std::vector<gridBus*>& busList,
+                 const basicReaderInfo& bri);
+void loadGenCostArray(coreObject* parentObject, mArray& genCost, int gencount);
+void loadLinkArray(coreObject* parentObject,
+                   mArray& lnks,
+                   std::vector<gridBus*>& busList,
+                   const basicReaderInfo& bri);
 // wrapper function to detect m file format for matpower or PSAT
 
-void loadMatPower (coreObject *parentObject,
-                   const std::string &filetext,
-                   const std::string &basename,
-                   const basicReaderInfo &bri)
+void loadMatPower(coreObject* parentObject,
+                  const std::string& filetext,
+                  const std::string& basename,
+                  const basicReaderInfo& bri)
 {
     double basepower = bri.base;
-    gridSimulation::resetObjectCounters ();  // reset all the object counters to 0
+    gridSimulation::resetObjectCounters();  // reset all the object counters to 0
     mArray M1;
     int gencount = 0;
-    std::vector<gridBus *> busList;
-    size_t A = filetext.find (basename + ".baseMVA");
-    if (A != std::string::npos)
-    {
-        size_t B = filetext.find_first_of ('=', A);
-        size_t C = filetext.find_first_of (";\n", A);
-        auto tstr = filetext.substr (B + 1, C - B - 1);
-        basepower = numeric_conversion (tstr, 0.0);
-        parentObject->set ("basepower", basepower);
+    std::vector<gridBus*> busList;
+    size_t A = filetext.find(basename + ".baseMVA");
+    if (A != std::string::npos) {
+        size_t B = filetext.find_first_of('=', A);
+        size_t C = filetext.find_first_of(";\n", A);
+        auto tstr = filetext.substr(B + 1, C - B - 1);
+        basepower = numeric_conversion(tstr, 0.0);
+        parentObject->set("basepower", basepower);
     }
     // now find the bus structure
-    if (readMatlabArray (basename + ".bus", filetext, M1))
-    {
-        loadBusArray (parentObject, basepower, M1, busList, bri);
+    if (readMatlabArray(basename + ".bus", filetext, M1)) {
+        loadBusArray(parentObject, basepower, M1, busList, bri);
     }
-    if (readMatlabArray (basename + ".gen", filetext, M1))
-    {
-        gencount = loadGenArray (parentObject, M1, busList, bri);
+    if (readMatlabArray(basename + ".gen", filetext, M1)) {
+        gencount = loadGenArray(parentObject, M1, busList, bri);
     }
-    if (readMatlabArray (basename + ".branch", filetext, M1))
-    {
-        loadLinkArray (parentObject, M1, busList, bri);
+    if (readMatlabArray(basename + ".branch", filetext, M1)) {
+        loadLinkArray(parentObject, M1, busList, bri);
     }
-    if (readMatlabArray (basename + ".gencost", filetext, M1))
-    {
-        loadGenCostArray (parentObject, M1, gencount);
+    if (readMatlabArray(basename + ".gencost", filetext, M1)) {
+        loadGenCostArray(parentObject, M1, gencount);
     }
 }
 
-void loadBusArray (coreObject *parentObject,
-                   double basepower,
-                   mArray &buses,
-                   std::vector<gridBus *> &busList,
-                   const basicReaderInfo & /*bri*/)
+void loadBusArray(coreObject* parentObject,
+                  double basepower,
+                  mArray& buses,
+                  std::vector<gridBus*>& busList,
+                  const basicReaderInfo& /*bri*/)
 {
-    Load *ld = nullptr;
-    auto busFactory =
-      dynamic_cast<typeFactory<gridBus> *> (coreObjectFactory::instance ()->getFactory ("bus")->getFactory (""));
-    busFactory->prepObjects (static_cast<count_t> (buses.size ()), parentObject);
+    Load* ld = nullptr;
+    auto busFactory = dynamic_cast<typeFactory<gridBus>*>(
+        coreObjectFactory::instance()->getFactory("bus")->getFactory(""));
+    busFactory->prepObjects(static_cast<count_t>(buses.size()), parentObject);
 
-    auto loadFactory =
-      dynamic_cast<typeFactory<Load> *> (coreObjectFactory::instance ()->getFactory ("load")->getFactory (""));
-    loadFactory->prepObjects (static_cast<count_t> (buses.size ()), parentObject);
-    for (const auto &busData : buses)
-    {
-        auto ind1 = static_cast<index_t> (busData[0]);
-        if (ind1 >= static_cast<index_t> (busList.size ()))
-        {
-            busList.resize (ind1 * 2 + 1);
+    auto loadFactory = dynamic_cast<typeFactory<Load>*>(
+        coreObjectFactory::instance()->getFactory("load")->getFactory(""));
+    loadFactory->prepObjects(static_cast<count_t>(buses.size()), parentObject);
+    for (const auto& busData : buses) {
+        auto ind1 = static_cast<index_t>(busData[0]);
+        if (ind1 >= static_cast<index_t>(busList.size())) {
+            busList.resize(ind1 * 2 + 1);
         }
-        if (busList[ind1] == nullptr)
-        {
-            busList[ind1] = busFactory->makeTypeObject ();
-            busList[ind1]->set ("basepower", basepower);
-            busList[ind1]->setName ("Bus_" + std::to_string (ind1));
-            busList[ind1]->setUserID (ind1);
-            parentObject->add (busList[ind1]);
+        if (busList[ind1] == nullptr) {
+            busList[ind1] = busFactory->makeTypeObject();
+            busList[ind1]->set("basepower", basepower);
+            busList[ind1]->setName("Bus_" + std::to_string(ind1));
+            busList[ind1]->setUserID(ind1);
+            parentObject->add(busList[ind1]);
         }
-        gridBus *bus = busList[ind1];
-        ind1 = static_cast<int> (busData[1]);
-        if (ind1 == 2)
-        {
-            bus->set ("type", "PV");
+        gridBus* bus = busList[ind1];
+        ind1 = static_cast<int>(busData[1]);
+        if (ind1 == 2) {
+            bus->set("type", "PV");
+        } else if (ind1 == 3) {
+            bus->set("type", "SLK");
+        } else if (ind1 == 4) {
+            bus->disable();
         }
-        else if (ind1 == 3)
-        {
-            bus->set ("type", "SLK");
-        }
-        else if (ind1 == 4)
-        {
-            bus->disable ();
-        }
-        bus->set ("basevoltage", busData[9]);
+        bus->set("basevoltage", busData[9]);
         // check the constant load
-        if ((busData[2] != 0.0) || (busData[3] != 0.0))
-        {
-            ld = loadFactory->makeTypeObject ();
-            bus->add (ld);
-            ld->set ("p", busData[2], MW);
-            ld->set ("q", busData[3], MVAR);
-            ld->setFlag ("no_pqvoltage_limit");
-        }
-        else
-        {
+        if ((busData[2] != 0.0) || (busData[3] != 0.0)) {
+            ld = loadFactory->makeTypeObject();
+            bus->add(ld);
+            ld->set("p", busData[2], MW);
+            ld->set("q", busData[3], MVAR);
+            ld->setFlag("no_pqvoltage_limit");
+        } else {
             ld = nullptr;
         }
-        if (busData[4] != 0.0)
-        {
-            if (ld == nullptr)
-            {
-                ld = loadFactory->makeTypeObject ();
-                bus->add (ld);
+        if (busData[4] != 0.0) {
+            if (ld == nullptr) {
+                ld = loadFactory->makeTypeObject();
+                bus->add(ld);
             }
-            ld->set ("yp", busData[4], MW);
+            ld->set("yp", busData[4], MW);
         }
-        if (busData[5] != 0)
-        {
-            if (ld == nullptr)
-            {
-                ld = loadFactory->makeTypeObject ();
-                bus->add (ld);
+        if (busData[5] != 0) {
+            if (ld == nullptr) {
+                ld = loadFactory->makeTypeObject();
+                bus->add(ld);
             }
-            ld->set ("yq", -busData[5], MVAR);
+            ld->set("yq", -busData[5], MVAR);
         }
         // buses[kk][6] is the area which should be used at some point
 
-        bus->setVoltageAngle (busData[7], convert(busData[8], deg, rad));
-        bus->set ("vmax", busData[11]);
-        bus->set ("vmin", busData[12]);
+        bus->setVoltageAngle(busData[7], convert(busData[8], deg, rad));
+        bus->set("vmax", busData[11]);
+        bus->set("vmin", busData[12]);
     }
 }
 /*
@@ -206,95 +183,79 @@ MU QMAX† 24 Kuhn-Tucker multiplier on upper Qg limit (u/MVAr)
 MU QMIN† 25 Kuhn-Tucker multiplier on lower Qg limit (u/MVAr)
 */
 
-int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo & bri)
+int loadGenArray(coreObject* parentObject,
+                 mArray& gens,
+                 std::vector<gridBus*>& busList,
+                 const basicReaderInfo& bri)
 {
     index_t kk = 1;
-	std::string gtype = (bri.checkFlag(assume_powerflow_only)) ? "simple" : "";
-    auto genFactory = dynamic_cast<typeFactory<Generator> *> (
-      coreObjectFactory::instance ()->getFactory ("generator")->getFactory (gtype));
-    genFactory->prepObjects (static_cast<count_t> (gens.size ()), parentObject);
+    std::string gtype = (bri.checkFlag(assume_powerflow_only)) ? "simple" : "";
+    auto genFactory = dynamic_cast<typeFactory<Generator>*>(
+        coreObjectFactory::instance()->getFactory("generator")->getFactory(gtype));
+    genFactory->prepObjects(static_cast<count_t>(gens.size()), parentObject);
 
-    for (auto &genLine : gens)
-    {
-        auto ind1 = static_cast<index_t> (genLine[0]);
+    for (auto& genLine : gens) {
+        auto ind1 = static_cast<index_t>(genLine[0]);
         auto bus = busList[ind1];
-        Generator *gen = genFactory->makeTypeObject ("gen" + std::to_string(kk));
-        gen->setUserID (kk);
+        Generator* gen = genFactory->makeTypeObject("gen" + std::to_string(kk));
+        gen->setUserID(kk);
         ++kk;
-        bus->add (gen);
-        if (genLine[1] != 0)
-        {
-            gen->set ("p", genLine[1], MW);
+        bus->add(gen);
+        if (genLine[1] != 0) {
+            gen->set("p", genLine[1], MW);
         }
-        if (genLine[2] != 0.0)
-        {
-            gen->set ("q", genLine[2], MVAR);
+        if (genLine[2] != 0.0) {
+            gen->set("q", genLine[2], MVAR);
         }
-        gen->set ("qmax", genLine[3], MVAR);
-        gen->set ("qmin", genLine[4], MVAR);
+        gen->set("qmax", genLine[3], MVAR);
+        gen->set("qmin", genLine[4], MVAR);
 
-        if (genLine[6] > 0.0)
-        {
-            gen->set ("mbase", genLine[6], MVAR);
+        if (genLine[6] > 0.0) {
+            gen->set("mbase", genLine[6], MVAR);
         }
-        if (genLine[7] <= 0.0)
-        {
-            gen->disable ();
-            if (genLine[5] != 1.0)
-            {
-				if (!bri.checkFlag(no_generator_bus_voltage_reset))
-				{
-					bus->set("vtarget", genLine[5]);
-				}
+        if (genLine[7] <= 0.0) {
+            gen->disable();
+            if (genLine[5] != 1.0) {
+                if (!bri.checkFlag(no_generator_bus_voltage_reset)) {
+                    bus->set("vtarget", genLine[5]);
+                }
+            }
+        } else {
+            if (!bri.checkFlag(no_generator_bus_voltage_reset)) {
+                bus->set("vtarget", genLine[5]);
+                // bus->set("voltage", genLine[5]);
             }
         }
-        else
-        {
-			if (!bri.checkFlag(no_generator_bus_voltage_reset))
-			{
-				bus->set("vtarget", genLine[5]);
-				//bus->set("voltage", genLine[5]);
-			}
+
+        if (genLine[8] != 0.0) {
+            gen->set("pmax", genLine[8], MW);
         }
 
-        if (genLine[8] != 0.0)
-        {
-            gen->set ("pmax", genLine[8], MW);
+        if (genLine[9] != 0) {
+            gen->set("pmin", genLine[9], MW);
         }
 
-        if (genLine[9] != 0)
-        {
-            gen->set ("pmin", genLine[9], MW);
-        }
-
-        if (genLine.size () >= 21)
-        {
-            if ((genLine[10] != 0) && (genLine[11] != 0))
-            {
+        if (genLine.size() >= 21) {
+            if ((genLine[10] != 0) && (genLine[11] != 0)) {
                 std::vector<double> PC{genLine[10], genLine[11]};
                 std::vector<double> Qmin{genLine[12], genLine[14]};
                 std::vector<double> Qmax{genLine[13], genLine[15]};
-                gen->setCapabilityCurve (PC, Qmin, Qmax);
+                gen->setCapabilityCurve(PC, Qmin, Qmax);
             }
-            if (genLine[16] != 0)
-            {
-                gen->set ("rampreg", genLine[16], MW/s);
+            if (genLine[16] != 0) {
+                gen->set("rampreg", genLine[16], MW / s);
             }
-            if (genLine[17] != 0)
-            {
-                gen->set ("ramp10", genLine[17], MW/s);
+            if (genLine[17] != 0) {
+                gen->set("ramp10", genLine[17], MW / s);
             }
-            if (genLine[18] != 0)
-            {
-                gen->set ("ramp30", genLine[18], MW/s);
+            if (genLine[18] != 0) {
+                gen->set("ramp30", genLine[18], MW / s);
             }
-            if (genLine[19] != 0)
-            {
-                gen->set ("rampq", genLine[19], MW/s);
+            if (genLine[19] != 0) {
+                gen->set("rampq", genLine[19], MW / s);
             }
-            if (genLine[20] != 0)
-            {
-                gen->set ("apf", genLine[20]);
+            if (genLine[20] != 0) {
+                gen->set("apf", genLine[20]);
             }
         }
     }
@@ -318,67 +279,60 @@ COST                    5 parameters defining total cost function f(p) begin in 
                             highest order, where cost is f(p) = cn*p^n + ... + c1*p + c0
 */
 #ifdef ENABLE_OPTIMIZATION_LIBRARY
-void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
+void loadGenCostArray(coreObject* parentObject, mArray& genCost, int gencount)
 {
-    auto gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot ());
-    if (gdo==nullptr)  // return if the core object doesn't support optimization
+    auto gdo = dynamic_cast<gridDynOptimization*>(parentObject->getRoot());
+    if (gdo == nullptr)  // return if the core object doesn't support optimization
     {
         return;
     }
 
-    gridGenOpt *go;
-    gridOptObject *oo;
-    coreObject *obj;
+    gridGenOpt* go;
+    gridOptObject* oo;
+    coreObject* obj;
     int mode = 0;
     int numc = 0;
     int q = 0;
     std::vector<double> coeff;
 
-    auto genOptFactory = dynamic_cast<optObjectFactory<gridGenOpt, Generator> *> (
-      coreOptObjectFactory::instance ()->getFactory ("")->getFactory ("generator"));
-    genOptFactory->prepObjects (static_cast<count_t> (genCost.size ()), parentObject);
+    auto genOptFactory = dynamic_cast<optObjectFactory<gridGenOpt, Generator>*>(
+        coreOptObjectFactory::instance()->getFactory("")->getFactory("generator"));
+    genOptFactory->prepObjects(static_cast<count_t>(genCost.size()), parentObject);
 
-    std::vector<gridGenOpt *> genOptList (gencount);
+    std::vector<gridGenOpt*> genOptList(gencount);
 
     int kk = 1;
-    for (auto &genLine : genCost)
-    {
-        if (kk > gencount)
-        {
+    for (auto& genLine : genCost) {
+        if (kk > gencount) {
             q = 1;
             go = genOptList[kk - gencount - 1];
-        }
-        else
-        {
-            obj = parentObject->getSubObject ("gen", kk);
-            if (obj==nullptr)
-            {
+        } else {
+            obj = parentObject->getSubObject("gen", kk);
+            if (obj == nullptr) {
                 continue;
             }
-            go = genOptFactory->makeTypeObject (obj);
+            go = genOptFactory->makeTypeObject(obj);
             genOptList[kk - 1] = go;
             q = 0;
-            oo = gdo->makeOptObjectPath (obj->getParent ());
-            oo->add (go);
+            oo = gdo->makeOptObjectPath(obj->getParent());
+            oo->add(go);
         }
 
         ++kk;
-        mode = static_cast<int> (genLine[0]);
-        numc = static_cast<int> (genLine[3]);
-        coeff.resize (numc);
-        for (int ii = 0; ii < numc; ii++)
-        {
+        mode = static_cast<int>(genLine[0]);
+        numc = static_cast<int>(genLine[3]);
+        coeff.resize(numc);
+        for (int ii = 0; ii < numc; ii++) {
             coeff[ii] = genLine[4 + ii];
         }
-        go->loadCostCoeff (coeff, q);
-        if (mode == 1)
-        {
-            go->set ("piecewise linear cost", 1);
+        go->loadCostCoeff(coeff, q);
+        if (mode == 1) {
+            go->set("piecewise linear cost", 1);
         }
     }
 }
 #else
-void loadGenCostArray (coreObject * /*parentObject*/, mArray & /*genCost*/, int /*gencount*/) {}
+void loadGenCostArray(coreObject* /*parentObject*/, mArray& /*genCost*/, int /*gencount*/) {}
 #endif
 /*
 see: http://www.pserc.cornell.edu/matpower/docs/ref/matpower6.0/idx_brch.html
@@ -408,64 +362,57 @@ MU ANGMIN‡ 20 Kuhn-Tucker multiplier lower angle difference limit (u/degree)
 MU ANGMAX‡ 21 Kuhn-Tucker multiplier upper angle difference limit (u/degree)
 */
 
-void loadLinkArray (coreObject *parentObject,
-                    mArray &lnks,
-                    std::vector<gridBus *> &busList,
-                    const basicReaderInfo & /*bri*/)
+void loadLinkArray(coreObject* parentObject,
+                   mArray& lnks,
+                   std::vector<gridBus*>& busList,
+                   const basicReaderInfo& /*bri*/)
 {
-    auto linkFactory =
-      dynamic_cast<typeFactory<Link> *> (coreObjectFactory::instance ()->getFactory ("link")->getFactory (""));
-    linkFactory->prepObjects (static_cast<count_t> (lnks.size ()), parentObject);
+    auto linkFactory = dynamic_cast<typeFactory<Link>*>(
+        coreObjectFactory::instance()->getFactory("link")->getFactory(""));
+    linkFactory->prepObjects(static_cast<count_t>(lnks.size()), parentObject);
     index_t kk = 0;
-    for (const auto &linkData : lnks)
-    {
-        auto ind1 = static_cast<index_t> (linkData[0]);
-        gridBus *bus1 = busList[ind1];
+    for (const auto& linkData : lnks) {
+        auto ind1 = static_cast<index_t>(linkData[0]);
+        gridBus* bus1 = busList[ind1];
 
-        auto ind2 = static_cast<index_t> (linkData[1]);
-        gridBus *bus2 = busList[ind2];
-        Link *lnk = linkFactory->makeTypeObject ();
+        auto ind2 = static_cast<index_t>(linkData[1]);
+        gridBus* bus2 = busList[ind2];
+        Link* lnk = linkFactory->makeTypeObject();
         ++kk;
-        lnk->setUserID (kk);
-        lnk->updateBus (bus1, 1);
-        lnk->updateBus (bus2, 2);
-        parentObject->add (lnk);
-        lnk->set ("r", linkData[2]);
-        lnk->set ("x", linkData[3]);
-        lnk->set ("b", linkData[4]);
+        lnk->setUserID(kk);
+        lnk->updateBus(bus1, 1);
+        lnk->updateBus(bus2, 2);
+        parentObject->add(lnk);
+        lnk->set("r", linkData[2]);
+        lnk->set("x", linkData[3]);
+        lnk->set("b", linkData[4]);
 
-        if (linkData[5] != 0.0)
-        {
-            lnk->set ("ratinga", linkData[5], MW);
+        if (linkData[5] != 0.0) {
+            lnk->set("ratinga", linkData[5], MW);
         }
 
-        if (linkData[6] != 0.0)
-        {
-            lnk->set ("ratingb", linkData[6], MW);
+        if (linkData[6] != 0.0) {
+            lnk->set("ratingb", linkData[6], MW);
         }
-        if (linkData[7] != 0.0)
-        {
-            lnk->set ("ratingc", linkData[7], MW);
+        if (linkData[7] != 0.0) {
+            lnk->set("ratingc", linkData[7], MW);
         }
         if (linkData[8] > 0.05)  // just make sure list a tap
         {
-            lnk->set ("tap", linkData[8]);
+            lnk->set("tap", linkData[8]);
         }
-        if (linkData[9] != 0.0)
-        {
-            lnk->set ("tapangle", linkData[9], deg);
+        if (linkData[9] != 0.0) {
+            lnk->set("tapangle", linkData[9], deg);
         }
 
-        if (linkData[10] <= 0.0)
-        {
-			lnk->disconnect();
+        if (linkData[10] <= 0.0) {
+            lnk->disconnect();
         }
-        if (linkData.size () >= 13)
-        {
-            lnk->set ("minangle", linkData[11], deg);
-            lnk->set ("maxangle", linkData[12], deg);
+        if (linkData.size() >= 13) {
+            lnk->set("minangle", linkData[11], deg);
+            lnk->set("maxangle", linkData[12], deg);
         }
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

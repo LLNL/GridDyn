@@ -4,10 +4,10 @@
       <type>infinite</type>
       <angle>0</angle>
       <voltage>1</voltage>
-	</bus>
+    </bus>
 <bus>
-	<name>bus2</name>
-	  
+    <name>bus2</name>
+
      <load name="load3" type="simple">
        <P>0.5</P>
        <fmiinput>
@@ -25,5 +25,5 @@
    <timestop>5000</timestop>
    <timestep>20</timestep>
     <fmioutput field="bus2:loadp as load" />
-   
+
 </griddyn>

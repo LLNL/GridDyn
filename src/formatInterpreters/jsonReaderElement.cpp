@@ -11,8 +11,9 @@
  */
 
 #include "jsonReaderElement.h"
-#include "jsonElement.h"
+
 #include "gmlc/utilities/stringConversion.h"
+#include "jsonElement.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -21,26 +22,29 @@ static const std::string nullStr;
 
 using namespace gmlc::utilities;
 
-bool isElement(const Json::Value &testValue);
-bool isAttribute(const Json::Value &testValue);
+bool isElement(const Json::Value& testValue);
+bool isAttribute(const Json::Value& testValue);
 jsonReaderElement::jsonReaderElement() = default;
-jsonReaderElement::jsonReaderElement(const std::string &fileName) { jsonReaderElement::loadFile(fileName); }
+jsonReaderElement::jsonReaderElement(const std::string& fileName)
+{
+    jsonReaderElement::loadFile(fileName);
+}
 void jsonReaderElement::clear()
 {
     parents.clear();
-    if (current)
-    {
+    if (current) {
         current->clear();
     }
 }
 
-bool jsonReaderElement::isValid() const { return ((current) && (!current->isNull())); }
+bool jsonReaderElement::isValid() const
+{
+    return ((current) && (!current->isNull()));
+}
 bool jsonReaderElement::isDocument() const
 {
-    if (parents.empty())
-    {
-        if (doc)
-        {
+    if (parents.empty()) {
+        if (doc) {
             return true;
         }
     }
@@ -51,8 +55,7 @@ std::shared_ptr<readerElement> jsonReaderElement::clone() const
 {
     auto ret = std::make_shared<jsonReaderElement>();
     ret->parents.reserve(parents.size());
-    for (auto &parent : parents)
-    {
+    for (auto& parent : parents) {
         ret->parents.push_back(std::make_shared<jsonElement>(*parent));
     }
     ret->current = std::make_shared<jsonElement>(*current);
@@ -60,18 +63,16 @@ std::shared_ptr<readerElement> jsonReaderElement::clone() const
     return ret;
 }
 
-bool jsonReaderElement::loadFile(const std::string &fileName)
+bool jsonReaderElement::loadFile(const std::string& fileName)
 {
     std::ifstream file(fileName);
-    if (file.is_open())
-    {
+    if (file.is_open()) {
         doc = std::make_shared<Json::Value>();
 
         Json::CharReaderBuilder rbuilder;
         std::string errs;
         bool ok = Json::parseFromStream(rbuilder, file, doc.get(), &errs);
-        if (ok)
-        {
+        if (ok) {
             current = std::make_shared<jsonElement>(*doc, fileName);
             return true;
         }
@@ -88,32 +89,27 @@ bool jsonReaderElement::loadFile(const std::string &fileName)
     return false;
 }
 
-bool jsonReaderElement::parse(const std::string &inputString)
+bool jsonReaderElement::parse(const std::string& inputString)
 {
     std::ifstream file(inputString);
     doc = std::make_shared<Json::Value>();
 
-    if (file.is_open())
-    {
+    if (file.is_open()) {
         Json::CharReaderBuilder rbuilder;
         std::string errs;
         bool ok = Json::parseFromStream(rbuilder, file, doc.get(), &errs);
-        if (!ok)
-        {
+        if (!ok) {
             std::cerr << "Read error in stream::" << errs << '\n';
             doc = nullptr;
             clear();
             return false;
         }
-    }
-    else
-    {
+    } else {
         Json::CharReaderBuilder rbuilder;
         std::string errs;
         std::istringstream jstring(inputString);
         bool ok = Json::parseFromStream(rbuilder, jstring, doc.get(), &errs);
-        if (!ok)
-        {
+        if (!ok) {
             std::cerr << "Read error in stream::" << errs << '\n';
             doc = nullptr;
             clear();
@@ -123,20 +119,20 @@ bool jsonReaderElement::parse(const std::string &inputString)
     return true;
 }
 
-std::string jsonReaderElement::getName() const { return current->name; }
+std::string jsonReaderElement::getName() const
+{
+    return current->name;
+}
 double jsonReaderElement::getValue() const
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return readerNullVal;
     }
 
-    if (current->getElement().isConvertibleTo(Json::ValueType::realValue))
-    {
+    if (current->getElement().isConvertibleTo(Json::ValueType::realValue)) {
         return current->getElement().asDouble();
     }
-    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue))
-    {
+    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue)) {
         return numeric_conversionComplete(current->getElement().asString(), readerNullVal);
     }
     return readerNullVal;
@@ -144,55 +140,47 @@ double jsonReaderElement::getValue() const
 
 std::string jsonReaderElement::getText() const
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return nullStr;
     }
 
-    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue))
-    {
+    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue)) {
         return current->getElement().asString();
     }
     return nullStr;
 }
 
-std::string jsonReaderElement::getMultiText(const std::string & /*sep*/) const
+std::string jsonReaderElement::getMultiText(const std::string& /*sep*/) const
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return nullStr;
     }
 
-    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue))
-    {
+    if (current->getElement().isConvertibleTo(Json::ValueType::stringValue)) {
         return current->getElement().asString();
     }
     return nullStr;
 }
 // no attributes in json
-bool jsonReaderElement::hasAttribute(const std::string &attributeName) const
+bool jsonReaderElement::hasAttribute(const std::string& attributeName) const
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return false;
     }
 
-    if (current->getElement().isMember(attributeName))
-    {
+    if (current->getElement().isMember(attributeName)) {
         return (isAttribute(current->getElement()[attributeName]));
     }
     return false;
 }
 
-bool jsonReaderElement::hasElement(const std::string &elementName) const
+bool jsonReaderElement::hasElement(const std::string& elementName) const
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return false;
     }
 
-    if (current->getElement().isMember(elementName))
-    {
+    if (current->getElement().isMember(elementName)) {
         return (isElement(current->getElement()[elementName]));
     }
 
@@ -201,8 +189,7 @@ bool jsonReaderElement::hasElement(const std::string &elementName) const
 
 readerAttribute jsonReaderElement::getFirstAttribute()
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return readerAttribute();
     }
 
@@ -210,10 +197,8 @@ readerAttribute jsonReaderElement::getFirstAttribute()
     auto elementEnd = current->getElement().end();
     iteratorCount = 0;
 
-    while (attIterator != elementEnd)
-    {
-        if (isAttribute(*attIterator))
-        {
+    while (attIterator != elementEnd) {
+        if (isAttribute(*attIterator)) {
             return readerAttribute(attIterator.name(), attIterator->asString());
         }
         ++attIterator;
@@ -225,30 +210,24 @@ readerAttribute jsonReaderElement::getFirstAttribute()
 
 readerAttribute jsonReaderElement::getNextAttribute()
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return readerAttribute();
     }
     auto elementEnd = current->getElement().end();
     auto attIterator = current->getElement().begin();
-    for (int ii = 0; ii < iteratorCount; ++ii)
-    {
+    for (int ii = 0; ii < iteratorCount; ++ii) {
         ++attIterator;
-        if (attIterator == elementEnd)
-        {
+        if (attIterator == elementEnd) {
             return readerAttribute();
         }
     }
-    if (attIterator == elementEnd)
-    {
+    if (attIterator == elementEnd) {
         return readerAttribute();
     }
     ++attIterator;
     ++iteratorCount;
-    while (attIterator != elementEnd)
-    {
-        if (isAttribute(*attIterator))
-        {
+    while (attIterator != elementEnd) {
+        if (isAttribute(*attIterator)) {
             return readerAttribute(attIterator.name(), attIterator->asString());
         }
         ++attIterator;
@@ -257,33 +236,30 @@ readerAttribute jsonReaderElement::getNextAttribute()
     return readerAttribute();
 }
 
-readerAttribute jsonReaderElement::getAttribute(const std::string &attributeName) const
+readerAttribute jsonReaderElement::getAttribute(const std::string& attributeName) const
 {
-    if (hasAttribute(attributeName))
-    {
+    if (hasAttribute(attributeName)) {
         return readerAttribute(attributeName, current->getElement()[attributeName].asString());
     }
     return readerAttribute();
 }
 
-std::string jsonReaderElement::getAttributeText(const std::string &attributeName) const
+std::string jsonReaderElement::getAttributeText(const std::string& attributeName) const
 {
-    if (hasAttribute(attributeName))
-    {
+    if (hasAttribute(attributeName)) {
         return current->getElement()[attributeName].asString();
     }
     return nullStr;
 }
 
-double jsonReaderElement::getAttributeValue(const std::string &attributeName) const
+double jsonReaderElement::getAttributeValue(const std::string& attributeName) const
 {
-    if (hasAttribute(attributeName))
-    {
-        if (current->getElement()[attributeName].isConvertibleTo(Json::ValueType::realValue))
-        {
+    if (hasAttribute(attributeName)) {
+        if (current->getElement()[attributeName].isConvertibleTo(Json::ValueType::realValue)) {
             return current->getElement()[attributeName].asDouble();
         }
-        return numeric_conversionComplete(current->getElement()[attributeName].asString(), readerNullVal);
+        return numeric_conversionComplete(current->getElement()[attributeName].asString(),
+                                          readerNullVal);
     }
     return readerNullVal;
 }
@@ -295,7 +271,7 @@ std::shared_ptr<readerElement> jsonReaderElement::firstChild() const
     return newElement;
 }
 
-std::shared_ptr<readerElement> jsonReaderElement::firstChild(const std::string &childName) const
+std::shared_ptr<readerElement> jsonReaderElement::firstChild(const std::string& childName) const
 {
     auto newElement = clone();
     newElement->moveToFirstChild(childName);
@@ -304,18 +280,15 @@ std::shared_ptr<readerElement> jsonReaderElement::firstChild(const std::string &
 
 void jsonReaderElement::moveToFirstChild()
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return;
     }
     current->elementIndex = 0;
     auto elementIterator = current->getElement().begin();
     auto endIterator = current->getElement().end();
 
-    while (elementIterator != endIterator)
-    {
-        if (isElement(*elementIterator))
-        {
+    while (elementIterator != endIterator) {
+        if (isElement(*elementIterator)) {
             parents.push_back(current);
             current = std::make_shared<jsonElement>(*elementIterator, elementIterator.name());
             return;
@@ -327,17 +300,14 @@ void jsonReaderElement::moveToFirstChild()
     current->clear();
 }
 
-void jsonReaderElement::moveToFirstChild(const std::string &childName)
+void jsonReaderElement::moveToFirstChild(const std::string& childName)
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return;
     }
 
-    if (current->getElement().isMember(childName))
-    {
-        if (isElement(current->getElement()[childName]))
-        {
+    if (current->getElement().isMember(childName)) {
+        if (isElement(current->getElement()[childName])) {
             parents.push_back(current);
             current = std::make_shared<jsonElement>(current->getElement()[childName], childName);
             return;
@@ -350,21 +320,17 @@ void jsonReaderElement::moveToFirstChild(const std::string &childName)
 
 void jsonReaderElement::moveToNextSibling()
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return;
     }
     ++current->arrayIndex;
-    while (current->arrayIndex < current->count())
-    {
-        if (!current->getElement().empty())
-        {
+    while (current->arrayIndex < current->count()) {
+        if (!current->getElement().empty()) {
             return;
         }
         ++current->arrayIndex;
     }
-    if (parents.empty())
-    {
+    if (parents.empty()) {
         current->clear();
         return;
     }
@@ -373,19 +339,15 @@ void jsonReaderElement::moveToNextSibling()
     auto endIterator = parents.back()->getElement().end();
     ++parents.back()->elementIndex;
     // iterators don't survive copy so have to move the iterator to the next element index
-    for (int ii = 0; ii < parents.back()->elementIndex; ++ii)
-    {
+    for (int ii = 0; ii < parents.back()->elementIndex; ++ii) {
         ++elementIterator;
-        if (elementIterator == endIterator)
-        {
+        if (elementIterator == endIterator) {
             current->clear();
         }
     }
     // Now find the next valid element
-    while (elementIterator != endIterator)
-    {
-        if (isElement(*elementIterator))
-        {
+    while (elementIterator != endIterator) {
+        if (isElement(*elementIterator)) {
             current = std::make_shared<jsonElement>(*elementIterator, elementIterator.name());
             return;
         }
@@ -395,32 +357,25 @@ void jsonReaderElement::moveToNextSibling()
     current->clear();
 }
 
-void jsonReaderElement::moveToNextSibling(const std::string &siblingName)
+void jsonReaderElement::moveToNextSibling(const std::string& siblingName)
 {
-    if (!isValid())
-    {
+    if (!isValid()) {
         return;
     }
-    if (siblingName == current->name)
-    {
+    if (siblingName == current->name) {
         ++current->arrayIndex;
-        while (current->arrayIndex < current->count())
-        {
-            if (!current->getElement().empty())
-            {
+        while (current->arrayIndex < current->count()) {
+            if (!current->getElement().empty()) {
                 return;
             }
             ++current->arrayIndex;
         }
         current->clear();
-    }
-    else
-    {
-        if (parents.back()->getElement().isMember(siblingName))
-        {
-            if (isElement(parents.back()->getElement()[siblingName]))
-            {
-                current = std::make_shared<jsonElement>(parents.back()->getElement()[siblingName], siblingName);
+    } else {
+        if (parents.back()->getElement().isMember(siblingName)) {
+            if (isElement(parents.back()->getElement()[siblingName])) {
+                current = std::make_shared<jsonElement>(parents.back()->getElement()[siblingName],
+                                                        siblingName);
                 return;
             }
         }
@@ -429,8 +384,7 @@ void jsonReaderElement::moveToNextSibling(const std::string &siblingName)
 
 void jsonReaderElement::moveToParent()
 {
-    if (parents.empty())
-    {
+    if (parents.empty()) {
         return;
     }
     current = parents.back();
@@ -444,19 +398,21 @@ std::shared_ptr<readerElement> jsonReaderElement::nextSibling() const
     return newElement;
 }
 
-std::shared_ptr<readerElement> jsonReaderElement::nextSibling(const std::string &siblingName) const
+std::shared_ptr<readerElement> jsonReaderElement::nextSibling(const std::string& siblingName) const
 {
     auto newElement = clone();
     newElement->moveToNextSibling(siblingName);
     return newElement;
 }
 
-void jsonReaderElement::bookmark() { bookmarks.push_back(std::static_pointer_cast<jsonReaderElement>(clone())); }
+void jsonReaderElement::bookmark()
+{
+    bookmarks.push_back(std::static_pointer_cast<jsonReaderElement>(clone()));
+}
 
 void jsonReaderElement::restore()
 {
-    if (bookmarks.empty())
-    {
+    if (bookmarks.empty()) {
         return;
     }
     parents = bookmarks.back()->parents;
@@ -464,36 +420,30 @@ void jsonReaderElement::restore()
     bookmarks.pop_back();
 }
 
-bool isAttribute(const Json::Value &testValue)
+bool isAttribute(const Json::Value& testValue)
 {
-    if (testValue.empty())
-    {
+    if (testValue.empty()) {
         return false;
     }
-    if (testValue.isObject())
-    {
+    if (testValue.isObject()) {
         return false;
     }
-    if (testValue.isArray())
-    {
+    if (testValue.isArray()) {
         return false;
     }
     return true;
 }
 
-bool isElement(const Json::Value &testValue)
+bool isElement(const Json::Value& testValue)
 {
-    if (testValue.empty())
-    {
+    if (testValue.empty()) {
         return false;
     }
 
-    if (testValue.isObject())
-    {
+    if (testValue.isObject()) {
         return true;
     }
-    if (testValue.isArray())
-    {
+    if (testValue.isArray()) {
         return true;
     }
 

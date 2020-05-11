@@ -1,81 +1,57 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 #ifndef DISABLE_GRIDDYN
 
-#include "paradaeArrayData.h"
+#    include "paradaeArrayData.h"
 
 namespace griddyn {
 namespace paradae {
-paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
-{
-  J=mat;
-  setRowLimit(static_cast<count_t>(mat->GetM()));
-  
-  setColLimit(static_cast<count_t>(mat->GetM()));
-}
+    paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
+    {
+        J = mat;
+        setRowLimit(static_cast<count_t>(mat->GetM()));
 
-void paradaeArrayData::clear()
-{
-  J->FillKeepingStruct(0);
-}
+        setColLimit(static_cast<count_t>(mat->GetM()));
+    }
 
-void paradaeArrayData::assign(index_t X, index_t Y, double num)
-{
-  (*J)(X,Y)+=num;
-}
+    void paradaeArrayData::clear() { J->FillKeepingStruct(0); }
 
-void paradaeArrayData::setMatrix (SparseMatrix* mat)
-{
-  J=mat;
-  setRowLimit(static_cast<count_t>(mat->GetM()));
-  setColLimit(static_cast<count_t>(mat->GetM()));
-}
+    void paradaeArrayData::assign(index_t X, index_t Y, double num) { (*J)(X, Y) += num; }
 
-count_t paradaeArrayData::size() const
-{
-  return static_cast<count_t> (J->GetNNZ());
-}
+    void paradaeArrayData::setMatrix(SparseMatrix* mat)
+    {
+        J = mat;
+        setRowLimit(static_cast<count_t>(mat->GetM()));
+        setColLimit(static_cast<count_t>(mat->GetM()));
+    }
 
-count_t paradaeArrayData::capacity() const
-{
-  return static_cast<count_t> (J->GetNNZ());
-}
+    count_t paradaeArrayData::size() const { return static_cast<count_t>(J->GetNNZ()); }
 
-index_t paradaeArrayData::rowIndex (index_t N) const
-{
-  return J->GetRowIndex(N);
-}
+    count_t paradaeArrayData::capacity() const { return static_cast<count_t>(J->GetNNZ()); }
 
-index_t paradaeArrayData::colIndex (index_t N) const
-{
-  return J->GetColIndex(N);
-}
+    index_t paradaeArrayData::rowIndex(index_t N) const { return J->GetRowIndex(N); }
 
-double paradaeArrayData::val(index_t N) const
-{
-  return J->GetValue(N);
-}
+    index_t paradaeArrayData::colIndex(index_t N) const { return J->GetColIndex(N); }
 
-double paradaeArrayData::at(index_t rowN, index_t colN) const
-{
-  return (*J)(rowN,colN);
-}
+    double paradaeArrayData::val(index_t N) const { return J->GetValue(N); }
 
-matrixElement<double> paradaeArrayData::element(index_t N) const
-{
-  return {J->GetRowIndex(N), J->GetColIndex(N), J->GetValue(N)};
-}
+    double paradaeArrayData::at(index_t rowN, index_t colN) const { return (*J)(rowN, colN); }
 
-} // namespace paradae
-} // namespace griddyn
+    matrixElement<double> paradaeArrayData::element(index_t N) const
+    {
+        return {J->GetRowIndex(N), J->GetColIndex(N), J->GetValue(N)};
+    }
+
+}  // namespace paradae
+}  // namespace griddyn
 
 #endif

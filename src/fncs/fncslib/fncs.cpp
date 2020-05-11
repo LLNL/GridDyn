@@ -18,14 +18,14 @@
 
 /* for fncs::timer() */
 #ifdef __MACH__
-#include <mach/clock.h>
-#include <mach/mach.h>
+#    include <mach/clock.h>
+#    include <mach/mach.h>
 #elif defined(__FreeBSD__)
-#include <time.h>
+#    include <time.h>
 #elif defined(_WIN32)
 //#include <windows.h>
 #else
-#include <ctime>
+#    include <ctime>
 #endif
 #include <cassert>
 
@@ -36,9 +36,9 @@
 #include "yaml-cpp/yaml.h"
 
 /* fncs headers */
-#include "log.hpp"
 #include "fncs.hpp"
 #include "fncs_internal.hpp"
+#include "log.hpp"
 
 using namespace ::std;
 
@@ -52,8 +52,8 @@ static fncs::time time_delta = 0;
 static fncs::time time_peer = 0;
 static fncs::time time_current = 0;
 static fncs::time time_window = 0;
-static zsock_t *client = NULL;
-static map<string,string> cache;
+static zsock_t* client = NULL;
+static map<string, string> cache;
 static vector<string> events;
 static set<string> keys; /* keys that other sims subscribed to */
 static vector<string> mykeys; /* keys from the fncs config file */
@@ -62,16 +62,14 @@ static const string default_broker = "tcp://localhost:5570";
 static const string default_time_delta = "1s";
 static const string default_fatal = "yes";
 
-typedef map<string,vector<string> > clist_t;
+typedef map<string, vector<string>> clist_t;
 static clist_t cache_list;
 
-typedef map<string,fncs::Subscription> sub_string_t;
+typedef map<string, fncs::Subscription> sub_string_t;
 static sub_string_t subs_string;
 
-
 #if defined(_WIN32)
-static BOOL WINAPI
-s_handler_fn_shim (DWORD ctrltype)
+static BOOL WINAPI s_handler_fn_shim(DWORD ctrltype)
 {
     if (ctrltype == CTRL_C_EVENT) {
         zctx_interrupted = 1;
@@ -85,10 +83,10 @@ static void signal_handler_reset()
     SetConsoleCtrlHandler(s_handler_fn_shim, TRUE);
 }
 #else
-#include <signal.h>
+#    include <signal.h>
 static struct sigaction sigint_default;
 static struct sigaction sigterm_default;
-static void signal_handler (int signal_value)
+static void signal_handler(int signal_value)
 {
     zctx_interrupted = 1;
     zsys_interrupted = 1;
@@ -110,25 +108,25 @@ static void signal_handler_reset()
 
 #if 0
 static inline string nodetype(const YAML::Node &node) {
-    if (node.Type() == YAML::NodeType::Scalar) { return "SCALAR"; } 
-    else if (node.Type() == YAML::NodeType::Sequence) { return "SEQUENCE"; } 
-    else if (node.Type() == YAML::NodeType::Map) { return "MAP"; } 
+    if (node.Type() == YAML::NodeType::Scalar) { return "SCALAR"; }
+    else if (node.Type() == YAML::NodeType::Sequence) { return "SEQUENCE"; }
+    else if (node.Type() == YAML::NodeType::Map) { return "MAP"; }
     else { return "ERROR"; }
 }
 #endif
 
-static inline bool EndsWith(const string& a, const string& b) {
+static inline bool EndsWith(const string& a, const string& b)
+{
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
-
 void fncs::start_logging()
 {
-    const char *fncs_log_filename = NULL;
-    const char *fncs_log_stdout = NULL;
-    const char *fncs_log_file = NULL;
-    const char *fncs_log_level = NULL;
+    const char* fncs_log_filename = NULL;
+    const char* fncs_log_stdout = NULL;
+    const char* fncs_log_file = NULL;
+    const char* fncs_log_level = NULL;
     string simlog = simulation_name + ".log";
     bool log_file = false;
     bool log_stdout = true;
@@ -139,8 +137,7 @@ void fncs::start_logging()
         if (simulation_name.empty()) {
             /* assume it's the broker */
             fncs_log_filename = "fncs_broker.log";
-        }
-        else {
+        } else {
             fncs_log_filename = simlog.c_str();
         }
     }
@@ -164,34 +161,28 @@ void fncs::start_logging()
     }
 
     /* start our logger */
-    if (fncs_log_stdout[0] == 'N'
-            || fncs_log_stdout[0] == 'n'
-            || fncs_log_stdout[0] == 'F'
-            || fncs_log_stdout[0] == 'f') {
+    if (fncs_log_stdout[0] == 'N' || fncs_log_stdout[0] == 'n' || fncs_log_stdout[0] == 'F' ||
+        fncs_log_stdout[0] == 'f') {
         log_stdout = false;
     }
 
-    if (fncs_log_file[0] == 'Y'
-            || fncs_log_file[0] == 'y'
-            || fncs_log_file[0] == 'T'
-            || fncs_log_file[0] == 't') {
+    if (fncs_log_file[0] == 'Y' || fncs_log_file[0] == 'y' || fncs_log_file[0] == 'T' ||
+        fncs_log_file[0] == 't') {
         log_file = true;
     }
 
     if (log_stdout && log_file) {
-        FILE *pFile = fopen(fncs_log_filename, "a");
+        FILE* pFile = fopen(fncs_log_filename, "a");
         if (!pFile) {
             cerr << "could not open " << fncs_log_filename << endl;
         }
         Output2Tee::Stream1() = stdout;
         Output2Tee::Stream2() = pFile;
-    }
-    else if (log_stdout) {
+    } else if (log_stdout) {
         Output2Tee::Stream1() = stdout;
         Output2Tee::Stream2() = NULL;
-    }
-    else if (log_file) {
-        FILE *pFile = fopen(fncs_log_filename, "a");
+    } else if (log_file) {
+        FILE* pFile = fopen(fncs_log_filename, "a");
         if (!pFile) {
             cerr << "could not open " << fncs_log_filename << endl;
         }
@@ -202,21 +193,19 @@ void fncs::start_logging()
     FNCSLog::ReportingLevel() = FNCSLog::FromString(fncs_log_level);
 }
 
-
-void fncs::replicate_logging(TLogLevel &level, FILE *& one, FILE *& two)
+void fncs::replicate_logging(TLogLevel& level, FILE*& one, FILE*& two)
 {
     level = FNCSLog::ReportingLevel();
     one = Output2Tee::Stream1();
     two = Output2Tee::Stream2();
 }
 
-
 /* This version of initialize() checks for a config filename in the
  * environment and then defaults to a known name. */
 void fncs::initialize()
 {
-    const char *fncs_config_file = NULL;
-    zconfig_t *zconfig = NULL;
+    const char* fncs_config_file = NULL;
+    zconfig_t* zconfig = NULL;
     fncs::Config config;
 
     /* name for fncs config file from environment */
@@ -230,33 +219,30 @@ void fncs::initialize()
         if (zconfig) {
             config = parse_config(zconfig);
             zconfig_destroy(&zconfig);
-        }
-        else {
+        } else {
             cerr << "could not open " << fncs_config_file << endl;
         }
-    }
-    else if (EndsWith(fncs_config_file, "yaml")) {
+    } else if (EndsWith(fncs_config_file, "yaml")) {
         try {
-			YAML::Node doc = YAML::LoadFile(fncs_config_file);
+            YAML::Node doc = YAML::LoadFile(fncs_config_file);
             config = parse_config(doc);
-        } catch (YAML::ParserException &) {
+        }
+        catch (YAML::ParserException&) {
             cerr << "could not open " << fncs_config_file << endl;
         }
-    }
-    else {
+    } else {
         cerr << "fncs config file must end in *.zpl or *.yaml" << endl;
     }
 
     initialize(config);
 }
 
-
 /* This version of initialize() reads configuration parameters directly
  * from the given string. */
-void fncs::initialize(const string &configuration)
+void fncs::initialize(const string& configuration)
 {
-    zchunk_t *zchunk = NULL;
-    zconfig_t *zconfig = NULL;
+    zchunk_t* zchunk = NULL;
+    zconfig_t* zconfig = NULL;
     fncs::Config config;
 
     config = parse_config(configuration);
@@ -264,24 +250,22 @@ void fncs::initialize(const string &configuration)
     initialize(config);
 }
 
-
 void fncs::initialize(Config config)
 {
-    const char *env_fatal = NULL;
-    const char *env_name = NULL;
-    const char *env_broker = NULL;
-    const char *env_time_delta = NULL;
+    const char* env_fatal = NULL;
+    const char* env_name = NULL;
+    const char* env_broker = NULL;
+    const char* env_time_delta = NULL;
     int rc;
-    zmsg_t *msg = NULL;
-    zchunk_t *zchunk = NULL;
-    zconfig_t *config_values = NULL;
+    zmsg_t* msg = NULL;
+    zchunk_t* zchunk = NULL;
+    zconfig_t* config_values = NULL;
 
     /* name from env var overrides config file */
     env_name = getenv("FNCS_NAME");
     if (env_name) {
         config.name = env_name;
-    }
-    else if (config.name.empty()) {
+    } else if (config.name.empty()) {
         cerr << "FNCS_NAME env var not set and" << endl;
         cerr << "fncs config does not contain 'name'" << endl;
         die();
@@ -296,8 +280,7 @@ void fncs::initialize(Config config)
     if (env_fatal) {
         config.fatal = env_fatal;
         LINFO << "fatal set by FNCS_FATAL env var";
-    }
-    else if (config.fatal.empty()) {
+    } else if (config.fatal.empty()) {
         LINFO << "FNCS_FATAL env var not set and fncs config does not contain 'fatal'";
         LINFO << "defaulting to " << default_fatal;
         config.fatal = default_fatal;
@@ -307,8 +290,7 @@ void fncs::initialize(Config config)
         if (fc == 'N' || fc == 'n' || fc == 'F' || fc == 'f') {
             die_is_fatal = false;
             LINFO << "fncs::die() will not call exit()";
-        }
-        else {
+        } else {
             die_is_fatal = true;
             LINFO << "fncs::die() will call exit(EXIT_FAILURE)";
         }
@@ -332,7 +314,8 @@ void fncs::initialize(Config config)
         LINFO << "FNCS_TIME_DELTA env var sets the time_delta";
         config.time_delta = env_time_delta;
     } else if (config.time_delta.empty()) {
-        LINFO << "FNCS_TIME_DELTA env var not set and fncs config does not contain 'time_delta'" << endl;
+        LINFO << "FNCS_TIME_DELTA env var not set and fncs config does not contain 'time_delta'"
+              << endl;
         LINFO << "defaulting to " << default_time_delta;
         config.time_delta = default_time_delta;
     }
@@ -345,20 +328,17 @@ void fncs::initialize(Config config)
     /* parse subscriptions */
     {
         vector<Subscription> subs = config.values;
-        for (size_t i=0; i<subs.size(); ++i) {
+        for (size_t i = 0; i < subs.size(); ++i) {
             subs_string.insert(make_pair(subs[i].topic, subs[i]));
             mykeys.push_back(subs[i].key);
-            LDEBUG2 << "initializing cache for '" << subs[i].key << "'='"
-                << subs[i].def << "'";
+            LDEBUG2 << "initializing cache for '" << subs[i].key << "'='" << subs[i].def << "'";
             if (subs[i].is_list()) {
                 if (subs[i].def.empty()) {
                     cache_list[subs[i].key] = vector<string>();
-                }
-                else {
+                } else {
                     cache_list[subs[i].key] = vector<string>(1, subs[i].def);
                 }
-            }
-            else {
+            } else {
                 cache[subs[i].key] = subs[i].def;
             }
         }
@@ -384,7 +364,10 @@ void fncs::initialize(Config config)
     signal_handler_reset();
 
     /* set client identity */
-    rc = zmq_setsockopt(zsock_resolve(client), ZMQ_IDENTITY, config.name.c_str(), config.name.size());
+    rc = zmq_setsockopt(zsock_resolve(client),
+                        ZMQ_IDENTITY,
+                        config.name.c_str(),
+                        config.name.size());
     if (rc) {
         LERROR << "socket identity failed";
         die();
@@ -435,14 +418,14 @@ void fncs::initialize(Config config)
         return;
     }
     /* first frame is type identifier */
-    zframe_t *frame = zmsg_first(msg);
+    zframe_t* frame = zmsg_first(msg);
     if (!zframe_streq(frame, ACK)) {
         LERROR << "ACK expected, got " << frame;
         die();
         return;
     }
     LDEBUG2 << "received ACK";
-    /* next frame is connetion order ID */
+    /* next frame is connection order ID */
     frame = zmsg_next(msg);
     if (!frame) {
         LERROR << "ACK message missing order ID";
@@ -473,7 +456,7 @@ void fncs::initialize(Config config)
     LDEBUG2 << "n_keys is " << n_keys;
 
     /* next frames are the keys */
-    for (int i=0; i<n_keys; ++i) {
+    for (int i = 0; i < n_keys; ++i) {
         frame = zmsg_next(msg);
         if (!frame) {
             LERROR << "ACK message missing key " << i;
@@ -511,12 +494,10 @@ void fncs::initialize(Config config)
     is_initialized_ = true;
 }
 
-
 bool fncs::is_initialized()
 {
     return is_initialized_;
 }
-
 
 fncs::time fncs::time_request(fncs::time time_next)
 {
@@ -535,21 +516,15 @@ fncs::time fncs::time_request(fncs::time time_next)
     time_next *= time_delta_multiplier;
 
     if (time_next % time_delta != 0) {
-        LERROR << "time request "
-            << time_next
-            << " ns is not a multiple of time delta ("
-            << time_delta
-            << " ns)!";
+        LERROR << "time request " << time_next << " ns is not a multiple of time delta ("
+               << time_delta << " ns)!";
         die();
         return time_next;
     }
 
     if (time_next < time_current) {
-        LERROR << "time request "
-            << time_next
-            << " ns is smaller than the current time ("
-            << time_current
-            << " ns)!";
+        LERROR << "time request " << time_next << " ns is smaller than the current time ("
+               << time_current << " ns)!";
         die();
         return time_next;
     }
@@ -562,7 +537,7 @@ fncs::time fncs::time_request(fncs::time time_next)
     /* only clear the vectors associated with cache list keys because
      * the keys should remain valid i.e. empty lists are meaningful */
     events.clear();
-    for (clist_t::iterator it=cache_list.begin(); it!=cache_list.end(); ++it) {
+    for (clist_t::iterator it = cache_list.begin(); it != cache_list.end(); ++it) {
         it->second.clear();
     }
 
@@ -579,8 +554,7 @@ fncs::time fncs::time_request(fncs::time time_next)
             LDEBUG2 << "time_granted " << time_granted << " in sim units";
             return time_granted;
         }
-    }
-    else {
+    } else {
         LDEBUG1 << "time_window expired";
         time_window = 0;
     }
@@ -590,7 +564,7 @@ fncs::time fncs::time_request(fncs::time time_next)
     zstr_sendf(client, "%llu", time_next);
 
     /* receive TIME_REQUEST and perhaps other message types */
-    zmq_pollitem_t items[] = { { zsock_resolve(client), 0, ZMQ_POLLIN, 0 } };
+    zmq_pollitem_t items[] = {{zsock_resolve(client), 0, ZMQ_POLLIN, 0}};
     while (true) {
         int rc = 0;
 
@@ -603,8 +577,8 @@ fncs::time fncs::time_request(fncs::time time_next)
         }
 
         if (items[0].revents & ZMQ_POLLIN) {
-            zmsg_t *msg = NULL;
-            zframe_t *frame = NULL;
+            zmsg_t* msg = NULL;
+            zframe_t* frame = NULL;
             string message_type;
 
             LDEBUG4 << "incoming message";
@@ -645,8 +619,7 @@ fncs::time fncs::time_request(fncs::time time_next)
                  * indicates we can move on with the break */
                 zmsg_destroy(&msg);
                 break;
-            }
-            else if (fncs::PUBLISH == message_type) {
+            } else if (fncs::PUBLISH == message_type) {
                 string topic;
                 string value;
                 sub_string_t::const_iterator sub_str_itr;
@@ -686,24 +659,21 @@ fncs::time fncs::time_request(fncs::time time_next)
                     if (subscription.is_list()) {
                         cache_list[subscription.key].push_back(value);
                         LDEBUG4 << "updated cache_list "
-                            << "key='" << subscription.key << "' "
-                            << "topic='" << topic << "' "
-                            << "value='" << value << "' "
-                            << "count=" << cache_list[subscription.key].size();
+                                << "key='" << subscription.key << "' "
+                                << "topic='" << topic << "' "
+                                << "value='" << value << "' "
+                                << "count=" << cache_list[subscription.key].size();
                     } else {
                         cache[subscription.key] = value;
                         LDEBUG4 << "updated cache "
-                            << "key='" << subscription.key << "' "
-                            << "topic='" << topic << "' "
-                            << "value='" << value << "' ";
+                                << "key='" << subscription.key << "' "
+                                << "topic='" << topic << "' "
+                                << "value='" << value << "' ";
                     }
+                } else {
+                    LDEBUG4 << "dropping PUBLISH message topic='" << topic << "'";
                 }
-                else {
-                    LDEBUG4 << "dropping PUBLISH message topic='"
-                        << topic << "'";
-                }
-            }
-            else {
+            } else {
                 LERROR << "unrecognized message type";
                 die();
                 return time_next;
@@ -731,8 +701,7 @@ fncs::time fncs::time_request(fncs::time time_next)
     return time_granted;
 }
 
-
-void fncs::publish(const string &key, const string &value)
+void fncs::publish(const string& key, const string& value)
 {
     LDEBUG4 << "fncs::publish(string,string)";
 
@@ -747,14 +716,12 @@ void fncs::publish(const string &key, const string &value)
         zstr_sendm(client, new_key.c_str());
         zstr_send(client, value.c_str());
         LDEBUG4 << "sent PUBLISH '" << new_key << "'='" << value << "'";
-    }
-    else {
+    } else {
         LDEBUG4 << "dropped " << key;
     }
 }
 
-
-void fncs::publish_anon(const string &key, const string &value)
+void fncs::publish_anon(const string& key, const string& value)
 {
     LDEBUG4 << "fncs::publish_anon(string,string)";
 
@@ -769,12 +736,7 @@ void fncs::publish_anon(const string &key, const string &value)
     LDEBUG4 << "sent PUBLISH anon '" << key << "'='" << value << "'";
 }
 
-
-void fncs::route(
-        const string &from,
-        const string &to,
-        const string &key,
-        const string &value)
+void fncs::route(const string& from, const string& to, const string& key, const string& value)
 {
     LDEBUG4 << "fncs::route(string,string,string,string)";
 
@@ -789,7 +751,6 @@ void fncs::route(
     zstr_send(client, value.c_str());
     LDEBUG4 << "sent PUBLISH '" << new_key << "'='" << value << "'";
 }
-
 
 void fncs::die()
 {
@@ -812,10 +773,9 @@ void fncs::die()
     }
 }
 
-
 void fncs::finalize()
 {
-	bool recBye = false;
+    bool recBye = false;
     LDEBUG4 << "fncs::finalize()";
 
     if (!is_initialized_) {
@@ -823,27 +783,27 @@ void fncs::finalize()
         return;
     }
 
-    zmsg_t *msg = NULL;
-    zframe_t *frame = NULL;
+    zmsg_t* msg = NULL;
+    zframe_t* frame = NULL;
 
     zstr_send(client, fncs::BYE);
 
     /* receive BYE and perhaps other message types */
-    zmq_pollitem_t items[] = { { zsock_resolve(client), 0, ZMQ_POLLIN, 0 } };
-    while(!recBye){
-		/* receive BYE back */
-    	int rc = 0;
+    zmq_pollitem_t items[] = {{zsock_resolve(client), 0, ZMQ_POLLIN, 0}};
+    while (!recBye) {
+        /* receive BYE back */
+        int rc = 0;
 
-		LDEBUG4 << "entering blocking poll";
-		rc = zmq_poll(items, 1, -1);
-		if (rc == -1) {
-			LERROR << "client polling error: " << strerror(errno);
-			die(); /* interrupted */
-			return;
-		}
+        LDEBUG4 << "entering blocking poll";
+        rc = zmq_poll(items, 1, -1);
+        if (rc == -1) {
+            LERROR << "client polling error: " << strerror(errno);
+            die(); /* interrupted */
+            return;
+        }
         if (items[0].revents & ZMQ_POLLIN) {
-            zmsg_t *msg = NULL;
-            zframe_t *frame = NULL;
+            zmsg_t* msg = NULL;
+            zframe_t* frame = NULL;
             string message_type;
 
             LDEBUG4 << "incoming message";
@@ -867,23 +827,19 @@ void fncs::finalize()
                 LERROR << "TIME_REQUEST received. Calling die.";
                 die();
                 return;
-            }
-            else if (fncs::PUBLISH == message_type) {
+            } else if (fncs::PUBLISH == message_type) {
                 LDEBUG2 << "PUBLISH received and ignored.";
-            }
-            else if(fncs::DIE == message_type){
+            } else if (fncs::DIE == message_type) {
                 LERROR << "DIE received.";
                 die();
                 return;
-            }
-            else if(fncs::BYE == message_type){
-            	LDEBUG4 << "BYE received.";
-            	recBye = true;
-            }
-            else{
-            	LERROR << "Unknown message type received! Sending DIE.";
-            	die();
-            	return;
+            } else if (fncs::BYE == message_type) {
+                LDEBUG4 << "BYE received.";
+                recBye = true;
+            } else {
+                LERROR << "Unknown message type received! Sending DIE.";
+                die();
+                return;
             }
 
             zmsg_destroy(&msg);
@@ -895,7 +851,6 @@ void fncs::finalize()
 
     is_initialized_ = false;
 }
-
 
 void fncs::update_time_delta(fncs::time delta)
 {
@@ -914,30 +869,29 @@ void fncs::update_time_delta(fncs::time delta)
     zstr_sendf(client, "%llu", delta);
 }
 
+ostream& operator<<(ostream& os, zframe_t* self)
+{
+    assert(self);
+    assert(zframe_is(self));
 
-ostream& operator << (ostream& os, zframe_t *self) {
-    assert (self);
-    assert (zframe_is (self));
-
-    byte *data = zframe_data (self);
-    size_t size = zframe_size (self);
+    byte* data = zframe_data(self);
+    size_t size = zframe_size(self);
 
     //  Probe data to check if it looks like unprintable binary
     int is_bin = 0;
     uint char_nbr;
     for (char_nbr = 0; char_nbr < size; char_nbr++)
-        if (data [char_nbr] < 9 || data [char_nbr] > 127)
-            is_bin = 1;
+        if (data[char_nbr] < 9 || data[char_nbr] > 127) is_bin = 1;
 
     size_t buffer_size = 31;
-    buffer_size += is_bin? size*2 : size;
-    char *buffer = (char*)zmalloc(buffer_size);
-    snprintf (buffer, 30, "[%03d] ", (int) size);
+    buffer_size += is_bin ? size * 2 : size;
+    char* buffer = (char*)zmalloc(buffer_size);
+    snprintf(buffer, 30, "[%03d] ", (int)size);
     for (char_nbr = 0; char_nbr < size; char_nbr++) {
         if (is_bin)
-            sprintf (buffer + strlen (buffer), "%02X", (unsigned char) data [char_nbr]);
+            sprintf(buffer + strlen(buffer), "%02X", (unsigned char)data[char_nbr]);
         else
-            sprintf (buffer + strlen (buffer), "%c", data [char_nbr]);
+            sprintf(buffer + strlen(buffer), "%c", data[char_nbr]);
     }
 
     os << buffer;
@@ -945,8 +899,7 @@ ostream& operator << (ostream& os, zframe_t *self) {
     return os;
 }
 
-
-fncs::time fncs::time_unit_to_multiplier(const string &value)
+fncs::time fncs::time_unit_to_multiplier(const string& value)
 {
     LDEBUG4 << "fncs::time_unit_to_multiplier(string)";
 
@@ -968,50 +921,24 @@ fncs::time fncs::time_unit_to_multiplier(const string &value)
         return retval;
     }
 
-    if ("d" == unit
-            || "day" == unit
-            || "days" == unit) {
+    if ("d" == unit || "day" == unit || "days" == unit) {
         retval = 24ULL * 60ULL * 60ULL * 1000000000ULL;
-    }
-    else if ("h" == unit
-            || "hour" == unit
-            || "hours" == unit) {
+    } else if ("h" == unit || "hour" == unit || "hours" == unit) {
         retval = 60ULL * 60ULL * 1000000000ULL;
-    }
-    else if ("m" == unit
-            || "min" == unit
-            || "minute" == unit
-            || "minutes" == unit) {
+    } else if ("m" == unit || "min" == unit || "minute" == unit || "minutes" == unit) {
         retval = 60ULL * 1000000000ULL;
-    }
-    else if ("s" == unit
-            || "sec" == unit
-            || "second" == unit
-            || "seconds" == unit) {
+    } else if ("s" == unit || "sec" == unit || "second" == unit || "seconds" == unit) {
         retval = 1000000000ULL;
-    }
-    else if ("ms" == unit
-            || "msec" == unit
-            || "millisec" == unit
-            || "millisecond" == unit
-            || "milliseconds" == unit) {
+    } else if ("ms" == unit || "msec" == unit || "millisec" == unit || "millisecond" == unit ||
+               "milliseconds" == unit) {
         retval = 1000000ULL;
-    }
-    else if ("us" == unit
-            || "usec" == unit
-            || "microsec" == unit
-            || "microsecond" == unit
-            || "microseconds" == unit) {
+    } else if ("us" == unit || "usec" == unit || "microsec" == unit || "microsecond" == unit ||
+               "microseconds" == unit) {
         retval = 1000ULL;
-    }
-    else if ("ns" == unit
-            || "nsec" == unit
-            || "nanosec" == unit
-            || "nanosecond" == unit
-            || "nanoseconds" == unit) {
+    } else if ("ns" == unit || "nsec" == unit || "nanosec" == unit || "nanosecond" == unit ||
+               "nanoseconds" == unit) {
         retval = 1ULL;
-    }
-    else {
+    } else {
         LERROR << "unrecognized time unit '" << unit << "'";
         die();
         return retval;
@@ -1020,12 +947,11 @@ fncs::time fncs::time_unit_to_multiplier(const string &value)
     return retval;
 }
 
-
-fncs::time fncs::parse_time(const string &value)
+fncs::time fncs::parse_time(const string& value)
 {
     LDEBUG4 << "fncs::parse_time(string)";
 
-    fncs::time retval; 
+    fncs::time retval;
     string unit;
     istringstream iss(value);
 
@@ -1041,13 +967,12 @@ fncs::time fncs::parse_time(const string &value)
     return retval;
 }
 
-
-fncs::Config fncs::parse_config(const string &configuration)
+fncs::Config fncs::parse_config(const string& configuration)
 {
     LDEBUG4 << "fncs::parse_config(string)";
 
-    zchunk_t *zchunk = NULL;
-    zconfig_t *zconfig = NULL;
+    zchunk_t* zchunk = NULL;
+    zconfig_t* zconfig = NULL;
     fncs::Config config;
     bool is_zpl = false;
 
@@ -1068,20 +993,18 @@ fncs::Config fncs::parse_config(const string &configuration)
             cerr << "could not load ZPL configuration string" << endl;
             cerr << "-- configuration was as follows --" << endl;
             cerr << configuration << endl;
-        }
-        else {
+        } else {
             zchunk_destroy(&zchunk);
             config = parse_config(zconfig);
             zconfig_destroy(&zconfig);
         }
-    }
-    else {
+    } else {
         /* attempt to load as a YAML document */
         try {
-           
-			YAML::Node doc = YAML::Load(configuration);
+            YAML::Node doc = YAML::Load(configuration);
             config = parse_config(doc);
-        } catch (YAML::ParserException &) {
+        }
+        catch (YAML::ParserException&) {
             cerr << "could not load YAML configuration string" << endl;
             cerr << "-- configuration was as follows --" << endl;
             cerr << configuration << endl;
@@ -1091,8 +1014,7 @@ fncs::Config fncs::parse_config(const string &configuration)
     return config;
 }
 
-
-fncs::Config fncs::parse_config(const YAML::Node &doc)
+fncs::Config fncs::parse_config(const YAML::Node& doc)
 {
     LDEBUG4 << "fncs::parse_config(YAML::Node)";
 
@@ -1101,36 +1023,32 @@ fncs::Config fncs::parse_config(const YAML::Node &doc)
     if (const YAML::Node node = doc["name"]) {
         if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'name' must be a Scalar" << endl;
-        }
-        else {
-			config.name = node.as<std::string>();
+        } else {
+            config.name = node.as<std::string>();
         }
     }
 
     if (const YAML::Node node = doc["broker"]) {
         if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'broker' must be a Scalar" << endl;
-        }
-        else {
-			config.broker = node.as<std::string>();
+        } else {
+            config.broker = node.as<std::string>();
         }
     }
 
     if (const YAML::Node node = doc["time_delta"]) {
         if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'time_delta' must be a Scalar" << endl;
-        }
-        else {
-			config.time_delta = node.as<std::string>();
+        } else {
+            config.time_delta = node.as<std::string>();
         }
     }
 
     if (const YAML::Node node = doc["fatal"]) {
         if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'fatal' must be a Scalar" << endl;
-        }
-        else {
-			config.fatal = node.as<std::string>();
+        } else {
+            config.fatal = node.as<std::string>();
         }
     }
 
@@ -1142,13 +1060,12 @@ fncs::Config fncs::parse_config(const YAML::Node &doc)
     return config;
 }
 
-
-fncs::Config fncs::parse_config(zconfig_t *zconfig)
+fncs::Config fncs::parse_config(zconfig_t* zconfig)
 {
     LDEBUG4 << "fncs::parse_config(zconfig_t*)";
 
     fncs::Config config;
-    zconfig_t *config_values = NULL;
+    zconfig_t* config_values = NULL;
 
     /* read sim name from zconfig */
     config.name = zconfig_resolve(zconfig, "/name", "");
@@ -1171,8 +1088,7 @@ fncs::Config fncs::parse_config(zconfig_t *zconfig)
     return config;
 }
 
-
-fncs::Subscription fncs::parse_value(const YAML::Node &node)
+fncs::Subscription fncs::parse_value(const YAML::Node& node)
 {
     LDEBUG4 << "fncs::parse_value(YAML::Node)";
 
@@ -1189,44 +1105,39 @@ fncs::Subscription fncs::parse_value(const YAML::Node &node)
     if (const YAML::Node child = node["topic"]) {
         if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'topic' must be a Scalar" << endl;
-        }
-        else {
-			sub.topic = child.as<std::string>();
+        } else {
+            sub.topic = child.as<std::string>();
         }
     }
 
     if (const YAML::Node child = node["default"]) {
         if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'default' must be a Scalar" << endl;
-        }
-        else {
-			sub.def = child.as<std::string>();
+        } else {
+            sub.def = child.as<std::string>();
         }
     }
 
     if (const YAML::Node child = node["type"]) {
         if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'type' must be a Scalar" << endl;
-        }
-        else {
-			sub.type = child.as<std::string>();
+        } else {
+            sub.type = child.as<std::string>();
         }
     }
 
     if (const YAML::Node child = node["list"]) {
         if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'list' must be a Scalar" << endl;
-        }
-        else {
-			sub.list = child.as<std::string>();
+        } else {
+            sub.list = child.as<std::string>();
         }
     }
 
     return sub;
 }
 
-
-fncs::Subscription fncs::parse_value(zconfig_t *config)
+fncs::Subscription fncs::parse_value(zconfig_t* config)
 {
     LDEBUG4 << "fncs::parse_value(zconfig_t*)";
 
@@ -1239,7 +1150,7 @@ fncs::Subscription fncs::parse_value(zconfig_t *config)
     */
 
     fncs::Subscription sub;
-    const char *value = NULL;
+    const char* value = NULL;
 
     sub.key = zconfig_name(config);
     LDEBUG4 << "parsing value with key '" << sub.key << "'";
@@ -1255,8 +1166,7 @@ fncs::Subscription fncs::parse_value(zconfig_t *config)
         LDEBUG4 << "key did not have 'topic' subheading";
         /* default is to use short key as subscription */
         sub.topic = sub.key;
-    }
-    else {
+    } else {
         sub.topic = value;
     }
     LDEBUG4 << "parsing key '" << sub.key << "' topic '" << sub.topic << "'";
@@ -1265,66 +1175,61 @@ fncs::Subscription fncs::parse_value(zconfig_t *config)
     if (!value) {
         LDEBUG4 << "parsing value '" << sub.key << "', missing 'default'";
     }
-    sub.def = value? value : "";
+    sub.def = value ? value : "";
 
     value = zconfig_resolve(config, "type", NULL);
     if (!value) {
         LDEBUG4 << "parsing value '" << sub.key << "', missing 'type'";
     }
-    sub.type = value? value : "";
+    sub.type = value ? value : "";
 
     value = zconfig_resolve(config, "list", NULL);
     if (!value) {
         LDEBUG4 << "parsing value '" << sub.key << "', missing 'list'";
     }
-    sub.list = value? value : "";
+    sub.list = value ? value : "";
 
     return sub;
 }
 
-
-vector<fncs::Subscription> fncs::parse_values(const YAML::Node &node)
+vector<fncs::Subscription> fncs::parse_values(const YAML::Node& node)
 {
     LDEBUG4 << "fncs::parse_values(YAML::Node)";
 
     vector<fncs::Subscription> subs;
 
     if (YAML::NodeType::Sequence == node.Type()) {
-        for (YAML::const_iterator it=node.begin(); it!=node.end(); ++it) {
+        for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
             fncs::Subscription sub;
-            const YAML::Node &child = *it;
+            const YAML::Node& child = *it;
             if (YAML::NodeType::Scalar == child.Type()) {
-				sub.key=child.Tag();
-				sub.topic = child.as<std::string>();
-            }
-            else if (YAML::NodeType::Map == child.Type()) {
-                for (YAML::const_iterator it2=child.begin();
-                        it2!=child.end(); ++it2) {
+                sub.key = child.Tag();
+                sub.topic = child.as<std::string>();
+            } else if (YAML::NodeType::Map == child.Type()) {
+                for (YAML::const_iterator it2 = child.begin(); it2 != child.end(); ++it2) {
                     if (YAML::NodeType::Scalar == it2->second.Type()) {
-						sub.key=it2->second.Tag();
-						sub.topic = it2->second.as<std::string>();
+                        sub.key = it2->second.Tag();
+                        sub.topic = it2->second.as<std::string>();
 
-                    }
-                    else if (YAML::NodeType::Map == it2->second.Type()) {
+                    } else if (YAML::NodeType::Map == it2->second.Type()) {
                         sub = parse_value(it2->second);
 
-						sub.key = it2->first.as<std::string>();
+                        sub.key = it2->first.as<std::string>();
                     }
                 }
             }
             subs.push_back(sub);
         }
-    }
-    else if (YAML::NodeType::Map == node.Type()) {
-        for (YAML::const_iterator it=node.begin(); it!=node.end(); ++it) {
+    } else if (YAML::NodeType::Map == node.Type()) {
+        for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
             fncs::Subscription sub;
             if (YAML::NodeType::Scalar == it->second.Type()) {
-				sub.key=it->first.Tag();
-				sub.topic=it->second.as<std::string>();
+                sub.key = it->first.Tag();
+                sub.topic = it->second.as<std::string>();
             }
             if (YAML::NodeType::Map == it->second.Type()) {
                 sub = parse_value(it->second);
-				sub.key = it->first.Tag();
+                sub.key = it->first.Tag();
             }
             subs.push_back(sub);
         }
@@ -1333,14 +1238,13 @@ vector<fncs::Subscription> fncs::parse_values(const YAML::Node &node)
     return subs;
 }
 
-
-vector<fncs::Subscription> fncs::parse_values(zconfig_t *config)
+vector<fncs::Subscription> fncs::parse_values(zconfig_t* config)
 {
     LDEBUG4 << "fncs::parse_values(zconfig_t*)";
 
     vector<fncs::Subscription> subs;
     string name;
-    zconfig_t *child = NULL;
+    zconfig_t* child = NULL;
 
     name = zconfig_name(config);
     if (name != "values") {
@@ -1358,12 +1262,10 @@ vector<fncs::Subscription> fncs::parse_values(zconfig_t *config)
     return subs;
 }
 
-
-string fncs::to_string(zframe_t *frame)
+string fncs::to_string(zframe_t* frame)
 {
-    return string((const char *)zframe_data(frame), zframe_size(frame));
+    return string((const char*)zframe_data(frame), zframe_size(frame));
 }
-
 
 vector<string> fncs::get_events()
 {
@@ -1377,8 +1279,7 @@ vector<string> fncs::get_events()
     return events;
 }
 
-
-string fncs::get_value(const string &key)
+string fncs::get_value(const string& key)
 {
     LDEBUG4 << "fncs::get_value(" << key << ")";
 
@@ -1396,8 +1297,7 @@ string fncs::get_value(const string &key)
     return cache[key];
 }
 
-
-vector<string> fncs::get_values(const string &key)
+vector<string> fncs::get_values(const string& key)
 {
     LDEBUG4 << "fncs::get_values(" << key << ")";
 
@@ -1419,7 +1319,6 @@ vector<string> fncs::get_values(const string &key)
     return values;
 }
 
-
 vector<string> fncs::get_keys()
 {
     LDEBUG4 << "fncs::get_keys()";
@@ -1432,30 +1331,25 @@ vector<string> fncs::get_keys()
     return mykeys;
 }
 
-
 string fncs::get_name()
 {
     return simulation_name;
 }
-
 
 fncs::time fncs::get_time_delta()
 {
     return convert_broker_to_sim_time(time_delta);
 }
 
-
 int fncs::get_id()
 {
     return simulation_id;
 }
 
-
 int fncs::get_simulator_count()
 {
     return n_sims;
 }
-
 
 fncs::time fncs::convert_broker_to_sim_time(fncs::time value)
 {
@@ -1471,44 +1365,42 @@ fncs::time fncs::timer_ft()
     host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
     clock_get_time(cclock, &mts);
     mach_port_deallocate(mach_task_self(), cclock);
-    return mts.tv_sec*1000000000UL + mts.tv_nsec;
+    return mts.tv_sec * 1000000000UL + mts.tv_nsec;
 #elif defined(__FreeBSD__)
     struct timespec ts;
     /* Works on FreeBSD */
     long retval = clock_gettime(CLOCK_MONOTONIC, &ts);
     assert(0 == retval);
-    return ts.tv_sec*1000000000UL + ts.tv_nsec;
+    return ts.tv_sec * 1000000000UL + ts.tv_nsec;
 #elif defined(_WIN32)
     static LARGE_INTEGER freq, start;
     LARGE_INTEGER count;
     BOOL retval;
     retval = QueryPerformanceCounter(&count);
     assert(retval);
-    if (!freq.QuadPart) { // one time initialization
+    if (!freq.QuadPart) {  // one time initialization
         retval = QueryPerformanceFrequency(&freq);
         assert(retval);
         start = count;
     }
-    return 1000000000UL*fncs::time(double(count.QuadPart - start.QuadPart)/freq.QuadPart);
+    return 1000000000UL * fncs::time(double(count.QuadPart - start.QuadPart) / freq.QuadPart);
 #else
     struct timespec ts;
     /* Works on Linux */
     long retval = clock_gettime(CLOCK_REALTIME, &ts);
     assert(0 == retval);
-    return ts.tv_sec*1000000000UL + ts.tv_nsec;
+    return ts.tv_sec * 1000000000UL + ts.tv_nsec;
 #endif
 }
 
 double fncs::timer()
 {
-    return double(timer_ft())/1000000000.0;
+    return double(timer_ft()) / 1000000000.0;
 }
 
-
-void get_version(int *major, int *minor, int *patch)
+void get_version(int* major, int* minor, int* patch)
 {
     *major = FNCS_VERSION_MAJOR;
     *minor = FNCS_VERSION_MINOR;
     *patch = FNCS_VERSION_PATCH;
 }
-

@@ -11,172 +11,147 @@
  */
 
 #include "grabberSource.h"
+
 #include "../measurement/grabberSet.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectInterpreter.h"
 
-namespace griddyn
-{
-namespace sources
-{
-grabberSource::grabberSource (const std::string &objName) : rampSource (objName) {}
-grabberSource::~grabberSource () = default;
+namespace griddyn {
+namespace sources {
+    grabberSource::grabberSource(const std::string& objName): rampSource(objName) {}
+    grabberSource::~grabberSource() = default;
 
-coreObject *grabberSource::clone (coreObject *obj) const
-{
-    auto src = cloneBase<grabberSource, Source> (this, obj);
-    if (src == nullptr)
+    coreObject* grabberSource::clone(coreObject* obj) const
     {
-        return obj;
-    }
-    src->updateTarget (target);
-    src->updateField (field);
-    src->set ("gain", multiplier);
-    if ((gset) && (!src->gset))
-    {
-        src->pFlowInitializeA (prevTime, 0);
-    }
-    return src;
-}
-
-void grabberSource::setFlag (const std::string &flag, bool val)
-{
-    if (flag.empty ())
-    {
-    }
-    else
-    {
-        Source::setFlag (flag, val);
-    }
-}
-void grabberSource::set (const std::string &param, const std::string &val)
-{
-    if (param == "field")
-    {
-        if (opFlags[dyn_initialized])
-        {
-            updateField (val);
+        auto src = cloneBase<grabberSource, Source>(this, obj);
+        if (src == nullptr) {
+            return obj;
         }
-        else
-        {
-            field = val;
+        src->updateTarget(target);
+        src->updateField(field);
+        src->set("gain", multiplier);
+        if ((gset) && (!src->gset)) {
+            src->pFlowInitializeA(prevTime, 0);
+        }
+        return src;
+    }
+
+    void grabberSource::setFlag(const std::string& flag, bool val)
+    {
+        if (flag.empty()) {
+        } else {
+            Source::setFlag(flag, val);
         }
     }
-    else if (param == "target")
+    void grabberSource::set(const std::string& param, const std::string& val)
     {
-        if (opFlags[dyn_initialized])
-        {
-            updateTarget (target);
-        }
-        else
-        {
-            target = val;
-        }
-    }
-    else
-    {
-        Source::set (param, val);
-    }
-}
-
-void grabberSource::set (const std::string &param, double val, units::unit unitType)
-{
-    if ((param == "gain") || (param == "multipler"))
-    {
-        multiplier = val;
-        if (gset)
-        {
-            gset->setGain (multiplier);
+        if (param == "field") {
+            if (opFlags[dyn_initialized]) {
+                updateField(val);
+            } else {
+                field = val;
+            }
+        } else if (param == "target") {
+            if (opFlags[dyn_initialized]) {
+                updateTarget(target);
+            } else {
+                target = val;
+            }
+        } else {
+            Source::set(param, val);
         }
     }
-    else
+
+    void grabberSource::set(const std::string& param, double val, units::unit unitType)
     {
-        Source::set (param, val, unitType);
+        if ((param == "gain") || (param == "multipler")) {
+            multiplier = val;
+            if (gset) {
+                gset->setGain(multiplier);
+            }
+        } else {
+            Source::set(param, val, unitType);
+        }
     }
-}
 
-double grabberSource::get (const std::string &param, units::unit unitType) const
-{
-    if (param == "multiplier")
+    double grabberSource::get(const std::string& param, units::unit unitType) const
     {
-        return multiplier;
+        if (param == "multiplier") {
+            return multiplier;
+        }
+        return Source::get(param, unitType);
     }
-    return Source::get (param, unitType);
-}
 
-void grabberSource::pFlowObjectInitializeA (coreTime /*time0*/, std::uint32_t /*flags*/)
-{
-    coreObject *obj = locateObject (target, this);
-    gset = std::make_unique<grabberSet> (field, obj);
-    gset->setGain (multiplier);
-}
-
-void grabberSource::dynObjectInitializeB (const IOdata & /*inputs*/,
-                                          const IOdata & /*desiredOutput*/,
-                                          IOdata &fieldSet)
-{
-    fieldSet.resize (1);
-    fieldSet[0] = gset->grabData ();
-}
-IOdata grabberSource::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
-{
-    return {gset->grabData (sD, sMode)};
-}
-double grabberSource::getOutput (const IOdata & /*inputs*/,
-                                 const stateData &sD,
-                                 const solverMode &sMode,
-                                 index_t outputNum) const
-{
-    if (outputNum == 0)
+    void grabberSource::pFlowObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
     {
-        return gset->grabData (sD, sMode);
+        coreObject* obj = locateObject(target, this);
+        gset = std::make_unique<grabberSet>(field, obj);
+        gset->setGain(multiplier);
     }
-    return kNullVal;
-}
 
-double grabberSource::getOutput (index_t outputNum) const
-{
-    if (outputNum == 0)
+    void grabberSource::dynObjectInitializeB(const IOdata& /*inputs*/,
+                                             const IOdata& /*desiredOutput*/,
+                                             IOdata& fieldSet)
     {
-        return gset->grabData ();
+        fieldSet.resize(1);
+        fieldSet[0] = gset->grabData();
     }
-    return kNullVal;
-}
-
-double grabberSource::getDoutdt (const IOdata & /*inputs*/,
-                                 const stateData & /*sD*/,
-                                 const solverMode & /*sMode*/,
-                                 index_t /*outputNum*/) const
-{
-    return 0.0;
-}
-
-void grabberSource::updateField (const std::string &newField)
-{
-    if (gset)
+    IOdata grabberSource::getOutputs(const IOdata& /*inputs*/,
+                                     const stateData& sD,
+                                     const solverMode& sMode) const
     {
-        gset->updateField (newField);
+        return {gset->grabData(sD, sMode)};
     }
-    field = newField;
-}
-
-void grabberSource::updateTarget (const std::string &newTarget)
-{
-    if (gset)
+    double grabberSource::getOutput(const IOdata& /*inputs*/,
+                                    const stateData& sD,
+                                    const solverMode& sMode,
+                                    index_t outputNum) const
     {
-        auto obj = locateObject (newTarget, this);
-        gset->updateObject (obj);
+        if (outputNum == 0) {
+            return gset->grabData(sD, sMode);
+        }
+        return kNullVal;
     }
-    target = newTarget;
-}
 
-void grabberSource::updateTarget (coreObject *obj)
-{
-    if (gset)
+    double grabberSource::getOutput(index_t outputNum) const
     {
-        gset->updateObject (obj);
+        if (outputNum == 0) {
+            return gset->grabData();
+        }
+        return kNullVal;
     }
-    target = obj->getName ();
-}
+
+    double grabberSource::getDoutdt(const IOdata& /*inputs*/,
+                                    const stateData& /*sD*/,
+                                    const solverMode& /*sMode*/,
+                                    index_t /*outputNum*/) const
+    {
+        return 0.0;
+    }
+
+    void grabberSource::updateField(const std::string& newField)
+    {
+        if (gset) {
+            gset->updateField(newField);
+        }
+        field = newField;
+    }
+
+    void grabberSource::updateTarget(const std::string& newTarget)
+    {
+        if (gset) {
+            auto obj = locateObject(newTarget, this);
+            gset->updateObject(obj);
+        }
+        target = newTarget;
+    }
+
+    void grabberSource::updateTarget(coreObject* obj)
+    {
+        if (gset) {
+            gset->updateObject(obj);
+        }
+        target = obj->getName();
+    }
 }  // namespace sources
 }  // namespace griddyn

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,16 +8,16 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "gridComponentHelperClasses.h"
+
 #include "gridComponent.h"
 #include <cstring>
 
-namespace griddyn
-{
+namespace griddyn {
 
-solverMode::solverMode (index_t index):offsetIndex(index)
+solverMode::solverMode(index_t index): offsetIndex(index)
 {
     if (index == local_mode)  // predefined local
     {
@@ -25,26 +25,22 @@ solverMode::solverMode (index_t index):offsetIndex(index)
         dynamic = true;
         differential = true;
         algebraic = true;
-    }
-    else if (index == power_flow)  // predefined pflow
+    } else if (index == power_flow)  // predefined pflow
     {
         algebraic = true;
         differential = false;
         dynamic = false;
-    }
-    else if (index == dae)  // predefined dae
+    } else if (index == dae)  // predefined dae
     {
         dynamic = true;
         differential = true;
         algebraic = true;
-    }
-    else if (index == dynamic_algebraic)  // predefined dynAlg
+    } else if (index == dynamic_algebraic)  // predefined dynAlg
     {
         algebraic = true;
         differential = false;
         dynamic = true;
-    }
-    else if (index == dynamic_differential)  // predefined dynDiff
+    } else if (index == dynamic_differential)  // predefined dynDiff
     {
         algebraic = false;
         differential = true;
@@ -52,9 +48,15 @@ solverMode::solverMode (index_t index):offsetIndex(index)
     }
 }
 
-void stateSizes::reset () { std::memset (this, 0, sizeof (stateSizes)); }
-void stateSizes::stateReset () { vSize = aSize = algSize = diffSize = 0; }
-void stateSizes::add (const stateSizes &arg)
+void stateSizes::reset()
+{
+    std::memset(this, 0, sizeof(stateSizes));
+}
+void stateSizes::stateReset()
+{
+    vSize = aSize = algSize = diffSize = 0;
+}
+void stateSizes::add(const stateSizes& arg)
 {
     vSize += arg.vSize;
     aSize += arg.aSize;
@@ -65,7 +67,7 @@ void stateSizes::add (const stateSizes &arg)
     jacSize += arg.jacSize;
 }
 
-void stateSizes::addStateSizes (const stateSizes &arg)
+void stateSizes::addStateSizes(const stateSizes& arg)
 {
     vSize += arg.vSize;
     aSize += arg.aSize;
@@ -73,41 +75,44 @@ void stateSizes::addStateSizes (const stateSizes &arg)
     diffSize += arg.diffSize;
 }
 
-void stateSizes::addRootSizes (const stateSizes &arg)
+void stateSizes::addRootSizes(const stateSizes& arg)
 {
     algRoots += arg.algRoots;
     diffRoots += arg.diffRoots;
 }
 
-void stateSizes::addJacobianSizes(const stateSizes &arg)
+void stateSizes::addJacobianSizes(const stateSizes& arg)
 {
     jacSize += arg.jacSize;
 }
 
-count_t stateSizes::totalSize () const { return vSize + aSize + algSize + diffSize; }
+count_t stateSizes::totalSize() const
+{
+    return vSize + aSize + algSize + diffSize;
+}
 
-void solverOffsets::reset ()
+void solverOffsets::reset()
 {
     diffOffset = aOffset = vOffset = algOffset = rootOffset = kNullLocation;
-    local.reset ();
-    total.reset ();
+    local.reset();
+    total.reset();
 
-    rootsLoaded = jacobianLoaded=stateLoaded = offetLoaded = false;
+    rootsLoaded = jacobianLoaded = stateLoaded = offetLoaded = false;
 }
 
-void solverOffsets::stateReset ()
+void solverOffsets::stateReset()
 {
-    local.stateReset ();
-    total.stateReset ();
+    local.stateReset();
+    total.stateReset();
     diffOffset = aOffset = vOffset = algOffset = kNullLocation;
     stateLoaded = false;
 }
 
-void solverOffsets::rootCountReset ()
+void solverOffsets::rootCountReset()
 {
     rootOffset = kNullLocation;
-    local.rootReset ();
-    total.rootReset ();
+    local.rootReset();
+    total.rootReset();
 
     rootsLoaded = false;
 }
@@ -120,128 +125,103 @@ void solverOffsets::JacobianCountReset()
     jacobianLoaded = false;
 }
 
-
-void solverOffsets::increment ()
+void solverOffsets::increment()
 {
     count_t algExtra = 0;
-    if (aOffset != kNullLocation)
-    {
+    if (aOffset != kNullLocation) {
         aOffset += total.aSize;
-    }
-    else
-    {
+    } else {
         algExtra = total.aSize;
     }
-    if (vOffset != kNullLocation)
-    {
+    if (vOffset != kNullLocation) {
         vOffset += total.vSize;
-    }
-    else
-    {
+    } else {
         algExtra += total.vSize;
     }
 
     algOffset += total.algSize + algExtra;
 
-    if (diffOffset != kNullLocation)
-    {
+    if (diffOffset != kNullLocation) {
         diffOffset += total.diffSize;
-    }
-    else
-    {
+    } else {
         algOffset += total.diffSize;
     }
-    if (rootOffset != kNullLocation)
-    {
+    if (rootOffset != kNullLocation) {
         rootOffset += total.algRoots + total.diffRoots;
     }
 }
 
-void solverOffsets::increment (const solverOffsets &offsets)
+void solverOffsets::increment(const solverOffsets& offsets)
 {
     count_t algExtra = 0;
-    if (aOffset != kNullLocation)
-    {
+    if (aOffset != kNullLocation) {
         aOffset += offsets.total.aSize;
-    }
-    else
-    {
+    } else {
         algExtra = offsets.total.aSize;
     }
-    if (vOffset != kNullLocation)
-    {
+    if (vOffset != kNullLocation) {
         vOffset += offsets.total.vSize;
-    }
-    else
-    {
+    } else {
         algExtra += offsets.total.vSize;
     }
 
     algOffset += offsets.total.algSize + algExtra;
 
-    if (diffOffset != kNullLocation)
-    {
+    if (diffOffset != kNullLocation) {
         diffOffset += offsets.total.diffSize;
-    }
-    else
-    {
+    } else {
         algOffset += offsets.total.diffSize;
     }
-    if (rootOffset != kNullLocation)
-    {
+    if (rootOffset != kNullLocation) {
         rootOffset += offsets.total.algRoots + offsets.total.diffRoots;
     }
 }
 
-void solverOffsets::localIncrement (const solverOffsets &offsets)
+void solverOffsets::localIncrement(const solverOffsets& offsets)
 {
     count_t algExtra = 0;
-    if (aOffset != kNullLocation)
-    {
+    if (aOffset != kNullLocation) {
         aOffset += offsets.local.aSize;
-    }
-    else
-    {
+    } else {
         algExtra = offsets.local.aSize;
     }
-    if (vOffset != kNullLocation)
-    {
+    if (vOffset != kNullLocation) {
         vOffset += offsets.local.vSize;
-    }
-    else
-    {
+    } else {
         algExtra += offsets.local.vSize;
     }
 
     algOffset += offsets.local.algSize + algExtra;
 
-    if (diffOffset != kNullLocation)
-    {
+    if (diffOffset != kNullLocation) {
         diffOffset += offsets.local.diffSize;
-    }
-    else
-    {
+    } else {
         algOffset += offsets.local.diffSize;
     }
-    if (rootOffset != kNullLocation)
-    {
+    if (rootOffset != kNullLocation) {
         rootOffset += offsets.local.algRoots + local.diffRoots;
     }
 }
 
-void solverOffsets::addSizes (const solverOffsets &offsets) { total.add (offsets.total); }
-void solverOffsets::addStateSizes (const solverOffsets &offsets) { total.addStateSizes (offsets.total); }
-void solverOffsets::addJacobianSizes (const solverOffsets &offsets)
+void solverOffsets::addSizes(const solverOffsets& offsets)
 {
-    total.addJacobianSizes (offsets.total);
+    total.add(offsets.total);
+}
+void solverOffsets::addStateSizes(const solverOffsets& offsets)
+{
+    total.addStateSizes(offsets.total);
+}
+void solverOffsets::addJacobianSizes(const solverOffsets& offsets)
+{
+    total.addJacobianSizes(offsets.total);
 }
 
-void solverOffsets::addRootSizes(const solverOffsets &offsets)
+void solverOffsets::addRootSizes(const solverOffsets& offsets)
 {
     total.addRootSizes(offsets.total);
 }
 
-void solverOffsets::localStateLoad (bool finishedLoading)
+void solverOffsets::localStateLoad(bool finishedLoading)
 {
     total.algSize = local.algSize;
     total.diffSize = local.diffSize;
@@ -258,63 +238,48 @@ void solverOffsets::localLoadAll(bool finishedLoading)
     rootsLoaded = finishedLoading;
 }
 
-void solverOffsets::setOffsets (const solverOffsets &newOffsets)
+void solverOffsets::setOffsets(const solverOffsets& newOffsets)
 {
     algOffset = newOffsets.algOffset;
     diffOffset = newOffsets.diffOffset;
 
-    if (total.aSize > 0)
-    {
-        if (newOffsets.aOffset != kNullLocation)
-        {
+    if (total.aSize > 0) {
+        if (newOffsets.aOffset != kNullLocation) {
             aOffset = newOffsets.aOffset;
-        }
-        else
-        {
+        } else {
             aOffset = algOffset;
             algOffset += total.aSize;
         }
-    }
-    else
-    {
+    } else {
         aOffset = kNullLocation;
     }
 
-    if (total.vSize > 0)
-    {
-        if (newOffsets.vOffset != kNullLocation)
-        {
+    if (total.vSize > 0) {
+        if (newOffsets.vOffset != kNullLocation) {
             vOffset = newOffsets.vOffset;
-        }
-        else
-        {
+        } else {
             vOffset = algOffset;
             algOffset += total.vSize;
         }
-    }
-    else
-    {
+    } else {
         vOffset = kNullLocation;
     }
 
-    if (diffOffset == kNullLocation)
-    {
+    if (diffOffset == kNullLocation) {
         diffOffset = algOffset + total.algSize;
     }
 }
 
-void solverOffsets::setOffset (index_t newOffset)
+void solverOffsets::setOffset(index_t newOffset)
 {
     aOffset = newOffset;
     vOffset = aOffset + total.aSize;
     algOffset = vOffset + total.vSize;
     diffOffset = algOffset + total.algSize;
-    if (total.aSize == 0)
-    {
+    if (total.aSize == 0) {
         aOffset = kNullLocation;
     }
-    if (total.vSize == 0)
-    {
+    if (total.vSize == 0) {
         vOffset = kNullLocation;
     }
 }

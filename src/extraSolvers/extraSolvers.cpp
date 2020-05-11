@@ -11,30 +11,31 @@
  */
 
 #include "extraSolvers.h"
+
 #include "core/factoryTemplates.hpp"
 #include "griddyn/solvers/solverInterface.h"
 #ifdef ENABLE_BRAID
-#include "braid/braidInterface.h"
+#    include "braid/braidInterface.h"
 #endif
 #include <memory>
 
-namespace griddyn
-{
+namespace griddyn {
 static std::vector<std::shared_ptr<classFactory<SolverInterface>>> extraFactories;
 
-void loadExtraSolvers (const std::string &subset)
+void loadExtraSolvers(const std::string& subset)
 {
-    if ((subset.empty()) || (subset == "braid"))
-    {
+    if ((subset.empty()) || (subset == "braid")) {
 #ifdef ENABLE_BRAID
-        auto bfact=std::make_shared<childClassFactory<braid::braidSolver, SolverInterface>>(stringVec{ "braid"});
+        auto bfact = std::make_shared<childClassFactory<braid::braidSolver, SolverInterface>>(
+            stringVec{"braid"});
         extraFactories.push_back(bfact);
 #endif
     }
-    //  auto b = std::make_shared<childTypeFactory<extra::txThermalModel, Relay>> ("relay", stringVec{"thermaltx"});
-    //extraFactories.push_back (b);
+    //  auto b = std::make_shared<childTypeFactory<extra::txThermalModel, Relay>> ("relay",
+    //  stringVec{"thermaltx"});
+    // extraFactories.push_back (b);
 
-    //auto c = std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>> ("relay", stringVec{"txaging", "txage"});
-    //extraFactories.push_back (c);
+    // auto c = std::make_shared<childTypeFactory<extra::txLifeSpan, Relay>> ("relay",
+    // stringVec{"txaging", "txage"}); extraFactories.push_back (c);
 }
-}//namespace griddyn
+}  // namespace griddyn

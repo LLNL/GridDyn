@@ -12,8 +12,7 @@ set(extra_solver_sources extraSolvers.cpp)
 
 set(extra_solver_headers extraSolvers.h)
 
-set(
-    paradae_headers
+set(paradae_headers
     paradae/common/def.h
     paradae/equations/AllEquations.h
     paradae/equations/Equation.h
@@ -72,8 +71,7 @@ set(
     paradae/timeintegrators/TimeIntegrator.h
 )
 
-set(
-    paradae_sources
+set(paradae_sources
     paradae/common/def.cxx
     paradae/equations/Equation.cxx
     paradae/equations/Equation_ODE.cxx
@@ -127,46 +125,25 @@ set(
     paradae/timeintegrators/TimeIntegrator.cxx
 )
 
-option(
-    BUILD_BRAID_SOLVER "enable the braid parallel in time solver integration"
-    OFF
-)
+option(BUILD_BRAID_SOLVER "enable the braid parallel in time solver integration" OFF)
 option(BUILD_SUPERLUMT_SOLVER "enable a superLU solver" OFF)
 option(BUILD_PARADAE_SOLVERS "enable inclusion of PARADAE solvers" OFF)
 
 if(BUILD_BRAID_SOLVER)
     find_package(Braid)
-    list(
-        APPEND
-            extra_solver_sources
-            ${paradae_sources}
-            braid/braidSolver.cpp
-            braid/braid_driver.cxx
+    list(APPEND extra_solver_sources ${paradae_sources} braid/braidSolver.cpp
+         braid/braid_driver.cxx
     )
-    list(
-        APPEND
-            extra_solver_headers
-            ${paradae_headers}
-            braid/braidInterface.h
-            braid/braid_driver.h
-    )
+    list(APPEND extra_solver_headers ${paradae_headers} braid/braidInterface.h braid/braid_driver.h)
 elseif(BUILD_PARADAE_SOLVERS)
     list(APPEND extra_solver_sources ${paradae_sources})
     list(APPEND extra_solver_headers ${paradae_headers})
 endif()
 
 if(ENABLE_MPI)
-    list(
-        APPEND
-            extra_solver_sources paradae/common/MapParam.cxx
-            paradae/common/Timer.cxx
-    )
-    list(
-        APPEND
-            extra_solver_headers
-            paradae/common/def_mpi.h
-            paradae/common/MapParam.h
-            paradae/common/Timer.h
+    list(APPEND extra_solver_sources paradae/common/MapParam.cxx paradae/common/Timer.cxx)
+    list(APPEND extra_solver_headers paradae/common/def_mpi.h paradae/common/MapParam.h
+         paradae/common/Timer.h
     )
 elseif(BUILD_BRAID_SOLVER)
     message(WARNING "Braid requires MPI to function")
@@ -174,27 +151,15 @@ endif()
 
 find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
 
-# find_package(LAPACKE)
-# if (LAPACKE_FOUND)
-# INCLUDE_DIRECTORIES(${LAPACKE_INCLUDE_DIRS})
-# endif()
+# find_package(LAPACKE) if (LAPACKE_FOUND) INCLUDE_DIRECTORIES(${LAPACKE_INCLUDE_DIRS}) endif()
 
-add_library(
-    extraSolverLibrary
-    STATIC
-    ${extra_solver_sources}
-    ${extra_solver_headers}
-)
+add_library(extraSolverLibrary STATIC ${extra_solver_sources} ${extra_solver_headers})
 set_target_properties(extraSolverLibrary PROPERTIES FOLDER libraries)
 
 if(WIN32)
 
 else(WIN32)
-    find_library(
-        LAPACKE_LIBRARY lapacke
-        HINTS /lib64
-        PATHS ${AUTOBUILD_INSTALL_PATH}/lib
-    )
+    find_library(LAPACKE_LIBRARY lapacke HINTS /lib64 PATHS ${AUTOBUILD_INSTALL_PATH}/lib)
     target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARY})
     include_directories(/usr/include/lapacke)
 endif(WIN32)
@@ -205,10 +170,7 @@ target_link_libraries(extraSolverLibrary PUBLIC SuiteSparse::umfpack)
 
 if(BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
     # source_group("paradae" FILES ${paradae_sources} ${paradae_headers})
-    source_group(
-        "paradae\\timeIntegrators" REGULAR_EXPRESSION
-        "paradae/timeintegrators/.*"
-    )
+    source_group("paradae\\timeIntegrators" REGULAR_EXPRESSION "paradae/timeintegrators/.*")
     source_group("paradae\\math" REGULAR_EXPRESSION "paradae/math/.*")
     source_group("paradae\\common" REGULAR_EXPRESSION "paradae/common/.*")
     source_group("paradae\\solvers" REGULAR_EXPRESSION "paradae/solvers/.*")
@@ -225,10 +187,7 @@ if(ENABLE_MPI)
     target_link_libraries(extraSolverLibrary PUBLIC MPI::MPI_C)
 endif(ENABLE_MPI)
 
-target_include_directories(
-    extraSolverLibrary
-    PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR}
-)
+target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})
 
 install(
     TARGETS extraSolverLibrary
@@ -237,10 +196,8 @@ install(
     COMPONENT libraries
 )
 
-install(
-    FILES ${extra_solver_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
-    COMPONENT headers
+install(FILES ${extra_solver_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
+        COMPONENT headers
 )
 
 list(APPEND optional_library_key_headers extraSolvers/extraSolvers.h)

@@ -11,14 +11,14 @@
  */
 
 #include "GlobalWorkQueue.hpp"
+
 #include "griddyn/griddyn-config.h"
 
-namespace griddyn
-{
-const std::shared_ptr<gmlc::containers::WorkQueue> &getGlobalWorkQueue(int threads)
+namespace griddyn {
+const std::shared_ptr<gmlc::containers::WorkQueue>& getGlobalWorkQueue(int threads)
 {
     static std::shared_ptr<gmlc::containers::WorkQueue> p_instance =
-      std::make_shared<gmlc::containers::WorkQueue>(threads);
+        std::make_shared<gmlc::containers::WorkQueue>(threads);
     return p_instance;
 }
 }  // namespace griddyn

@@ -51,7 +51,7 @@ end
 a=regexp(cstring,['void\s*',nname,'::\s*setFlag\s*\([^\)]*)'],'end');
 if (~isempty(a))
     block=extractCodeBlock(cstring,a(1)+1);
-    
+
     pstr=regexp(block,'param\s*==\s*"([^"]*)','tokenExtents');
     for nn=1:length(pstr)
         eblock=extractCodeBlock(block,pstr{nn}(2));
@@ -88,4 +88,3 @@ else
     end
 end
 end
-

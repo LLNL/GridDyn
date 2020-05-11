@@ -59,14 +59,14 @@
 ;Initialization
 
 Function .onInit
-	# the plugins dir is automatically deleted when the installer exits
-	InitPluginsDir
-	File /oname=$PLUGINSDIR\splash.bmp "${NSISDIR}\Contrib\Graphics\Wizard\GridDyn_Small.bmp"
+    # the plugins dir is automatically deleted when the installer exits
+    InitPluginsDir
+    File /oname=$PLUGINSDIR\splash.bmp "${NSISDIR}\Contrib\Graphics\Wizard\GridDyn_Small.bmp"
 
-	splash::show 2000 $PLUGINSDIR\splash
+    splash::show 2000 $PLUGINSDIR\splash
 
-	Pop $0 ; $0 has '1' if the user closed the splash screen early,
-			; '0' if everything closed normally, and '-1' if some error occurred.
+    Pop $0 ; $0 has '1' if the user closed the splash screen early,
+            ; '0' if everything closed normally, and '-1' if some error occurred.
 FunctionEnd
 
 ;---------------------------------

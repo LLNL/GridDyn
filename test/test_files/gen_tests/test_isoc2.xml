@@ -37,19 +37,19 @@
             <T2>0.150</T2>
             <T3>0.050</T3>
          </governor>
-		 <flags>isochronous</flags>
-		 <recorder>
-		<file>datafile.dat</file>
-		<field>freq,p</field>
-		<period>0.1</period>
-		</recorder>
-		  
+         <flags>isochronous</flags>
+         <recorder>
+        <file>datafile.dat</file>
+        <field>freq,p</field>
+        <period>0.1</period>
+        </recorder>
+
       </generator>
-	  <recorder>
-	  <file>datafile.dat</file>
-		<field>angle</field>
-		<period>0.1</period>
-		</recorder>
+      <recorder>
+      <file>datafile.dat</file>
+        <field>angle</field>
+        <period>0.1</period>
+        </recorder>
    </bus>
    <bus name="bus2">
       <type>PV</type>
@@ -84,12 +84,12 @@
          <governor>
             <type>basic</type>
             <K>16.667</K>
- 
+
             <T1>0.100</T1>
             <T2>0.150</T2>
             <T3>0.050</T3>
          </governor>
-		 
+
       </generator>
    </bus>
    <bus name="bus3">
@@ -98,20 +98,20 @@
       <load name="load3">
          <P>1.500</P>
          <Q>0</Q>
-		 <event>
-		 <field>P</field>
-		 <value>1.7</value>
-		 <time>1</time>
-		 </event>
-		 
+         <event>
+         <field>P</field>
+         <value>1.7</value>
+         <time>1</time>
+         </event>
+
       </load>
    </bus>
    <bus name="bus4">
       <type>PQ</type>
       <angle>-0.038</angle>
       <load name="load4">
-		<P>1.500</P>
-         	<Q>0</Q>
+        <P>1.500</P>
+             <Q>0</Q>
       </load>
    </bus>
    <link from="bus1" name="bus1_to_bus3" to="bus3">

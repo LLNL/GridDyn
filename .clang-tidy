@@ -1,7 +1,83 @@
 ---
-Checks:         '*,-android-cloexec-fopen,-fuchsia-overloaded-operator,-fuchsia-default-arguments,-llvm-include-order,-llvm-header-guard,-readability-redundant-declaration,-misc-unused-parameters,-modernize-use-override,-cppcoreguidelines-pro-type-vararg,-google-default-arguments,-google-runtime-references,-google-readability-todo,-google-readability-namespace-comments,-clang-analyzer-alpha.core.CastToStruct,-clang-diagnostic-pragma-once-outside-header,-google-build-using-namespace,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cert-err58-cpp,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-type-reinterpret-cast,-misc-misplaced-widening-cast,-clang-analyzer-alpha.deadcode.UnreachableCode'
-WarningsAsErrors: ''
-HeaderFilterRegex: ''
+FormatStyle: file
+
+Checks: '
+-*,
+google-*,
+-google-runtime-int,
+-google-runtime-references,
+-google-build-using-namespace,
+-google-default-arguments,
+llvm-include-order,
+llvm-namespace-comment,
+modernize*,
+-modernize-use-trailing-return-type,
+-modernize-use-override,
+-modernize-avoid-c-arrays,
+-modernize-pass-by-value,
+-modernize-use-equals-default,
+hicpp-*,
+-hicpp-use-equals-default,
+-hicpp-explicit-conversions,
+-hicpp-use-override,
+-hicpp-special-member-functions,
+-hicpp-avoid-c-arrays,
+-hicpp-no-array-decay,
+clang-analyzer-*,
+bugprone-*,
+-bugprone-narrowing-conversions,
+misc-*,
+-misc-non-private-member-variables-in-classes,
+cert-*,
+-cert-err58-cpp,
+portability-*,
+readability-*,
+-readability-magic-numbers,
+performance-*
+'
+
+WarningsAsErrors: '
+-*,
+google-*,
+-google-runtime-int,
+-google-runtime-references,
+-google-build-using-namespace,
+-google-default-arguments,
+-google-explicit-constructor,
+llvm-include-order,
+llvm-namespace-comment,
+modernize*,
+-modernize-use-trailing-return-type,
+-modernize-use-override,
+-modernize-use-using,
+-modernize-avoid-c-arrays,
+-modernize-pass-by-value,
+-modernize-use-equals-default,
+hicpp-*,
+-hicpp-use-equals-default,
+-hicpp-explicit-conversions,
+-hicpp-use-override,
+-hicpp-special-member-functions,
+-hicpp-avoid-c-arrays,
+-hicpp-no-array-decay,
+clang-analyzer-*,
+-clang-analyzer-optin.cplusplus.VirtualCall,
+bugprone-*,
+-bugprone-narrowing-conversions,
+misc-*,
+-misc-non-private-member-variables-in-classes,
+cert-*,
+-cert-err58-cpp,
+portability-*,
+readability-*,
+-readability-magic-numbers,
+-readability-identifier-naming,
+performance-*
+-performance-unnecessary-value-param
+'
+
+HeaderFilterRegex: 'src/helics/*.hp?p?'
+
 AnalyzeTemporaryDtors: false
 CheckOptions:
   - key:             cert-dcl59-cpp.HeaderFileExtensions
@@ -109,13 +185,13 @@ CheckOptions:
   - key:             readability-function-size.StatementThreshold
     value:           '800'
   - key:             readability-identifier-naming.AbstractClassCase
-    value:           aNy_CasE
+    value:           CamelCase
   - key:             readability-identifier-naming.AbstractClassPrefix
     value:           ''
   - key:             readability-identifier-naming.AbstractClassSuffix
     value:           ''
   - key:             readability-identifier-naming.ClassCase
-    value:           aNy_CasE
+    value:           CamelCase
   - key:             readability-identifier-naming.ClassConstantCase
     value:           aNy_CasE
   - key:             readability-identifier-naming.ClassConstantPrefix
@@ -129,7 +205,7 @@ CheckOptions:
   - key:             readability-identifier-naming.ClassMemberSuffix
     value:           ''
   - key:             readability-identifier-naming.ClassMethodCase
-    value:           aNy_CasE
+    value:           camelBack
   - key:             readability-identifier-naming.ClassMethodPrefix
     value:           ''
   - key:             readability-identifier-naming.ClassMethodSuffix
@@ -175,9 +251,9 @@ CheckOptions:
   - key:             readability-identifier-naming.ConstexprVariableSuffix
     value:           ''
   - key:             readability-identifier-naming.EnumCase
-    value:           aNy_CasE
+    value:           lower_case
   - key:             readability-identifier-naming.EnumConstantCase
-    value:           aNy_CasE
+    value:           lower_case
   - key:             readability-identifier-naming.EnumConstantPrefix
     value:           ''
   - key:             readability-identifier-naming.EnumConstantSuffix
@@ -187,7 +263,7 @@ CheckOptions:
   - key:             readability-identifier-naming.EnumSuffix
     value:           ''
   - key:             readability-identifier-naming.FunctionCase
-    value:           aNy_CasE
+    value:           camelBack
   - key:             readability-identifier-naming.FunctionPrefix
     value:           ''
   - key:             readability-identifier-naming.FunctionSuffix
@@ -243,7 +319,7 @@ CheckOptions:
   - key:             readability-identifier-naming.MethodSuffix
     value:           ''
   - key:             readability-identifier-naming.NamespaceCase
-    value:           aNy_CasE
+    value:           lowercase
   - key:             readability-identifier-naming.NamespacePrefix
     value:           ''
   - key:             readability-identifier-naming.NamespaceSuffix

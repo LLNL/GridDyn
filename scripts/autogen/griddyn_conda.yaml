@@ -84,4 +84,3 @@ dependencies:
   - gcc-6=6.1.0=0
   - isl=0.15=0
 prefix: /software/anaconda2/envs/matlabDyn
-

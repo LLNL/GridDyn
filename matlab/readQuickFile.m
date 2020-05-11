@@ -23,7 +23,7 @@ if (dflag~=1)
         return;
     end
 end
-    
+
 dcount=fread(fid,1,'int32');
 if (dcount>0)
     desc=fread(fid,dcount,'char=>char');

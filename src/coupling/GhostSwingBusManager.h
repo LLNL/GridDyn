@@ -16,7 +16,7 @@
 #include "griddyn/griddyn-config.h"
 
 #ifndef ENABLE_MPI
-#include <functional>
+#    include <functional>
 #endif
 
 #include <complex>
@@ -25,20 +25,17 @@
 
 typedef int MPI_Request;
 
-namespace griddyn
-{
-namespace mpi
-{
-class MpiService;
+namespace griddyn {
+namespace mpi {
+    class MpiService;
 }
 
-class GhostSwingBusManager
-{
+class GhostSwingBusManager {
   public:
     /**
      * class destructor must be public so it can be used with shared_ptr
      */
-    ~GhostSwingBusManager ();  // destructor
+    ~GhostSwingBusManager();  // destructor
 
     using cvec = std::vector<std::complex<double>>;
 
@@ -51,19 +48,19 @@ class GhostSwingBusManager
      * MPI_Init.
      */
     static std::shared_ptr<GhostSwingBusManager>
-    Initialize (int *argc, char **argv[]);  // only constructor that creates Instance
+        Initialize(int* argc, char** argv[]);  // only constructor that creates Instance
 
     /**
      * Return the current instance of the singleton.
      *
      * This will fail if Initialize has not been called.
      */
-    static std::shared_ptr<GhostSwingBusManager> Instance ();
+    static std::shared_ptr<GhostSwingBusManager> Instance();
 
     /**
      * Returns true if instance of the manager exists.
      */
-    static bool isInstance ();
+    static bool isInstance();
 
     /**
      * Creates a new GridLab-D instance using
@@ -72,7 +69,7 @@ class GhostSwingBusManager
      *
      * Returns taskId for the new instance.
      */
-    int createGridlabDInstance (const std::string &arguments);
+    int createGridlabDInstance(const std::string& arguments);
 
     /**
      * End the simulation.
@@ -80,14 +77,14 @@ class GhostSwingBusManager
      * Must be called at the end of the simulation to ensure that
      * tasks launched by the manager are correctly ended.
      */
-    void endSimulation ();
+    void endSimulation();
 
     /**
      * Advances time in distribution model by deltaTime with the
      * provided.N voltages on the swing bus.
      * This will asynchronously execute the distribution model.
      */
-    void sendVoltageStep (int taskId, cvec &voltage, unsigned int deltaTime);
+    void sendVoltageStep(int taskId, cvec& voltage, unsigned int deltaTime);
 
     /**
      * Returns the computed currents from the distribution system for
@@ -98,20 +95,21 @@ class GhostSwingBusManager
      * have receiving of currents be processed in a non-blocking
      * way.
      */
-    void getCurrent (int taskId, cvec &current);
+    void getCurrent(int taskId, cvec& current);
 
     /**
      * Returns number of tasks.
      */
-    int getNumTasks () const { return m_numTasks; }
+    int getNumTasks() const { return m_numTasks; }
 
-    static void SetDebug (bool debug) { g_printStuff = debug; }
+    static void SetDebug(bool debug) { g_printStuff = debug; }
 
 #ifndef ENABLE_MPI
     /**
      * sets the dummy load function
      */
-    void setDummyLoadFunction (int taskId, std::function<void(VoltageMessage *vm, CurrentMessage *cm)> dfunc)
+    void setDummyLoadFunction(int taskId,
+                              std::function<void(VoltageMessage* vm, CurrentMessage* cm)> dfunc)
     {
         dummy_load_eval[taskId] = dfunc;
     }
@@ -120,27 +118,27 @@ class GhostSwingBusManager
   private:
     static bool g_printStuff;  //!< public boolean to change whether things are printed or not
 #ifdef ENABLE_MPI
-    mpi::MpiService *servicer;  //!< pointer to the global MpiService
+    mpi::MpiService* servicer;  //!< pointer to the global MpiService
 #endif
     /**
      * Singleton so prevent external construction and copying of this
      * class.
      */
-    GhostSwingBusManager () {}
+    GhostSwingBusManager() {}
 
     /*
      * Private so cannot be called
      */
-    GhostSwingBusManager (int *argc, char **argv[]);
-    GhostSwingBusManager (GhostSwingBusManager const &) = delete;
-    GhostSwingBusManager &operator= (GhostSwingBusManager const &) = delete;
+    GhostSwingBusManager(int* argc, char** argv[]);
+    GhostSwingBusManager(GhostSwingBusManager const&) = delete;
+    GhostSwingBusManager& operator=(GhostSwingBusManager const&) = delete;
 
     /**
      * End the distribution system model.
      *
      * Should be called for each distribution model.
      */
-    void sendStopMessage (int taskId);
+    void sendStopMessage(int taskId);
 
     /**
      * Singleton instance.
@@ -165,7 +163,7 @@ class GhostSwingBusManager
     /**
      * a function call for a dummy load to execute on a windows system
      */
-    std::vector<std::function<void(VoltageMessage *vm, CurrentMessage *cm)>> dummy_load_eval;
+    std::vector<std::function<void(VoltageMessage* vm, CurrentMessage* cm)>> dummy_load_eval;
 
 #endif
 

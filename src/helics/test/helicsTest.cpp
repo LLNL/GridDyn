@@ -30,7 +30,9 @@
 #include <future>
 #include <iostream>
 #include <memory>
+
 #include <boost/test/unit_test.hpp>
+
 #include <boost/filesystem.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -38,7 +40,8 @@ BOOST_FIXTURE_TEST_SUITE(helics_tests, gridDynSimulationTestFixture)
 using namespace griddyn;
 using namespace griddyn::helicsLib;
 
-static const std::string helics_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/helics_tests/");
+static const std::string helics_test_directory =
+    std::string(GRIDDYN_TEST_DIRECTORY "/helics_tests/");
 
 BOOST_AUTO_TEST_CASE(time_conversion_test)
 {
@@ -69,9 +72,9 @@ BOOST_AUTO_TEST_CASE(test_pub_sub_str)
 
     auto vFed = std::make_shared<helics::ValueFederate>("string_test", fi);
     // register the publications
-    auto &pubid = vFed->registerGlobalPublication<std::string>("pub1");
+    auto& pubid = vFed->registerGlobalPublication<std::string>("pub1");
 
-    auto &subid = vFed->registerSubscription("pub1");
+    auto& subid = vFed->registerSubscription("pub1");
     vFed->setProperty(helics::defs::properties::period, 1.0);
     vFed->enterExecutingMode();
     // publish string1 at time=0.0;
@@ -110,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_pub_sub_double)
     // register the publications
     auto pubid = vFed->registerGlobalPublication<double>("pub1");
 
-    auto &subid = vFed->registerSubscription("pub1");
+    auto& subid = vFed->registerSubscription("pub1");
     vFed->setProperty(helics::defs::properties::period, 1.0);
     vFed->enterExecutingMode();
     // publish string1 at time=0.0;
@@ -180,11 +183,12 @@ BOOST_AUTO_TEST_CASE(load_helics_xml)
     auto hR = new helicsRunner();
     hR->InitializeFromString(helics_test_directory + "helics_test1.xml --core_type=test");
 
-    coreObject *obj = coreObjectFactory::instance()->createObject("source", "helics", "helicsSource");
+    coreObject* obj =
+        coreObjectFactory::instance()->createObject("source", "helics", "helicsSource");
 
-    BOOST_REQUIRE(dynamic_cast<helicsSource *>(obj) != nullptr);
+    BOOST_REQUIRE(dynamic_cast<helicsSource*>(obj) != nullptr);
     // as a note sources are source with respect to GridDyn not HELICS
-    auto src = static_cast<helicsSource *>(obj);
+    auto src = static_cast<helicsSource*>(obj);
     BOOST_REQUIRE(src != nullptr);
     src->set("valkey", "sourceValue");
     src->set("period", 2);
@@ -192,7 +196,7 @@ BOOST_AUTO_TEST_CASE(load_helics_xml)
     auto sim = hR->getSim();
 
     auto genObj = sim->find("bus2::gen#0");
-    auto gen = dynamic_cast<Generator *>(genObj);
+    auto gen = dynamic_cast<Generator*>(genObj);
     BOOST_REQUIRE(gen != nullptr);
 
     gen->add(src);
@@ -233,16 +237,17 @@ BOOST_AUTO_TEST_CASE(helics_xml_with_load)
     fi.coreInitString = "-f 2 --autobroker";
     auto vFed = std::make_shared<helics::ValueFederate>("helics_load_test", fi);
     // register the publications
-    auto &subid = vFed->registerSubscription("voltage3key");
-    auto &pubid = vFed->registerGlobalPublication<std::complex<double>>("load3val");
+    auto& subid = vFed->registerSubscription("voltage3key");
+    auto& pubid = vFed->registerGlobalPublication<std::complex<double>>("load3val");
 
     auto hR = new helicsRunner();
-    hR->InitializeFromString(helics_test_directory + "helics_test2.xml --core_type=test --core_name=test2");
+    hR->InitializeFromString(helics_test_directory +
+                             "helics_test2.xml --core_type=test --core_name=test2");
 
     auto sim = hR->getSim();
 
     auto ldObj = sim->find("bus2::load#0");
-    auto ld = dynamic_cast<helicsLoad *>(ldObj);
+    auto ld = dynamic_cast<helicsLoad*>(ldObj);
     BOOST_REQUIRE(ld != nullptr);
 
     auto res = std::async(std::launch::async, [&]() { hR->simInitialize(); });
@@ -256,8 +261,7 @@ BOOST_AUTO_TEST_CASE(helics_xml_with_load)
 
     auto resT = std::async(std::launch::async, [&]() { return hR->Step(3.0); });
     auto tm = vFed->requestTime(3.0);
-    while (tm < 3.0)
-    {
+    while (tm < 3.0) {
         tm = vFed->requestTime(3.0);
     }
     BOOST_CHECK_EQUAL(tm, 3.0);
@@ -269,8 +273,7 @@ BOOST_AUTO_TEST_CASE(helics_xml_with_load)
 
     resT = std::async(std::launch::async, [&]() { return hR->Step(7.0); });
     tm = vFed->requestTime(7.0);
-    while (tm < 7.0)
-    {
+    while (tm < 7.0) {
         tm = vFed->requestTime(7.0);
     }
     BOOST_CHECK_EQUAL(tm, 7.0);
@@ -288,10 +291,11 @@ BOOST_AUTO_TEST_CASE(helics_xml_with_load)
 BOOST_AUTO_TEST_CASE(test_recorder_player)
 {
     auto brk = runBroker("2");
-    auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=25 2> playerout.txt");
-    auto rec =
-      runRecorder(helics_test_directory +
-                  "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt 2> recout.txt");
+    auto play = runPlayer(helics_test_directory +
+                          "source_player.txt --name=player --stop=25 2> playerout.txt");
+    auto rec = runRecorder(
+        helics_test_directory +
+        "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt 2> recout.txt");
 
     BOOST_CHECK(play.get() == 0);
     BOOST_CHECK(rec.get() == 0);
@@ -333,7 +337,7 @@ BOOST_AUTO_TEST_CASE(test_zmq_core)
 
     auto genObj = sim->find("bus2::gen1");
     BOOST_REQUIRE(genObj != nullptr);
-    auto src = static_cast<Source *>(genObj->find("source"));
+    auto src = static_cast<Source*>(genObj->find("source"));
     BOOST_REQUIRE(src != nullptr);
     auto brk = runBroker("2");
     auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=24");
@@ -499,18 +503,16 @@ BOOST_AUTO_TEST_CASE(test_vector_event)
 BOOST_AUTO_TEST_CASE(test_main_exe)
 {
     exeTestRunner mainExeRunner(GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");
-    if (mainExeRunner.isActive())
-    {
+    if (mainExeRunner.isActive()) {
         auto brk = runBroker("2");
         auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=24");
-        auto out = mainExeRunner.runCaptureOutput(helics_test_directory + "helics_test3.xml --helics");
+        auto out =
+            mainExeRunner.runCaptureOutput(helics_test_directory + "helics_test3.xml --helics");
         auto res = out.find("HELICS");
         BOOST_CHECK(res != std::string::npos);
         BOOST_CHECK(play.get() == 0);
         BOOST_CHECK(brk.get() == 0);
-    }
-    else
-    {
+    } else {
         std::cout << "Unable to locate main executable:: skipping test\n";
     }
 }
@@ -524,22 +526,19 @@ bool testHELICSCollector()
     loadFile(gds.get(), tfile1);
 
     int cc = gds->getInt("collectorcount");
-    if (cc != 1)
-    {
+    if (cc != 1) {
         std::cout << "incorrect number of collectors\n";
         return false;
     }
     gds->run(2.0);
     auto val = helicsGetVal("p1");
-    if (std::abs(val - 0.35) > 0.000001)
-    {
+    if (std::abs(val - 0.35) > 0.000001) {
         std::cout << "incorrect bus load\n";
         return false;
     }
 
     auto keys = helics::get_keys();
-    if (keys.size() != 9)
-    {
+    if (keys.size() != 9) {
         std::cout << "incorrect number of keys\n";
         return false;
     }
@@ -548,21 +547,18 @@ bool testHELICSCollector()
 
     gds->run(4.0);
     val = helicsGetVal("p1");
-    if (std::abs(val - 0.45) > 0.000001)
-    {
+    if (std::abs(val - 0.45) > 0.000001) {
         std::cout << "incorrect bus real load\n";
         return false;
     }
     val = helicsGetVal("q2");
-    if (std::abs(val - 0.31) > 0.000001)
-    {
+    if (std::abs(val - 0.31) > 0.000001) {
         std::cout << "incorrect bus reactive load\n";
         return false;
     }
     auto v1 = helicsGetComplex("helicsvoltage1");
     auto v2 = helicsGetComplex("helicsvoltage2");
-    if (std::abs(v1 - v2) > 0.000001)
-    {
+    if (std::abs(v1 - v2) > 0.000001) {
         std::cout << "incorrect voltage\n";
         return false;
     }
