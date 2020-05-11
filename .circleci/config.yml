@@ -35,6 +35,15 @@ jobs:
       - checkout
       - run: *setup_griddyn
       - run: *run_griddyn_tests
+  build_clang9:
+    docker:
+      - image: helics/buildenv:clang9-builder
+    environment:
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON '
+    steps:
+      - checkout
+      - run: *setup_griddyn
+      - run: *run_griddyn_tests
 
 workflows:
   version: 2
