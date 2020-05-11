@@ -11,10 +11,11 @@ engines:
 languages:
 
 exclude_paths:
-  - ThirdParty/**/*
-  - ThirdParty/*
-  - config/cmake/test_compiler_cxx/**
-  - swig/**/*
-  - scripts/**/*
-  - src/zmqlib/cppzmq/*
-  - scripts/*
+  - 'ThirdParty/**/*'
+  - 'ThirdParty/*'
+  - 'config/cmake/test_compiler_cxx/**'
+  - 'swig/**/*'
+  - 'scripts/**/*'
+  - 'src/zmqlib/cppzmq/*'
+  - 'scripts/*'
+  - '**.md'

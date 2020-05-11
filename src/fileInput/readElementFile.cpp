@@ -14,7 +14,7 @@
 #include "elementReaderTemplates.hpp"
 #include "gmlc/utilities/stringConversion.h"
 #include "griddyn/gridDynSimulation.h"
-#include "readElement.h"
+#include "readElementFile.h"
 #include "readerHelper.h"
 #include "utilities/gridRandom.h"
 #include <sstream>
@@ -190,8 +190,9 @@ void getElementParam(const std::shared_ptr<readerElement>& element, gridParamete
             }
         }
     }
-    // all other properties
+   
     else {
+        // all other properties
         param.paramUnits = readUnits(element, fieldName);
         if (fieldName.back() == ')') {
             auto p = fieldName.find_last_of('(');
@@ -280,8 +281,9 @@ void objSetAttributes(coreObject* obj,
             ri.checkDirectoryParam(strVal);
             gridParameter po(fieldName, strVal);
             objectParameterSet(component, obj, po);
-        } else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
+        } else if ((fieldName == "flag") || (fieldName == "flags")) 
         {
+            // read the flags parameter
             try {
                 setMultipleFlags(obj, att.getText());
             }
@@ -340,8 +342,9 @@ void paramLoopElement(coreObject* obj,
                     ri.checkDirectoryParam(param.strVal);
                     objectParameterSet(component, obj, param);
                 } else if ((fieldName == "flag") ||
-                           (fieldName == "flags"))  // read the flags parameter
+                           (fieldName == "flags")) 
                 {
+                    // read the flags parameter
                     paramStringProcess(param, ri);
                     try {
                         setMultipleFlags(obj, param.strVal);

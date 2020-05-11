@@ -140,8 +140,7 @@ namespace events {
             } else {
                 armed = false;
             }
-        } else  // just proceed to the next trigger and Value
-        {
+        } else  {// just proceed to the next trigger and Value
             setNextValue();
         }
     }

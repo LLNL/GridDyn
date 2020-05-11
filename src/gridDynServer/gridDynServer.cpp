@@ -1,3 +1,15 @@
+/*
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
+
 #include "gridDynServer.h"
 
 #include <boost/cstdint.hpp>
@@ -55,7 +67,6 @@ void gridDynServer::set(std::string param, int val)
     if (param.compare("port") == 0) {
         port = val;
     }
-
     else if (param.compare("ip_protocol") == 0) {
         if ((val == 0) | (val == 1)) {
             ip_protocol = (ip_protocol_t)val;
@@ -63,7 +74,6 @@ void gridDynServer::set(std::string param, int val)
             std::cout << "invalid ip protocol\n";
         }
     }
-
     else if (param.compare("timeBase") == 0) {
         timeBase = val;
     } else if (param.compare("max_connections") == 0) {
@@ -92,9 +102,8 @@ void gridDynServer::start_server(boost::asio::io_service& ios)
                         this,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
-
-    } /* end of UDP protocol */
-
+        /* end of UDP protocol */
+    }
     else {
         printf("\n\t\t|-------------------------------------------------------|\n");
         printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");

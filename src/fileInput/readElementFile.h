@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef READ_ELEMENT_FILE_H_
-#define READ_ELEMENT_FILE_H_
 #pragma once
 
 #include "core/coreObject.h"
@@ -101,4 +99,3 @@ coreObject* loadElementFile(coreObject* parentObject, const std::string& fileNam
 
 }  // namespace griddyn
 
-#endif

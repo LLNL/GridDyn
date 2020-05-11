@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_TRANSLATE_H_
-#define _MATRIX_DATA_TRANSLATE_H_
 #pragma once
 
 #include "matrixDataContainer.hpp"
@@ -36,7 +34,7 @@ class matrixDataTranslate: public matrixDataContainer<ValueT> {
     explicit matrixDataTranslate(matrixData<ValueT>& input): matrixDataContainer<ValueT>(input)
     {
         Trow.fill(kNullLocation);
-    };
+    }
     inline bool isValidRow(index_t row) const
     {
 #ifdef UNSIGNED_INDEXING
@@ -74,5 +72,3 @@ class matrixDataTranslate: public matrixDataContainer<ValueT> {
         }
     }
 };
-
-#endif

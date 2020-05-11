@@ -324,7 +324,6 @@ void loadRAW(coreObject* parentObject, const std::string& fileName, const basicR
                             moreData = false;
                         }
                     }
-
                     else {
                         temp1 = txlines[4];
                         trimString(temp1);

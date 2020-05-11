@@ -31,7 +31,7 @@ class solverException: public std::exception {
   protected:
     int errorCode;  //<!* the actual solver Error Code
   public:
-    explicit solverException(int ecode = 0): errorCode(ecode){};
+    explicit solverException(int ecode = 0): errorCode(ecode){}
     virtual const char* what() const noexcept override
     {
         return (std::string("solver Exception:error code=") + std::to_string(errorCode)).c_str();
@@ -45,7 +45,7 @@ class solverException: public std::exception {
 class InvalidSolverOperation: public solverException {
   protected:
   public:
-    explicit InvalidSolverOperation(int ecode = 0): solverException(ecode){};
+    explicit InvalidSolverOperation(int ecode = 0): solverException(ecode){}
     virtual const char* what() const noexcept override
     {
         return (std::string("invalid solver operation:error code=") + std::to_string(errorCode))
