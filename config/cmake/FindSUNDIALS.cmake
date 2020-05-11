@@ -1,5 +1,5 @@
 ## CMake file to locate SUNDIALS and its useful composite projects
-## The first development of this file was made fro Windows users who
+## The first development of this file was made from Windows users who
 ## use:
 ##
 ##
@@ -20,7 +20,7 @@
 ##
 ## Detailed variables this file provide :
 ##   * SUNDIALS_<UPPPER_CASE_COMPONENT>_FOUND        True if the given component to look for is found (INCLUDE DIR and LIBRARY)
-##   * SUNDIALS_<UPPPER_CASE_COMPONENT>_INCLUDE_DIR    The path directory where we can found all compenent header files
+##   * SUNDIALS_<UPPPER_CASE_COMPONENT>_INCLUDE_DIR    The path directory where we can found all component header files
 ##   * SUNDIALS_<UPPPER_CASE_COMPONENT>_LIBRARY        The file path to the component library
 ##   Note: If a component is not found, a SUNDIALS_<UPPPER_CASE_COMPONENT>_DIR cache variable is set to allow user set the search directory.
 ##

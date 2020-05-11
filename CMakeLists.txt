@@ -100,7 +100,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
                 CACHE PATH "default install path" FORCE
             )
         elseif(MSYS)
-            # use CMAKE_OBJCOPY here since it is somewhat less likely to be overwridden by users
+            # use CMAKE_OBJCOPY here since it is somewhat less likely to be overridden by users
             # rather than the compiler
             get_filename_component(path_bin ${CMAKE_OBJCOPY} DIRECTORY)
             get_filename_component(path_install ${path_bin} DIRECTORY)

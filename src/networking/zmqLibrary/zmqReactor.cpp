@@ -210,7 +210,7 @@ void zmqReactor::reactorLoop()
                             }
                             break;
                         case reactorInstruction::terminate:
-                            // jumpt out of the loop
+                            // jump out of the loop
                             goto REACTOR_HALT;
                         default:
                             break;
