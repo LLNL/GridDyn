@@ -66,15 +66,13 @@ void gridDynServer::set(std::string param, int val)
     boost::algorithm::to_lower(param);
     if (param.compare("port") == 0) {
         port = val;
-    }
-    else if (param.compare("ip_protocol") == 0) {
+    } else if (param.compare("ip_protocol") == 0) {
         if ((val == 0) | (val == 1)) {
             ip_protocol = (ip_protocol_t)val;
         } else {
             std::cout << "invalid ip protocol\n";
         }
-    }
-    else if (param.compare("timeBase") == 0) {
+    } else if (param.compare("timeBase") == 0) {
         timeBase = val;
     } else if (param.compare("max_connections") == 0) {
         max_connections = val;
@@ -103,8 +101,7 @@ void gridDynServer::start_server(boost::asio::io_service& ios)
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
         /* end of UDP protocol */
-    }
-    else {
+    } else {
         printf("\n\t\t|-------------------------------------------------------|\n");
         printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");
         printf("\t\t|-------------------------------------------------------|\n");

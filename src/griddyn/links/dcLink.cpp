@@ -145,7 +145,7 @@ namespace links {
                     localSS.diffSize = 1;
                 }
             }
-        } else if (r <= 0.0) {// superconducting
+        } else if (r <= 0.0) {  // superconducting
             localSS.algSize = 1;
         }
         return localSS;
@@ -160,7 +160,7 @@ namespace links {
                     jacCount = 3;
                 }
             }
-        } else if (r <= 0.0)  {// superconducting
+        } else if (r <= 0.0) {  // superconducting
             jacCount = 2;
         }
         return jacCount;
@@ -202,8 +202,7 @@ namespace links {
                 P2V1 = -linkInfo.v1 / r;
             } else {
             }
-        }  
-        else {// in some other mode
+        } else {  // in some other mode
         }
         // int mode = B1->getMode(sMode) * 4 + B2->getMode(sMode);
 

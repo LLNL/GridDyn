@@ -10,11 +10,12 @@
  * LLNS Copyright End
  */
 
+#include "readElementFile.h"
+
 #include "core/helperObject.h"
 #include "elementReaderTemplates.hpp"
 #include "gmlc/utilities/stringConversion.h"
 #include "griddyn/gridDynSimulation.h"
-#include "readElementFile.h"
 #include "readerHelper.h"
 #include "utilities/gridRandom.h"
 #include <sstream>
@@ -190,7 +191,7 @@ void getElementParam(const std::shared_ptr<readerElement>& element, gridParamete
             }
         }
     }
-   
+
     else {
         // all other properties
         param.paramUnits = readUnits(element, fieldName);
@@ -281,8 +282,7 @@ void objSetAttributes(coreObject* obj,
             ri.checkDirectoryParam(strVal);
             gridParameter po(fieldName, strVal);
             objectParameterSet(component, obj, po);
-        } else if ((fieldName == "flag") || (fieldName == "flags")) 
-        {
+        } else if ((fieldName == "flag") || (fieldName == "flags")) {
             // read the flags parameter
             try {
                 setMultipleFlags(obj, att.getText());
@@ -341,9 +341,7 @@ void paramLoopElement(coreObject* obj,
                            (param.field.find("directory") != std::string::npos)) {
                     ri.checkDirectoryParam(param.strVal);
                     objectParameterSet(component, obj, param);
-                } else if ((fieldName == "flag") ||
-                           (fieldName == "flags")) 
-                {
+                } else if ((fieldName == "flag") || (fieldName == "flags")) {
                     // read the flags parameter
                     paramStringProcess(param, ri);
                     try {
