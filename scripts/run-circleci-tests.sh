@@ -1,6 +1,8 @@
 #!/bin/bash
 tests=(
     /root/project/build/test/testLibrary
+    /root/project/build/test/testComponents
+    /root/project/build/test/testSystem
 )
 
 SUMRESULT=0

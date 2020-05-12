@@ -82,7 +82,7 @@
     <target>LINK#7</target>
     <field>fault</field>
     <value>0.25,-1</value>
-    <time>1,1.1</time>
+    <time>1,1.07</time>
   </event>
 
   <recorder field="auto" period="0.001">

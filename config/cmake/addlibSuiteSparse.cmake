@@ -19,12 +19,6 @@ else()
     set(suitesparse_shared_build ON)
 endif()
 
-if(MINGW)
-    set(${PROJECT_NAME}_SUITESPARSE_VERSION v4.3.1)
-else()
-    set(${PROJECT_NAME}_SUITESPARSE_VERSION v4.3.2)
-endif()
-
 string(TOLOWER "suitesparse" lcName)
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.11)
@@ -38,7 +32,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
     fetchcontent_declare(
         suitesparse
         GIT_REPOSITORY https://github.com/jlblancoc/suitesparse-metis-for-windows.git
-        GIT_TAG ${${PROJECT_NAME}_SUTIESPARSE_VERSION}
+        GIT_TAG master
     )
 
     fetchcontent_getproperties(suitesparse)
@@ -62,8 +56,6 @@ else() # CMake <3.11
         ${lcName}
         GIT_URL
         https://github.com/jlblancoc/suitesparse-metis-for-windows.git
-        GIT_TAG
-        ${${PROJECT_NAME}_SUITESPARSE_VERSION}
         DIRECTORY
         ${PROJECT_BINARY_DIR}/_deps
     )
@@ -73,9 +65,9 @@ else() # CMake <3.11
 endif()
 
 # Set custom variab
-if (MSVC OR MINGW)
-    set(LAPACK_DIR ${${lcName}_SOURCE_DIR}/lapack_windows/x64 CACHE INTERNAL "")
-    endif()
+#if (MSVC OR MINGW)
+#    set(LAPACK_DIR ${${lcName}_SOURCE_DIR}/lapack_windows/x64 CACHE INTERNAL "")
+#    endif()
 
 set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD
     ON
