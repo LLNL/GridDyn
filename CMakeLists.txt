@@ -46,7 +46,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/" "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/")
 else()
     set(ORIGINAL_MODULE_PATH ${CMAKE_MODULE_PATH})
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/" ${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"  ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/" "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"  ${CMAKE_MODULE_PATH})
     get_property(griddyn-use-folders GLOBAL PROPERTY USE_FOLDERS)
 endif()
 
