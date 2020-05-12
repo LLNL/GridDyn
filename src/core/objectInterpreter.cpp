@@ -28,10 +28,10 @@ void objInfo::LoadInfo(const std::string& Istring, const coreObject* obj)
     if (rlc != std::string::npos) {
         m_obj = locateObject(Istring.substr(0, rlc), obj);
 
-        m_field = convertToLowerCase(Istring.substr(rlc + 1, std::string::npos));
+        m_field = Istring.substr(rlc + 1, std::string::npos);
     } else {
         m_obj = const_cast<coreObject*>(obj);
-        m_field = convertToLowerCase(Istring);
+        m_field = Istring;
     }
 
     rlc = m_field.find_first_of('(');
@@ -40,6 +40,10 @@ void objInfo::LoadInfo(const std::string& Istring, const coreObject* obj)
         m_unitType =
             units::unit_cast(units::unit_from_string(m_field.substr(rlc + 1, rlc2 - rlc - 1)));
         m_field = convertToLowerCase(m_field.substr(0, rlc));
+    }
+    else
+    {
+        m_field = convertToLowerCase(m_field);
     }
 
     stringOps::trimString(m_field);

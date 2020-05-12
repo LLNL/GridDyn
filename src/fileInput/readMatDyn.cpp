@@ -126,8 +126,8 @@ void loadMatDyn(coreObject* parentObject,
         }
     }
     // now delete the temporary generators the subobjects should have transferred ownership
-    for (auto g : genList) {
-        delete g;
+    for (auto subg : genList) {
+        delete subg;
     }
     // lastly all the loads need to be autoconverted
     index_t b = static_cast<index_t>(parentObject->get("loadcount"));
@@ -302,22 +302,22 @@ void loadMatDynEvent(coreObject* parentObject,
         return;
     }
     // read the frequency
-    size_t A = ftext.find_first_of('[', 0);
-    size_t B = ftext.find_first_of(']', 0);
-    auto tstr = ftext.substr(A + 1, B - A - 1);
+    auto locA = ftext.find_first_of('[', 0);
+    auto locB = ftext.find_first_of(']', locA+1);
+    auto tstr = ftext.substr(locA + 1, locB - locA - 1);
     auto Tline = split(tstr, "\t ,");
-    size_t C = B;
-    A = ftext.find(Tline[0], C);  // event
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, event1);
+    auto locC = locB;
+    locA = ftext.find(Tline[0], locC);  // event
+    if (locA != string_view::npos) {
+        locB = ftext.find_first_of('=', locA);
+        readMatlabArray(filetext, locB + 1, event1);
         // loadGenDynArray(parentObject, M1, genList);
     }
 
-    A = ftext.find(Tline[1], C);  // buschange
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, M1);
+    locA = ftext.find(Tline[1], locC);  // buschange
+    if (locA != string_view::npos) {
+        locB = ftext.find_first_of('=', locA);
+        readMatlabArray(filetext, locB + 1, M1);
         for (auto& eventSpec : M1) {
             auto evnt = std::make_shared<Event>(eventSpec[0]);
             auto ind = static_cast<index_t>(eventSpec[1]);
@@ -352,10 +352,10 @@ void loadMatDynEvent(coreObject* parentObject,
         //    loadGenExcArray(parentObject, M1, genList);
     }
 
-    A = ftext.find(Tline[2], C);  // linechange
-    if (A != std::string::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, M1);
+    locA = ftext.find(Tline[2], locC);  // linechange
+    if (locA != std::string::npos) {
+        locB = ftext.find_first_of('=', locA);
+        readMatlabArray(filetext, locB + 1, M1);
         for (const auto& lc : M1) {
             auto evnt = std::make_shared<Event>(lc[0]);
 
