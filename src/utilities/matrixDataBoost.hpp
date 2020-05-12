@@ -28,7 +28,7 @@ class matrixDataBoost: public matrixData<type> {
     @param[in] R  number of rows
     @param[in] C  number of columns
     */
-    matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C){}
+    matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C) {}
     /**
      * function to clear the data
      */
