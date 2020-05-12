@@ -121,18 +121,18 @@ void Link::followNetwork(int network, std::queue<gridBus*>& stk)
     }
 }
 
-void Link::pFlowCheck(std::vector<violation>& Violation_vector)
+void Link::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     double mva = std::max(getCurrent(0), getCurrent(1));
     if (mva > ratingA) {
-        violation viol(getName(), MVA_EXCEED_RATING_A);
+        Violation viol(getName(), MVA_EXCEED_RATING_A);
         viol.level = mva;
         viol.limit = ratingA;
         viol.percentViolation = (mva - ratingA) / ratingA * 100;
         Violation_vector.push_back(viol);
     }
     if (mva > ratingB) {
-        violation viol(getName(), MVA_EXCEED_RATING_B);
+        Violation viol(getName(), MVA_EXCEED_RATING_B);
 
         viol.level = mva;
         viol.limit = ratingB;
@@ -140,7 +140,7 @@ void Link::pFlowCheck(std::vector<violation>& Violation_vector)
         Violation_vector.push_back(viol);
     }
     if (mva > Erating) {
-        violation viol(getName(), MVA_EXCEED_ERATING);
+        Violation viol(getName(), MVA_EXCEED_ERATING);
         viol.level = mva;
         viol.limit = Erating;
         viol.percentViolation = (mva - Erating) / Erating * 100;

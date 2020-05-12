@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.7)
 
-include(${PROJECT_SOURCE_DIR}/config/cmake/Utils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/Utils.cmake)
 include(CMakeParseArguments)
 
 find_package(Git)
@@ -128,7 +128,7 @@ function(git_clone)
     endif()
 
     if(NOT PARGS_QUIET)
-        message("${git_output}")
+        message(STATUS "${git_output}")
     endif()
 
     # now checkout the right commit
@@ -152,6 +152,6 @@ function(git_clone)
     endif()
 
     if(NOT PARGS_QUIET)
-        message("${git_output}")
+        message(STATUS "${git_output}")
     endif()
 endfunction()

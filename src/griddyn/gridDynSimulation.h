@@ -29,7 +29,7 @@ namespace griddyn {
 
 #define STRINGIFY(x) #x
 
-class contingency;
+class Contingency;
 class continuationSequence;
 class SolverInterface;
 class parameterSet;

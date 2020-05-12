@@ -68,7 +68,7 @@ class dcBus: public gridBus {
                                         std::uint32_t flags,
                                         check_level_t level) override;  // only applicable in pFlow
     // virtual  void generationAdjust(double adjustment);
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector) override;
     // dynInitializeB dynamics
   protected:
     virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;

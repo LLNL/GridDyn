@@ -145,7 +145,7 @@ class acLine: public Link {
     @param[out] Violation_vector --a list of all the violations any new violations get added to the
     result
     */
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector) override;
     virtual change_code
         powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, check_level_t level) override;
     virtual void pFlowObjectInitializeB() override;
