@@ -29,7 +29,7 @@ class matrixDataCompact: public matrixData<ValueT> {
   public:
     /** @brief compact constructor
      */
-    matrixDataCompact(): matrixData<ValueT>(R, C){}
+    matrixDataCompact(): matrixData<ValueT>(R, C) {}
 
     virtual void clear() override { dVec.fill(0); }
     virtual void assign(index_t row, index_t col, ValueT num) override

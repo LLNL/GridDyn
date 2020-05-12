@@ -68,7 +68,7 @@ class extraContingencyInfo {
     std::shared_ptr<Contingency> baseCont;  //!< pointer to the base contingency
     double cutoff{0.0};  //!< the threshold level to trigger
     double delta{0.0};  //!< the change in data
-    int stage {0};  //!< which stage should the contingency execute in
+    int stage{0};  //!< which stage should the contingency execute in
     extraContingencyInfo() = default;
 };
 

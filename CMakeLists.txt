@@ -24,7 +24,6 @@ endif()
 
 project(GRIDDYN VERSION 0.9.2)
 
-
 # version number
 set(GRIDDYN_VERSION_BUILD)
 set(GRIDDYN_DATE "05-12-2020")
@@ -43,10 +42,14 @@ endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/" "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
+                          "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"
+    )
 else()
     set(ORIGINAL_MODULE_PATH ${CMAKE_MODULE_PATH})
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/" "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"  ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/"
+                          "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/" ${CMAKE_MODULE_PATH}
+    )
     get_property(griddyn-use-folders GLOBAL PROPERTY USE_FOLDERS)
 endif()
 
@@ -102,7 +105,6 @@ if(MSYS
 )
     set(UNIX_LIKE TRUE)
 endif()
-
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -161,8 +163,8 @@ option(GRIDDYN_BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 option(GRIDDYN_ENABLE_CODE_COVERAGE_TEST "Build a target for testing code coverage" OFF)
 
 set(GRIDDYN_ENABLE_OPENMP AUTO CACHE STRING "Enable OpenMP support")
-  set_property(CACHE GRIDDYN_ENABLE_OPENMP PROPERTY STRINGS AUTO ON OFF)
-  
+set_property(CACHE GRIDDYN_ENABLE_OPENMP PROPERTY STRINGS AUTO ON OFF)
+
 option(# TODO this needs to be accounted for in the source code
        GRIDDYN_ENABLE_MULTITHREADING "enable multithreading in GridDyn libraries" ON
 )
@@ -408,8 +410,8 @@ if(GRIDDYN_ENABLE_OPENMP)
             link_libraries(${OpenMP_C_FLAGS})
         endif()
     else(OPENMP_FOUND)
-    if (NOT GRIDDYN_ENABLE_OPENMP STREQUAL "AUTO")
-        message(FATAL_ERROR "Disabling OpenMP support, could not determine compiler flags")
+        if(NOT GRIDDYN_ENABLE_OPENMP STREQUAL "AUTO")
+            message(FATAL_ERROR "Disabling OpenMP support, could not determine compiler flags")
         endif()
     endif(OPENMP_FOUND)
 endif(GRIDDYN_ENABLE_OPENMP)

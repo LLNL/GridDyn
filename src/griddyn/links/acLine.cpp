@@ -750,8 +750,7 @@ void acLine::setState(coreTime time,
         DEFAULTDERIVCOMP();
         constLinkInfo = linkInfo;  // update the constant linkInfo
         constLinkComp = linkComp;
-    } else  
-    { // the other states are normal
+    } else {  // the other states are normal
         updateLocalCache(noInputs, sD, sMode);
         constLinkInfo = linkInfo;  // update the constant linkInfo
         constLinkComp = linkComp;
