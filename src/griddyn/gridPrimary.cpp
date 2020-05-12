@@ -128,7 +128,7 @@ void gridPrimary::delayedJacobian(const IOdata& inputs,
     jacobianElements(inputs, sD, md, inputLocs, sMode);
 }
 
-void gridPrimary::pFlowCheck(std::vector<violation>& /*Violation_vector*/) {}
+void gridPrimary::pFlowCheck(std::vector<Violation>& /*Violation_vector*/) {}
 void gridPrimary::updateLocalCache() {}
 gridBus* gridPrimary::getBus(index_t /*num*/) const
 {

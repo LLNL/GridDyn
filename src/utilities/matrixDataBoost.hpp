@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_BOOST_H_
-#define _MATRIX_DATA_BOOST_H_
 #pragma once
 
 #include "utilities/matrixData.hpp"
@@ -30,7 +28,7 @@ class matrixDataBoost: public matrixData<type> {
     @param[in] R  number of rows
     @param[in] C  number of columns
     */
-    matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C){};
+    matrixDataBoost(count_t R, count_t C): matrixData<type>(R, C), m(R, C){}
     /**
      * function to clear the data
      */
@@ -120,5 +118,3 @@ class matrixDataBoost: public matrixData<type> {
         decltype(cptr->end()) cptr2end;
     };
 };
-
-#endif

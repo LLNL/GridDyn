@@ -41,7 +41,7 @@ int contingency_id;        //usually added later or ignored
 int violationCode;      //a code representing the type of violation
 int severity = 0;       //a code indicating the severity of the violation
 */
-std::string violation::to_string() const
+std::string Violation::to_string() const
 {
     if (violationCode == 0) {
         return "";
@@ -81,15 +81,15 @@ contingency_mode_t getContingencyMode(const std::string& mode)
     return cmode;
 }
 
-std::atomic_int contingency::contingencyCount{0};
+std::atomic_int Contingency::contingencyCount{0};
 
-contingency::contingency(): future_ret(promise_val.get_future())
+Contingency::Contingency(): future_ret(promise_val.get_future())
 {
     id = ++contingencyCount;
     name = "contingency_" + std::to_string(id);
 }
 
-contingency::contingency(gridDynSimulation* sim, std::shared_ptr<Event> ge):
+Contingency::Contingency(gridDynSimulation* sim, std::shared_ptr<Event> ge):
     gds(sim), future_ret(promise_val.get_future())
 {
     id = ++contingencyCount;
@@ -98,7 +98,7 @@ contingency::contingency(gridDynSimulation* sim, std::shared_ptr<Event> ge):
     eventList[0].push_back(std::move(ge));
 }
 
-void contingency::execute()
+void Contingency::execute()
 {
     auto contSim =
         std::unique_ptr<gridDynSimulation>(static_cast<gridDynSimulation*>(gds->clone()));
@@ -127,36 +127,36 @@ void contingency::execute()
     completed.store(true, std::memory_order::memory_order_release);
     promise_val.set_value(static_cast<int>(Violations.size()));
 }
-void contingency::reset()
+void Contingency::reset()
 {
     completed.store(false);
     promise_val = std::promise<int>();
     future_ret = std::shared_future<int>(promise_val.get_future());
 }
 
-void contingency::wait() const
+void Contingency::wait() const
 {
     future_ret.wait();
 }
-bool contingency::isFinished() const
+bool Contingency::isFinished() const
 {
     return completed.load(std::memory_order_acquire);
 }
 
-void contingency::setContingencyRoot(gridDynSimulation* gdSim)
+void Contingency::setContingencyRoot(gridDynSimulation* gdSim)
 {
     if (gds != gdSim) {
         gds = gdSim;
     }
 }
 
-void contingency::add(std::shared_ptr<Event> ge, index_t stage)
+void Contingency::add(std::shared_ptr<Event> ge, index_t stage)
 {
     gmlc::utilities::ensureSizeAtLeast(eventList, stage + 1);
     eventList[stage].push_back(std::move(ge));
 }
 
-std::string contingency::generateHeader() const
+std::string Contingency::generateHeader() const
 {
     std::stringstream ss;
     ss << "index, name, event";
@@ -179,7 +179,7 @@ std::string contingency::generateHeader() const
 }
 
 const std::string commaQuote = R"(, ")";
-std::string contingency::generateFullOutputLine() const
+std::string Contingency::generateFullOutputLine() const
 {
     std::stringstream ss;
     ss << id << ", " << name << commaQuote;
@@ -209,7 +209,7 @@ std::string contingency::generateFullOutputLine() const
     return ss.str();
 }
 
-std::string contingency::generateViolationsOutputLine() const
+std::string Contingency::generateViolationsOutputLine() const
 {
     std::stringstream ss;
     ss << id << ", " << name << commaQuote;
@@ -224,12 +224,12 @@ std::string contingency::generateViolationsOutputLine() const
     return ss.str();
 }
 
-coreObject* contingency::getObject() const
+coreObject* Contingency::getObject() const
 {
     return gds;
 }
 
-void contingency::getObjects(std::vector<coreObject*>& objects) const
+void Contingency::getObjects(std::vector<coreObject*>& objects) const
 {
     for (auto& evL : eventList) {
         for (auto& evnt : evL) {
@@ -238,7 +238,7 @@ void contingency::getObjects(std::vector<coreObject*>& objects) const
     }
 }
 
-void contingency::updateObject(coreObject* newObj, object_update_mode mode)
+void Contingency::updateObject(coreObject* newObj, object_update_mode mode)
 {
     // update all the events
     for (auto& evList : eventList) {
@@ -254,11 +254,11 @@ void contingency::updateObject(coreObject* newObj, object_update_mode mode)
     }
 }
 
-std::shared_ptr<contingency> contingency::clone(std::shared_ptr<contingency> con) const
+std::shared_ptr<Contingency> Contingency::clone(std::shared_ptr<Contingency> con) const
 {
     auto newCont = con;
     if (!newCont) {
-        con = std::make_shared<contingency>(gds);
+        con = std::make_shared<Contingency>(gds);
     }
     con->completed = false;
     con->name = name;

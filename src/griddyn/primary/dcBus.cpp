@@ -176,7 +176,7 @@ change_code
     return out;
 }
 /*function to check the current status for any limit violations*/
-void dcBus::pFlowCheck(std::vector<violation>& Violation_vector)
+void dcBus::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     gridBus::pFlowCheck(Violation_vector);
 }
