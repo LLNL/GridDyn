@@ -22,7 +22,7 @@ else()
     cmake_policy(VERSION 3.17)
 endif()
 
-project(HELICS VERSION 2.5.0)
+project(GRIDDYN VERSION 0.9.2)
 
 
 # version number
@@ -52,7 +52,7 @@ endif()
 
 if(NOT GRIDDYN_DISABLE_GIT_OPERATIONS)
     include(version_describe)
-    git_version_describe(${GRIDDYN_SOURCE_DIR} GRIDDYN_VERSION_DESCRIPTION)
+    git_version_describe(${PROJECT_SOURCE_DIR} GRIDDYN_VERSION_DESCRIPTION)
 endif()
 
 if(GRIDDYN_VERSION_DESCRIPTION)
@@ -160,8 +160,7 @@ option(GRIDDYN_BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 option(GRIDDYN_ENABLE_CODE_COVERAGE_TEST "Build a target for testing code coverage" OFF)
 
-set(GRIDDYN_ENABLE_OPENMP AUTO CACHE STRING "Enable OpenMP support")  #
-create the variable
+set(GRIDDYN_ENABLE_OPENMP AUTO CACHE STRING "Enable OpenMP support")
   set_property(CACHE GRIDDYN_ENABLE_OPENMP PROPERTY STRINGS AUTO ON OFF)
   
 option(# TODO this needs to be accounted for in the source code
