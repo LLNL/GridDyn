@@ -170,7 +170,7 @@ class Link: public gridPrimary {
     @param[out] Violation_vector --a list of all the violations any new violations get added to the
     result
     */
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector) override;
 
     virtual void timestep(coreTime time, const IOdata& inputs, const solverMode& sMode) override;
     /** @brief do a quick update  (may be deprecated)

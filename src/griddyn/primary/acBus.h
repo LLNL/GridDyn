@@ -125,7 +125,7 @@ class acBus: public gridBus {
     /** @brief  adjust the power levels of the contained adjustable secondary objects
     @param[in] adjustment the amount of the adjustment requested*/
     virtual void generationAdjust(double adjustment) override;
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector) override;
     virtual void reset(reset_levels level = reset_levels::minimal) override;
     // dynInitializeB dynamics
   protected:

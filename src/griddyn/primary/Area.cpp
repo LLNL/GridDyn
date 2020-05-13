@@ -681,7 +681,7 @@ change_code Area::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, che
     return ret;
 }
 
-void Area::pFlowCheck(std::vector<violation>& Violation_vector)
+void Area::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     for (auto obj : primaryObjects) {
         obj->pFlowCheck(Violation_vector);

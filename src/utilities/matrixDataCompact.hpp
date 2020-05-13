@@ -29,17 +29,17 @@ class matrixDataCompact: public matrixData<ValueT> {
   public:
     /** @brief compact constructor
      */
-    matrixDataCompact(): matrixData<ValueT>(R, C){};
+    matrixDataCompact(): matrixData<ValueT>(R, C) {}
 
-    virtual void clear() override { dVec.fill(0); };
+    virtual void clear() override { dVec.fill(0); }
     virtual void assign(index_t row, index_t col, ValueT num) override
     {
         // in column major order
         dVec[col * R + row] += num;
     }
 
-    virtual count_t size() const override { return R * C; };
-    virtual count_t capacity() const override { return R * C; };
+    virtual count_t size() const override { return R * C; }
+    virtual count_t capacity() const override { return R * C; }
     virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) final override
     {  // the row and col limits cannot change
         if (newRowLimit != R) {
@@ -104,9 +104,9 @@ class matrixDataCompact: public matrixData<ValueT> {
         virtual matrixElement<ValueT> operator*() const { return {Rctr, Cctr, mDC->dVec[counter]}; }
 
       private:
-        const matrixDataCompact<R, C, ValueT>* mDC = nullptr;
-        index_t Rctr = 0;
-        index_t Cctr = 0;
+        const matrixDataCompact<R, C, ValueT>* mDC;
+        index_t Rctr{0};
+        index_t Cctr{0};
         index_t counter;
     };
 };

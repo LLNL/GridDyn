@@ -14,6 +14,7 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
+#include "motorLoad.h"
 #include "motorLoad5.h"
 #include "utilities/matrixData.hpp"
 #include <cmath>
@@ -185,9 +186,7 @@ namespace loads {
                 x1 = val;
             } else if (param == "xm") {
                 xm = val;
-            }
-
-            else if (param == "alpha") {
+            } else if (param == "alpha") {
                 alpha = val;
                 a = alpha - b - c;
                 slipCheck = true;
@@ -200,7 +199,7 @@ namespace loads {
                 gamma = val;
                 c = gamma;
                 slipCheck = true;
-            } else if ((param == "base") || (param == "mbase") || (param == "rating")) {
+            } else if (param == "base" || param == "mbase" || param == "rating") {
                 mBase = convert(val, unitType, MVAR, systemBasePower, localBaseVoltage);
             } else if (param == "Vcontrol") {
                 Vcontrol = convert(val, unitType, puV, systemBasePower, localBaseVoltage);

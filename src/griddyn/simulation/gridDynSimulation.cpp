@@ -460,7 +460,7 @@ int gridDynSimulation::execute(const gridDynAction& cmd)
             break;
         case gridDynAction::gd_action_t::check:
             if (cmd.string1 == "powerflow") {
-                std::vector<violation> violations;
+                std::vector<Violation> violations;
                 pFlowCheck(violations);
                 if (cmd.string2.empty()) {
                     for (auto& v : violations) {

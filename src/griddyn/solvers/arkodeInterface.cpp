@@ -163,7 +163,7 @@ namespace solvers {
 
     double arkodeInterface::get(const std::string& param) const
     {
-        long int val = -1;
+        int val = -1;
         if ((param == "resevals") || (param == "iterationcount")) {
             //    CVodeGetNumResEvals(solverMem, &val);
         } else if (param == "iccount") {
@@ -187,8 +187,8 @@ namespace solvers {
         if (!flags[initialized_flag]) {
             return;
         }
-        long int nni = 0;
-        long int nst, nre, nfi, netf, ncfn, nge;
+        int nni = 0;
+        int nst, nre, nfi, netf, ncfn, nge;
         realtype tolsfac, hlast, hcur;
 
         int retval = ARKodeGetNumRhsEvals(solverMem, &nre, &nfi);

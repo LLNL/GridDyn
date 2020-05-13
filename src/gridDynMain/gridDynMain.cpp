@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
             gds->log(nullptr, print_level::error, std::string("unknown execution mode"));
             return (-4);
             break;
-    };
+    }
 
     auto pState = gds->currentProcessState();
     if (pState >= gridDynSimulation::gridState_t::DYNAMIC_COMPLETE) {
@@ -179,8 +179,9 @@ int main(int argc, char* argv[])
             ssize % gds->getInt("vcount") % gds->getInt("account") % gds->getInt("algcount") %
             gds->getInt("diffcount") % jsize;
         gds->log(nullptr, print_level::summary, res.str());
-    } else  // if (pState <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
+    } else  
     {
+        // if (pState <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
         auto ssize = gds->getInt("pflowstatesize");
         auto jsize = gds->getInt("pflownonzeros");
         auto res =

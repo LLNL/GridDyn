@@ -303,7 +303,7 @@ void loadMatDynEvent(coreObject* parentObject,
     }
     // read the frequency
     auto locA = ftext.find_first_of('[', 0);
-    auto locB = ftext.find_first_of(']', locA+1);
+    auto locB = ftext.find_first_of(']', locA + 1);
     auto tstr = ftext.substr(locA + 1, locB - locA - 1);
     auto Tline = split(tstr, "\t ,");
     auto locC = locB;

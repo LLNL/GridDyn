@@ -729,17 +729,17 @@ change_code
     return out;
 }
 /*function to check the current status for any limit violations*/
-void acBus::pFlowCheck(std::vector<violation>& Violation_vector)
+void acBus::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     if (voltage > Vmax) {
-        violation V(getName(), VOLTAGE_OVER_LIMIT_VIOLATION);
+        Violation V(getName(), VOLTAGE_OVER_LIMIT_VIOLATION);
 
         V.level = voltage;
         V.limit = Vmax;
         V.percentViolation = (voltage - Vmax) * 100;  // assumes nominal voltage level at 1.0;
         Violation_vector.push_back(V);
     } else if (voltage < Vmin) {
-        violation V(getName(), VOLTAGE_UNDER_LIMIT_VIOLATION);
+        Violation V(getName(), VOLTAGE_UNDER_LIMIT_VIOLATION);
         V.level = voltage;
         V.limit = Vmin;
         V.percentViolation = (Vmin - voltage) * 100;  // assumes nominal voltage level at 1.0;

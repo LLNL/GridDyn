@@ -80,11 +80,11 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
 
     target_compile_options(
         compile_flags_target
-        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wcast-align>>
+        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>: -Wstrict-overflow=5 -Wcast-align>>
     )
     target_compile_options(
         compile_flags_target
-        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wcast-align -Wlogical-op>>
+        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wstrict-overflow=5 -Wcast-align -Wlogical-op>>
     )
     # target_compile_options(compile_flags_target INTERFACE
     # $<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)

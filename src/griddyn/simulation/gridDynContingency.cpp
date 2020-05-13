@@ -24,26 +24,26 @@
 
 namespace griddyn {
 void buildBusContingencies(gridDynSimulation* gds,
-                           std::vector<std::shared_ptr<contingency>>& contList,
+                           std::vector<std::shared_ptr<Contingency>>& contList,
                            const extraContingencyInfo& info);
 void buildLineContingencies(gridDynSimulation* gds,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info);
 void buildGenContingencies(gridDynSimulation* gds,
-                           std::vector<std::shared_ptr<contingency>>& contList,
+                           std::vector<std::shared_ptr<Contingency>>& contList,
                            const extraContingencyInfo& info);
 void buildLoadContingencies(gridDynSimulation* gds,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info);
 
 void addContingency(gridDynSimulation* gds,
-                    std::vector<std::shared_ptr<contingency>>& contList,
+                    std::vector<std::shared_ptr<Contingency>>& contList,
                     std::shared_ptr<Event>& newEvent,
                     const extraContingencyInfo& info);
 
 size_t buildContingencyList(gridDynSimulation* gds,
                             contingency_mode_t cmode,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info)
 {
     auto cnt = contList.size();
@@ -101,18 +101,18 @@ size_t buildContingencyList(gridDynSimulation* gds,
     return static_cast<index_t>(contList.size() - cnt);
 }
 
-std::vector<std::shared_ptr<contingency>> buildContingencyList(gridDynSimulation* gds,
+std::vector<std::shared_ptr<Contingency>> buildContingencyList(gridDynSimulation* gds,
                                                                const std::string& contMode,
                                                                const extraContingencyInfo& info)
 {
     contingency_mode_t cmode = getContingencyMode(contMode);
-    std::vector<std::shared_ptr<contingency>> contList;
+    std::vector<std::shared_ptr<Contingency>> contList;
     buildContingencyList(gds, cmode, contList, info);
 
     return contList;
 }
 
-void runContingencyAnalysis(std::vector<std::shared_ptr<contingency>>& contList,
+void runContingencyAnalysis(std::vector<std::shared_ptr<Contingency>>& contList,
                             const std::string& output)
 {
     auto wqI = getGlobalWorkQueue();
@@ -131,7 +131,7 @@ void runContingencyAnalysis(std::vector<std::shared_ptr<contingency>>& contList,
 }
 
 void buildBusContingencies(gridDynSimulation* gds,
-                           std::vector<std::shared_ptr<contingency>>& contList,
+                           std::vector<std::shared_ptr<Contingency>>& contList,
                            const extraContingencyInfo& info)
 {
     std::vector<gridBus*> buses;
@@ -149,7 +149,7 @@ void buildBusContingencies(gridDynSimulation* gds,
 }
 
 void buildLineContingencies(gridDynSimulation* gds,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info)
 {
     std::vector<Link*> links;
@@ -167,7 +167,7 @@ void buildLineContingencies(gridDynSimulation* gds,
 }
 
 void buildLoadContingencies(gridDynSimulation* gds,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info)
 {
     std::vector<gridBus*> buses;
@@ -193,7 +193,7 @@ void buildLoadContingencies(gridDynSimulation* gds,
 }
 
 void buildGenContingencies(gridDynSimulation* gds,
-                           std::vector<std::shared_ptr<contingency>>& contList,
+                           std::vector<std::shared_ptr<Contingency>>& contList,
                            const extraContingencyInfo& info)
 {
     std::vector<gridBus*> buses;
@@ -219,7 +219,7 @@ void buildGenContingencies(gridDynSimulation* gds,
 }
 
 void addContingency(gridDynSimulation* gds,
-                    std::vector<std::shared_ptr<contingency>>& contList,
+                    std::vector<std::shared_ptr<Contingency>>& contList,
                     std::shared_ptr<Event>& newEvent,
                     const extraContingencyInfo& info)
 {
@@ -229,9 +229,9 @@ void addContingency(gridDynSimulation* gds,
         contList.push_back(std::move(cont));
     } else {
         if (info.stage == 0) {
-            contList.push_back(std::make_shared<contingency>(gds, newEvent));
+            contList.push_back(std::make_shared<Contingency>(gds, newEvent));
         } else {
-            auto cont = std::make_shared<contingency>(gds);
+            auto cont = std::make_shared<Contingency>(gds);
             cont->add(newEvent, info.stage);
             contList.push_back(std::move(cont));
         }

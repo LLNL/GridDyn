@@ -75,8 +75,8 @@ namespace blocks {
             }
             fieldSet = inReq;
             fieldSet[0] -= bias;
-        } else  // we have inputs and outputs
-        {
+        } else  
+        {// we have inputs and outputs
             fieldSet = desiredOutput;  // the field is the output
         }
     }

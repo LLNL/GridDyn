@@ -23,7 +23,7 @@ class matrixData;
 namespace griddyn {
 // forward declare the template class matrixData
 
-class violation;
+class Violation;
 
 /** @brief base object for gridDynSimulations
  * the basic object for creating a power system encapsulating some common functions and data that is

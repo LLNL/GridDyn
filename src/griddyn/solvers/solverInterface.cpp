@@ -10,6 +10,8 @@
  * LLNS Copyright End
  */
 
+#include "solverInterface.h"
+
 #include "../gridDynSimulation.h"
 #include "basicOdeSolver.h"
 #include "basicSolver.h"

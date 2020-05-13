@@ -40,9 +40,7 @@ void objInfo::LoadInfo(const std::string& Istring, const coreObject* obj)
         m_unitType =
             units::unit_cast(units::unit_from_string(m_field.substr(rlc + 1, rlc2 - rlc - 1)));
         m_field = convertToLowerCase(m_field.substr(0, rlc));
-    }
-    else
-    {
+    } else {
         m_field = convertToLowerCase(m_field);
     }
 

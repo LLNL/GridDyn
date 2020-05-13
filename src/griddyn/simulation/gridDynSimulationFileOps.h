@@ -237,13 +237,13 @@ void writeArray(coreTime time,
                 const std::string& fileName,
                 bool append = true);
 
-class contingency;
+class Contingency;
 
 /** write a contingency list to a text based file output
 @param[in] contList the vector of contingencies that have been run
 @param[in] fileName the name of the file to save
 */
-void saveContingencyOutput(const std::vector<std::shared_ptr<contingency>>& contList,
+void saveContingencyOutput(const std::vector<std::shared_ptr<Contingency>>& contList,
                            const std::string& fileName);
 
 }  // namespace griddyn

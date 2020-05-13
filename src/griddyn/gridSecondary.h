@@ -9,9 +9,8 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef GRIDSECONDARY_H_
-#define GRIDSECONDARY_H_
 #include "gridComponent.h"
 
 namespace griddyn {
@@ -97,7 +96,7 @@ class gridSecondary: public gridComponent {
                               const stateData& sD,
                               const solverMode& sMode) const override;
 
-    const gridBus* getBus() const { return bus; };
+    const gridBus* getBus() const { return bus; }
 
     /**
     *@brief get the time derivative of a single state
@@ -168,4 +167,3 @@ class gridSecondary: public gridComponent {
 };
 
 }  // namespace griddyn
-#endif

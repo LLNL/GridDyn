@@ -133,10 +133,9 @@ int gridDynSimulation::powerflow()
                     if (AdjustmentChanges > change_code::non_state_change) {
                         reInitpFlow(sm, AdjustmentChanges);
                     }
-                    if (AdjustmentChanges ==
-                        change_code::no_change)  // if there was no adjustable changes  check
-                    // if there was any non-reversable checks
-                    {
+                    if (AdjustmentChanges == change_code::no_change) {
+                        // if there were no adjustable changes check if there was any non-reversable
+                        // changes
                         AdjustmentChanges = powerFlowAdjust(noInputs,
                                                             lower_flags(controlFlags),
                                                             check_level_t::full_check);
