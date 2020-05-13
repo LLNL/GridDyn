@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(runner_test1)
                 prevTime = simTime;
             } else {
                 std::cout << "suppressing duplicate" << std::endl;
-			}
+            }
         }
         testFile.close();
     }

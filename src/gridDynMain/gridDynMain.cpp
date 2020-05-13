@@ -179,8 +179,7 @@ int main(int argc, char* argv[])
             ssize % gds->getInt("vcount") % gds->getInt("account") % gds->getInt("algcount") %
             gds->getInt("diffcount") % jsize;
         gds->log(nullptr, print_level::summary, res.str());
-    } else  
-    {
+    } else {
         // if (pState <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
         auto ssize = gds->getInt("pflowstatesize");
         auto jsize = gds->getInt("pflownonzeros");

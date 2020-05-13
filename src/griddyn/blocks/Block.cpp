@@ -696,8 +696,7 @@ void Block::setFlag(const std::string& flag, bool val)
         }
     } else if (flag == "simplified") {
         if (opFlags[dyn_initialized]) {
-            if (opFlags[simplified] != val)  
-            {
+            if (opFlags[simplified] != val) {
                 // this is probably not the best thing to
                 // be changing after initialization
                 opFlags[simplified] = val;
@@ -759,8 +758,7 @@ void Block::set(const std::string& param, double val, units::unit unitType)
         rampMin = -val;
         rampMax = val;
         rampLimiterUpdate();
-    }
-    else if (param == "resetlevel") {
+    } else if (param == "resetlevel") {
         resetLevel = val;
         if (vLimiter) {
             vLimiter->setResetLevel(val);

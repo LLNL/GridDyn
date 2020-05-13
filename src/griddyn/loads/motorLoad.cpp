@@ -10,11 +10,12 @@
  * LLNS Copyright End
  */
 
+#include "motorLoad.h"
+
 #include "../gridBus.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "motorLoad.h"
 #include "motorLoad5.h"
 #include "utilities/matrixData.hpp"
 #include <cmath>

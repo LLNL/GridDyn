@@ -24,4 +24,3 @@ if (( filecount > 0 && filecount <= 20 )); then
   done <<< "$FILES"
 fi
 exit $tidyerr
-

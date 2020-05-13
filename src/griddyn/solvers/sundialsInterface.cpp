@@ -10,8 +10,9 @@
  * LLNS Copyright End
  */
 
-#include "griddyn/griddyn-config.h"
 #include "sundialsInterface.h"
+
+#include "griddyn/griddyn-config.h"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
 #ifdef GRIDDYN_ENABLE_CVODE

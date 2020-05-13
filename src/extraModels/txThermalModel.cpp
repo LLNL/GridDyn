@@ -180,8 +180,7 @@ namespace extra {
             mp_m = val;
         } else if ((param == "n") || (param == "oil_exponent")) {
             mp_m = val;
-        }
-        else {
+        } else {
             gridPrimary::set(param, val, unitType);
         }
     }
