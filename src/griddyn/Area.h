@@ -243,7 +243,7 @@ class Area: public gridPrimary {
 
     virtual change_code
         powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, check_level_t level) override;
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector) override;
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector) override;
     virtual void setState(coreTime time,
                           const double state[],
                           const double dstate_dt[],

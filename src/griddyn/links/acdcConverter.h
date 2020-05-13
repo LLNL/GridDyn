@@ -70,7 +70,7 @@ namespace links {
 
         virtual double getMaxTransfer() const override;
 
-        // virtual void pFlowCheck (std::vector<violation> &Violation_vector);
+        // virtual void pFlowCheck (std::vector<Violation> &Violation_vector);
         // virtual void getVariableType (double sdata[], const solverMode &sMode);      //has no
         // state variables
         virtual void updateBus(gridBus* bus, index_t busnumber) override;

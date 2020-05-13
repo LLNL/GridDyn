@@ -464,7 +464,7 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
     }
 }
 
-const static IOdata kNullVec;
+static const IOdata kNullVec;
 
 double
     sensor::getBlockOutput(const stateData& sD, const solverMode& sMode, index_t blockNumber) const

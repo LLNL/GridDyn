@@ -38,16 +38,16 @@ namespace griddyn {
 class gridDynSimulation;
 
 /** class encapsulating the data needed to record a violation */
-class violation {
+class Violation {
   public:
     std::string m_objectName;  //!< the  name of the object with the violation
-    double level = 0.0;  //!< the value of the parameter exceeding some limit
-    double limit = 0.0;  //!< the limit value
-    double percentViolation = 100;  //!< the violation percent;
-    int contingency_id = 0;  //!< usually added later or ignored
+    double level{0.0};  //!< the value of the parameter exceeding some limit
+    double limit{0.0};  //!< the limit value
+    double percentViolation{100.0};  //!< the violation percent;
+    int contingency_id{0};  //!< usually added later or ignored
     int violationCode;  //!< a code representing the type of violation
-    int severity = 0;  //!< a code indicating the severity of the violation
-    violation(const std::string& name = "", int code = 0): m_objectName(name), violationCode(code)
+    int severity{0};  //!< a code indicating the severity of the violation
+    Violation(const std::string& name = "", int code = 0): m_objectName(name), violationCode(code)
     {
     }
     /** @brief encode the violation to a string
@@ -59,16 +59,16 @@ class Event;
 
 enum class contingency_mode_t { N_1, N_1_1, N_2, line, gen, load, bus, custom, unknown };
 
-class contingency;
+class Contingency;
 /** convert a string to a contingency mode*/
 contingency_mode_t getContingencyMode(const std::string& mode);
 /** class defining some extra optional info used for building contingency lists */
 class extraContingencyInfo {
   public:
-    std::shared_ptr<contingency> baseCont;  //!< pointer to the base contingency
-    double cutoff = 0.0;  //!< the threshold level to trigger
-    double delta = 0.0;  //!< the change in data
-    int stage = 0;  //!< which stage should the contingency execute in
+    std::shared_ptr<Contingency> baseCont;  //!< pointer to the base contingency
+    double cutoff{0.0};  //!< the threshold level to trigger
+    double delta{0.0};  //!< the change in data
+    int stage{0};  //!< which stage should the contingency execute in
     extraContingencyInfo() = default;
 };
 
@@ -76,7 +76,7 @@ class extraContingencyInfo {
 const extraContingencyInfo emptyExtraInfo{};
 /** class that encapsulated the information about a contingency
  */
-class contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterface {
+class Contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterface {
   private:
     static std::atomic_int
         contingencyCount;  //!< static variable counting the number of created contingencies
@@ -85,7 +85,7 @@ class contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterf
     int id;  //!< contingency id
     std::atomic<bool> completed{false};  //!< boolean indicator if the contingency was run
 
-    std::vector<violation> Violations;  //!< the resulting violations
+    std::vector<Violation> Violations;  //!< the resulting violations
     double PI = 0.0;  //!< performance index score
     double lowV = 0.0;  //!< minimum voltage
     std::vector<double> busVoltages;  //!< vector of bus voltages
@@ -100,9 +100,9 @@ class contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterf
         eventList;  //!< events that describe the contingency
   public:
     /** default constructor*/
-    contingency();
+    Contingency();
     /** construct from a sim and event*/
-    contingency(gridDynSimulation* sim, std::shared_ptr<Event> ge = nullptr);
+    Contingency(gridDynSimulation* sim, std::shared_ptr<Event> ge = nullptr);
     /** run the contingency
      */
     virtual void execute() override;
@@ -143,14 +143,14 @@ class contingency: public gmlc::containers::basicWorkBlock, objectOperatorInterf
     void updateObject(coreObject* newObj,
                       object_update_mode mode = object_update_mode::match) override;
 
-    std::shared_ptr<contingency> clone(std::shared_ptr<contingency> con = nullptr) const;
+    std::shared_ptr<Contingency> clone(std::shared_ptr<Contingency> con = nullptr) const;
 };
 // Contingency execution functions
 /** @brief build a list of contingencies
 @param[in] contMode a string with the type of contingency analysis
 @return a vector of contingencies
 */
-std::vector<std::shared_ptr<contingency>>
+std::vector<std::shared_ptr<Contingency>>
     buildContingencyList(gridDynSimulation* gds,
                          const std::string& contMode,
                          const extraContingencyInfo& info = emptyExtraInfo);
@@ -163,14 +163,14 @@ std::vector<std::shared_ptr<contingency>>
 */
 size_t buildContingencyList(gridDynSimulation* gds,
                             contingency_mode_t cmode,
-                            std::vector<std::shared_ptr<contingency>>& contList,
+                            std::vector<std::shared_ptr<Contingency>>& contList,
                             const extraContingencyInfo& info = emptyExtraInfo);
 
 /** @brief perform a contingency analysis
 @param[in] contList the list of specific contingencies to test
 @param[in] output a string containing the output specs (either fileName or some other string
 */
-void runContingencyAnalysis(std::vector<std::shared_ptr<contingency>>& contList,
+void runContingencyAnalysis(std::vector<std::shared_ptr<Contingency>>& contList,
                             const std::string& output);
 
 }  // namespace griddyn

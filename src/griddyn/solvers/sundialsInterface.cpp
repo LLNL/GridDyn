@@ -10,6 +10,8 @@
  * LLNS Copyright End
  */
 
+#include "sundialsInterface.h"
+
 #include "griddyn/griddyn-config.h"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
@@ -391,7 +393,7 @@ namespace solvers {
             sd->nnz = a1->size();
             if (sd->flags[fileCapture_flag]) {
                 if (!sd->jacFile.empty()) {
-                    auto val = static_cast<long int>(sd->get("nliterations"));
+                    auto val = static_cast<std::uint32_t>(sd->get("nliterations"));
                     writeArray(time, 1, val, sd->mode.offsetIndex, *a1, sd->jacFile);
                 }
             }

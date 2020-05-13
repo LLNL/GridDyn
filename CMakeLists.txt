@@ -13,31 +13,20 @@
 cmake_minimum_required(VERSION 3.5)
 cmake_policy(VERSION 3.5)
 
-if(POLICY CMP0079)
-    cmake_policy(SET CMP0079 NEW)
+# Make sure users don't get warnings on a tested (3.5 to 3.17) version of CMake. For most of the
+# policies, the new version is better (hence the change). We don't use the 3.0...3.16 syntax because
+# of a bug in MSVC 15.7 built-in and modified CMake 3.11
+if(CMAKE_VERSION VERSION_LESS 3.17)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.17)
 endif()
 
-if(POLICY CMP0069)
-    # Policy CMP0069 INTERPROCEDURAL OPTIMIZATION, just use the new policy since this isn't used for
-    # old systems
-    cmake_policy(SET CMP0069 NEW)
-endif()
-
-if(POLICY CMP0074)
-    # Policy CMP0074 find_package uses <PackageName>_ROOT variables
-    cmake_policy(SET CMP0074 NEW)
-endif()
-
-if(POLICY CMP0079)
-    cmake_policy(SET CMP0079 NEW)
-endif()
-
-# project name
 project(GRIDDYN VERSION 0.9.2)
 
 # version number
 set(GRIDDYN_VERSION_BUILD)
-set(GRIDDYN_DATE "10-30-2019")
+set(GRIDDYN_DATE "05-12-2020")
 
 set(GRIDDYN_VERSION_UNDERSCORE
     "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}"
@@ -53,15 +42,21 @@ endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
+                          "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"
+    )
 else()
     set(ORIGINAL_MODULE_PATH ${CMAKE_MODULE_PATH})
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/" ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake/"
+                          "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/" ${CMAKE_MODULE_PATH}
+    )
     get_property(griddyn-use-folders GLOBAL PROPERTY USE_FOLDERS)
 endif()
 
-include(version_describe)
-git_version_describe(${GRIDDYN_SOURCE_DIR} GRIDDYN_VERSION_DESCRIPTION)
+if(NOT GRIDDYN_DISABLE_GIT_OPERATIONS)
+    include(version_describe)
+    git_version_describe(${PROJECT_SOURCE_DIR} GRIDDYN_VERSION_DESCRIPTION)
+endif()
 
 if(GRIDDYN_VERSION_DESCRIPTION)
     message(STATUS "griddyn version tag description is ${GRIDDYN_VERSION_DESCRIPTION}")
@@ -80,23 +75,17 @@ include(CTest)
 include(ucm)
 include(GNUInstallDirs)
 
-if(POLICY CMP0079)
-    # Policy CMP0079 introduced since CMake 3.13.2 changes a few things in target definitions with
-    # INTERFACE, use old until this is evaluated properly condition.
-    cmake_policy(SET CMP0079 NEW)
-endif()
-
 # ------------------------------------------------------------
 # set the install path to a local directory
 # ------------------------------------------------------------
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if(WIN32)
         if(MSVC)
-            set(CMAKE_INSTALL_PREFIX "C:/local/helics_${HELICS_VERSION_UNDERSCORE}/"
+            set(CMAKE_INSTALL_PREFIX "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path" FORCE
             )
         elseif(MINGW AND NOT MSYS)
-            set(CMAKE_INSTALL_PREFIX "C:/local/helics_${HELICS_VERSION_UNDERSCORE}/"
+            set(CMAKE_INSTALL_PREFIX "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path" FORCE
             )
         elseif(MSYS)
@@ -116,13 +105,6 @@ if(MSYS
 )
     set(UNIX_LIKE TRUE)
 endif()
-
-show_variable(
-    AUTOBUILD_INSTALL_PATH PATH "location to install the autobuild libraries and Headers"
-    "${PROJECT_BINARY_DIR}/libs"
-)
-
-mark_as_advanced(AUTOBUILD_INSTALL_PATH)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -180,7 +162,8 @@ option(GRIDDYN_BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 option(GRIDDYN_ENABLE_CODE_COVERAGE_TEST "Build a target for testing code coverage" OFF)
 
-option(GRIDDYN_ENABLE_OPENMP "Enable openMP support" ON)
+set(GRIDDYN_ENABLE_OPENMP AUTO CACHE STRING "Enable OpenMP support")
+set_property(CACHE GRIDDYN_ENABLE_OPENMP PROPERTY STRINGS AUTO ON OFF)
 
 option(# TODO this needs to be accounted for in the source code
        GRIDDYN_ENABLE_MULTITHREADING "enable multithreading in GridDyn libraries" ON
@@ -427,19 +410,21 @@ if(GRIDDYN_ENABLE_OPENMP)
             link_libraries(${OpenMP_C_FLAGS})
         endif()
     else(OPENMP_FOUND)
-        message(FATAL_ERROR "Disabling OpenMP support, could not determine compiler flags")
+        if(NOT GRIDDYN_ENABLE_OPENMP STREQUAL "AUTO")
+            message(FATAL_ERROR "Disabling OpenMP support, could not determine compiler flags")
+        endif()
     endif(OPENMP_FOUND)
 endif(GRIDDYN_ENABLE_OPENMP)
 
 cmake_dependent_option(
     ENABLE_OPENMP_SUNDIALS "Enable SUNDIALS NVector openMP implementation" ON
-    "GRIDDYN_ENABLE_OPENMP" OFF
+    "GRIDDYN_ENABLE_OPENMP;OPENMP_FOUND" OFF
 )
 
 cmake_dependent_advanced_option(
     # TODO look at this
     GRIDDYN_ENABLE_OPENMP_INTERNAL "Enable openmp internal to GridDyn--not used yet" OFF
-    "GRIDDYN_ENABLE_OPENMP" OFF
+    "GRIDDYN_ENABLE_OPENMP;OPENMP_FOUND" OFF
 )
 
 # ------------------------------------------------------------

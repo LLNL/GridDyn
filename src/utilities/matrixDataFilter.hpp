@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_FILTER_H_
-#define _MATRIX_DATA_FILTER_H_
 #pragma once
 
 #include "matrixDataContainer.hpp"
@@ -43,7 +41,7 @@ class matrixDataFilter: public matrixDataContainer<ValueT> {
         if (!found) {
             matrixDataContainer<ValueT>::md->assign(row, col, num);
         }
-    };
+    }
 
     /** add a filter
     @param[in] row  the row to filter out
@@ -68,5 +66,3 @@ class matrixDataFilter: public matrixDataContainer<ValueT> {
         std::sort(rowFilter.begin(), rowFilter.end());
     }
 };
-
-#endif

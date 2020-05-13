@@ -1130,7 +1130,7 @@ void saveJacobian(gridDynSimulation* gds, const std::string& fileName, const sol
     }
 }
 
-void saveContingencyOutput(const std::vector<std::shared_ptr<contingency>>& contList,
+void saveContingencyOutput(const std::vector<std::shared_ptr<Contingency>>& contList,
                            const std::string& fileName)
 {
     if (contList.empty()) {

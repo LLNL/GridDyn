@@ -19,29 +19,24 @@ namespace griddyn {
 
 solverMode::solverMode(index_t index): offsetIndex(index)
 {
-    if (index == local_mode)  // predefined local
-    {
+    if (index == local_mode) {  // predefined local
         local = true;
         dynamic = true;
         differential = true;
         algebraic = true;
-    } else if (index == power_flow)  // predefined pflow
-    {
+    } else if (index == power_flow) {  // predefined pflow
         algebraic = true;
         differential = false;
         dynamic = false;
-    } else if (index == dae)  // predefined dae
-    {
+    } else if (index == dae) {  // predefined dae
         dynamic = true;
         differential = true;
         algebraic = true;
-    } else if (index == dynamic_algebraic)  // predefined dynAlg
-    {
+    } else if (index == dynamic_algebraic) {  // predefined dynAlg
         algebraic = true;
         differential = false;
         dynamic = true;
-    } else if (index == dynamic_differential)  // predefined dynDiff
-    {
+    } else if (index == dynamic_differential) {  // predefined dynDiff
         algebraic = false;
         differential = true;
         dynamic = true;

@@ -147,7 +147,7 @@ class gridPrimary: public gridComponent {
      * transfer capacity, angle limits, etc
      * @param[out] Violation_vector, a storage location for any detected violations
      */
-    virtual void pFlowCheck(std::vector<violation>& Violation_vector);
+    virtual void pFlowCheck(std::vector<Violation>& Violation_vector);
 
     using gridComponent::updateLocalCache;
     /** @brief do any local computation to get ready for measurements*/

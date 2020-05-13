@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(runner_test1)
     std::string line;
     std::ifstream testFile(
         std::string(GRIDDYN_TEST_DIRECTORY "/runner_tests/coupled-time-solvererror.txt"));
-    if (!testFile.is_open())
+    if (!testFile.is_open()) {
         std::cout << "failed to open file";
-    else {
+    } else {
         while (std::getline(testFile, line) && simTime < 18000000000) {
             std::istringstream ss(line);
             std::string time;
@@ -74,8 +74,9 @@ BOOST_AUTO_TEST_CASE(runner_test1)
                 // Try explicit (double) casting of simTime and see if crashes
                 m_currentGDTime = gdr->Step((double)simTime * 1.0E-9);
                 prevTime = simTime;
-            } else
+            } else {
                 std::cout << "suppressing duplicate" << std::endl;
+            }
         }
         testFile.close();
     }

@@ -80,25 +80,25 @@ void acLine::pFlowObjectInitializeB()
 {
     updateLocalCache();
 }
-void acLine::pFlowCheck(std::vector<violation>& Violation_vector)
+void acLine::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     Link::pFlowCheck(Violation_vector);
     double angle = linkInfo.theta1;
     if (angle < minAngle) {
-        violation V;
-        V.m_objectName = getName();
-        V.violationCode = MINIMUM_ANGLE_EXCEEDED;
-        V.level = angle;
-        V.limit = minAngle;
+        Violation violation;
+        violation.m_objectName = getName();
+        violation.violationCode = MINIMUM_ANGLE_EXCEEDED;
+        violation.level = angle;
+        violation.limit = minAngle;
         if (minAngle != 0.0) {
-            V.percentViolation = (minAngle - angle) / std::abs(minAngle) * 100;
+            violation.percentViolation = (minAngle - angle) / std::abs(minAngle) * 100;
         } else {
-            V.percentViolation = 100.0;
+            violation.percentViolation = 100.0;
         }
 
-        Violation_vector.push_back(V);
+        Violation_vector.push_back(violation);
     } else if (angle > maxAngle) {
-        violation V;
+        Violation V;
         V.m_objectName = getName();
         V.violationCode = MAXIMUM_ANGLE_EXCEEDED;
         V.level = angle;
@@ -750,8 +750,7 @@ void acLine::setState(coreTime time,
         DEFAULTDERIVCOMP();
         constLinkInfo = linkInfo;  // update the constant linkInfo
         constLinkComp = linkComp;
-    } else  // the other states are normal
-    {
+    } else {  // the other states are normal
         updateLocalCache(noInputs, sD, sMode);
         constLinkInfo = linkInfo;  // update the constant linkInfo
         constLinkComp = linkComp;

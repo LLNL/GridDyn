@@ -156,7 +156,7 @@ change_code
     return subarea.powerFlowAdjust(inputs, flags, level);
 }
 
-void subsystem::pFlowCheck(std::vector<violation>& Violation_vector)
+void subsystem::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
     subarea.pFlowCheck(Violation_vector);
 }
