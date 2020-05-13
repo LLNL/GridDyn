@@ -181,7 +181,6 @@ namespace extra {
         } else if ((param == "n") || (param == "oil_exponent")) {
             mp_m = val;
         }
-
         else {
             gridPrimary::set(param, val, unitType);
         }

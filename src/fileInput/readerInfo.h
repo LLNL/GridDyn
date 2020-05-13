@@ -52,7 +52,7 @@ class basicReaderInfo {
         return (flagID < 32) ? ((flags & (1 << flagID)) != 0) : false;
     }
     void setAllFlags(uint32_t newFlags) { flags = newFlags; }
-    uint32_t getFlags() const { return flags; };
+    uint32_t getFlags() const { return flags; }
 };
 
 const basicReaderInfo defInfo = basicReaderInfo();
