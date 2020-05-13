@@ -20,7 +20,7 @@
 
 using namespace griddyn;
 
-int gridDynObject_stateSize(gridDynObject obj, solverKey key)
+int gridDynObjectStateSize(GridDynObject obj, SolverKey key, GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -98,11 +98,12 @@ void CopyFromLocal(std::vector<double>& dest,
     }
 }
 
-griddyn_status gridDynObject_guessState(gridDynObject obj,
+void gridDynObjectGuessState(GridDynObject obj,
                                         double time,
                                         double* states,
                                         double* dstate_dt,
-                                        solverKey key)
+                             SolverKey key,
+                             GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -138,11 +139,12 @@ griddyn_status gridDynObject_guessState(gridDynObject obj,
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_setState(gridDynObject obj,
+void gridDynObjectSetState(GridDynObject obj,
                                       double time,
                                       const double* states,
                                       const double* dstate_dt,
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -167,7 +169,10 @@ griddyn_status gridDynObject_setState(gridDynObject obj,
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_getStateVariableTypes(gridDynObject obj, double* types, solverKey key)
+void gridDynObjectGetStateVariableTypes(GridDynObject obj,
+                                        double* types,
+                                        SolverKey key,
+                                        GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -186,11 +191,12 @@ griddyn_status gridDynObject_getStateVariableTypes(gridDynObject obj, double* ty
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_residual(gridDynObject obj,
+void gridDynObjectResidual(GridDynObject obj,
                                       const double* inputs,
                                       int inputSize,
                                       double* resid,
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -212,11 +218,12 @@ griddyn_status gridDynObject_residual(gridDynObject obj,
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_derivative(gridDynObject obj,
+void gridDynObjectDerivative(GridDynObject obj,
                                         const double* inputs,
                                         int inputSize,
                                         double* deriv,
-                                        solverKey key)
+                             SolverKey key,
+                             GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -241,12 +248,13 @@ griddyn_status gridDynObject_derivative(gridDynObject obj,
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_algebraicUpdate(gridDynObject obj,
+void gridDynObjectAlgebraicUpdate(GridDynObject obj,
                                              const double* inputs,
                                              int inputSize,
                                              double* update,
                                              double alpha,
-                                             solverKey key)
+                                  SolverKey key,
+                                  GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -280,12 +288,13 @@ const IOlocs defInputlocs{kNullLocation,
                           kNullLocation,
                           kNullLocation,
                           kNullLocation};
-griddyn_status gridDynObject_jacobian(gridDynObject obj,
+void gridDynObjectJacobian(GridDynObject obj,
                                       const double* inputs,
                                       int inputSize,
                                       double cj,
                                       void (*insert)(int, int, double),
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -309,11 +318,12 @@ griddyn_status gridDynObject_jacobian(gridDynObject obj,
 
 const IOlocs defInputlocs_act{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-griddyn_status gridDynObject_ioPartialDerivatives(gridDynObject obj,
+void gridDynObjecIoPartialDerivatives(GridDynObject obj,
                                                   const double* inputs,
                                                   int inputSize,
                                                   void (*insert)(int, int, double),
-                                                  solverKey key)
+                                      SolverKey key,
+                                      GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
@@ -333,11 +343,12 @@ griddyn_status gridDynObject_ioPartialDerivatives(gridDynObject obj,
     return griddyn_ok;
 }
 
-griddyn_status gridDynObject_outputPartialDerivatives(gridDynObject obj,
+void gridDynObjectOutputPartialDerivatives(GridDynObject obj,
                                                       const double* inputs,
                                                       int inputSize,
                                                       void (*insert)(int, int, double),
-                                                      solverKey key)
+                                           SolverKey key,
+                                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 

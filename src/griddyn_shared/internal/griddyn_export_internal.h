@@ -14,13 +14,13 @@
 #define GRIDDYN_EXPORT_INTERNAL_H_
 #include "griddyn/gridComponent.h"
 #include "griddyn/solvers/solverMode.hpp"
-typedef void* gridDynObject;
-/** make a gridDynObject wrapper out of an actual component pointer*/
-gridDynObject creategridDynObject(griddyn::gridComponent* comp);
-/** get the component pointer from a gridDynObject*/
-griddyn::gridComponent* getComponentPointer(gridDynObject obj);
-/** get the const component pointer from a const gridDynObject*/
-const griddyn::gridComponent* getConstComponentPointer(gridDynObject obj);
+typedef void* GridDynObject;
+/** make a GridDynObject wrapper out of an actual component pointer*/
+GridDynObject creategridDynObject(griddyn::gridComponent* comp);
+/** get the component pointer from a GridDynObject*/
+griddyn::gridComponent* getComponentPointer(GridDynObject obj);
+/** get the const component pointer from a const GridDynObject*/
+const griddyn::gridComponent* getConstComponentPointer(GridDynObject obj);
 
 /** data class for storing some solver information and data buffers*/
 class solverKeyInfo {

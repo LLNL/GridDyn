@@ -21,7 +21,7 @@
 
 using namespace griddyn;
 
-gridDynEvent gridDynEvent_create(const char* eventString, gridDynObject obj)
+GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, GridDynError* err)
 {
     auto evnt = new std::shared_ptr<Event>(make_event(eventString, getComponentPointer(obj)));
     if (evnt != nullptr) {
@@ -30,7 +30,7 @@ gridDynEvent gridDynEvent_create(const char* eventString, gridDynObject obj)
     return nullptr;
 }
 
-void gridDynEvent_free(gridDynEvent evnt)
+void gridDynEventFree(GridDynEvent evnt)
 {
     if (evnt != nullptr) {
         auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
@@ -38,7 +38,7 @@ void gridDynEvent_free(gridDynEvent evnt)
     }
 }
 
-griddyn_status gridDynEvent_trigger(gridDynEvent evnt)
+void gridDynEventTrigger(GridDynEvent evnt, GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
@@ -52,7 +52,7 @@ griddyn_status gridDynEvent_trigger(gridDynEvent evnt)
     return griddyn_function_failure;
 }
 
-griddyn_status gridDynEvent_schedule(gridDynEvent evnt, gridDynSimReference sim)
+void gridDynEventSchedule(GridDynEvent evnt, GridDynSimReference sim, GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
@@ -73,7 +73,8 @@ griddyn_status gridDynEvent_schedule(gridDynEvent evnt, gridDynSimReference sim)
     }
 }
 
-griddyn_status gridDynEvent_setValue(gridDynEvent evnt, const char* parameter, double value)
+void
+    gridDynEventSetValue(GridDynEvent evnt, const char* parameter, double value, GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
@@ -91,7 +92,10 @@ griddyn_status gridDynEvent_setValue(gridDynEvent evnt, const char* parameter, d
     }
 }
 
-griddyn_status gridDynEvent_setString(gridDynEvent evnt, const char* parameter, const char* value)
+void gridDynEventSetString(GridDynEvent evnt,
+                                      const char* parameter,
+                                      const char* value,
+                                      GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
@@ -109,7 +113,7 @@ griddyn_status gridDynEvent_setString(gridDynEvent evnt, const char* parameter, 
     }
 }
 
-griddyn_status gridDynEvent_setFlag(gridDynEvent evnt, const char* flag, int val)
+void gridDynEventSetFlag(GridDynEvent evnt, const char* flag, int val, GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
@@ -127,7 +131,7 @@ griddyn_status gridDynEvent_setFlag(gridDynEvent evnt, const char* flag, int val
     }
 }
 
-griddyn_status gridDynEvent_setTarget(gridDynEvent evnt, gridDynObject obj)
+void gridDynEventSetTarget(GridDynEvent evnt, GridDynObject obj, GridDynError* err)
 {
     if (evnt == nullptr) {
         return griddyn_invalid_object;
