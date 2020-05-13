@@ -9,6 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
 #include "gridComponent.h"
 
