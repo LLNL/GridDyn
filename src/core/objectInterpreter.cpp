@@ -47,7 +47,7 @@ void objInfo::LoadInfo(const std::string& Istring, const coreObject* obj)
     stringOps::trimString(m_field);
 }
 
-// TODO:: convert to using stringView
+// TODO(PT):: convert to using stringView
 coreObject* locateObject(const std::string& Istring,
                          const coreObject* rootObj,
                          bool rootSearch,
@@ -93,8 +93,6 @@ coreObject* locateObject(const std::string& Istring,
                             obj = rootObj->findByUserID(type, onum);
                             break;
                         case '!':
-                            obj = rootObj->getSubObject(type, onum);
-                            break;
                         case '#':
                             obj = rootObj->getSubObject(type, onum);
                             break;
@@ -103,7 +101,7 @@ coreObject* locateObject(const std::string& Istring,
                     }
                 }
             } else if (rootSearch) {
-                auto rootObject2 = rootObj->getRoot();
+                auto* rootObject2 = rootObj->getRoot();
                 obj = rootObject2->find(mname);
             }
         }
