@@ -39,7 +39,7 @@ GridDynObject createGridDynObject(gridComponent* comp)
     if (comp == nullptr) {
         return nullptr;
     }
-    auto ptr = new coreOwningPtr<gridComponent>(comp);
+    auto* ptr = new coreOwningPtr<gridComponent>(comp);
     return ptr;
 }
 
@@ -55,7 +55,7 @@ gridComponent* getComponentPointer(GridDynObject obj)
 const gridComponent* getConstComponentPointer(GridDynObject obj)
 {
     if (obj != nullptr) {
-        auto *cptr = static_cast<coreOwningPtr<gridComponent> const*>(obj);
+        const auto *cptr = static_cast<coreOwningPtr<gridComponent> const*>(obj);
         return cptr->get();
     }
     return nullptr;
@@ -351,11 +351,11 @@ GridDynObject gridDynObjectFindByUserId(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
-    auto res = comp->findByUserID(componentType, static_cast<index_t>(ID));
+    auto* res = comp->findByUserID(componentType, static_cast<index_t>(ID));
     if (res == nullptr) {
         return nullptr;
     }
-    auto compNew = dynamic_cast<gridComponent*>(res);
+    auto* compNew = dynamic_cast<gridComponent*>(res);
     if (compNew == nullptr) {
         return nullptr;
     }
@@ -369,7 +369,7 @@ GridDynObject gridDynObjectGetParent(GridDynObject obj, GridDynError* err)
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
-    auto compNew = dynamic_cast<gridComponent*>(comp->getParent());
+    auto* compNew = dynamic_cast<gridComponent*>(comp->getParent());
     if (compNew == nullptr) {
         return nullptr;
     }
