@@ -302,6 +302,7 @@ set(core_headers
     numericEstimationFunctions.h
     gridDynDefinitions.hpp
     offsetTable.h
+    gridDynVersion.hpp
 )
 
 set(core_sources

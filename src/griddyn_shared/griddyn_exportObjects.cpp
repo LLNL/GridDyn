@@ -32,7 +32,9 @@
 #include <map>
 using namespace griddyn;
 
-GridDynObject creategridDynObject(gridComponent* comp)
+static constexpr char invalidComponent[] = "the Griddyn object is not valid";
+
+GridDynObject createGridDynObject(gridComponent* comp)
 {
     if (comp == nullptr) {
         return nullptr;
@@ -64,6 +66,7 @@ GridDynObject
 {
     auto newObject = coreObjectFactory::instance()->createObject(componentType, objectType);
     if (newObject == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto* comp = dynamic_cast<gridComponent*>(newObject);
@@ -79,11 +82,13 @@ GridDynObject gridDynObjectClone(GridDynObject obj, GridDynError* err)
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto newObject = comp->clone();
     auto* comp_clone = dynamic_cast<gridComponent*>(newObject);
     if (comp_clone == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto ptr = new coreOwningPtr<gridComponent>(comp_clone);
@@ -105,10 +110,9 @@ void gridDynObjectAdd(GridDynObject parentObject, GridDynObject objectToAdd, Gri
 
     try {
         parent->add(child);
-        return griddyn_ok;
     }
-    catch (const objectAddFailure&) {
-        return griddyn_add_failure;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
@@ -120,14 +124,14 @@ void gridDynObjectRemove(GridDynObject parentObject,
     coreObject* child = getComponentPointer(objectToRemove);
 
     if ((parent == nullptr) || (child == nullptr)) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     try {
         parent->remove(child);
-        return griddyn_ok;
     }
-    catch (const objectRemoveFailure&) {
-        return griddyn_remove_failure;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
@@ -139,17 +143,14 @@ void gridDynObjectSetString(GridDynObject obj,
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     try {
         comp->set(parameter, value);
-        return griddyn_ok;
     }
-    catch (const invalidParameterValue&) {
-        return griddyn_invalid_parameter_value;
-    }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
@@ -161,17 +162,14 @@ void gridDynObjectSetValue(GridDynObject obj,
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     try {
         comp->set(parameter, value);
-        return griddyn_ok;
     }
-    catch (const invalidParameterValue&) {
-        return griddyn_invalid_parameter_value;
-    }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
@@ -184,18 +182,15 @@ void gridDynObjectSetValueUnits(GridDynObject obj,
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     auto unitType = (units == nullptr) ? units::defunit : units::unit_cast_from_string(units);
     try {
         comp->set(parameter, value, unitType);
-        return griddyn_ok;
     }
-    catch (const invalidParameterValue&) {
-        return griddyn_invalid_parameter_value;
-    }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
@@ -204,96 +199,103 @@ void gridDynObjectSetFlag(GridDynObject obj, const char* flag, int val, GridDynE
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     try {
         // ???
         comp->set(flag, static_cast<double>(val != 0));
-        return griddyn_ok;
     }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
 }
 
-void gridDynObjectGetString(GridDynObject obj,
-                             const char* parameter,
-                             char* value,
-                             int N,
+void gridDynObjectGetString(
+    GridDynObject obj, const char* parameter, char* value, int N, int* actualSize,
                              GridDynError* err)
 {
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     auto s = comp->getString(parameter);
     strncpy(value, s.c_str(), N);
-    return static_cast<int>(s.size());
+    if (actualSize != nullptr)
+    {
+        *actualSize = static_cast<int>(s.size());
+    }
 }
 
-void gridDynObjectGetValue(GridDynObject obj,
+static constexpr char unknownParameter[] = "the given parameter was not recognized";
+
+double gridDynObjectGetValue(GridDynObject obj,
                             const char* parameter,
-                            double* result,
                             GridDynError* err)
 {
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return kNullVal;
     }
     try {
-        *result = comp->get(parameter);
-        if (*result == kNullVal) {
-            return griddyn_unknown_parameter;
+        double result = comp->get(parameter);
+        if (result == kNullVal) {
+            assignError(err, griddyn_error_unknown_parameter, unknownParameter);
         }
-        return griddyn_ok;
+        return result;
     }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
+    return kNullVal;
 }
 
-void gridDynObjectGetValueUnits(GridDynObject obj,
+double gridDynObjectGetValueUnits(GridDynObject obj,
                                            const char* parameter,
                                            const char* units,
-                                 double* result,
                                  GridDynError* err)
 {
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return kNullVal;
     }
 
     auto unitType = (units == nullptr) ? units::defunit : units::unit_cast_from_string(units);
     try {
-        *result = comp->get(parameter, unitType);
-        if (*result == kNullVal) {
-            return griddyn_unknown_parameter;
+        double result = comp->get(parameter, unitType);
+        if (result == kNullVal) {
+            assignError(err, griddyn_error_unknown_parameter, unknownParameter);
+            return result;
         }
-        return griddyn_ok;
     }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
+    return kNullVal;
 }
 
-void gridDynObjectGetFlag(GridDynObject obj, const char* flag, int* result, GridDynError* err)
+int gridDynObjectGetFlag(GridDynObject obj, const char* flag, GridDynError* err)
 {
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return 0;
     }
     try {
         auto res = comp->getFlag(flag);
-        *result = (res) ? 1 : 0;
-        return griddyn_ok;
+        return (res) ? 1 : 0;
     }
-    catch (const unrecognizedParameter&) {
-        return griddyn_unknown_parameter;
+    catch (...) {
+        griddynErrorHandler(err);
     }
+    return 0;
 }
 
 GridDynObject gridDynObjectFind(GridDynObject obj, const char* objectToFind, GridDynError* err)
@@ -301,6 +303,7 @@ GridDynObject gridDynObjectFind(GridDynObject obj, const char* objectToFind, Gri
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto res = comp->find(objectToFind);
@@ -311,7 +314,7 @@ GridDynObject gridDynObjectFind(GridDynObject obj, const char* objectToFind, Gri
     if (compNew == nullptr) {
         return nullptr;
     }
-    return creategridDynObject(compNew);
+    return createGridDynObject(compNew);
 }
 
 GridDynObject gridDynObjectGetSubObject(GridDynObject obj,
@@ -321,6 +324,7 @@ GridDynObject gridDynObjectGetSubObject(GridDynObject obj,
 {
     auto comp = getConstComponentPointer(obj);
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
 
@@ -332,7 +336,7 @@ GridDynObject gridDynObjectGetSubObject(GridDynObject obj,
     if (compNew == nullptr) {
         return nullptr;
     }
-    return creategridDynObject(compNew);
+    return createGridDynObject(compNew);
 }
 
 GridDynObject gridDynObjectFindByUserId(GridDynObject obj,
@@ -343,6 +347,7 @@ GridDynObject gridDynObjectFindByUserId(GridDynObject obj,
     auto comp = getConstComponentPointer(obj);
 
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto res = comp->findByUserID(componentType, static_cast<index_t>(ID));
@@ -353,20 +358,21 @@ GridDynObject gridDynObjectFindByUserId(GridDynObject obj,
     if (compNew == nullptr) {
         return nullptr;
     }
-    return creategridDynObject(compNew);
+    return createGridDynObject(compNew);
 }
 
 GridDynObject gridDynObjectGetParent(GridDynObject obj, GridDynError* err)
 {
     auto comp = getConstComponentPointer(obj);
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto compNew = dynamic_cast<gridComponent*>(comp->getParent());
     if (compNew == nullptr) {
         return nullptr;
     }
-    return creategridDynObject(compNew);
+    return createGridDynObject(compNew);
 }
 static const char* invalid_str = "invalid";
 static const char* bus_str = "bus";

@@ -13,26 +13,141 @@
 #include "core/coreExceptions.h"
 #include "fileInput/fileInput.h"
 #include "griddyn/gridDynSimulation.h"
+#include "griddyn/gridDynVersion.hpp"
 #include "griddyn_export.h"
 #include "internal/griddyn_export_internal.h"
 #include "runner/gridDynRunner.h"
 
 using namespace griddyn;
 
-GridDynSimReference gridDynSimulationCreate(const char* type, const char* name, GridDynError* err)
+const char* gridDynGetVersion(void)
 {
+    return griddyn::versionString;
+}
+
+const char* gridDynGetBuildFlags(void)
+{
+    return griddyn::buildFlags;
+}
+
+const char* gridDynGetCompilerVersion(void)
+{
+    return griddyn::compiler;
+}
+
+static constexpr const char* nullstrPtr = "";
+
+const std::string emptyStr;
+
+GridDynError gridDynErrorInitialize(void)
+{
+    GridDynError err;
+    err.error_code = 0;
+    err.message = nullstrPtr;
+    return err;
+}
+
+/** clear an error object*/
+void gridDynErrorClear(GridDynError* err)
+{
+    if (err != nullptr) {
+        err->error_code = 0;
+        err->message = nullstrPtr;
+    }
+}
+
+/** this function is based on the lippencott function template
+http://cppsecrets.blogspot.com/2013/12/using-lippincott-function-for.html
+*/
+static constexpr char unknown_err_string[] = "unknown error";
+
+void griddynErrorHandler(GridDynError* err) noexcept
+{
+    if (err == nullptr) {
+        return;
+    }
+    try {
+        try {
+            // this is intended to be a single '='
+            if (std::exception_ptr eptr = std::current_exception()) {
+                std::rethrow_exception(eptr);
+            } else {
+                // LCOV_EXCL_START
+                err->error_code = griddyn_error_external_type;
+                err->message = unknown_err_string;
+                // LCOV_EXCL_STOP
+            }
+        }
+        catch (const griddyn::unrecognizedObjectException& uoe) {
+            err->error_code = griddyn_error_invalid_object;
+            err->message = getMasterHolder()->addErrorString(uoe.what());
+        }
+        catch (const griddyn::objectAddFailure& af) {
+            err->error_code = griddyn_error_add_failure;
+            err->message = getMasterHolder()->addErrorString(af.what());
+        }
+        catch (const griddyn::objectRemoveFailure& rf) {
+            err->error_code = griddyn_error_remove_failure;
+            err->message = getMasterHolder()->addErrorString(rf.what());
+        }
+        catch (const griddyn::unrecognizedParameter& up) {
+            err->error_code = griddyn_error_unknown_parameter;
+            err->message = getMasterHolder()->addErrorString(up.what());
+        }
+        catch (const griddyn::invalidParameterValue& ip) {
+            err->error_code = griddyn_error_invalid_parameter_value;
+            err->message = getMasterHolder()->addErrorString(ip.what());
+        }
+        catch (const griddyn::executionFailure& ef) {
+            err->error_code = griddyn_error_function_failure;
+            err->message = getMasterHolder()->addErrorString(ef.what());
+        }
+        catch (const griddyn::cloneFailure& cf) {
+            err->error_code = griddyn_error_other;
+            err->message = getMasterHolder()->addErrorString(cf.what());
+        }
+        catch (const griddyn::fileOperationError& cf) {
+            err->error_code = griddyn_error_file_load_failure;
+            err->message = getMasterHolder()->addErrorString(cf.what());
+        }
+        catch (const std::exception& exc) {
+            err->error_code = griddyn_error_other;
+            err->message = getMasterHolder()->addErrorString(exc.what());
+        }
+        // LCOV_EXCL_START
+        catch (...) {
+            err->error_code = griddyn_error_external_type;
+            err->message = unknown_err_string;
+        }
+        // LCOV_EXCL_STOP
+    }
+    // LCOV_EXCL_START
+    catch (...) {
+        err->error_code = griddyn_error_external_type;
+        err->message = unknown_err_string;
+    }
+    // LCOV_EXCL_STOP
+}
+
+GridDynSimulation gridDynSimulationCreate(const char* type, const char* name, GridDynError* err)
+{
+    static constexpr char invalidSimType[] = "the given simtype is not valid in the shared library";
     GriddynRunner* sim;
     std::string typeStr(type);
     if (typeStr == "helics") {
+        assignError(err, griddyn_error_invalid_parameter_value, invalidSimType); 
         return nullptr;
     }
     if (typeStr == "buildfmu") {
+        assignError(err, griddyn_error_invalid_parameter_value, invalidSimType);
         return nullptr;
     }
     if (typeStr == "dime") {
+        assignError(err, griddyn_error_invalid_parameter_value, invalidSimType);
         return nullptr;
     }
     if (typeStr == "buildgdz") {
+        assignError(err, griddyn_error_invalid_parameter_value, invalidSimType);
         return nullptr;
     }
 
@@ -40,52 +155,61 @@ GridDynSimReference gridDynSimulationCreate(const char* type, const char* name, 
     if (sim != nullptr) {
         sim->getSim()->setName(name);
     }
-
-    return reinterpret_cast<GridDynSimReference>(sim);
+    else
+    {
+        static constexpr char creationFailure[] = "unable to create the simulation";
+        assignError(err, griddyn_error_function_failure, creationFailure);
+    }
+    return reinterpret_cast<GridDynSimulation>(sim);
 }
 
-void gridDynSimulationFree(GridDynSimReference sim)
+static constexpr char invalidSimulation[] = "the simulation object is not valid";
+
+void gridDynSimulationFree(GridDynSimulation sim)
 {
     if (sim != nullptr) {
         delete reinterpret_cast<GriddynRunner*>(sim);
     }
 }
 
-void gridDynSimulationInitializeFromString(GridDynSimReference sim,
-                                            const char* initializationString,
-                                            GridDynError* err)
+void gridDynSimulationInitializeFromString(GridDynSimulation sim,
+                                           const char* initializationString,
+                                           GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return runner->InitializeFromString(initializationString);
+    runner->InitializeFromString(initializationString);
 }
 
-void gridDynSimulationInitializeFromArgs(GridDynSimReference sim,
-                                                    int argc,
-                                                    char* argv[],
-                                          int ignoreUnrecognized,
-                                          GridDynError* err)
+void gridDynSimulationInitializeFromArgs(GridDynSimulation sim,
+                                         int argc,
+                                         char* argv[],
+                                         int ignoreUnrecognized,
+                                         GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return runner->Initialize(argc, argv, (ignoreUnrecognized != 0));
+    runner->Initialize(argc, argv, (ignoreUnrecognized != 0));
 }
 
-void gridDynSimulationLoadfile(GridDynSimReference sim,
-                                const char* fileName,
-                                const char* fileType,
-                                GridDynError* err)
+void gridDynSimulationLoadfile(GridDynSimulation sim,
+                               const char* fileName,
+                               const char* fileType,
+                               GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
 
     try {
@@ -95,183 +219,215 @@ void gridDynSimulationLoadfile(GridDynSimReference sim,
         } else {
             loadFile(runner->getSim().get(), fileName, nullptr, typestr);
         }
-        return griddyn_ok;
     }
     catch (...) {
-        return griddyn_file_load_failure;
+        griddynErrorHandler(err);
     }
 }
 
-void gridDynSimulationAddCommand(GridDynSimReference sim, const char* command, GridDynError* err)
+void gridDynSimulationAddCommand(GridDynSimulation sim, const char* command, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
     gridDynAction action(command);
     if (action.command != gridDynAction::gd_action_t::invalid) {
         runner->getSim()->add(action);
-        return griddyn_ok;
+        return;
     }
-    return griddyn_add_failure;
+    //return griddyn_add_failure;
 }
 
-void gridDynSimulationRun(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationRun(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
     try {
         runner->Run();
     }
     catch (...) {
-        return griddyn_solve_error;
+        griddynErrorHandler(err);
     }
-    return griddyn_ok;
 }
 
-void gridDynSimulationRunTo(GridDynSimReference sim, double runToTime, GridDynError* err)
+double gridDynSimulationRunTo(GridDynSimulation sim, double runToTime, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return kNullVal;
     }
     try {
-        runner->Step(runToTime);
+        auto time=runner->Step(runToTime);
+        return static_cast<double>(time);
     }
     catch (...) {
-        return griddyn_solve_error;
+         griddynErrorHandler(err);
+        return kNullVal;
     }
-    return griddyn_ok;
 }
 
-void gridDynSimulationStep(GridDynSimReference sim, GridDynError* err)
+double gridDynSimulationStep(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return kNullVal;
     }
-    auto ret = runner->getSim()->step();
-    return ret;
+    runner->getSim()->step();
+    return static_cast<double>(runner->getSim()->getSimulationTime());
 }
 
-void gridDynSimulationRunAsync(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationRunAsync(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
     try {
         runner->RunAsync();
     }
-    catch (const executionFailure&) {
-        return FUNCTION_EXECUTION_FAILURE;
+    catch (...) {
+        griddynErrorHandler(err);
     }
-    return 0;
 }
 
-void gridDynSimulationRunToAsync(GridDynSimReference sim, double runToTime, GridDynError* err)
+void gridDynSimulationRunToAsync(GridDynSimulation sim, double runToTime, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
     try {
         runner->StepAsync(runToTime);
     }
-    catch (const executionFailure&) {
-        return FUNCTION_EXECUTION_FAILURE;
+    catch (...) {
+        griddynErrorHandler(err);
     }
-    return 0;
 }
 
-void gridDynSimulationStepAsync(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationStepAsync(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return 0;
+
 }
 
-int gridDynSimulationGetStatus(GridDynSimReference sim, GridDynError* err)
+int gridDynSimulationGetStatus(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return griddyn_error_invalid_object;
     }
     coreTime tRet;
     auto res = runner->getStatus(tRet);
     return res;
 }
 
-GridDynObject getSimulationObject(GridDynSimReference sim, GridDynError* err)
+GridDynObject getSimulationObject(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return nullptr;
     }
     runner->getSim()->addOwningReference();
-    return creategridDynObject(runner->getSim().get());
+    return createGridDynObject(runner->getSim().get());
 }
 
-void gridDynSimulationPowerflowInitialize(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationPowerflowInitialize(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return runner->getSim()->pFlowInitialize();
+    runner->getSim()->pFlowInitialize();
 }
 
-void gridDynSimulationPowerflow(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationPowerflow(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return runner->getSim()->powerflow();
+    runner->getSim()->powerflow();
 }
 
-void gridDynSimulationDynamicInitialize(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationDynamicInitialize(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
     runner->simInitialize();
-    return griddyn_ok;
+    return;
 }
 
-void gridDynSimulationReset(GridDynSimReference sim, GridDynError* err)
+void gridDynSimulationReset(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
+        return;
     }
-    return runner->Reset();
+    auto val = runner->Reset();
+    if (val != griddyn_ok) {
+    }
 }
 
-double gridDynSimulationGetCurrentTime(GridDynSimReference sim, GridDynError* err)
+double gridDynSimulationGetCurrentTime(GridDynSimulation sim, GridDynError* err)
 {
     auto runner = reinterpret_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return kNullVal;
     }
     return static_cast<double>(runner->getSim()->getSimulationTime());
+}
+
+MasterObjectHolder::MasterObjectHolder() noexcept {}
+
+MasterObjectHolder::~MasterObjectHolder() {}
+
+const char* MasterObjectHolder::addErrorString(std::string newError)
+{
+    auto estring = errorStrings.lock();
+    estring->push_back(std::move(newError));
+    auto& v = estring->back();
+    return v.c_str();
+}
+
+std::shared_ptr<MasterObjectHolder> getMasterHolder()
+{
+    static auto instance = std::make_shared<MasterObjectHolder>();
+    static gmlc::concurrency::TripWireTrigger tripTriggerholder;
+    return instance;
 }

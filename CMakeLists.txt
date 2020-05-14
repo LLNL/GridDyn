@@ -36,6 +36,10 @@ if(GRIDDYN_VERSION_BUILD)
     set(GRIDDYN_VERSION_UNDERSCORE "${GRIDDYN_VERSION_UNDERSCORE}-${GRIDDYN_VERSION_BUILD}")
 endif()
 
+set(GRIDDYN_COMPILER_VERSION
+    "${CMAKE_GENERATOR} ${CMAKE_GENERATOR_PLATFORM} ${CMAKE_SYSTEM}:${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+)
+message(STATUS "SYSTEM INFO -> ${GRIDDYN_COMPILER_VERSION}")
 # ------------------------------------------------------------
 # set the module path and include some common macros
 # ------------------------------------------------------------
@@ -303,6 +307,11 @@ endif()
 
 add_library(GRIDDYN::compile_flags_target ALIAS compile_flags_target)
 add_library(GRIDDYN::build_flags_target ALIAS build_flags_target)
+
+get_target_property(EXTRA_BUILD_FLAGS build_flags_target INTERFACE_COMPILE_OPTIONS)
+set(GRIDDYN_BUILD_FLAGS_OUTPUT
+    "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_STATIC_LINKER_FLAGS} ${EXTRA_BUILD_FLAGS} "
+)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(NOT USE_LIBCXX)

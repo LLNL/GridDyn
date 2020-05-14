@@ -19,12 +19,17 @@
 
 using namespace griddyn;
 
+static constexpr char invalidQuery[] = "the Query object is not valid";
+static constexpr char invalidComponent[] = "the Griddyn object is not valid";
+
+
 GridDynSingleQuery
     gridDynSingleQueryCreate(GridDynObject obj, const char* queryString, GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto val = createGrabber(queryString, comp);
@@ -44,6 +49,7 @@ GridDynVectorQuery
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
     auto mquery = new collector();
@@ -69,6 +75,7 @@ void gridDynVectorQueryFree(GridDynVectorQuery query)
 double gridDynSingleQueryRun(GridDynSingleQuery query, GridDynError* err)
 {
     if (query == nullptr) {
+        assignError(err, griddyn_error_invalid_object, invalidQuery);
         return kNullVal;
     }
     auto grabber = reinterpret_cast<gridGrabber*>(query);
@@ -78,11 +85,12 @@ double gridDynSingleQueryRun(GridDynSingleQuery query, GridDynError* err)
 void gridDynVectorQueryRun(GridDynVectorQuery query, double* data, int N, GridDynError* err)
 {
     if (query == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidQuery);
+        return;
     }
     auto mGrabber = reinterpret_cast<collector*>(query);
 
-    return mGrabber->grabData(data, N);
+    mGrabber->grabData(data, N);
 }
 
 void gridDynVectorQueryAppend(GridDynVectorQuery query,
@@ -91,17 +99,19 @@ void gridDynVectorQueryAppend(GridDynVectorQuery query,
                                GridDynError* err)
 {
     if (query == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidQuery);
+        return;
     }
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     auto col = reinterpret_cast<collector*>(query);
 
     col->add(queryString, comp);
-    return griddyn_ok;
+    return;
 }
 
 void gridDynSingleQueryUpdate(GridDynSingleQuery query,
@@ -110,20 +120,22 @@ void gridDynSingleQueryUpdate(GridDynSingleQuery query,
                                GridDynError* err)
 {
     if (query == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidQuery);
+        return;
     }
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     auto grabber = reinterpret_cast<gridGrabber*>(query);
     grabber->updateField(queryString);
     grabber->updateObject(comp);
     if (!grabber->loaded) {
-        return griddyn_query_load_failure;
+        assignError(err, griddyn_error_query_load_failure, invalidQuery);
+        return;
     }
-    return griddyn_ok;
 }
 
 void gridDynVectorQueryUpdate(GridDynVectorQuery query,
@@ -132,15 +144,16 @@ void gridDynVectorQueryUpdate(GridDynVectorQuery query,
                                GridDynError* err)
 {
     if (query == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidQuery);
+        return;
     }
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     auto col = reinterpret_cast<collector*>(query);
     col->reset();
     col->add(queryString, comp);
-    return griddyn_ok;
 }
