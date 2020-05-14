@@ -22,7 +22,6 @@ using namespace griddyn;
 static constexpr char invalidQuery[] = "the Query object is not valid";
 static constexpr char invalidComponent[] = "the Griddyn object is not valid";
 
-
 GridDynSingleQuery
     gridDynSingleQueryCreate(GridDynObject obj, const char* queryString, GridDynError* err)
 {
@@ -78,7 +77,7 @@ double gridDynSingleQueryRun(GridDynSingleQuery query, GridDynError* err)
         assignError(err, griddyn_error_invalid_object, invalidQuery);
         return kNullVal;
     }
-    auto *grabber = static_cast<gridGrabber*>(query);
+    auto* grabber = static_cast<gridGrabber*>(query);
     return grabber->grabData();
 }
 
@@ -88,15 +87,15 @@ void gridDynVectorQueryRun(GridDynVectorQuery query, double* data, int N, GridDy
         assignError(err, griddyn_error_invalid_object, invalidQuery);
         return;
     }
-    auto *mGrabber = static_cast<collector*>(query);
+    auto* mGrabber = static_cast<collector*>(query);
 
     mGrabber->grabData(data, N);
 }
 
 void gridDynVectorQueryAppend(GridDynVectorQuery query,
-                               GridDynObject obj,
-                               const char* queryString,
-                               GridDynError* err)
+                              GridDynObject obj,
+                              const char* queryString,
+                              GridDynError* err)
 {
     if (query == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidQuery);
@@ -108,15 +107,15 @@ void gridDynVectorQueryAppend(GridDynVectorQuery query,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto *col = static_cast<collector*>(query);
+    auto* col = static_cast<collector*>(query);
 
     col->add(queryString, comp);
 }
 
 void gridDynSingleQueryUpdate(GridDynSingleQuery query,
-                               GridDynObject obj,
-                               const char* queryString,
-                               GridDynError* err)
+                              GridDynObject obj,
+                              const char* queryString,
+                              GridDynError* err)
 {
     if (query == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidQuery);
@@ -128,7 +127,7 @@ void gridDynSingleQueryUpdate(GridDynSingleQuery query,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto *grabber = static_cast<gridGrabber*>(query);
+    auto* grabber = static_cast<gridGrabber*>(query);
     grabber->updateField(queryString);
     grabber->updateObject(comp);
     if (!grabber->loaded) {
@@ -138,9 +137,9 @@ void gridDynSingleQueryUpdate(GridDynSingleQuery query,
 }
 
 void gridDynVectorQueryUpdate(GridDynVectorQuery query,
-                               GridDynObject obj,
-                               const char* queryString,
-                               GridDynError* err)
+                              GridDynObject obj,
+                              const char* queryString,
+                              GridDynError* err)
 {
     if (query == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidQuery);
@@ -152,7 +151,7 @@ void gridDynVectorQueryUpdate(GridDynVectorQuery query,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto *col = static_cast<collector*>(query);
+    auto* col = static_cast<collector*>(query);
     col->reset();
     col->add(queryString, comp);
 }

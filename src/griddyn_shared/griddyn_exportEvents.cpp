@@ -25,16 +25,14 @@ static constexpr char invalidEvent[] = "the Event object is not valid";
 
 GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, GridDynError* err)
 {
-    try
-    {
+    try {
         auto* evnt = new std::shared_ptr<Event>(make_event(eventString, getComponentPointer(obj)));
         if (evnt != nullptr) {
             return static_cast<GridDynEvent>(evnt);
         }
         return nullptr;
     }
-    catch (...)
-    {
+    catch (...) {
         griddynErrorHandler(err);
     }
     return nullptr;
@@ -43,7 +41,7 @@ GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, Grid
 void gridDynEventFree(GridDynEvent evnt)
 {
     if (evnt != nullptr) {
-        auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+        auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
         delete shr_event;
     }
 }
@@ -54,7 +52,7 @@ void gridDynEventTrigger(GridDynEvent evnt, GridDynError* err)
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     if (*shr_event) {
         if ((*shr_event)->trigger() >= change_code::no_change) {
             return;
@@ -70,9 +68,9 @@ void gridDynEventSchedule(GridDynEvent evnt, GridDynSimulation sim, GridDynError
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
 
-    auto *runner = static_cast<GriddynRunner*>(sim);
+    auto* runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         static constexpr char invalidSimulation[] = "the Simulation object is not valid";
@@ -87,14 +85,13 @@ void gridDynEventSchedule(GridDynEvent evnt, GridDynSimulation sim, GridDynError
     }
 }
 
-void
-    gridDynEventSetValue(GridDynEvent evnt, const char* parameter, double value, GridDynError* err)
+void gridDynEventSetValue(GridDynEvent evnt, const char* parameter, double value, GridDynError* err)
 {
     if (evnt == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->set(parameter, value);
     }
@@ -104,15 +101,15 @@ void
 }
 
 void gridDynEventSetString(GridDynEvent evnt,
-                                      const char* parameter,
-                                      const char* value,
-                                      GridDynError* err)
+                           const char* parameter,
+                           const char* value,
+                           GridDynError* err)
 {
     if (evnt == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->set(parameter, value);
     }
@@ -127,7 +124,7 @@ void gridDynEventSetFlag(GridDynEvent evnt, const char* flag, int val, GridDynEr
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->setFlag(flag, (val != 0));
     }
@@ -142,7 +139,7 @@ void gridDynEventSetTarget(GridDynEvent evnt, GridDynObject obj, GridDynError* e
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
+    auto* shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     auto* comp = getComponentPointer(obj);
     if (comp == nullptr) {
         static constexpr char invalidComponent[] = "the target object is not valid";
