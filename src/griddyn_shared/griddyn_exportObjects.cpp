@@ -46,7 +46,7 @@ GridDynObject createGridDynObject(gridComponent* comp)
 gridComponent* getComponentPointer(GridDynObject obj)
 {
     if (obj != nullptr) {
-        auto cptr = reinterpret_cast<coreOwningPtr<gridComponent>*>(obj);
+        auto *cptr = static_cast<coreOwningPtr<gridComponent>*>(obj);
         return cptr->get();
     }
     return nullptr;
@@ -55,7 +55,7 @@ gridComponent* getComponentPointer(GridDynObject obj)
 const gridComponent* getConstComponentPointer(GridDynObject obj)
 {
     if (obj != nullptr) {
-        auto cptr = reinterpret_cast<coreOwningPtr<gridComponent> const*>(obj);
+        auto *cptr = static_cast<coreOwningPtr<gridComponent> const*>(obj);
         return cptr->get();
     }
     return nullptr;
@@ -98,7 +98,7 @@ GridDynObject gridDynObjectClone(GridDynObject obj, GridDynError* err)
 void gridDynObjectFree(GridDynObject obj)
 {
     if (obj != nullptr) {
-        auto cptr = reinterpret_cast<coreOwningPtr<gridComponent>*>(obj);
+        auto *cptr = static_cast<coreOwningPtr<gridComponent>*>(obj);
         delete cptr;
     }
 }

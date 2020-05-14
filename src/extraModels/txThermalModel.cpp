@@ -376,7 +376,7 @@ namespace extra {
         }
         // printf("%f:%s A=%f to(%f)=%f hs(%f)=%f\n",time, name.c_str(), ambientTemp,
         // DTtou+ambientTemp, o1, DTgu, o2);
-        Relay::updateA(time);
+        Relay::updateA(time); // NOLINT
         prevTime = time;
     }
 

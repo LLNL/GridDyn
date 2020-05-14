@@ -121,7 +121,7 @@ void gridDynObjectGuessState(GridDynObject obj,
         assignError(err, griddyn_error_insufficient_space, emptyState);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -162,7 +162,7 @@ void gridDynObjectSetState(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -191,7 +191,7 @@ void gridDynObjectGetStateVariableTypes(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -216,7 +216,7 @@ void gridDynObjectResidual(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -250,7 +250,7 @@ void gridDynObjectDerivative(GridDynObject obj,
         assignError(err, griddyn_error_object_not_initialized, notInitialized);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -279,7 +279,7 @@ void gridDynObjectAlgebraicUpdate(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -320,7 +320,7 @@ void gridDynObjectJacobian(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -350,7 +350,7 @@ void gridDynObjecIoPartialDerivatives(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -376,7 +376,7 @@ void gridDynObjectOutputPartialDerivatives(GridDynObject obj,
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;

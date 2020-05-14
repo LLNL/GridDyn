@@ -176,7 +176,7 @@ void gridDynSimulationInitializeFromString(GridDynSimulation sim,
                                            const char* initializationString,
                                            GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -191,7 +191,7 @@ void gridDynSimulationInitializeFromArgs(GridDynSimulation sim,
                                          int ignoreUnrecognized,
                                          GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -205,7 +205,7 @@ void gridDynSimulationLoadfile(GridDynSimulation sim,
                                const char* fileType,
                                GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -227,7 +227,7 @@ void gridDynSimulationLoadfile(GridDynSimulation sim,
 
 void gridDynSimulationAddCommand(GridDynSimulation sim, const char* command, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -243,7 +243,7 @@ void gridDynSimulationAddCommand(GridDynSimulation sim, const char* command, Gri
 
 void gridDynSimulationRun(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -259,7 +259,7 @@ void gridDynSimulationRun(GridDynSimulation sim, GridDynError* err)
 
 double gridDynSimulationRunTo(GridDynSimulation sim, double runToTime, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -277,7 +277,7 @@ double gridDynSimulationRunTo(GridDynSimulation sim, double runToTime, GridDynEr
 
 double gridDynSimulationStep(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -289,7 +289,7 @@ double gridDynSimulationStep(GridDynSimulation sim, GridDynError* err)
 
 void gridDynSimulationRunAsync(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -305,7 +305,7 @@ void gridDynSimulationRunAsync(GridDynSimulation sim, GridDynError* err)
 
 void gridDynSimulationRunToAsync(GridDynSimulation sim, double runToTime, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -321,7 +321,7 @@ void gridDynSimulationRunToAsync(GridDynSimulation sim, double runToTime, GridDy
 
 void gridDynSimulationStepAsync(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -332,7 +332,7 @@ void gridDynSimulationStepAsync(GridDynSimulation sim, GridDynError* err)
 
 int gridDynSimulationGetStatus(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -345,7 +345,7 @@ int gridDynSimulationGetStatus(GridDynSimulation sim, GridDynError* err)
 
 GridDynObject getSimulationObject(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -357,7 +357,7 @@ GridDynObject getSimulationObject(GridDynSimulation sim, GridDynError* err)
 
 void gridDynSimulationPowerflowInitialize(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -368,7 +368,7 @@ void gridDynSimulationPowerflowInitialize(GridDynSimulation sim, GridDynError* e
 
 void gridDynSimulationPowerflow(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -379,19 +379,18 @@ void gridDynSimulationPowerflow(GridDynSimulation sim, GridDynError* err)
 
 void gridDynSimulationDynamicInitialize(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
     runner->simInitialize();
-    return;
 }
 
 void gridDynSimulationReset(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
@@ -404,7 +403,7 @@ void gridDynSimulationReset(GridDynSimulation sim, GridDynError* err)
 
 double gridDynSimulationGetCurrentTime(GridDynSimulation sim, GridDynError* err)
 {
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidSimulation);

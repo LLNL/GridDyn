@@ -42,7 +42,7 @@ GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, Grid
 void gridDynEventFree(GridDynEvent evnt)
 {
     if (evnt != nullptr) {
-        auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+        auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
         delete shr_event;
     }
 }
@@ -52,7 +52,7 @@ void gridDynEventTrigger(GridDynEvent evnt, GridDynError* err)
     if (evnt == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidEvent);
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     if (*shr_event) {
         if ((*shr_event)->trigger() >= change_code::no_change) {
             return;
@@ -68,9 +68,9 @@ void gridDynEventSchedule(GridDynEvent evnt, GridDynSimulation sim, GridDynError
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
 
-    auto runner = reinterpret_cast<GriddynRunner*>(sim);
+    auto *runner = static_cast<GriddynRunner*>(sim);
 
     if (runner == nullptr) {
         static constexpr char invalidSimulation[] = "the Simulation object is not valid";
@@ -92,7 +92,7 @@ void
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->set(parameter, value);
     }
@@ -110,7 +110,7 @@ void gridDynEventSetString(GridDynEvent evnt,
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->set(parameter, value);
     }
@@ -125,7 +125,7 @@ void gridDynEventSetFlag(GridDynEvent evnt, const char* flag, int val, GridDynEr
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     try {
         shr_event->operator->()->setFlag(flag, (val != 0));
     }
@@ -140,7 +140,7 @@ void gridDynEventSetTarget(GridDynEvent evnt, GridDynObject obj, GridDynError* e
         assignError(err, griddyn_error_invalid_object, invalidEvent);
         return;
     }
-    auto shr_event = reinterpret_cast<std::shared_ptr<Event>*>(evnt);
+    auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     auto comp = getComponentPointer(obj);
     if (comp == nullptr) {
         static constexpr char invalidComponent[] = "the target object is not valid";
