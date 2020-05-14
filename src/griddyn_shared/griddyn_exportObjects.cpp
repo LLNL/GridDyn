@@ -273,6 +273,7 @@ double gridDynObjectGetValueUnits(GridDynObject obj,
             assignError(err, griddyn_error_unknown_parameter, unknownParameter);
             return result;
         }
+        return result;
     }
     catch (...) {
         griddynErrorHandler(err);
