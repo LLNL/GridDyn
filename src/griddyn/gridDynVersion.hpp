@@ -33,4 +33,4 @@ constexpr auto versionBuild = GRIDDYN_VERSION_BUILD;
 constexpr auto buildFlags = GRIDDYN_BUILD_FLAGS;
 /** compiler used to build helics*/
 constexpr auto compiler = GRIDDYN_COMPILER_VERSION;
-}  // namespace helics
+}  // namespace griddyn

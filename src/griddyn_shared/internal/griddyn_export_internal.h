@@ -12,10 +12,10 @@
 
 #ifndef GRIDDYN_EXPORT_INTERNAL_H_
 #define GRIDDYN_EXPORT_INTERNAL_H_
+#include "gmlc/concurrency/TripWire.hpp"
+#include "gmlc/libguarded/guarded.hpp"
 #include "griddyn/gridComponent.h"
 #include "griddyn/solvers/solverMode.hpp"
-#include "gmlc/libguarded/guarded.hpp"
-#include "gmlc/concurrency/TripWire.hpp"
 #include <deque>
 
 typedef void* GridDynObject;
@@ -53,7 +53,7 @@ void CopyFromLocal(std::vector<double>& dest,
                    const griddyn::solverMode& sMode);
 
 /** definitions to simplify error returns if an error already exists*/
-#define GRIDDYN_ERROR_CHECK(err, retval)                                                            \
+#define GRIDDYN_ERROR_CHECK(err, retval)                                                           \
     do {                                                                                           \
         if (((err) != nullptr) && ((err)->error_code != 0)) {                                      \
             return (retval);                                                                       \
@@ -84,14 +84,12 @@ extern const std::string nullStringArgument;
         }                                                                                          \
     } while (false)
 
-
 /**centralized error handler for the C interface*/
 void griddynErrorHandler(GridDynError* err) noexcept;
 
 /** class for containing all the objects associated with a federation*/
 class MasterObjectHolder {
   private:
-    
     gmlc::libguarded::guarded<std::deque<std::string>>
         errorStrings;  //!< container for strings generated from error conditions
   public:
