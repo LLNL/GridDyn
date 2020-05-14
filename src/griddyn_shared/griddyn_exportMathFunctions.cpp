@@ -33,13 +33,13 @@ SolverKey gridDynSimulationGetSolverKey(GridDynSimulation sim,
         return nullptr;
     }
     auto slv = runner->getSim()->getSolverMode(solverType);
-    auto key = new solverKeyInfo(slv);
-    return reinterpret_cast<void*>(key);
+    auto* key = new solverKeyInfo(slv);
+    return reinterpret_cast<SolverKey>(key);
 }
 
 void gridDynSolverKeyFree(SolverKey key)
 {
-    auto *skey = static_cast<const solverKeyInfo*>(key);
+    auto *skey = static_cast<solverKeyInfo*>(key);
     delete skey;
 }
 
@@ -105,7 +105,7 @@ int gridDynSimulationStateSize(GridDynSimulation sim, SolverKey key, GridDynErro
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return 0;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return 0;
@@ -126,7 +126,7 @@ void gridDynSimulationGuessState(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -147,7 +147,7 @@ void gridDynSimulationSetState(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -166,7 +166,7 @@ void gridDynSimulationGetStateVariableTypes(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -189,7 +189,7 @@ void gridDynSimulationResidual(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -210,7 +210,7 @@ void gridDynSimulationDerivative(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -232,7 +232,7 @@ void gridDynSimulationAlgebraicUpdate(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;
@@ -255,7 +255,7 @@ void gridDynSimulationJacobian(GridDynSimulation sim,
         assignError(err, griddyn_error_invalid_object, invalidSimulation);
         return;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return;

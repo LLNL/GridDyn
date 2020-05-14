@@ -27,9 +27,9 @@ GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, Grid
 {
     try
     {
-        auto evnt = new std::shared_ptr<Event>(make_event(eventString, getComponentPointer(obj)));
+        auto* evnt = new std::shared_ptr<Event>(make_event(eventString, getComponentPointer(obj)));
         if (evnt != nullptr) {
-            return reinterpret_cast<void*>(evnt);
+            return static_cast<GridDynEvent>(evnt);
         }
         return nullptr;
     }
@@ -37,6 +37,7 @@ GridDynEvent gridDynEventCreate(const char* eventString, GridDynObject obj, Grid
     {
         griddynErrorHandler(err);
     }
+    return nullptr;
 }
 
 void gridDynEventFree(GridDynEvent evnt)
@@ -51,6 +52,7 @@ void gridDynEventTrigger(GridDynEvent evnt, GridDynError* err)
 {
     if (evnt == nullptr) {
         assignError(err, griddyn_error_invalid_object, invalidEvent);
+        return;
     }
     auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
     if (*shr_event) {
@@ -141,7 +143,7 @@ void gridDynEventSetTarget(GridDynEvent evnt, GridDynObject obj, GridDynError* e
         return;
     }
     auto *shr_event = static_cast<std::shared_ptr<Event>*>(evnt);
-    auto comp = getComponentPointer(obj);
+    auto* comp = getComponentPointer(obj);
     if (comp == nullptr) {
         static constexpr char invalidComponent[] = "the target object is not valid";
         assignError(err, griddyn_error_invalid_object, invalidComponent);

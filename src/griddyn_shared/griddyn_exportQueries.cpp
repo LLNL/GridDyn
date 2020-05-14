@@ -39,8 +39,8 @@ GridDynSingleQuery
     if (val->vectorGrab) {
         return nullptr;
     }
-    auto grabber = val.release();
-    return reinterpret_cast<GridDynSingleQuery>(grabber);
+    auto* grabber = val.release();
+    return static_cast<GridDynSingleQuery>(grabber);
 }
 
 GridDynVectorQuery
@@ -52,7 +52,7 @@ GridDynVectorQuery
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return nullptr;
     }
-    auto mquery = new collector();
+    auto* mquery = new collector();
     mquery->add(queryString, comp);
 
     return nullptr;
@@ -61,14 +61,14 @@ GridDynVectorQuery
 void gridDynSingleQueryFree(GridDynSingleQuery query)
 {
     if (query != nullptr) {
-        delete reinterpret_cast<gridGrabber*>(query);
+        delete static_cast<gridGrabber*>(query);
     }
 }
 
 void gridDynVectorQueryFree(GridDynVectorQuery query)
 {
     if (query != nullptr) {
-        delete reinterpret_cast<collector*>(query);
+        delete static_cast<collector*>(query);
     }
 }
 
@@ -111,7 +111,6 @@ void gridDynVectorQueryAppend(GridDynVectorQuery query,
     auto *col = static_cast<collector*>(query);
 
     col->add(queryString, comp);
-    return;
 }
 
 void gridDynSingleQueryUpdate(GridDynSingleQuery query,

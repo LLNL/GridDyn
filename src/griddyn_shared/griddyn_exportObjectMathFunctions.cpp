@@ -31,7 +31,7 @@ int gridDynObjectStateSize(GridDynObject obj, SolverKey key, GridDynError* err)
         assignError(err, griddyn_error_invalid_object, invalidComponent);
         return griddyn_error_invalid_object;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = static_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
         assignError(err, griddyn_error_invalid_object, invalidSolver);
         return griddyn_error_invalid_object;
@@ -41,7 +41,7 @@ int gridDynObjectStateSize(GridDynObject obj, SolverKey key, GridDynError* err)
 
 void setUpSolverKeyInfo(solverKeyInfo* key, gridComponent* comp)
 {
-    auto root = dynamic_cast<gridDynSimulation*>(comp->getRoot());
+    auto* root = dynamic_cast<gridDynSimulation*>(comp->getRoot());
     auto ssize = root->stateSize(key->sMode_);
     key->stateBuffer.resize(ssize);
     key->dstateBuffer.resize(ssize);
