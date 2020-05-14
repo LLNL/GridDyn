@@ -14,13 +14,17 @@
 #define GRIDDYN_EXPORT_INTERNAL_H_
 #include "griddyn/gridComponent.h"
 #include "griddyn/solvers/solverMode.hpp"
-typedef void* gridDynObject;
-/** make a gridDynObject wrapper out of an actual component pointer*/
-gridDynObject creategridDynObject(griddyn::gridComponent* comp);
-/** get the component pointer from a gridDynObject*/
-griddyn::gridComponent* getComponentPointer(gridDynObject obj);
-/** get the const component pointer from a const gridDynObject*/
-const griddyn::gridComponent* getConstComponentPointer(gridDynObject obj);
+#include "gmlc/libguarded/guarded.hpp"
+#include "gmlc/concurrency/TripWire.hpp"
+#include <deque>
+
+typedef void* GridDynObject;
+/** make a GridDynObject wrapper out of an actual component pointer*/
+GridDynObject createGridDynObject(griddyn::gridComponent* comp);
+/** get the component pointer from a GridDynObject*/
+griddyn::gridComponent* getComponentPointer(GridDynObject obj);
+/** get the const component pointer from a const GridDynObject*/
+const griddyn::gridComponent* getConstComponentPointer(GridDynObject obj);
 
 /** data class for storing some solver information and data buffers*/
 class solverKeyInfo {
@@ -47,4 +51,56 @@ void CopyFromLocal(std::vector<double>& dest,
                    const double* localData,
                    const griddyn::gridComponent* comp,
                    const griddyn::solverMode& sMode);
+
+/** definitions to simplify error returns if an error already exists*/
+#define GRIDDYN_ERROR_CHECK(err, retval)                                                            \
+    do {                                                                                           \
+        if (((err) != nullptr) && ((err)->error_code != 0)) {                                      \
+            return (retval);                                                                       \
+        }                                                                                          \
+    } while (false)
+
+/** assign and error string and code to an error object if it exists*/
+inline void assignError(GridDynError* err, int errorCode, const char* string)
+{
+    if (err != nullptr) {
+        err->error_code = errorCode;
+        err->message = string;
+    }
+}
+
+extern const std::string emptyStr;
+extern const std::string nullStringArgument;
+#define AS_STRING(str) ((str) != nullptr) ? std::string(str) : emptyStr
+
+#define CHECK_NULL_STRING(str, retval)                                                             \
+    do {                                                                                           \
+        if ((str) == nullptr) {                                                                    \
+            if (err != nullptr) {                                                                  \
+                err->error_code = helics_error_invalid_argument;                                   \
+                err->message = nullStringArgument.c_str();                                         \
+            }                                                                                      \
+            return (retval);                                                                       \
+        }                                                                                          \
+    } while (false)
+
+
+/**centralized error handler for the C interface*/
+void griddynErrorHandler(GridDynError* err) noexcept;
+
+/** class for containing all the objects associated with a federation*/
+class MasterObjectHolder {
+  private:
+    
+    gmlc::libguarded::guarded<std::deque<std::string>>
+        errorStrings;  //!< container for strings generated from error conditions
+  public:
+    MasterObjectHolder() noexcept;
+    ~MasterObjectHolder();
+    /** store an error string to a string buffer
+    @return a pointer to the memory location*/
+    const char* addErrorString(std::string newError);
+};
+
+std::shared_ptr<MasterObjectHolder> getMasterHolder();
 #endif

@@ -100,7 +100,7 @@ void loadMatDyn(coreObject* parentObject,
     }
     A = 1;
     for (auto& ngen : genList) {
-        auto gen =
+        auto* gen =
             static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(A)));
         A++;
         if (gen == nullptr) {
@@ -126,13 +126,13 @@ void loadMatDyn(coreObject* parentObject,
         }
     }
     // now delete the temporary generators the subobjects should have transferred ownership
-    for (auto subg : genList) {
+    for (auto* subg : genList) {
         delete subg;
     }
     // lastly all the loads need to be autoconverted
     index_t b = static_cast<index_t>(parentObject->get("loadcount"));
     for (index_t kk = 1; kk <= b; kk++) {
-        auto ld = static_cast<zipLoad*>(parentObject->findByUserID("load", kk));
+        auto* ld = static_cast<zipLoad*>(parentObject->findByUserID("load", kk));
         ld->set("converttoimpedance", 1);
     }
 }
@@ -147,7 +147,7 @@ void loadGenDynArray(coreObject* /*parentObject*/,
 
     /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
     for (const auto& genLine : genData) {
-        auto gen = new DynamicGenerator();
+        auto* gen = new DynamicGenerator();
         switch (static_cast<int>(genLine[0])) {
             case 1:  // classical model
                 gm = new genmodels::GenModelClassical();
@@ -296,8 +296,9 @@ void loadMatDynEvent(coreObject* parentObject,
                      const basicReaderInfo& /*bri*/)
 {
     string_view ftext = filetext;
-    mArray event1, M1;
-    auto gds = dynamic_cast<gridSimulation*>(parentObject->getRoot());
+    mArray event1;
+    mArray M1;
+    auto* gds = dynamic_cast<gridSimulation*>(parentObject->getRoot());
     if (gds == nullptr) {  // can't make events if we don't have access to the simulation
         return;
     }
@@ -321,8 +322,8 @@ void loadMatDynEvent(coreObject* parentObject,
         for (auto& eventSpec : M1) {
             auto evnt = std::make_shared<Event>(eventSpec[0]);
             auto ind = static_cast<index_t>(eventSpec[1]);
-            auto bus = static_cast<gridBus*>(parentObject->findByUserID("bus", ind));
-            auto ld = bus->getLoad();
+            auto* bus = static_cast<gridBus*>(parentObject->findByUserID("bus", ind));
+            auto* ld = bus->getLoad();
             if (ld == nullptr) {
                 ld = new zipLoad();
                 bus->add(ld);
@@ -360,7 +361,7 @@ void loadMatDynEvent(coreObject* parentObject,
             auto evnt = std::make_shared<Event>(lc[0]);
 
             auto ind = static_cast<index_t>(lc[1]);
-            auto lnk = static_cast<Link*>(parentObject->findByUserID("link", ind));
+            auto* lnk = static_cast<Link*>(parentObject->findByUserID("link", ind));
             switch (static_cast<int>(lc[2])) {
                 case 3:  // r
                     evnt->setTarget(lnk, "r");

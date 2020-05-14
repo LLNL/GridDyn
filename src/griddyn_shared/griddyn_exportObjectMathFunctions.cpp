@@ -20,23 +20,28 @@
 
 using namespace griddyn;
 
-int gridDynObject_stateSize(gridDynObject obj, solverKey key)
+static constexpr char invalidComponent[] = "the Griddyn object is not valid";
+static constexpr char invalidSolver[] = "the given solver key was not valid";
+
+int gridDynObjectStateSize(GridDynObject obj, SolverKey key, GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return griddyn_error_invalid_object;
     }
-    auto& sMode = reinterpret_cast<const solverKeyInfo*>(key)->sMode_;
+    const auto& sMode = static_cast<const solverKeyInfo*>(key)->sMode_;
     if ((sMode.offsetIndex < 0) || (sMode.offsetIndex > 500)) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return griddyn_error_invalid_object;
     }
     return static_cast<int>(comp->stateSize(sMode));
 }
 
 void setUpSolverKeyInfo(solverKeyInfo* key, gridComponent* comp)
 {
-    auto root = dynamic_cast<gridDynSimulation*>(comp->getRoot());
+    auto* root = dynamic_cast<gridDynSimulation*>(comp->getRoot());
     auto ssize = root->stateSize(key->sMode_);
     key->stateBuffer.resize(ssize);
     key->dstateBuffer.resize(ssize);
@@ -98,30 +103,37 @@ void CopyFromLocal(std::vector<double>& dest,
     }
 }
 
-griddyn_status gridDynObject_guessState(gridDynObject obj,
+void gridDynObjectGuessState(GridDynObject obj,
                                         double time,
                                         double* states,
                                         double* dstate_dt,
-                                        solverKey key)
+                             SolverKey key,
+                             GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     if (states == nullptr) {
-        return griddyn_invalid_object;
+        static constexpr char emptyState[] = "given state buffer is null";
+        assignError(err, griddyn_error_insufficient_space, emptyState);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
     }
     if (comp->checkFlag(dyn_initialized)) {
         if (dstate_dt == nullptr) {
-            return griddyn_invalid_object;
+            static constexpr char emptyState[] = "given dstate buffer is null for dynamic operation";
+            assignError(err, griddyn_error_insufficient_space, emptyState);
+            return;
         }
         comp->guessState(time,
                          keyInfo->stateBuffer.data(),
@@ -135,23 +147,25 @@ griddyn_status gridDynObject_guessState(gridDynObject obj,
     }
     TranslateToLocal(keyInfo->stateBuffer, states, comp, keyInfo->sMode_);
     TranslateToLocal(keyInfo->dstateBuffer, dstate_dt, comp, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_setState(gridDynObject obj,
+void gridDynObjectSetState(GridDynObject obj,
                                       double time,
                                       const double* states,
                                       const double* dstate_dt,
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
@@ -164,42 +178,48 @@ griddyn_status gridDynObject_setState(gridDynObject obj,
                    keyInfo->stateBuffer.data(),
                    keyInfo->dstateBuffer.data(),
                    keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_getStateVariableTypes(gridDynObject obj, double* types, solverKey key)
+void gridDynObjectGetStateVariableTypes(GridDynObject obj,
+                                        double* types,
+                                        SolverKey key,
+                                        GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
     }
     comp->getVariableType(keyInfo->stateBuffer.data(), keyInfo->sMode_);
     TranslateToLocal(keyInfo->stateBuffer, types, comp, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_residual(gridDynObject obj,
+void gridDynObjectResidual(GridDynObject obj,
                                       const double* inputs,
                                       int inputSize,
                                       double* resid,
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
@@ -209,26 +229,31 @@ griddyn_status gridDynObject_residual(gridDynObject obj,
                    keyInfo->stateBuffer.data(),
                    keyInfo->sMode_);
     TranslateToLocal(keyInfo->stateBuffer, resid, comp, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_derivative(gridDynObject obj,
+void gridDynObjectDerivative(GridDynObject obj,
                                         const double* inputs,
                                         int inputSize,
                                         double* deriv,
-                                        solverKey key)
+                             SolverKey key,
+                             GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
     if (!comp->checkFlag(dyn_initialized)) {
-        return griddyn_object_not_initialized;
+        static constexpr char notInitialized[] =
+            "the object has not been initialized for dynamic operations";
+        assignError(err, griddyn_error_object_not_initialized, notInitialized);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
@@ -238,24 +263,26 @@ griddyn_status gridDynObject_derivative(gridDynObject obj,
                      keyInfo->stateBuffer.data(),
                      keyInfo->sMode_);
     TranslateToLocal(keyInfo->stateBuffer, deriv, comp, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_algebraicUpdate(gridDynObject obj,
+void gridDynObjectAlgebraicUpdate(GridDynObject obj,
                                              const double* inputs,
                                              int inputSize,
                                              double* update,
                                              double alpha,
-                                             solverKey key)
+                                  SolverKey key,
+                                  GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     if (keyInfo->stateBuffer.empty()) {
         setUpSolverKeyInfo(keyInfo, comp);
@@ -266,7 +293,6 @@ griddyn_status gridDynObject_algebraicUpdate(gridDynObject obj,
                           keyInfo->sMode_,
                           alpha);
     TranslateToLocal(keyInfo->stateBuffer, update, comp, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
 const IOlocs defInputlocs{kNullLocation,
@@ -280,21 +306,24 @@ const IOlocs defInputlocs{kNullLocation,
                           kNullLocation,
                           kNullLocation,
                           kNullLocation};
-griddyn_status gridDynObject_jacobian(gridDynObject obj,
+void gridDynObjectJacobian(GridDynObject obj,
                                       const double* inputs,
                                       int inputSize,
                                       double cj,
                                       void (*insert)(int, int, double),
-                                      solverKey key)
+                           SolverKey key,
+                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     matrixDataCustomWriteOnly<double> md;
     md.setFunction([insert](index_t row, index_t col, double val) {
@@ -304,25 +333,27 @@ griddyn_status gridDynObject_jacobian(gridDynObject obj,
     sD.cj = cj;
     comp->jacobianElements(
         IOdata(inputs, inputs + inputSize), sD, md, defInputlocs, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
 const IOlocs defInputlocs_act{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-griddyn_status gridDynObject_ioPartialDerivatives(gridDynObject obj,
+void gridDynObjecIoPartialDerivatives(GridDynObject obj,
                                                   const double* inputs,
                                                   int inputSize,
                                                   void (*insert)(int, int, double),
-                                                  solverKey key)
+                                      SolverKey key,
+                                      GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
     matrixDataCustomWriteOnly<double> md;
     md.setFunction([insert](index_t row, index_t col, double val) {
@@ -330,23 +361,25 @@ griddyn_status gridDynObject_ioPartialDerivatives(gridDynObject obj,
     });
     comp->ioPartialDerivatives(
         IOdata(inputs, inputs + inputSize), emptyStateData, md, defInputlocs, keyInfo->sMode_);
-    return griddyn_ok;
 }
 
-griddyn_status gridDynObject_outputPartialDerivatives(gridDynObject obj,
+void gridDynObjectOutputPartialDerivatives(GridDynObject obj,
                                                       const double* inputs,
                                                       int inputSize,
                                                       void (*insert)(int, int, double),
-                                                      solverKey key)
+                                           SolverKey key,
+                                           GridDynError* err)
 {
     gridComponent* comp = getComponentPointer(obj);
 
     if (comp == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidComponent);
+        return;
     }
-    auto keyInfo = reinterpret_cast<solverKeyInfo*>(key);
+    auto *keyInfo = static_cast<solverKeyInfo*>(key);
     if (keyInfo == nullptr) {
-        return griddyn_invalid_object;
+        assignError(err, griddyn_error_invalid_object, invalidSolver);
+        return;
     }
 
     matrixDataCustomWriteOnly<double> md;
@@ -357,5 +390,4 @@ griddyn_status gridDynObject_outputPartialDerivatives(gridDynObject obj,
                                    emptyStateData,
                                    md,
                                    keyInfo->sMode_);
-    return griddyn_ok;
 }
