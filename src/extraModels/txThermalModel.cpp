@@ -179,9 +179,9 @@ namespace extra {
         } else if ((param == "m") || (param == "winding_exponent")) {
             mp_m = val;
         } else if ((param == "n") || (param == "oil_exponent")) {
-            mp_m = val;
+            mp_n = val;
         } else {
-            gridPrimary::set(param, val, unitType);
+            gridPrimary::set(param, val, unitType);  // NOLINT
         }
     }
 
@@ -242,16 +242,17 @@ namespace extra {
             sensor::set("input1", "loss");
             sensor::set("input2", "attached");
 
-            auto b1 = new blocks::delayBlock(Ttor);
-            auto b2 = new blocks::delayBlock(Tgr);
+            auto* b1 = new blocks::delayBlock(Ttor);
+            auto* b2 = new blocks::delayBlock(Tgr);
 
             sensor::add(b1);
             sensor::add(b2);
             b1->parentSetFlag(separate_processing, true, this);
             b2->parentSetFlag(separate_processing, true, this);
             auto g1 = std::make_shared<customGrabber>();
-            g1->setGrabberFunction("ambient",
-                                   [this](coreObject*) -> double { return ambientTemp; });
+            g1->setGrabberFunction("ambient", [this](coreObject * /*unused*/) -> double {
+                return ambientTemp;
+            });
             sensor::add(g1);
 
             m_outputSize = (m_outputSize > 3) ? m_outputSize : 3;
@@ -272,8 +273,8 @@ namespace extra {
             c1 = make_condition("output1", ">", cutoutTemp, this);
             Relay::add(std::shared_ptr<Condition>(std::move(c1)));
 
-            Relay::set("action", "alarm temperature_alarm1");
-            Relay::set("action", "alarm temperature_alarm2");
+            Relay::set("action", "alarm temperature_alarm1");  // NOLINT
+            Relay::set("action", "alarm temperature_alarm2");  // NOLINT
             auto ge = std::make_unique<Event>();
             ge->setTarget(m_sinkObject, "switch1");
             ge->setValue(1.0);
@@ -333,10 +334,8 @@ namespace extra {
             iset[0] = 0;
             filterBlocks[1]->dynInitializeB(iset, iset, iset);
         }
-        return Relay::dynObjectInitializeB(inputs,
-                                           desiredOutput,
-                                           fieldSet);  // skip over sensor::dynInitializeB since the
-                                                       // filter blocks are initialized here.
+        // skip over sensor::dynInitializeB since the filter blocks are initialized here.
+        return Relay::dynObjectInitializeB(inputs, desiredOutput, fieldSet);  // NOLINT
     }
 
     void txThermalModel::updateA(coreTime time)
@@ -378,7 +377,7 @@ namespace extra {
         }
         // printf("%f:%s A=%f to(%f)=%f hs(%f)=%f\n",time, name.c_str(), ambientTemp,
         // DTtou+ambientTemp, o1, DTgu, o2);
-        Relay::updateA(time);
+        Relay::updateA(time);  // NOLINT
         prevTime = time;
     }
 
