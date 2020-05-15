@@ -31,6 +31,39 @@ jobs:
       - bash: ctest --output-on-failure --timeout 480 -C Release -L "Continuous"
         displayName: 'Test GridDyn'
         workingDirectory: build
+        
+  - job: macOS_mojave
+    pool:
+      vmImage: 'macOS-10.14'
+    steps:
+      # -----------------------
+      # Install dependencies
+      # -----------------------
+
+      - bash: brew install boost suite-sparse
+        displayName: Install boost
+
+      # -----------------------
+      # Configure GRIDDYN
+      # -----------------------
+      - task: CMake@1
+        inputs:
+          cmakeArgs: -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON -DGRIDDYN_BUILD_TESTS=ON ..
+        displayName: 'Configure GridDyn'
+
+      # -----------------------
+      # Build GridDyn
+      # -----------------------
+      - bash: cmake --build . --config Release
+        displayName: 'Build GridDyn'
+        workingDirectory: build
+
+      # -----------------------
+      # Test GridDyn
+      # -----------------------
+      - bash: ctest --output-on-failure --timeout 480 -C Release -L "Continuous"
+        displayName: 'Test GridDyn'
+        workingDirectory: build
 
   - job: Windows
     strategy:
