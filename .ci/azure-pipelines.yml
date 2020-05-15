@@ -41,7 +41,7 @@ jobs:
           echo "##vso[task.setvariable variable=BOOST_ROOT]$BOOST_ROOT_1_72_0"
       - task: CMake@1
         inputs:
-          cmakeArgs: -A $(vsArch) -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON -DGRIDDYN_BUILD_TESTS=ON ..
+          cmakeArgs: -A $(vsArch) -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON -DGRIDDYN_ENABLE_PACKAGE_BUILD=ON -DGRIDDYN_BUILD_TESTS=ON ..
         displayName: 'Configure GridDyn'
         condition: eq( variables['Agent.OS'], 'Windows_NT' )
 

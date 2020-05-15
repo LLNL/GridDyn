@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load)
     BOOST_CHECK_CLOSE(ip * 2.0, ip2, 0.00002);
     BOOST_CHECK_CLOSE(yp, yp2, 0.001);
 
-    ld1->set("angle0", 10, gridUnits::deg);
+    ld1->set("angle0", 10, units::deg);
     apload.updateA(0);
     apload.updateB();
     auto iq2 = apload.get("iq");
