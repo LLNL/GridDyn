@@ -108,6 +108,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
+        - BUILD_C_LIB=true
 
     - <<: *linux_base
       compiler: clang
