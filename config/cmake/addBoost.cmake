@@ -34,6 +34,7 @@ mark_as_advanced(USE_BOOST_STATIC_LIBS)
 if (MSVC)
 
 set (boost_versions
+boost_1_73_0
 boost_1_72_0
 boost_1_72_0
 boost_1_71_0

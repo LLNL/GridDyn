@@ -1,5 +1,5 @@
 jobs:
-  - job: macOS-latest
+  - job: macOS_latest
     pool:
       vmImage: 'macOS-latest'
     steps:
