@@ -1,5 +1,5 @@
 jobs:
-  - job: macOS
+  - job: macOS-latest
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -7,7 +7,7 @@ jobs:
       # Install dependencies
       # -----------------------
 
-      - bash: port install boost
+      - bash: brew install boost
         displayName: Install boost
 
       # -----------------------
