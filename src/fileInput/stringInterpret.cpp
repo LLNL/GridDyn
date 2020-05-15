@@ -83,8 +83,9 @@ double interpretString_sv(string_view command, readerInfo& ri)
                         double v2 = stringBlocktoDouble(args[1], ri);
                         val = InterpretFunction(cmdBlock.to_string(), v1, v2, ri);
                     } else if (args.size() ==
-                               1)  // if the single argument is a function of multiple arguments
+                               1)  
                     {
+                        // if the single argument is a function of multiple arguments
                         if (cmdBlock == "query") {
                             val = ObjectQuery(args[0], ri.getKeyObject());
                         } else {

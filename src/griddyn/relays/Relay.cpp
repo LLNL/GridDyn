@@ -823,8 +823,8 @@ change_code Relay::evaluateCondCheck(condCheckTime& cond, coreTime checkTime)
                 if (iret > eventReturn) {
                     eventReturn = iret;
                 }
-            } else  // it was a multiCondition trigger
-            {
+            } else  
+            {// it was a multiCondition trigger
                 bool all_triggered = true;
                 coreTime trigDelay =
                     multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;

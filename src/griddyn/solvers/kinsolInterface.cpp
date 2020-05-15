@@ -281,9 +281,8 @@ namespace solvers {
             KINDlsGetNumJacEvals(solverMem, &val);
         } else if (param == "nliterations") {
             KINGetNumNonlinSolvIters(solverMem, &val);
-        }
 #if MEASURE_TIMINGS > 0
-        else if (param == "kintime") {
+        } else if (param == "kintime") {
             return kinTime;
         } else if (param == "residtime") {
             return residTime;
@@ -293,9 +292,8 @@ namespace solvers {
             return jac1Time;
         } else if (param == "kin1time") {
             return kinsol1Time;
-        }
 #endif
-        else {
+        } else {
             return sundialsInterface::get(param);
         }
         return static_cast<double>(val);

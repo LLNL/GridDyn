@@ -429,12 +429,14 @@ std::string fullObjectName(const coreObject* obj)
 void removeReference(coreObject* objToDelete)
 {
     if (objToDelete != nullptr) {
-        if (objToDelete->m_refCount <= 1)  // don't do a write unless we absolutely need to
+        // don't do a write unless we absolutely need to
+        if (objToDelete->m_refCount <= 1) 
         {
             delete objToDelete;
         } else if (--objToDelete->m_refCount <=
-                   0)  // now we need to check again if we need to delete
-        {
+                   0)  
+        {// now we need to check again if we need to delete
+            
             delete objToDelete;
         }
     }

@@ -119,7 +119,6 @@ namespace loads {
                 zipLoad::set(param, val, unitType);
             }
         }
-
         else {
             zipLoad::set(param, val, unitType);
         }

@@ -13,8 +13,6 @@
 /** @file
  *  @brief define some operations related to matrixData objects
  */
-#ifndef THREE_PHASE_FUNCTIONS_H_
-#define THREE_PHASE_FUNCTIONS_H_
 #pragma once
 
 #include <complex>
@@ -124,4 +122,3 @@ X ThreePhasePowerPolar(const X& V, const X& I)
 
     return {P1.real(), P1.imag(), P2.real(), P2.imag(), P3.real(), P3.imag()};
 }
-#endif

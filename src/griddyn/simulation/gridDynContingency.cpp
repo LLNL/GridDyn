@@ -123,9 +123,10 @@ void runContingencyAnalysis(std::vector<std::shared_ptr<Contingency>>& contList,
     if (output.compare(0, 6, "file:/") == 0) {
         saveContingencyOutput(contList, output.substr(7));
     } else if (output.compare(0, 10, "database:/") == 0) {
-        // TODO::something with a database
-    } else  // assume it is a file output
+        // TODO(PT)::something with a database
+    } else  
     {
+        // assume it is a file output
         saveContingencyOutput(contList, output);
     }
 }

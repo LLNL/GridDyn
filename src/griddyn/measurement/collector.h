@@ -67,7 +67,7 @@ class collector: public helperObject, public eventInterface, public objectOperat
                        int ccnt = 1,
                        const std::string& cname = ""):
             dataGrabber(std::move(dg)),
-            dataGrabberSt(std::move(sg)), column(ncol), columnCount(ccnt), colname(cname){};
+            dataGrabberSt(std::move(sg)), column(ncol), columnCount(ccnt), colname(cname){}
     };
 
     std::vector<collectorPoint> points;  //!< the data grabbers
