@@ -31,7 +31,7 @@ jobs:
       - bash: ctest --output-on-failure --timeout 480 -C Release -L "Continuous"
         displayName: 'Test GridDyn'
         workingDirectory: build
-        
+
   - job: macOS_mojave
     pool:
       vmImage: 'macOS-10.14'
@@ -157,4 +157,3 @@ jobs:
       - bash: ctest --output-on-failure --timeout 480 -C Release -L "Continuous"
         displayName: 'Test GridDyn'
         workingDirectory: build
-
