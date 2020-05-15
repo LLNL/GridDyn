@@ -5,12 +5,12 @@
 ##############################################################################
 
 SHOW_VARIABLE(BOOST_INSTALL_PATH PATH "Boost root directory" "${BOOST_INSTALL_PATH}")
-
+set(Boost_NO_BOOST_CMAKE ON)
 if(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
   # regular way.
-  set(Boost_NO_BOOST_CMAKE ON)
+  
   set(Boost_USE_MULTITHREADED OFF)   # Needed if MT libraries not built
    option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
 else(UNIX)
@@ -34,6 +34,7 @@ mark_as_advanced(USE_BOOST_STATIC_LIBS)
 if (MSVC)
 
 set (boost_versions
+boost_1_73_0
 boost_1_72_0
 boost_1_72_0
 boost_1_71_0

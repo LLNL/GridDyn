@@ -31,8 +31,8 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.11)
 
     fetchcontent_declare(
         suitesparse
-        GIT_REPOSITORY https://github.com/jlblancoc/suitesparse-metis-for-windows.git
-        GIT_TAG master
+        GIT_REPOSITORY https://github.com/phlptp/suitesparse-metis-for-windows.git
+        GIT_TAG cmake_tweaks
     )
 
     fetchcontent_getproperties(suitesparse)
@@ -55,7 +55,9 @@ else() # CMake <3.11
         PROJECT_NAME
         ${lcName}
         GIT_URL
-        https://github.com/jlblancoc/suitesparse-metis-for-windows.git
+        https://github.com/phlptp/suitesparse-metis-for-windows.git
+        GIT_BRANCH
+        cmake_tweaks
         DIRECTORY
         ${PROJECT_BINARY_DIR}/_deps
     )
@@ -79,27 +81,6 @@ set(KLU_INCLUDE_DIR "${${lcName}_SOURCE_DIR}/Suitesparse/KLU/Include"
                     "${${lcName}_SOURCE_DIR}/Suitesparse/COLAMD/Include"
                     "${${lcName}_SOURCE_DIR}/Suitesparse/BTF/Include"
                     CACHE INTERNAL "")
-
-if (NOT EXISTS ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake)
-    file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
-             ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-old.cmake
-        )
-    file(COPY ${PROJECT_SOURCE_DIR}/config/cmake/checkGetSuiteSparse-griddyn.cmake
-              ${PROJECT_SOURCE_DIR}/config/cmake/CMakeLists-suitesparse.txt
-              DESTINATION
-             ${${lcName}_SOURCE_DIR})
-
-     file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists.txt
-             ${${lcName}_SOURCE_DIR}/CMakeLists.old
-        )
-     file(RENAME ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse-griddyn.cmake
-             ${${lcName}_SOURCE_DIR}/checkGetSuiteSparse.cmake
-             )
-
-       file(RENAME ${${lcName}_SOURCE_DIR}/CMakeLists-suitesparse.txt
-             ${${lcName}_SOURCE_DIR}/CMakeLists.txt
-             )
-endif()
 
 add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR} EXCLUDE_FROM_ALL)
 
