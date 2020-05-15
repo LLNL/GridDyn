@@ -13,6 +13,7 @@ set(runner_sources gridDynRunner.cpp)
 set(runner_headers gridDynRunner.h)
 
 add_library(runner STATIC ${runner_sources} ${runner_headers})
+target_compile_definitions(runner PUBLIC -DCLI11_EXPERIMENTAL_OPTIONAL=0)
 
 target_link_libraries(runner PUBLIC fileInput utilities)
 

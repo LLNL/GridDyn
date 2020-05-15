@@ -81,11 +81,11 @@ BOOST_AUTO_TEST_CASE(test_fmi_xml)
     }
 }
 
-#ifdef _WIN32
+#if defined _WIN32 && defined _WIN64
 BOOST_AUTO_TEST_CASE(test_fmi_load_shared)
 {
-    std::string fmu = fmu_directory + "rectifier.fmu";
-    path rectDir(fmu_directory + "rectifier");
+    std::string fmu = fmu_directory + "Rectifier.fmu";
+    path rectDir(fmu_directory + "Rectifier");
     fmiLibrary rectFmu(fmu);
     rectFmu.loadSharedLibrary();
     BOOST_REQUIRE(rectFmu.isSoLoaded());
@@ -113,8 +113,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_load_shared)
 
 #endif
 
-#ifdef _WIN32
-#    ifndef _WIN64
+#if defined _WIN32 && !defined _WIN64
 BOOST_AUTO_TEST_CASE(test_3phase_fmu)
 {
     std::string fmu = fmu_directory + "DUMMY_0CYMDIST.fmu";
@@ -160,7 +159,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load)
 
     auto ld1 = new griddyn::fmi::fmiMELoad3phase("fmload1");
     std::string fmu = fmu_directory + "DUMMY_0CYMDIST.fmu";
-
+    ld1->set("fmu", fmu);
     apload.add(ld1);
     ld1->set("a2", 0.0);
     ld1->set("b2", 0);
@@ -195,7 +194,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load)
     BOOST_CHECK_CLOSE(ip * 2.0, ip2, 0.00002);
     BOOST_CHECK_CLOSE(yp, yp2, 0.001);
 
-    ld1->set("angle0", 10, gridUnits::deg);
+    ld1->set("angle0", 10, units::deg);
     apload.updateA(0);
     apload.updateB();
     auto iq2 = apload.get("iq");
@@ -241,7 +240,6 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load_xml)
     ld1 = nullptr;
 }
 
-#    endif
 #endif
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
