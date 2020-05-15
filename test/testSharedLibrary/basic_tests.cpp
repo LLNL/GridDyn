@@ -31,17 +31,17 @@ BOOST_AUTO_TEST_SUITE(basic_tests, *boost::unit_test::label("quick"))
 BOOST_AUTO_TEST_CASE(simple_load_test)
 {
     GridDynError err = gridDynErrorInitialize();
-    GridDynSimulation sim = gridDynSimulationCreate("", "sim1",&err);
+    GridDynSimulation sim = gridDynSimulationCreate("", "sim1", &err);
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
     gridDynSimulationLoadfile(sim, file.c_str(), "", &err);
     BOOST_CHECK(err.error_code == griddyn_ok);
-    gridDynSimulationRun(sim,&err);
+    gridDynSimulationRun(sim, &err);
 
-    double time = gridDynSimulationGetCurrentTime(sim,&err);
+    double time = gridDynSimulationGetCurrentTime(sim, &err);
 
     BOOST_CHECK_CLOSE(time, 30.0, 0.0001);
-    auto obj = getSimulationObject(sim,&err);
+    auto obj = getSimulationObject(sim, &err);
 
     gridDynObjectFree(obj);
 
@@ -51,12 +51,12 @@ BOOST_AUTO_TEST_CASE(simple_load_test)
 BOOST_AUTO_TEST_CASE(getResult_test)
 {
     GridDynError err = gridDynErrorInitialize();
-    GridDynSimulation sim = gridDynSimulationCreate("", "sim1",&err);
+    GridDynSimulation sim = gridDynSimulationCreate("", "sim1", &err);
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
-    gridDynSimulationLoadfile(sim, file.c_str(), "",&err);
+    gridDynSimulationLoadfile(sim, file.c_str(), "", &err);
     BOOST_CHECK(err.error_code == griddyn_ok);
-    gridDynSimulationPowerflow(sim,&err);
+    gridDynSimulationPowerflow(sim, &err);
 
     int cnt = gridDynSimulationBusCount(sim);
 
@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE(getResult_test)
     std::vector<double> voltages(cnt);
     std::vector<double> angles(cnt);
     int act;
-    gridDynSimulationGetResults(sim, "voltage", voltages.data(), cnt,&act, &err);
+    gridDynSimulationGetResults(sim, "voltage", voltages.data(), cnt, &act, &err);
     BOOST_REQUIRE_EQUAL(cnt, act);
-    gridDynSimulationGetResults(sim, "angles", angles.data(), cnt,&act, &err);
+    gridDynSimulationGetResults(sim, "angles", angles.data(), cnt, &act, &err);
     BOOST_REQUIRE_EQUAL(cnt, act);
     BOOST_CHECK_CLOSE(voltages[0], 1.06, 0.001);
     BOOST_CHECK_SMALL(angles[0], 0.00001);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
     GridDynSimulation sim = gridDynSimulationCreate("", "sim1", &err);
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
-   gridDynSimulationLoadfile(sim, file.c_str(), "", &err);
+    gridDynSimulationLoadfile(sim, file.c_str(), "", &err);
     BOOST_CHECK(err.error_code == griddyn_ok);
     gridDynSimulationPowerflow(sim, &err);
 
@@ -94,13 +94,13 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
     gridDynObjectFree(obj);  // just making sure the bus object is disconnected from obj
     BOOST_CHECK(bus2 != nullptr);
 
-    double result= gridDynObjectGetValue(bus2, "voltage", &err);
+    double result = gridDynObjectGetValue(bus2, "voltage", &err);
     BOOST_CHECK(err.error_code == griddyn_ok);
     BOOST_CHECK_CLOSE(result, 1.056, 0.1);
 
     char name[50];
     int strSize;
-    gridDynObjectGetString(bus2, "name", name, 50,&strSize, &err);
+    gridDynObjectGetString(bus2, "name", name, 50, &strSize, &err);
 
     std::string namestr(name);
     BOOST_CHECK_EQUAL(strSize, static_cast<int>(namestr.size()));
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
 BOOST_AUTO_TEST_CASE(build_small_test_case)
 {
     GridDynError err = gridDynErrorInitialize();
-    GridDynSimulation sim = gridDynSimulationCreate("", "sim1",&err);
+    GridDynSimulation sim = gridDynSimulationCreate("", "sim1", &err);
     BOOST_CHECK(sim != nullptr);
     auto obj = getSimulationObject(sim, &err);
 
@@ -140,9 +140,9 @@ BOOST_AUTO_TEST_CASE(build_small_test_case)
 
     gridDynSimulationPowerflow(sim, &err);
 
-    double V=gridDynObjectGetValueUnits(bus2, "voltage", "pu", &err);
+    double V = gridDynObjectGetValueUnits(bus2, "voltage", "pu", &err);
     BOOST_CHECK(V < 1.0);
-    double A=gridDynObjectGetValueUnits(bus2, "angle", "deg", &err);
+    double A = gridDynObjectGetValueUnits(bus2, "angle", "deg", &err);
     BOOST_CHECK(A < 0);
     gridDynObjectFree(bus1);
     gridDynObjectFree(ld1);
