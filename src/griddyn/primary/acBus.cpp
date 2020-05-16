@@ -53,7 +53,7 @@ acBus::~acBus() = default;
 
 coreObject* acBus::clone(coreObject* obj) const
 {
-    auto nobj = cloneBaseFactory<acBus, gridBus>(this, obj, &gbfac);
+    auto* nobj = cloneBaseFactory<acBus, gridBus>(this, obj, &gbfac);
     if (nobj == nullptr) {
         return obj;
     }
@@ -83,7 +83,7 @@ coreObject* acBus::clone(coreObject* obj) const
 
 void acBus::disable()
 {
-    coreObject::disable();
+    coreObject::disable();  // NOLINT
     alert(this, STATE_COUNT_CHANGE);
     for (auto& link : attachedLinks) {
         link->disable();
@@ -92,7 +92,7 @@ void acBus::disable()
 
 void acBus::add(coreObject* obj)
 {
-    auto bus = dynamic_cast<acBus*>(obj);
+    auto* bus = dynamic_cast<acBus*>(obj);
     if (bus != nullptr) {
         return add(bus);
     }
@@ -117,7 +117,7 @@ void acBus::add(acBus* bus)
 
 void acBus::remove(coreObject* obj)
 {
-    auto bus = dynamic_cast<acBus*>(obj);
+    auto* bus = dynamic_cast<acBus*>(obj);
     if (bus != nullptr) {
         return (remove(bus));
     }
@@ -172,7 +172,7 @@ void acBus::alert(coreObject* obj, int code)
             }
             FALLTHROUGH
         default:
-            gridPrimary::alert(obj, code);
+            gridPrimary::alert(obj, code);  // NOLINT
     }
 }
 
@@ -207,7 +207,7 @@ void acBus::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
     if (!(opFlags[use_autogen])) {
         if (CHECK_CONTROLFLAG(flags, auto_bus_disconnect)) {
             int activeLink = 0;
-            for (auto lnk : attachedLinks) {
+            for (auto* lnk : attachedLinks) {
                 if (lnk->isConnected()) {
                     ++activeLink;
                 }
@@ -332,10 +332,10 @@ void acBus::pFlowObjectInitializeB()
     }
 }
 
-// TODO:: transfer these functions to the busController
+// TODO(PT):: transfer these functions to the busController
 void acBus::mergeBus(gridBus* mbus)
 {
-    auto acmbus = dynamic_cast<acBus*>(mbus);
+    auto* acmbus = dynamic_cast<acBus*>(mbus);
     if (acmbus == nullptr) {
         return;
     }
@@ -354,26 +354,22 @@ void acBus::mergeBus(gridBus* mbus)
                 acmbus->busController.masterBus = this;
                 acmbus->opFlags.set(slave_bus);
                 busController.slaveBusses.push_back(acmbus);
-                for (auto sb : acmbus->busController.slaveBusses) {
+                for (auto* sb : acmbus->busController.slaveBusses) {
                     busController.slaveBusses.push_back(sb);
                     sb->busController.masterBus = this;
                 }
                 acmbus->busController.slaveBusses.clear();
             }
         }
-    } else if (getID() > mbus->getID())  
-    {
+    } else if (getID() > mbus->getID()) {
         // mbus is now this buses master
-        if (opFlags[slave_bus])  
-        {
+        if (opFlags[slave_bus]) {
             // if we are already a slave forward the merge to the master
             if (busController.masterBus->getID() != mbus->getID()) {
                 busController.masterBus->mergeBus(mbus);
             }
-        } else  
-        {// we were a master now mbus is the master
-            if (busController.slaveBusses.empty())  
-            { // no slave buses
+        } else {  // we were a master now mbus is the master
+            if (busController.slaveBusses.empty()) {  // no slave buses
                 busController.masterBus = mbus;
                 acmbus->busController.slaveBusses.push_back(this);
             } else {
@@ -382,7 +378,7 @@ void acBus::mergeBus(gridBus* mbus)
                 } else {
                     busController.masterBus = mbus;
                     acmbus->busController.slaveBusses.push_back(this);
-                    for (auto sb : busController.slaveBusses) {
+                    for (auto* sb : busController.slaveBusses) {
                         acmbus->busController.slaveBusses.push_back(sb);
                         sb->busController.masterBus = mbus;
                     }
@@ -395,7 +391,7 @@ void acBus::mergeBus(gridBus* mbus)
 
 void acBus::unmergeBus(gridBus* mbus)
 {
-    auto acmbus = dynamic_cast<acBus*>(mbus);
+    auto* acmbus = dynamic_cast<acBus*>(mbus);
     if (acmbus == nullptr) {
         return;
     }
@@ -407,8 +403,7 @@ void acBus::unmergeBus(gridBus* mbus)
         } else if (busController.masterBus->getID() == mbus->getID()) {
             mbus->unmergeBus(this);  // flip it around so this bus is unmerged from mbus
         }
-    } else  
-    {// in the masterbus
+    } else {  // in the masterbus
         if ((mbus->checkFlag(slave_bus)) && (getID() == acmbus->busController.masterBus->getID())) {
             for (auto& eb : busController.slaveBusses) {
                 eb->opFlags.reset(slave_bus);
@@ -535,7 +530,7 @@ double acBus::getAverageAngle() const
     if (!attachedLinks.empty()) {
         double a = 0.0;
         double rel = 0.0;
-        for (auto& lnk : attachedLinks) {
+        for (const auto* lnk : attachedLinks) {
             a += lnk->getBusAngle(getID());
             rel += 1.0;
         }
@@ -738,13 +733,15 @@ void acBus::pFlowCheck(std::vector<Violation>& violations)
 
         violation.level = voltage;
         violation.limit = Vmax;
-        violation.percentViolation = (voltage - Vmax) * 100;  // assumes nominal voltage level at 1.0;
+        violation.percentViolation =
+            (voltage - Vmax) * 100;  // assumes nominal voltage level at 1.0;
         violations.push_back(violation);
     } else if (voltage < Vmin) {
         Violation violation(getName(), VOLTAGE_UNDER_LIMIT_VIOLATION);
         violation.level = voltage;
         violation.limit = Vmin;
-        violation.percentViolation = (Vmin - voltage) * 100;  // assumes nominal voltage level at 1.0;
+        violation.percentViolation =
+            (Vmin - voltage) * 100;  // assumes nominal voltage level at 1.0;
         violations.push_back(violation);
     }
 }
@@ -769,9 +766,7 @@ void acBus::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
         }
     }
     if (opFlags[uses_bus_frequency]) {
-        if (attachedGens.empty()) {
-            opFlags.set(compute_frequency);
-        } else if (keyGen == nullptr) {
+        if (attachedGens.empty() || keyGen == nullptr) {
             opFlags.set(compute_frequency);
         }
     }
@@ -796,7 +791,7 @@ void acBus::dynObjectInitializeB(const IOdata& /*inputs*/,
                                  const IOdata& desiredOutput,
                                  IOdata& fieldSet)
 {
-    // TODO:: clean up this function
+    // TODO(PT):: clean up this function
     if (!desiredOutput.empty()) {
         if (desiredOutput[voltageInLocation] > 0) {
             voltage = desiredOutput[voltageInLocation];
@@ -822,8 +817,10 @@ void acBus::dynObjectInitializeB(const IOdata& /*inputs*/,
     }
     // first get the state size for the internal state ordering
     auto inputs = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
-    double Qgap, Pgap;
-    int vci = 0, poi = 0;
+    double Qgap;
+    double Pgap;
+    int vci = 0;
+    int poi = 0;
     auto cid = getID();
     switch (type) {
         case busType::PQ:
@@ -871,8 +868,7 @@ void acBus::dynObjectInitializeB(const IOdata& /*inputs*/,
                     }
                     ++vci;
                 }
-            } else 
-            {  // adjust the power levels separately
+            } else {  // adjust the power levels separately
                 // adjust the real power flow
                 for (auto& pco : busController.pControlObjects) {
                     if (pco->checkFlag(local_voltage_control)) {
@@ -925,7 +921,7 @@ void acBus::dynObjectInitializeB(const IOdata& /*inputs*/,
             break;
     }
     IOdata pc;
-    // TODO:: Do some thing with the fieldSet
+    // TODO(PT):: Do some thing with the fieldSet
     for (auto& gen : attachedGens) {
         gen->dynInitializeB(inputs, pc, fieldSet);
     }
@@ -1006,7 +1002,7 @@ void acBus::setFlag(const std::string& flag, bool val)
             }
         }
     } else {
-        gridPrimary::setFlag(flag, val);
+        gridBus::setFlag(flag, val);
     }
 }
 
@@ -1059,7 +1055,7 @@ void acBus::set(const std::string& param, const std::string& val)
             throw(invalidParameterValue(val));
         }
     } else {
-        gridPrimary::set(param, val);
+        gridBus::set(param, val);
     }
 }
 
@@ -1407,8 +1403,7 @@ int acBus::propogatePower(bool makeSlack)
         if ((adjPSecondary == 0) && (adjQSecondary == 0)) {
             /*ret = */ unfixed_line->fixPower(-Pexp, -Qexp, getID(), getID());
         }
-    } else  
-    { // no lines so adjust the generators and load
+    } else {  // no lines so adjust the generators and load
         if ((adjPSecondary == 1) && (adjQSecondary == 1)) {
             int found = 0;
             for (auto& gen : attachedGens) {
@@ -1437,8 +1432,7 @@ int acBus::propogatePower(bool makeSlack)
                     return 1;
                 }
             }
-        } else  
-        { // TODO(PT):deal with multiple adjustable controls
+        } else {  // TODO(PT):deal with multiple adjustable controls
             return 0;
         }
     }
@@ -1798,8 +1792,8 @@ void acBus::algebraicUpdate(const IOdata& inputs,
 
         double DP = S.sumP();
         double DQ = S.sumQ();
-        double dV, dT;
-
+        double dV;
+        double dT;
         double Pvii = partDeriv.at(PoutLocation, voltageInLocation);
         double Ptii = partDeriv.at(PoutLocation, angleInLocation);
         double Qvii = partDeriv.at(QoutLocation, voltageInLocation);
@@ -1872,11 +1866,16 @@ void acBus::localConverge(const solverMode& sMode, int mode, double tol)
     if (isDifferentialOnly(sMode)) {
         return;
     }
-    double v1 = voltage, t1 = angle;
-    double dV, dT;
-    double Pvii, Ptii, Qvii, Qtii;
-    double err = kBigNum;
-    int iteration = 1;
+    double v1{voltage};
+    double t1{angle};
+    double dV;
+    double dT;
+    double Pvii;
+    double Ptii;
+    double Qvii;
+    double Qtii;
+    double err{kBigNum};
+    int iteration{1};
 
     updateLocalCache();
     double DP = S.sumP();
@@ -1983,7 +1982,8 @@ void acBus::converge(coreTime time,
     stateData sD(time, state, dstate_dt);
     double v1 = uV ? state[Voffset] : voltage;
     double t1 = uA ? state[Aoffset] : angle;
-    double v2, t2;
+    double v2;
+    double t2;
     double f = getFreq(sD, sMode);
     if (v1 <= 0.0) {
         v1 = std::abs(v1 - 0.001);
@@ -2196,11 +2196,11 @@ void acBus::setOffsets(const solverOffsets& newOffsets, const solverMode& sMode)
     offsets.setOffsets(newOffsets, sMode);
     solverOffsets no(newOffsets);
     no.localIncrement(offsets.getOffsets(sMode));
-    for (auto ld : attachedLoads) {
+    for (auto* ld : attachedLoads) {
         ld->setOffsets(no, sMode);
         no.increment(ld->getOffsets(sMode));
     }
-    for (auto gen : attachedGens) {
+    for (auto* gen : attachedGens) {
         gen->setOffsets(no, sMode);
         no.increment(gen->getOffsets(sMode));
     }
@@ -2219,11 +2219,11 @@ void acBus::setOffsets(const solverOffsets& newOffsets, const solverMode& sMode)
 
 void acBus::setOffset(index_t offset, const solverMode& sMode)
 {
-    for (auto ld : attachedLoads) {
+    for (auto* ld : attachedLoads) {
         ld->setOffset(offset, sMode);
         offset += ld->stateSize(sMode);
     }
-    for (auto gen : attachedGens) {
+    for (auto* gen : attachedGens) {
         gen->setOffset(offset, sMode);
         offset += gen->stateSize(sMode);
     }
@@ -2379,13 +2379,13 @@ int acBus::getMode(const solverMode& sMode) const
             return 3;
         }
         if (isDC(sMode)) {
-            return (static_cast<int>(dynType) | 2);
+            return static_cast<int>(static_cast<unsigned int>(dynType) | 2);
         }
         return static_cast<int>(dynType);
     }
 
     if (isDC(sMode)) {
-        return (static_cast<int>(type) | 2);
+        return static_cast<int>(static_cast<unsigned int>(type) | 2 );
     }
 
     return static_cast<int>(type);

@@ -346,7 +346,7 @@ void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn) //NO
 
 //NOLINTNEXTLINE
 void collector::add(std::shared_ptr<gridGrabber> ggb,
-                    std::shared_ptr<stateGrabber> sst,
+                    std::shared_ptr<stateGrabber> sst, // NOLINT
                     int requestedColumn)
 {
     int newColumn = getColumn(requestedColumn);
