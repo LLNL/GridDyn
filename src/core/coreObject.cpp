@@ -104,7 +104,7 @@ void coreObject::remove(coreObject* obj)
     }
 }
 
-void coreObject::addHelper(std::shared_ptr<helperObject> obj)
+void coreObject::addHelper(std::shared_ptr<helperObject> obj)  // NOLINT
 {
     if (obj) {
         throw(objectAddFailure(this));

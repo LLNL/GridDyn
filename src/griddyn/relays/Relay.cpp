@@ -579,10 +579,7 @@ void Relay::updateRootCount(bool alertChange)
     localRoots = 0;  // reset the local roots
     conditionsWithRoots.clear();
     for (index_t kk = 0; kk < static_cast<index_t>(cStates.size()); ++kk) {
-        if (cStates[kk] == condition_status_t::active) {
-            ++localRoots;
-            conditionsWithRoots.push_back(kk);
-        } else if ((cStates[kk] == condition_status_t::triggered) && (opFlags[resettable_flag])) {
+        if (cStates[kk] == condition_status_t::active ||(cStates[kk] == condition_status_t::triggered && opFlags[resettable_flag])) {
             ++localRoots;
             conditionsWithRoots.push_back(kk);
         }

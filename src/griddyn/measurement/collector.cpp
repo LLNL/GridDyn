@@ -87,7 +87,7 @@ void collector::cloneTo(collector* col) const
 
 void collector::updateObject(coreObject* gco, object_update_mode mode)
 {
-    for (const auto gg : points) {
+    for (const auto& gg : points) {
         if (gg.dataGrabber) {
             gg.dataGrabber->updateObject(gco, mode);
             if (gg.dataGrabber->vectorGrab) {
@@ -114,7 +114,7 @@ coreObject* collector::getObject() const
 
 void collector::getObjects(std::vector<coreObject*>& objects) const
 {
-    for (const auto gg : points) {
+    for (const auto& gg : points) {
         if (gg.dataGrabber) {
             gg.dataGrabber->getObjects(objects);
         } else if (gg.dataGrabberSt) {
@@ -304,7 +304,7 @@ void collector::updateColumns(int requestedColumn)
 }
 
 // TODO(PT):: a lot of repeated code here try to merge them
-void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
+void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn) //NOLINT
 {
     int newColumn = getColumn(requestedColumn);
 
@@ -327,7 +327,7 @@ void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
     }
 }
 
-void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn)
+void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn) //NOLINT
 {
     int newColumn = getColumn(requestedColumn);
     updateColumns(newColumn);
@@ -344,6 +344,7 @@ void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn)
     }
 }
 
+//NOLINTNEXTLINE
 void collector::add(std::shared_ptr<gridGrabber> ggb,
                     std::shared_ptr<stateGrabber> sst,
                     int requestedColumn)

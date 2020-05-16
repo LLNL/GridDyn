@@ -369,7 +369,7 @@ namespace solvers {
 
     int kinsolFunc(N_Vector state, N_Vector resid, void* user_data)
     {
-        auto sd = reinterpret_cast<kinsolInterface*>(user_data);
+        auto* sd = static_cast<kinsolInterface*>(user_data);
         sd->funcCallCount++;
 #if MEASURE_TIMINGS > 0
         auto start_t = std::chrono::high_resolution_clock::now();
@@ -432,7 +432,7 @@ namespace solvers {
                   N_Vector tmp1,
                   N_Vector tmp2)
     {
-        auto sd = reinterpret_cast<kinsolInterface*>(user_data);
+        auto* sd = static_cast<kinsolInterface*>(user_data);
         return sundialsJac(sd->solveTime, 0, state, nullptr, J, user_data, tmp1, tmp2);
     }
 

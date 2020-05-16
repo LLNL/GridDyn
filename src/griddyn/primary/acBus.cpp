@@ -361,17 +361,19 @@ void acBus::mergeBus(gridBus* mbus)
                 acmbus->busController.slaveBusses.clear();
             }
         }
-    } else if (getID() > mbus->getID())  // mbus is now this buses master
+    } else if (getID() > mbus->getID())  
     {
-        if (opFlags[slave_bus])  // if we are already a slave forward the merge to the master
+        // mbus is now this buses master
+        if (opFlags[slave_bus])  
         {
+            // if we are already a slave forward the merge to the master
             if (busController.masterBus->getID() != mbus->getID()) {
                 busController.masterBus->mergeBus(mbus);
             }
-        } else  // we were a master now mbus is the master
-        {
-            if (busController.slaveBusses.empty())  // no slave buses
-            {
+        } else  
+        {// we were a master now mbus is the master
+            if (busController.slaveBusses.empty())  
+            { // no slave buses
                 busController.masterBus = mbus;
                 acmbus->busController.slaveBusses.push_back(this);
             } else {
@@ -405,8 +407,8 @@ void acBus::unmergeBus(gridBus* mbus)
         } else if (busController.masterBus->getID() == mbus->getID()) {
             mbus->unmergeBus(this);  // flip it around so this bus is unmerged from mbus
         }
-    } else  // in the masterbus
-    {
+    } else  
+    {// in the masterbus
         if ((mbus->checkFlag(slave_bus)) && (getID() == acmbus->busController.masterBus->getID())) {
             for (auto& eb : busController.slaveBusses) {
                 eb->opFlags.reset(slave_bus);
@@ -729,21 +731,21 @@ change_code
     return out;
 }
 /*function to check the current status for any limit violations*/
-void acBus::pFlowCheck(std::vector<Violation>& Violation_vector)
+void acBus::pFlowCheck(std::vector<Violation>& violations)
 {
     if (voltage > Vmax) {
-        Violation V(getName(), VOLTAGE_OVER_LIMIT_VIOLATION);
+        Violation violation(getName(), VOLTAGE_OVER_LIMIT_VIOLATION);
 
-        V.level = voltage;
-        V.limit = Vmax;
-        V.percentViolation = (voltage - Vmax) * 100;  // assumes nominal voltage level at 1.0;
-        Violation_vector.push_back(V);
+        violation.level = voltage;
+        violation.limit = Vmax;
+        violation.percentViolation = (voltage - Vmax) * 100;  // assumes nominal voltage level at 1.0;
+        violations.push_back(violation);
     } else if (voltage < Vmin) {
-        Violation V(getName(), VOLTAGE_UNDER_LIMIT_VIOLATION);
-        V.level = voltage;
-        V.limit = Vmin;
-        V.percentViolation = (Vmin - voltage) * 100;  // assumes nominal voltage level at 1.0;
-        Violation_vector.push_back(V);
+        Violation violation(getName(), VOLTAGE_UNDER_LIMIT_VIOLATION);
+        violation.level = voltage;
+        violation.limit = Vmin;
+        violation.percentViolation = (Vmin - voltage) * 100;  // assumes nominal voltage level at 1.0;
+        violations.push_back(violation);
     }
 }
 
@@ -869,8 +871,8 @@ void acBus::dynObjectInitializeB(const IOdata& /*inputs*/,
                     }
                     ++vci;
                 }
-            } else  // adjust the power levels separately
-            {
+            } else 
+            {  // adjust the power levels separately
                 // adjust the real power flow
                 for (auto& pco : busController.pControlObjects) {
                     if (pco->checkFlag(local_voltage_control)) {
@@ -1405,8 +1407,8 @@ int acBus::propogatePower(bool makeSlack)
         if ((adjPSecondary == 0) && (adjQSecondary == 0)) {
             /*ret = */ unfixed_line->fixPower(-Pexp, -Qexp, getID(), getID());
         }
-    } else  // no lines so adjust the generators and load
-    {
+    } else  
+    { // no lines so adjust the generators and load
         if ((adjPSecondary == 1) && (adjQSecondary == 1)) {
             int found = 0;
             for (auto& gen : attachedGens) {
@@ -1435,8 +1437,8 @@ int acBus::propogatePower(bool makeSlack)
                     return 1;
                 }
             }
-        } else  // TODO::PT:deal with multiple adjustable controls
-        {
+        } else  
+        { // TODO(PT):deal with multiple adjustable controls
             return 0;
         }
     }

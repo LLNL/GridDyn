@@ -58,10 +58,13 @@ double interpretString_sv(string_view command, readerInfo& ri)
     }
     double val{0.0};
     if ((rlcps == 0) &&
-        (rlcp == command.length() - 1)) {  // just remove outer parenthesis and call again
+        (rlcp == command.length() - 1)) {
+        // just remove outer parenthesis and call again
         val = interpretString_sv(command.substr(1, rlcp - 1), ri);
+        // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (((rlc = command.find_first_of("+-", 1)) != std::string::npos) && (rlc < rlcps)) {
         val = addSubStringBlocks(command, ri, rlc);
+        // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (((rlc = command.find_first_of("*/^%", 1)) != std::string::npos) && (rlc < rlcps)) {
         val = multDivStringBlocks(command, ri, rlc);
     } else if ((rlc = command.find_first_of("+-", rlcp + 1)) != std::string::npos) {
