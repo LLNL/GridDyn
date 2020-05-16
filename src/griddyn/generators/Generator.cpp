@@ -484,7 +484,7 @@ void Generator::set(const std::string& param, double val, unit unitType)
         dPdt = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
     } else if (param == "dqdt") {
         dQdt = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
-    }else if (param == "participation") {
+    } else if (param == "participation") {
         participation = val;
     } else if (param == "vcontrolfrac" || param == "vregfraction" || param == "vcfrac") {
         vRegFraction = val;
@@ -583,8 +583,8 @@ IOdata
             }
         }
     }
-    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 
@@ -608,8 +608,8 @@ double Generator::getRealPower(const IOdata& inputs,
         }
     }
 
-    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 double Generator::getReactivePower(const IOdata& inputs,
@@ -628,8 +628,8 @@ double Generator::getReactivePower(const IOdata& inputs,
             }
         }
     }
-    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 

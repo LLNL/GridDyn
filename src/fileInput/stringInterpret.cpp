@@ -57,8 +57,7 @@ double interpretString_sv(string_view command, readerInfo& ri)
         }
     }
     double val{0.0};
-    if ((rlcps == 0) &&
-        (rlcp == command.length() - 1)) {
+    if ((rlcps == 0) && (rlcp == command.length() - 1)) {
         // just remove outer parenthesis and call again
         val = interpretString_sv(command.substr(1, rlcp - 1), ri);
         // NOLINTNEXTLINE(bugprone-branch-clone)
@@ -87,9 +86,7 @@ double interpretString_sv(string_view command, readerInfo& ri)
                         double v1 = stringBlocktoDouble(args[0], ri);
                         double v2 = stringBlocktoDouble(args[1], ri);
                         val = InterpretFunction(cmdBlock.to_string(), v1, v2, ri);
-                    } else if (args.size() ==
-                               1)  
-                    {
+                    } else if (args.size() == 1) {
                         // if the single argument is a function of multiple arguments
                         if (cmdBlock == "query") {
                             val = ObjectQuery(args[0], ri.getKeyObject());

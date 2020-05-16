@@ -362,7 +362,7 @@ void Relay::set(const std::string& param, const std::string& val)
 void Relay::set(const std::string& param, double val, units::unit unitType)
 {
     if ((param == "samplingperiod") || (param == "ts") || (param == "sampleperiod")) {
-        coreObject::set("period", val, unitType); // NOLINT
+        coreObject::set("period", val, unitType);  // NOLINT
         m_nextSampleTime = timeZero;
     } else if ((param == "rate") || (param == "fs") || (param == "samplerate")) {
         coreObject::set("period", 1.0 / convert(val, unitType, units::Hz));  // NOLINT
@@ -579,7 +579,8 @@ void Relay::updateRootCount(bool alertChange)
     localRoots = 0;  // reset the local roots
     conditionsWithRoots.clear();
     for (index_t kk = 0; kk < static_cast<index_t>(cStates.size()); ++kk) {
-        if (cStates[kk] == condition_status_t::active ||(cStates[kk] == condition_status_t::triggered && opFlags[resettable_flag])) {
+        if (cStates[kk] == condition_status_t::active ||
+            (cStates[kk] == condition_status_t::triggered && opFlags[resettable_flag])) {
             ++localRoots;
             conditionsWithRoots.push_back(kk);
         }
@@ -716,7 +717,8 @@ std::unique_ptr<eventAdapter> Relay::make_alarm(const std::string& val)
     return nullptr;
 }
 
-void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {} // NOLINT
+void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {
+}  // NOLINT
 
 void Relay::sendAlarm(std::uint32_t code)
 {
@@ -820,8 +822,7 @@ change_code Relay::evaluateCondCheck(condCheckTime& cond, coreTime checkTime)
                 if (iret > eventReturn) {
                     eventReturn = iret;
                 }
-            } else  
-            {// it was a multiCondition trigger
+            } else {  // it was a multiCondition trigger
                 bool all_triggered = true;
                 coreTime trigDelay =
                     multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;

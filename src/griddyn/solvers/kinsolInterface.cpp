@@ -17,11 +17,11 @@
 #include "sundialsMatrixData.h"
 //#include "matrixDataBoost.h"
 #include "core/coreExceptions.h"
+#include "fmtlib/include/fmt/format.h"
 #include "utilities/matrixCreation.h"
 #include <kinsol/kinsol.h>
 #include <kinsol/kinsol_direct.h>
 #include <sunlinsol/sunlinsol_dense.h>
-#include "fmtlib/include/fmt/format.h"
 
 #ifdef GRIDDYN_ENABLE_KLU
 #    include <sunlinsol/sunlinsol_klu.h>
@@ -319,9 +319,9 @@ namespace solvers {
         std::chrono::duration<double> elapsed_t = stop_t - start_t;
         kinTime += elapsed_t.count();
         fmt::print("total solve time {}, {:5.3f}% in resid {:5.3f}%  in Jacobian\n",
-               kinTime,
-               residTime / kinTime * 100.0,
-               jacTime / kinTime * 100);
+                   kinTime,
+                   residTime / kinTime * 100.0,
+                   jacTime / kinTime * 100);
 #else
         int retval = KINSol(solverMem, state, KIN_NONE, scale, scale);
 #endif
@@ -334,9 +334,9 @@ namespace solvers {
                 m_gds->getStateName(sL, mode);
                 for (auto mv : mvec) {
                     fmt::format("state[{}]{} following state {} is singular\n",
-                           mv,
-                           sL[mv].c_str(),
-                           sL[mv - 1].c_str());
+                                mv,
+                                sL[mv].c_str(),
+                                sL[mv - 1].c_str());
                 }
             } else {
                 // stringVec sL;
@@ -395,9 +395,9 @@ namespace solvers {
             KINGetNumNonlinSolvIters(sd->solverMem, &val);
             double* residuals = NVECTOR_DATA(sd->use_omp, resid);
             fmt::print("Residual for {} at time ={} iteration %{}\n",
-                   sd->getName(),
-                   static_cast<double>(sd->solveTime),
-                   val);
+                       sd->getName(),
+                       static_cast<double>(sd->solveTime),
+                       val);
             for (int kk = 0; kk < static_cast<int>(sd->svsize); ++kk) {
                 fmt::print("resid[{}]={}\n", kk, residuals[kk]);
             }

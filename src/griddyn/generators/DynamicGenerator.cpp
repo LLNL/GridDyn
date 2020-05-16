@@ -200,7 +200,7 @@ void DynamicGenerator::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
         bus->setFlag("compute_frequency", true);
         // opFlags.set(uses_bus_frequency);
     }
-    gridSecondary::dynObjectInitializeA(time0, flags); // NOLINT
+    gridSecondary::dynObjectInitializeA(time0, flags);  // NOLINT
 }
 
 // initial conditions of dynamic states
@@ -836,7 +836,7 @@ void DynamicGenerator::getStateName(stringVec& stNames,
     if ((!isDynamic(sMode)) && (stateSize(sMode) > 0)) {
         Generator::getStateName(stNames, sMode, prefix);
     }
-    gridComponent::getStateName(stNames, sMode, prefix); // NOLINT
+    gridComponent::getStateName(stNames, sMode, prefix);  // NOLINT
 }
 
 void DynamicGenerator::rootTest(const IOdata& inputs,
@@ -1088,8 +1088,7 @@ double DynamicGenerator::pSetControlUpdate(const IOdata& inputs,
         val = (!sD.empty()) ? (Pset + dPdt * (sD.time - prevTime)) : Pset;
     }
     if (opFlags[isochronous_operation]) {
-        if (isoc != nullptr)
-        {
+        if (isoc != nullptr) {
             isoc->setLimits(Pmin - val, Pmax - val);
             isoc->setFreq(subInputs.inputs[isoc_control][0]);
 

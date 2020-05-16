@@ -366,8 +366,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
                 }
             }
         }
-    }
-    else if ((param == "basevoltage") || (param == "base vol")) {
+    } else if ((param == "basevoltage") || (param == "base vol")) {
         // SGS added to set the base voltage 2015-01-30
         localBaseVoltage = val;
     } else {
