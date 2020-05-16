@@ -2385,7 +2385,7 @@ int acBus::getMode(const solverMode& sMode) const
     }
 
     if (isDC(sMode)) {
-        return static_cast<int>(static_cast<unsigned int>(type) | 2U );
+        return static_cast<int>(static_cast<unsigned int>(type) | 2U);
     }
 
     return static_cast<int>(type);

@@ -304,7 +304,7 @@ void collector::updateColumns(int requestedColumn)
 }
 
 // TODO(PT):: a lot of repeated code here try to merge them
-void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn) //NOLINT
+void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)  // NOLINT
 {
     int newColumn = getColumn(requestedColumn);
 
@@ -327,7 +327,7 @@ void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn) //NOL
     }
 }
 
-void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn) //NOLINT
+void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn)  // NOLINT
 {
     int newColumn = getColumn(requestedColumn);
     updateColumns(newColumn);
@@ -344,9 +344,9 @@ void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn) //NO
     }
 }
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 void collector::add(std::shared_ptr<gridGrabber> ggb,
-                    std::shared_ptr<stateGrabber> sst, // NOLINT
+                    std::shared_ptr<stateGrabber> sst,  // NOLINT
                     int requestedColumn)
 {
     int newColumn = getColumn(requestedColumn);
@@ -398,8 +398,7 @@ void collector::add(const gridGrabberInfo& gdRI, coreObject* obj)
                 }
                 add(tempInfo, obj);
             }
-        } else  
-        {
+        } else {
             // now we get to the interesting bit
             auto fldGrabbers = makeGrabbers(gdRI.field, obj);
             auto stGrabbers = makeStateGrabbers(gdRI.field, obj);
@@ -441,8 +440,7 @@ void collector::add(const std::string& field, coreObject* obj)
         for (const auto& fld : grabberStrings) {
             add(fld, obj);
         }
-    } else 
-    {  // now we get to the interesting bit
+    } else {  // now we get to the interesting bit
         auto fldGrabbers = makeGrabbers(field, obj);
         for (auto& ggb : fldGrabbers) {
             add(std::shared_ptr<gridGrabber>(std::move(ggb)));

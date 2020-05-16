@@ -34,10 +34,7 @@ class pmu_udp_socket {
     {
         index = 0;
     }
-    void data_sent(const boost::system::error_code& error, std::size_t size)
-    {
-        send_lock.unlock();
-    }
+    void data_sent(const boost::system::error_code& error, std::size_t size) { send_lock.unlock(); }
 };
 
 // class for establishing a TCP connection
@@ -47,7 +44,9 @@ class pmu_tcp_acc {
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::io_service& io_service_;
     pmu_tcp_acc(boost::asio::io_service& ios, boost::asio::ip::tcp::endpoint ep):
-        io_service_(ios), acceptor_(ios, ep){}
+        io_service_(ios), acceptor_(ios, ep)
+    {
+    }
 };
 
 class pmu_tcp_session {
@@ -66,10 +65,7 @@ class pmu_tcp_session {
         recv_buffer_.resize(65536);
         cstate = accepting;
     }
-    void data_sent(const boost::system::error_code& error, std::size_t size)
-    {
-        send_lock.unlock();
-    }
+    void data_sent(const boost::system::error_code& error, std::size_t size) { send_lock.unlock(); }
 };
 
 // class for creating a virtual PMU server
@@ -132,7 +128,7 @@ class gridDynServer {
     // function for accepting TCP connection requests
     virtual void tcp_accept(pmu_tcp_session* session, const boost::system::error_code& error);
     // hook for executing alternate command and control functions
-    virtual void command_loop(){}
+    virtual void command_loop() {}
 
     // function for starting the PMU server
     virtual void start_server(boost::asio::io_service& ios);

@@ -181,7 +181,7 @@ void coreObject::set(const std::string& param, const std::string& val)
     }
 }
 
-void coreObject::setDescription(const std::string& description) // NOLINT
+void coreObject::setDescription(const std::string& description)  // NOLINT
 {
     descriptionDictionary.update(m_oid, description);
 }
@@ -440,8 +440,7 @@ void removeReference(coreObject* objToDelete)
 void removeReference(coreObject* objToDelete, const coreObject* parent)
 {
     if (objToDelete != nullptr) {
-        if (objToDelete->m_refCount <= 1 ||
-            --objToDelete->m_refCount <= 0) {
+        if (objToDelete->m_refCount <= 1 || --objToDelete->m_refCount <= 0) {
             // don't do a write on an atomic unless we absolutely need to
             delete objToDelete;
         } else if (parent == objToDelete->parent) {
