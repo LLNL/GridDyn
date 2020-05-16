@@ -117,9 +117,7 @@ void variableGenerator::set(const std::string& param, double val, unit unitType)
         mp_Vcutout = convert(val, unitType, puV, systemBasePower, localBaseVoltage);
     } else if (param == "vmax") {
         mp_Vmax = convert(val, unitType, puV, systemBasePower, localBaseVoltage);
-    } else
-
-    {
+    } else {
         DynamicGenerator::set(param, val, unitType);
     }
 }

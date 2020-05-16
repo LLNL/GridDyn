@@ -619,9 +619,7 @@ void DynamicGenerator::set(const std::string& param, double val, unit unitType)
         if (genModel != nullptr) {
             genModel->set("base", machineBasePower);
         }
-    }
-
-    else if (param == "basepower") {
+    } else if (param == "basepower") {
         systemBasePower = convert(val, unitType, units::MW);
         if (opFlags[independent_machine_base]) {
         } else {
@@ -638,9 +636,7 @@ void DynamicGenerator::set(const std::string& param, double val, unit unitType)
         if (gov != nullptr) {
             gov->set(param, systemBaseFrequency);
         }
-    }
-
-    else if (param == "pmax") {
+    } else if (param == "pmax") {
         Pmax = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0) {
             machineBasePower = convert(Pmax, puMW, MW, systemBasePower);

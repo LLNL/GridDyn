@@ -2379,13 +2379,13 @@ int acBus::getMode(const solverMode& sMode) const
             return 3;
         }
         if (isDC(sMode)) {
-            return static_cast<int>(static_cast<unsigned int>(dynType) | 2);
+            return static_cast<int>(static_cast<unsigned int>(dynType) | 2U);
         }
         return static_cast<int>(dynType);
     }
 
     if (isDC(sMode)) {
-        return static_cast<int>(static_cast<unsigned int>(type) | 2 );
+        return static_cast<int>(static_cast<unsigned int>(type) | 2U );
     }
 
     return static_cast<int>(type);
