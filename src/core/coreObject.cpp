@@ -104,7 +104,7 @@ void coreObject::remove(coreObject* obj)
     }
 }
 
-void coreObject::addHelper(std::shared_ptr<helperObject> obj)
+void coreObject::addHelper(std::shared_ptr<helperObject> obj)  // NOLINT
 {
     if (obj) {
         throw(objectAddFailure(this));
@@ -149,7 +149,6 @@ void coreObject::getParameterStrings(stringVec& pstr, paramStringType pstype) co
             pstr.insert(pstr.end(), locStrStrings.begin(), locStrStrings.end());
             break;
         case paramStringType::localflags:
-            break;
         case paramStringType::flags:
             break;
     }
@@ -182,7 +181,7 @@ void coreObject::set(const std::string& param, const std::string& val)
     }
 }
 
-void coreObject::setDescription(const std::string& description)
+void coreObject::setDescription(const std::string& description) // NOLINT
 {
     descriptionDictionary.update(m_oid, description);
 }
@@ -215,11 +214,13 @@ static bool parentReferenceLoop(coreObject* pobj, coreObject* test)
     }
     return false;
 }
+static nullObject nullObjectEp(0);
+
 void coreObject::setParent(coreObject* parentObj)
 {
-    static nullObject nullObjectEp(0);
     if (parentObj == nullptr) {
         parent = &nullObjectEp;
+        return;
     }
     if (parentReferenceLoop(parentObj, this)) {
         throw(griddyn::objectAddFailure(this));
@@ -414,9 +415,9 @@ int coreObject::getInt(const std::string& param) const
 
 std::string fullObjectName(const coreObject* obj)
 {
-    if (obj->parent->m_oid != 0u)  // the nullobject oid==0
+    if (obj->parent->m_oid != 0U)  // the nullobject oid==0
     {
-        if (obj->parent->parent->m_oid != 0u) {
+        if (obj->parent->parent->m_oid != 0U) {
             return fullObjectName(obj->parent) + "::" + obj->getName();  // yay recursion
         }
         return obj
@@ -429,12 +430,8 @@ std::string fullObjectName(const coreObject* obj)
 void removeReference(coreObject* objToDelete)
 {
     if (objToDelete != nullptr) {
-        if (objToDelete->m_refCount <= 1)  // don't do a write unless we absolutely need to
-        {
-            delete objToDelete;
-        } else if (--objToDelete->m_refCount <=
-                   0)  // now we need to check again if we need to delete
-        {
+        // don't do a write unless we absolutely need to
+        if (objToDelete->m_refCount <= 1 || --objToDelete->m_refCount <= 0) {
             delete objToDelete;
         }
     }
@@ -443,15 +440,12 @@ void removeReference(coreObject* objToDelete)
 void removeReference(coreObject* objToDelete, const coreObject* parent)
 {
     if (objToDelete != nullptr) {
-        if (objToDelete->m_refCount <=
-            1)  // don't do a write on an atomic unless we absolutely need to
-        {
-            delete objToDelete;
-        } else if (--objToDelete->m_refCount <= 0)  // this is an atomic operation
-        {
+        if (objToDelete->m_refCount <= 1 ||
+            --objToDelete->m_refCount <= 0) {
+            // don't do a write on an atomic unless we absolutely need to
             delete objToDelete;
         } else if (parent == objToDelete->parent) {
-            objToDelete->parent = nullptr;
+            objToDelete->parent = &nullObjectEp;
         }
     }
 }

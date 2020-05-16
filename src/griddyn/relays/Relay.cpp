@@ -64,7 +64,7 @@ Relay::Relay(const std::string& objName): gridPrimary(objName)
 
 coreObject* Relay::clone(coreObject* obj) const
 {
-    auto nobj = cloneBase<Relay, gridPrimary>(this, obj);
+    auto* nobj = cloneBase<Relay, gridPrimary>(this, obj);
     if (nobj == nullptr) {
         return obj;
     }
@@ -186,7 +186,7 @@ void Relay::setActionMultiTrigger(index_t actionNumber,
     if (actionNumber >= static_cast<index_t>(actions.size())) {
         return;
     }
-    for (auto& cnum : multi_conditions) {
+    for (const auto& cnum : multi_conditions) {
         multiConditionTriggers[cnum].emplace_back(actionNumber, multi_conditions, delayTime);
     }
 }
@@ -362,10 +362,10 @@ void Relay::set(const std::string& param, const std::string& val)
 void Relay::set(const std::string& param, double val, units::unit unitType)
 {
     if ((param == "samplingperiod") || (param == "ts") || (param == "sampleperiod")) {
-        coreObject::set("period", val, unitType);
+        coreObject::set("period", val, unitType); // NOLINT
         m_nextSampleTime = timeZero;
     } else if ((param == "rate") || (param == "fs") || (param == "samplerate")) {
-        coreObject::set("period", 1.0 / convert(val, unitType, units::Hz));
+        coreObject::set("period", 1.0 / convert(val, unitType, units::Hz));  // NOLINT
         m_nextSampleTime = timeZero;
     } else {
         if (cManager.set(param, val)) {
@@ -483,7 +483,7 @@ void Relay::pFlowObjectInitializeA(coreTime time0, std::uint32_t /*flags*/)
                 commLink->initialize();
                 commLink->registerReceiveCallback(
                     [this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
-                        receiveMessage(sourceID, message);
+                        receiveMessage(sourceID, std::move(message));
                     });
             }
             catch (const std::invalid_argument&) {
@@ -493,7 +493,7 @@ void Relay::pFlowObjectInitializeA(coreTime time0, std::uint32_t /*flags*/)
                     commLink->initialize();
                     commLink->registerReceiveCallback(
                         [this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
-                            receiveMessage(sourceID, message);
+                            receiveMessage(sourceID, std::move(message));
                         });
                 }
                 catch (const std::invalid_argument&) {
@@ -579,10 +579,7 @@ void Relay::updateRootCount(bool alertChange)
     localRoots = 0;  // reset the local roots
     conditionsWithRoots.clear();
     for (index_t kk = 0; kk < static_cast<index_t>(cStates.size()); ++kk) {
-        if (cStates[kk] == condition_status_t::active) {
-            ++localRoots;
-            conditionsWithRoots.push_back(kk);
-        } else if ((cStates[kk] == condition_status_t::triggered) && (opFlags[resettable_flag])) {
+        if (cStates[kk] == condition_status_t::active ||(cStates[kk] == condition_status_t::triggered && opFlags[resettable_flag])) {
             ++localRoots;
             conditionsWithRoots.push_back(kk);
         }
@@ -719,7 +716,7 @@ std::unique_ptr<eventAdapter> Relay::make_alarm(const std::string& val)
     return nullptr;
 }
 
-void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {}
+void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {} // NOLINT
 
 void Relay::sendAlarm(std::uint32_t code)
 {
@@ -823,8 +820,8 @@ change_code Relay::evaluateCondCheck(condCheckTime& cond, coreTime checkTime)
                 if (iret > eventReturn) {
                     eventReturn = iret;
                 }
-            } else  // it was a multiCondition trigger
-            {
+            } else  
+            {// it was a multiCondition trigger
                 bool all_triggered = true;
                 coreTime trigDelay =
                     multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
@@ -953,10 +950,10 @@ void Relay::getObjects(std::vector<coreObject*>& objects) const
     if ((m_sinkObject != nullptr) && (m_sourceObject != m_sinkObject)) {
         objects.push_back(m_sinkObject);
     }
-    for (auto& cond : conditions) {
+    for (const auto& cond : conditions) {
         cond->getObjects(objects);
     }
-    for (auto& act : actions) {
+    for (const auto& act : actions) {
         act->getObjects(objects);
     }
 }

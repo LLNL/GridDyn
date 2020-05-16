@@ -67,7 +67,7 @@ class collector: public helperObject, public eventInterface, public objectOperat
                        int ccnt = 1,
                        const std::string& cname = ""):
             dataGrabber(std::move(dg)),
-            dataGrabberSt(std::move(sg)), column(ncol), columnCount(ccnt), colname(cname){};
+            dataGrabberSt(std::move(sg)), column(ncol), columnCount(ccnt), colname(cname){}
     };
 
     std::vector<collectorPoint> points;  //!< the data grabbers
@@ -166,7 +166,7 @@ class collector: public helperObject, public eventInterface, public objectOperat
     /** get a column number, the requested column is a request only
     *@param[in] requestedColumn the column that is being requested
     @return the actual column granted*/
-    int getColumn(int requestedColumn);
+    int getColumn(int requestedColumn) const;
 
     void updateColumns(int requestedColumn);
     void addWarning(const std::string& warnMessage)

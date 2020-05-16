@@ -1,5 +1,16 @@
-#ifndef GRIDDYNSERVER_HEADER_
-#define GRIDDYNSERVER_HEADER_
+/*
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
+
+#pragma once
 
 #include <string>
 #include <vector>
@@ -22,11 +33,11 @@ class pmu_udp_socket {
         socket_(ios, ep)
     {
         index = 0;
-    };
+    }
     void data_sent(const boost::system::error_code& error, std::size_t size)
     {
         send_lock.unlock();
-    };
+    }
 };
 
 // class for establishing a TCP connection
@@ -36,7 +47,7 @@ class pmu_tcp_acc {
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::io_service& io_service_;
     pmu_tcp_acc(boost::asio::io_service& ios, boost::asio::ip::tcp::endpoint ep):
-        io_service_(ios), acceptor_(ios, ep){};
+        io_service_(ios), acceptor_(ios, ep){}
 };
 
 class pmu_tcp_session {
@@ -54,11 +65,11 @@ class pmu_tcp_session {
         index = 0;
         recv_buffer_.resize(65536);
         cstate = accepting;
-    };
+    }
     void data_sent(const boost::system::error_code& error, std::size_t size)
     {
         send_lock.unlock();
-    };
+    }
 };
 
 // class for creating a virtual PMU server
@@ -121,7 +132,7 @@ class gridDynServer {
     // function for accepting TCP connection requests
     virtual void tcp_accept(pmu_tcp_session* session, const boost::system::error_code& error);
     // hook for executing alternate command and control functions
-    virtual void command_loop(){};
+    virtual void command_loop(){}
 
     // function for starting the PMU server
     virtual void start_server(boost::asio::io_service& ios);
@@ -130,10 +141,8 @@ class gridDynServer {
     // initialize the server
     virtual void initialize();
     // returns the PMU id
-    virtual int id() { return 0; };
+    virtual int id() { return 0; }
     // helper function to set various parameters
     virtual void set(std::string param, int val);
-    virtual void set(std::string param, std::string val) { return; };
+    virtual void set(std::string param, std::string val) { return; }
 };
-
-#endif
