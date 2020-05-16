@@ -36,7 +36,7 @@ class solverKeyInfo {
     /** default constructor*/
     solverKeyInfo() = default;
     /** constructor from a solverMode reference*/
-    solverKeyInfo(const griddyn::solverMode& sMode): sMode_(sMode){};
+    solverKeyInfo(const griddyn::solverMode& sMode): sMode_(sMode) {}
 };
 
 /** allocate buffers for using a solverKeyInfo object with a gridComponent*/

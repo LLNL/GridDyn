@@ -29,7 +29,7 @@ For the dynamics states order matters for entries used across
 multiple components and other parts of the program.
 
 genModel
-[theta, V, Id, Iq, delta, w]
+[theta, voltage, Id, Iq, delta, w]
 
 exciter
 [Ef]
@@ -63,7 +63,7 @@ Generator::~Generator() = default;
 
 coreObject* Generator::clone(coreObject* obj) const
 {
-    auto gen = cloneBaseFactory<Generator, gridSecondary>(this, obj, &gf);
+    auto* gen = cloneBaseFactory<Generator, gridSecondary>(this, obj, &gf);
     if (gen == nullptr) {
         return obj;
     }
@@ -247,14 +247,14 @@ void Generator::add(gridSubModel* obj)
 
 void Generator::setRemoteBus(coreObject* newRemoteBus)
 {
-    auto newRbus = dynamic_cast<gridBus*>(newRemoteBus);
+    auto* newRbus = dynamic_cast<gridBus*>(newRemoteBus);
     if (newRbus == nullptr) {
         return;
     }
     if (isSameObject(newRbus, remoteBus)) {
         return;
     }
-    auto prevRbus = remoteBus;
+    auto* prevRbus = remoteBus;
     remoteBus = newRbus;
     // update the flags as appropriate
     if (isSameObject(remoteBus, getParent())) {
@@ -321,7 +321,7 @@ double Generator::get(const std::string& param, unit unitType) const
     } else if (param == "participation") {
         ret = participation;
     } else if (param == "pset") {
-        ret = convert(getPmax(), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert(getPset(), puMW, unitType, systemBasePower, localBaseVoltage);
     } else if (param == "pmax") {
         ret = convert(getPmax(), puMW, unitType, systemBasePower, localBaseVoltage);
     } else if (param == "pmin") {
@@ -369,13 +369,13 @@ change_code Generator::powerFlowAdjust(const IOdata& /*inputs*/,
                                        check_level_t /*level*/)
 {
     if (opFlags[at_limit]) {
-        double V = remoteBus->getVoltage();
+        double voltage = remoteBus->getVoltage();
         if (Q >= getQmax()) {
-            if (V < m_Vtarget) {
+            if (voltage < m_Vtarget) {
                 opFlags.reset(at_limit);
                 return change_code::parameter_change;
             }
-        } else if (V > m_Vtarget) {
+        } else if (voltage > m_Vtarget) {
             opFlags.reset(at_limit);
             return change_code::parameter_change;
         }
@@ -484,11 +484,9 @@ void Generator::set(const std::string& param, double val, unit unitType)
         dPdt = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
     } else if (param == "dqdt") {
         dQdt = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
-    }
-
-    else if (param == "participation") {
+    } else if (param == "participation") {
         participation = val;
-    } else if ((param == "vcontrolfrac") || (param == "vregfraction") || (param == "vcfrac")) {
+    } else if (param == "vcontrolfrac" || param == "vregfraction" || param == "vcfrac") {
         vRegFraction = val;
     } else if (param == "pmax") {
         Pmax = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
@@ -585,8 +583,8 @@ IOdata
             }
         }
     }
-    // printf("t=%f (%s ) V=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 
@@ -610,8 +608,8 @@ double Generator::getRealPower(const IOdata& inputs,
         }
     }
 
-    // printf("t=%f (%s ) V=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 double Generator::getReactivePower(const IOdata& inputs,
@@ -630,8 +628,8 @@ double Generator::getReactivePower(const IOdata& inputs,
             }
         }
     }
-    // printf("t=%f (%s ) V=%f T=%f, P=%f\n", time, parent->name.c_str(), inputs[voltageInLocation],
-    // inputs[angleInLocation], output[PoutLocation]);
+    // printf("t=%f (%s ) voltage=%f T=%f, P=%f\n", time, parent->name.c_str(),
+    // inputs[voltageInLocation], inputs[angleInLocation], output[PoutLocation]);
     return output;
 }
 
@@ -692,7 +690,7 @@ void Generator::jacobianElements(const IOdata& /*inputs*/,
         auto Voff = remoteBus->getOutputLoc(sMode, voltageInLocation);
         auto offset = offsets.getAlgOffset(sMode);
         if (!opFlags[at_limit]) {
-            // resid[offset] = sD.state[offset] - (V - m_Vtarget)*remoteVRegFraction * 10000;
+            // resid[offset] = sD.state[offset] - (voltage - m_Vtarget)*remoteVRegFraction * 10000;
             md.assignCheck(offset, offset, 1);
             md.assignCheck(offset, Voff, -vRegFraction * 10000);
         } else {

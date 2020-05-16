@@ -58,7 +58,7 @@ zipLoad::zipLoad(const std::string& objName): Load(objName) {}
 zipLoad::zipLoad(double rP, double rQ, const std::string& objName): Load(rP, rQ, objName) {}
 coreObject* zipLoad::clone(coreObject* obj) const
 {
-    auto nobj = cloneBaseFactory<zipLoad, Load>(this, obj, &zlf);
+    auto* nobj = cloneBaseFactory<zipLoad, Load>(this, obj, &zlf);
     if (nobj == nullptr) {
         return obj;
     }
@@ -285,7 +285,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             Iq += convert(val, unitType, puA, systemBasePower, localBaseVoltage);
             checkFaultChange();
         } else {
-            gridSecondary::set(param, val, unitType);
+            gridSecondary::set(param, val, unitType);  // NOLINT
         }
     } else if (param.back() == '*') {
         // load increments  allows a delta on the load through the set functions
@@ -308,7 +308,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             Iq *= val;
             checkFaultChange();
         } else {
-            gridSecondary::set(param, val, unitType);
+            gridSecondary::set(param, val, unitType);  // NOLINT
         }
     } else if (param == "load p") {
         setP(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
@@ -366,9 +366,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
                 }
             }
         }
-    }
-
-    else if ((param == "basevoltage") || (param == "base vol")) {
+    } else if ((param == "basevoltage") || (param == "base vol")) {
         // SGS added to set the base voltage 2015-01-30
         localBaseVoltage = val;
     } else {

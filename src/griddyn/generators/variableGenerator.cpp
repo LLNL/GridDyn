@@ -37,7 +37,7 @@ variableGenerator::variableGenerator(dynModel_t dynModel, const std::string& obj
 
 coreObject* variableGenerator::clone(coreObject* obj) const
 {
-    auto gen = cloneBase<variableGenerator, DynamicGenerator>(this, obj);
+    auto* gen = cloneBase<variableGenerator, DynamicGenerator>(this, obj);
     if (gen == nullptr) {
         return obj;
     }
@@ -117,9 +117,7 @@ void variableGenerator::set(const std::string& param, double val, unit unitType)
         mp_Vcutout = convert(val, unitType, puV, systemBasePower, localBaseVoltage);
     } else if (param == "vmax") {
         mp_Vmax = convert(val, unitType, puV, systemBasePower, localBaseVoltage);
-    } else
-
-    {
+    } else {
         DynamicGenerator::set(param, val, unitType);
     }
 }
@@ -135,7 +133,7 @@ void variableGenerator::residual(const IOdata& inputs,
         m_source->residual(inputs, sD, resid, sMode);
     }
     if ((m_cBlock != nullptr) && (m_cBlock->isEnabled())) {
-        // TODO:: this needs to be tied to the source
+        // TODO(PT):: this needs to be tied to the source
         m_cBlock->blockResidual(Pset, dPdt, sD, resid, sMode);
     }
 }
@@ -167,7 +165,7 @@ coreObject* variableGenerator::find(const std::string& object) const
 
 coreObject* variableGenerator::getSubObject(const std::string& typeName, index_t num) const
 {
-    auto out = DynamicGenerator::getSubObject(typeName, num);
+    auto* out = DynamicGenerator::getSubObject(typeName, num);
     if (out == nullptr) {
         out = find(typeName);
     }

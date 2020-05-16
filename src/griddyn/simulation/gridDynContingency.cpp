@@ -93,7 +93,6 @@ size_t buildContingencyList(gridDynSimulation* gds,
         } break;
         case contingency_mode_t::custom:
         case contingency_mode_t::unknown:
-            break;
         default:
             break;
     }
@@ -115,7 +114,7 @@ std::vector<std::shared_ptr<Contingency>> buildContingencyList(gridDynSimulation
 void runContingencyAnalysis(std::vector<std::shared_ptr<Contingency>>& contList,
                             const std::string& output)
 {
-    auto wqI = getGlobalWorkQueue();
+    const auto& wqI = getGlobalWorkQueue();
 
     for (auto& cList : contList) {
         wqI->addWorkBlock(cList);
@@ -123,9 +122,9 @@ void runContingencyAnalysis(std::vector<std::shared_ptr<Contingency>>& contList,
     if (output.compare(0, 6, "file:/") == 0) {
         saveContingencyOutput(contList, output.substr(7));
     } else if (output.compare(0, 10, "database:/") == 0) {
-        // TODO::something with a database
-    } else  // assume it is a file output
-    {
+        // TODO(PT)::something with a database
+    } else {
+        // assume it is a file output
         saveContingencyOutput(contList, output);
     }
 }
@@ -178,7 +177,7 @@ void buildLoadContingencies(gridDynSimulation* gds,
         if (bus->isConnected()) {
             if (bus->isConnected()) {
                 index_t kk = 0;
-                auto ld = bus->getLoad(0);
+                auto* ld = bus->getLoad(0);
                 while (ld != nullptr) {
                     auto ge = std::make_shared<Event>();
                     ge->setTarget(ld, "connected");
@@ -204,7 +203,7 @@ void buildGenContingencies(gridDynSimulation* gds,
         if (bus->isConnected()) {
             if (bus->isConnected()) {
                 index_t kk = 0;
-                auto gen = bus->getGen(0);
+                auto* gen = bus->getGen(0);
                 while (gen != nullptr) {
                     auto ge = std::make_shared<Event>();
                     ge->setTarget(gen, "connected");

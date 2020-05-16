@@ -60,7 +60,7 @@ DynamicGenerator::DynamicGenerator(dynModel_t dynModel, const std::string& objNa
 }
 coreObject* DynamicGenerator::clone(coreObject* obj) const
 {
-    auto gen = cloneBaseFactory<DynamicGenerator, Generator>(this, obj, &gf);
+    auto* gen = cloneBaseFactory<DynamicGenerator, Generator>(this, obj, &gf);
     if (gen == nullptr) {
         return obj;
     }
@@ -177,7 +177,6 @@ void DynamicGenerator::buildDynModel(dynModel_t dynModel)
             }
             break;
         case dynModel_t::invalid:
-            break;
         default:
             break;
     }
@@ -201,7 +200,7 @@ void DynamicGenerator::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
         bus->setFlag("compute_frequency", true);
         // opFlags.set(uses_bus_frequency);
     }
-    gridSecondary::dynObjectInitializeA(time0, flags);
+    gridSecondary::dynObjectInitializeA(time0, flags);  // NOLINT
 }
 
 // initial conditions of dynamic states
@@ -284,7 +283,7 @@ void DynamicGenerator::dynObjectInitializeB(const IOdata& inputs,
 
     inputArgs.resize(0);
     localDesiredOutput.resize(0);
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->locIndex < 4) {
             continue;
         }
@@ -306,7 +305,7 @@ void DynamicGenerator::setState(coreTime time,
                                 const solverMode& sMode)
 {
     if (isDynamic(sMode)) {
-        for (auto& subobj : getSubObjects()) {
+        for (auto* subobj : getSubObjects()) {
             if (subobj->isEnabled()) {
                 subobj->setState(time, state, dstate_dt, sMode);
                 // subobj->guessState (time, m_state.data (), m_dstate_dt.data (),
@@ -328,7 +327,7 @@ void DynamicGenerator::updateLocalCache(const IOdata& inputs,
 {
     if ((isDynamic(sMode)) && (sD.updateRequired(subInputs.seqID))) {
         generateSubModelInputs(inputs, sD, sMode);  // generate current input values
-        for (auto& subobj : getSubObjects()) {
+        for (auto* subobj : getSubObjects()) {
             if (subobj->isEnabled()) {
                 subobj->updateLocalCache(subInputs.inputs[subobj->locIndex], sD, sMode);
             }
@@ -348,7 +347,7 @@ void DynamicGenerator::guessState(coreTime time,
                                   const solverMode& sMode)
 {
     if (isDynamic(sMode)) {
-        for (auto& subobj : getSubObjects()) {
+        for (auto* subobj : getSubObjects()) {
             if (subobj->isEnabled()) {
                 subobj->guessState(time, state, dstate_dt, sMode);
                 // subobj->guessState (time, m_state.data (), m_dstate_dt.data (),
@@ -392,7 +391,7 @@ void DynamicGenerator::add(gridSubModel* obj)
     } else if (dynamic_cast<Stabilizer*>(obj) != nullptr) {
         pss = static_cast<Stabilizer*>(replaceModel(obj, pss, pss_loc));
     } else if (dynamic_cast<Source*>(obj) != nullptr) {
-        auto src = static_cast<Source*>(obj);
+        auto* src = static_cast<Source*>(obj);
         if ((src->purpose_ == "power") || (src->purpose_ == "pset")) {
             pSetControl = static_cast<Source*>(replaceModel(obj, pSetControl, pset_loc));
             if (dynamic_cast<scheduler*>(pSetControl) != nullptr) {
@@ -443,7 +442,7 @@ void DynamicGenerator::set(const std::string& param, const std::string& val)
         }
         catch (const std::invalid_argument& ia) {
             bool setSuccess = false;
-            for (auto subobj : getSubObjects()) {
+            for (auto* subobj : getSubObjects()) {
                 subobj->setFlag("no_gridcomponent_set");
                 try {
                     subobj->set(param, val);
@@ -519,7 +518,7 @@ void DynamicGenerator::algebraicUpdate(const IOdata& inputs,
 
     // if ((!sD.empty ()) && (!isLocal (sMode)))
     // {
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->isEnabled()) {
             sub->algebraicUpdate(subInputs.inputs[sub->locIndex], sD, update, sMode, alpha);
         }
@@ -619,14 +618,12 @@ void DynamicGenerator::set(const std::string& param, double val, unit unitType)
         if (genModel != nullptr) {
             genModel->set("base", machineBasePower);
         }
-    }
-
-    else if (param == "basepower") {
+    } else if (param == "basepower") {
         systemBasePower = convert(val, unitType, units::MW);
         if (opFlags[independent_machine_base]) {
         } else {
             machineBasePower = systemBasePower;
-            for (auto& subobj : getSubObjects()) {
+            for (auto* subobj : getSubObjects()) {
                 subobj->set("basepower", machineBasePower);
             }
         }
@@ -638,9 +635,7 @@ void DynamicGenerator::set(const std::string& param, double val, unit unitType)
         if (gov != nullptr) {
             gov->set(param, systemBaseFrequency);
         }
-    }
-
-    else if (param == "pmax") {
+    } else if (param == "pmax") {
         Pmax = convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0) {
             machineBasePower = convert(Pmax, puMW, MW, systemBasePower);
@@ -658,7 +653,7 @@ void DynamicGenerator::set(const std::string& param, double val, unit unitType)
             Generator::set(param, val, unitType);
         }
         catch (const unrecognizedParameter&) {
-            for (auto subobj : getSubObjects()) {
+            for (auto* subobj : getSubObjects()) {
                 subobj->setFlag("no_gridcomponent_set");
                 try {
                     subobj->set(param, val, unitType);
@@ -782,7 +777,7 @@ void DynamicGenerator::residual(const IOdata& inputs,
 
     // compute the residuals
     updateLocalCache(inputs, sD, sMode);
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->isEnabled()) {
             sub->residual(subInputs.inputs[sub->locIndex], sD, resid, sMode);
         }
@@ -796,7 +791,7 @@ void DynamicGenerator::derivative(const IOdata& inputs,
 {
     updateLocalCache(inputs, sD, sMode);
     // compute the residuals
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->isEnabled()) {
             static_cast<gridSubModel*>(sub)->derivative(subInputs.inputs[sub->locIndex],
                                                         sD,
@@ -823,7 +818,7 @@ void DynamicGenerator::jacobianElements(const IOdata& inputs,
     generateSubModelInputLocs(inputLocs, sD, sMode);
 
     // compute the Jacobian
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->isEnabled()) {
             sub->jacobianElements(subInputs.inputs[sub->locIndex],
                                   sD,
@@ -841,7 +836,7 @@ void DynamicGenerator::getStateName(stringVec& stNames,
     if ((!isDynamic(sMode)) && (stateSize(sMode) > 0)) {
         Generator::getStateName(stNames, sMode, prefix);
     }
-    gridComponent::getStateName(stNames, sMode, prefix);
+    gridComponent::getStateName(stNames, sMode, prefix);  // NOLINT
 }
 
 void DynamicGenerator::rootTest(const IOdata& inputs,
@@ -851,7 +846,7 @@ void DynamicGenerator::rootTest(const IOdata& inputs,
 {
     updateLocalCache(inputs, sD, sMode);
 
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->checkFlag(has_roots)) {
             sub->rootTest(subInputs.inputs[sub->locIndex], sD, roots, sMode);
         }
@@ -866,7 +861,7 @@ change_code DynamicGenerator::rootCheck(const IOdata& inputs,
     auto ret = change_code::no_change;
     updateLocalCache(inputs, sD, sMode);
 
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->checkFlag(has_alg_roots)) {
             auto ret2 = sub->rootCheck(subInputs.inputs[sub->locIndex], sD, sMode, level);
             if (ret2 > ret) {
@@ -882,7 +877,7 @@ void DynamicGenerator::rootTrigger(coreTime time,
                                    const std::vector<int>& rootMask,
                                    const solverMode& sMode)
 {
-    for (auto& sub : getSubObjects()) {
+    for (auto* sub : getSubObjects()) {
         if (sub->checkFlag(has_roots)) {
             sub->rootTrigger(time, subInputs.inputs[sub->locIndex], rootMask, sMode);
         }
@@ -892,7 +887,7 @@ void DynamicGenerator::rootTrigger(coreTime time,
 index_t DynamicGenerator::findIndex(const std::string& field, const solverMode& sMode) const
 {
     index_t ret = kInvalidLocation;
-    for (auto& subobj : getSubObjects()) {
+    for (auto* subobj : getSubObjects()) {
         ret = subobj->findIndex(field, sMode);
         if (ret != kInvalidLocation) {
             break;
@@ -931,7 +926,7 @@ coreObject* DynamicGenerator::getSubObject(const std::string& typeName, index_t 
 {
     if (typeName == "submodelcode")  // undocumented for internal use
     {
-        for (auto& sub : getSubObjects()) {
+        for (auto* sub : getSubObjects()) {
             if (sub->locIndex == num) {
                 return sub;
             }
@@ -1093,10 +1088,12 @@ double DynamicGenerator::pSetControlUpdate(const IOdata& inputs,
         val = (!sD.empty()) ? (Pset + dPdt * (sD.time - prevTime)) : Pset;
     }
     if (opFlags[isochronous_operation]) {
-        isoc->setLimits(Pmin - val, Pmax - val);
-        isoc->setFreq(subInputs.inputs[isoc_control][0]);
+        if (isoc != nullptr) {
+            isoc->setLimits(Pmin - val, Pmax - val);
+            isoc->setFreq(subInputs.inputs[isoc_control][0]);
 
-        val = val + isoc->getOutput() * machineBasePower / systemBasePower;
+            val = val + isoc->getOutput() * machineBasePower / systemBasePower;
+        }
     }
     return val;
 }
