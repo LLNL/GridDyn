@@ -63,7 +63,7 @@ Generator::~Generator() = default;
 
 coreObject* Generator::clone(coreObject* obj) const
 {
-    auto gen = cloneBaseFactory<Generator, gridSecondary>(this, obj, &gf);
+    auto* gen = cloneBaseFactory<Generator, gridSecondary>(this, obj, &gf);
     if (gen == nullptr) {
         return obj;
     }
@@ -247,14 +247,14 @@ void Generator::add(gridSubModel* obj)
 
 void Generator::setRemoteBus(coreObject* newRemoteBus)
 {
-    auto newRbus = dynamic_cast<gridBus*>(newRemoteBus);
+    auto* newRbus = dynamic_cast<gridBus*>(newRemoteBus);
     if (newRbus == nullptr) {
         return;
     }
     if (isSameObject(newRbus, remoteBus)) {
         return;
     }
-    auto prevRbus = remoteBus;
+    auto* prevRbus = remoteBus;
     remoteBus = newRbus;
     // update the flags as appropriate
     if (isSameObject(remoteBus, getParent())) {
@@ -321,7 +321,7 @@ double Generator::get(const std::string& param, unit unitType) const
     } else if (param == "participation") {
         ret = participation;
     } else if (param == "pset") {
-        ret = convert(getPmax(), puMW, unitType, systemBasePower, localBaseVoltage);
+        ret = convert(getPset(), puMW, unitType, systemBasePower, localBaseVoltage);
     } else if (param == "pmax") {
         ret = convert(getPmax(), puMW, unitType, systemBasePower, localBaseVoltage);
     } else if (param == "pmin") {
