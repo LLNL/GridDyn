@@ -21,6 +21,7 @@
 #include <kinsol/kinsol.h>
 #include <kinsol/kinsol_direct.h>
 #include <sunlinsol/sunlinsol_dense.h>
+#include "fmtlib/include/fmt/format.h"
 
 #ifdef GRIDDYN_ENABLE_KLU
 #    include <sunlinsol/sunlinsol_klu.h>
@@ -31,7 +32,6 @@
 #endif
 
 #include <cassert>
-#include <cstdio>
 #include <map>
 
 namespace griddyn {
@@ -83,7 +83,7 @@ namespace solvers {
     void kinsolInterface::cloneTo(SolverInterface* si, bool fullCopy) const
     {
         sundialsInterface::cloneTo(si, fullCopy);
-        auto ai = dynamic_cast<kinsolInterface*>(si);
+        auto* ai = dynamic_cast<kinsolInterface*>(si);
         if (ai == nullptr) {
             return;
         }
@@ -111,8 +111,10 @@ namespace solvers {
         if (!flags[initialized_flag]) {
             return;
         }
-        long int nni = 0, nfe = 0, nje = 0, nfeD = 0;
-
+        long int nni{0};
+        long int nfe{0};
+        long int nje{0};
+        long int nfeD{0};
         int flag = KINGetNumNonlinSolvIters(solverMem, &nni);
         check_flag(&flag, "KINGetNumNonlinSolvIters", 1);
         flag = KINGetNumFuncEvals(solverMem, &nfe);
@@ -134,7 +136,7 @@ namespace solvers {
         if (m_gds != nullptr) {
             m_gds->log(m_gds, logLevel, logstr);
         } else {
-            printf("\n%s", logstr.c_str());
+            fmt::print("\n{}", logstr);
         }
     }
 
@@ -316,7 +318,7 @@ namespace solvers {
         auto stop_t = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed_t = stop_t - start_t;
         kinTime += elapsed_t.count();
-        printf("total solve time %f, %5.3f%% in resid %5.3f%% in Jacobian\n",
+        fmt::print("total solve time {}, {:5.3f}% in resid {:5.3f}%  in Jacobian\n",
                kinTime,
                residTime / kinTime * 100.0,
                jacTime / kinTime * 100);
@@ -331,7 +333,7 @@ namespace solvers {
                 stringVec sL;
                 m_gds->getStateName(sL, mode);
                 for (auto mv : mvec) {
-                    printf("state[%d]%s following state %s is singular\n",
+                    fmt::format("state[{}]{} following state {} is singular\n",
                            mv,
                            sL[mv].c_str(),
                            sL[mv - 1].c_str());
@@ -392,14 +394,14 @@ namespace solvers {
             long int val = 0;
             KINGetNumNonlinSolvIters(sd->solverMem, &val);
             double* residuals = NVECTOR_DATA(sd->use_omp, resid);
-            printf("Residual for %s at time =%f iteration %ld\n",
-                   sd->getName().c_str(),
+            fmt::print("Residual for {} at time ={} iteration %{}\n",
+                   sd->getName(),
                    static_cast<double>(sd->solveTime),
                    val);
             for (int kk = 0; kk < static_cast<int>(sd->svsize); ++kk) {
-                printf("resid[%u]=%f\n", kk, residuals[kk]);
+                fmt::print("resid[{}]={}\n", kk, residuals[kk]);
             }
-            printf("---------------------------------\n");
+            fmt::print("---------------------------------\n");
         }
         if (sd->flags[fileCapture_flag]) {
             if (!sd->stateFile.empty()) {

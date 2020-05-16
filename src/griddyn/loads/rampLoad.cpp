@@ -27,7 +27,7 @@ namespace loads {
     }
     coreObject* rampLoad::clone(coreObject* obj) const
     {
-        auto ld = cloneBase<rampLoad, zipLoad>(this, obj);
+        auto* ld = cloneBase<rampLoad, zipLoad>(this, obj);
         if (ld == nullptr) {
             return obj;
         }

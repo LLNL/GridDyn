@@ -17,6 +17,7 @@
 #include "utilities/functionInterpreter.h"
 #include <cctype>
 #include <cmath>
+#include <fmtlib/include/fmt/format.h>
 
 namespace griddyn {
 using namespace gmlc::utilities::string_viewOps;
@@ -45,7 +46,8 @@ double interpretString(const std::string& command, readerInfo& ri)
 }
 double interpretString_sv(string_view command, readerInfo& ri)
 {
-    size_t rlc, rlcp = 0;
+    size_t rlc{0};
+    size_t rlcp{0};
     // check for functions
     auto rlcps = command.find_first_of('(', 0);
     if (rlcps != std::string::npos) {
@@ -54,7 +56,7 @@ double interpretString_sv(string_view command, readerInfo& ri)
             rlcp = command.length();
         }
     }
-    double val = 0;
+    double val{0.0};
     if ((rlcps == 0) &&
         (rlcp == command.length() - 1)) {  // just remove outer parenthesis and call again
         val = interpretString_sv(command.substr(1, rlcp - 1), ri);
@@ -93,7 +95,7 @@ double interpretString_sv(string_view command, readerInfo& ri)
                             val = InterpretFunction(cmdBlock.to_string(), v1, ri);
                         }
                     } else {
-                        printf("invalid arguments to function %s\n", cmdBlock.to_string().c_str());
+                        fmt::print("invalid arguments to function {}\n", cmdBlock.to_string());
                     }
                 } else {
                     if (cmdBlock == "query") {

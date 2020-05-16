@@ -87,7 +87,7 @@ void collector::cloneTo(collector* col) const
 
 void collector::updateObject(coreObject* gco, object_update_mode mode)
 {
-    for (auto gg : points) {
+    for (const auto gg : points) {
         if (gg.dataGrabber) {
             gg.dataGrabber->updateObject(gco, mode);
             if (gg.dataGrabber->vectorGrab) {
@@ -114,7 +114,7 @@ coreObject* collector::getObject() const
 
 void collector::getObjects(std::vector<coreObject*>& objects) const
 {
-    for (auto gg : points) {
+    for (const auto gg : points) {
         if (gg.dataGrabber) {
             gg.dataGrabber->getObjects(objects);
         } else if (gg.dataGrabberSt) {
@@ -127,7 +127,7 @@ std::vector<std::string> collector::getColumnDescriptions() const
 {
     stringVec res;
     res.resize(data.size());
-    for (auto& datapoint : points) {
+    for (const auto& datapoint : points) {
         if (datapoint.dataGrabber->vectorGrab) {
             stringVec vdesc;
             datapoint.dataGrabber->getDesc(vdesc);
@@ -279,7 +279,7 @@ change_code collector::trigger(coreTime time)
     return change_code::no_change;
 }
 
-int collector::getColumn(int requestedColumn)
+int collector::getColumn(int requestedColumn) const
 {
     int retColumn = requestedColumn;
     if (requestedColumn < 0) {
@@ -303,7 +303,7 @@ void collector::updateColumns(int requestedColumn)
     }
 }
 
-// TODO:: a lot of repeated code here try to merge them
+// TODO(PT):: a lot of repeated code here try to merge them
 void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
 {
     int newColumn = getColumn(requestedColumn);
@@ -410,7 +410,7 @@ void collector::add(const gridGrabberInfo& gdRI, coreObject* obj)
                 if (gdRI.outputUnits != units::defunit) {
                     fldGrabbers[0]->outputUnits = gdRI.outputUnits;
                 }
-                // TODO:: PT incorporate state grabbers properly
+                // TODO(PT) incorporate state grabbers properly
                 add(std::shared_ptr<gridGrabber>(std::move(fldGrabbers[0])), gdRI.column);
             } else {
                 int ccol = gdRI.column;
