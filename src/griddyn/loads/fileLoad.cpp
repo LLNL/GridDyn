@@ -177,7 +177,7 @@ namespace loads {
         }
     }
 
-     static int columnCode(const std::string& ldc)
+    static int columnCode(const std::string& ldc)
     {
         auto lc = convertToLowerCase(ldc);
         int code = -1;
@@ -285,6 +285,5 @@ namespace loads {
         return schedLoad.size();
     }
 
-   
 }  // namespace loads
 }  // namespace griddyn

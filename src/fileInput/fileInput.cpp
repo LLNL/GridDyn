@@ -213,7 +213,7 @@ void loadFile(coreObject* parentObject,
     } else if ((ext == "yaml") || (ext == "yml")) {
         loadElementFile<yamlReaderElement>(parentObject, fileName, ri);
 #endif
-    } else if (ext == "gdz") { // gridDyn Zipped file
+    } else if (ext == "gdz") {  // gridDyn Zipped file
         loadGDZ(parentObject, fileName, *ri);
     }
 }

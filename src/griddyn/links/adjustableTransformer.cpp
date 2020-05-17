@@ -1020,23 +1020,23 @@ namespace links {
         double v1;
         switch (cMode) {
             case control_mode_t::voltage_control:
-         //       v1 = controlBus->getVoltage();
-    //            if (v1 > Vmax) {
-      //          } else if (v1 < Vmin) {
-       //         }
+                //       v1 = controlBus->getVoltage();
+                //            if (v1 > Vmax) {
+                //          } else if (v1 < Vmin) {
+                //         }
                 break;
             case control_mode_t::MW_control:  // NOLINT
 
                 updateLocalCache();
-        //        if (linkFlows.P1 > Pmax) {
-         //       } else if (linkFlows.P1 < Pmin) {
-         //       }
+                //        if (linkFlows.P1 > Pmax) {
+                //       } else if (linkFlows.P1 < Pmin) {
+                //       }
                 break;
             case control_mode_t::MVar_control:
                 updateLocalCache();
-         //       if (linkFlows.Q2 > Qmax) {
-         //       } else if (linkFlows.Q2 < Qmin) {
-         //       }
+                //       if (linkFlows.Q2 > Qmax) {
+                //       } else if (linkFlows.Q2 < Qmin) {
+                //       }
                 break;
             default:
                 assert(false);
@@ -1319,13 +1319,13 @@ namespace links {
         return ret;
     }
 
-    change_code adjustableTransformer::MWControlAdjust() //NOLINT
+    change_code adjustableTransformer::MWControlAdjust()  // NOLINT
     {
         auto ret = change_code::no_change;
         return ret;
     }
 
-    change_code adjustableTransformer::MVarControlAdjust() //NOLINT
+    change_code adjustableTransformer::MVarControlAdjust()  // NOLINT
     {
         auto ret = change_code::no_change;
         return ret;
