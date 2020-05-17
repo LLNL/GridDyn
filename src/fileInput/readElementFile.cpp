@@ -190,9 +190,7 @@ void getElementParam(const std::shared_ptr<readerElement>& element, gridParamete
                 param.stringType = false;
             }
         }
-    }
-
-    else {
+    } else {
         // all other properties
         param.paramUnits = readUnits(element, fieldName);
         if (fieldName.back() == ')') {

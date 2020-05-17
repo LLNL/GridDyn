@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
-#include "../simulation/gridSimulation.h"
+#include "gridSimulation.h"
 
 #include "../Area.h"
 #include "../Generator.h"

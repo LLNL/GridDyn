@@ -540,7 +540,7 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
                 ++diffc;
             }
     }
-    BOOST_CHECK_EQUAL(diffc, 0);
+    BOOST_CHECK_EQUAL(diffc, 0U);
     // remove (recname.c_str ());
     // remove (recname2.c_str ());
 }

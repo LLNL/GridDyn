@@ -119,9 +119,7 @@ void loadSubObjects(std::shared_ptr<readerElement>& element,
             auto obname = ri.objectNameTranslate(fieldName);
             if (obname == "collector") {
                 loadCollectorElement(element, parentObject, ri);
-            }
-            // event
-            else if (obname == "event") {
+            } else if (obname == "event") {
                 loadEventElement(element, parentObject, ri);
             } else {
                 auto rval = loadFunctionMap.find(obname);

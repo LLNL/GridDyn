@@ -117,8 +117,9 @@ namespace helicsLib {
                 prevP = newP;
                 prevQ = newQ;
                 prevTime = lastUpdateTime;
-            } else  // output will ramp up to the specified value in the update period
+            } else  
             {
+                // output will ramp up to the specified value in the update period
                 dPdt = (newP - getP()) / updatePeriod;
                 dQdt = (newQ - getQ()) / updatePeriod;
                 prevP = getP();
@@ -190,11 +191,9 @@ namespace helicsLib {
             }
         } else if ((param == "units") || (param == "inputunits")) {
             inputUnits = units::unit_cast_from_string(val);
-        }
-
-        else {
+        } else {
             // no reason to set the ramps in helics load so go to zipLoad instead
-            zipLoad::set(param, val);
+            zipLoad::set(param, val);  // NOLINT
         }
     }
 

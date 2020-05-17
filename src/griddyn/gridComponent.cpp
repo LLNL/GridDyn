@@ -682,7 +682,6 @@ void gridComponent::set(const std::string& param, double val, units::unit unitTy
             }
         }
     }
-
     else if ((param == "basepower") || (param == "basemw") || (param == "basemva")) {
         systemBasePower = units::convert(val, unitType, units::MW);
         setAll("all", "basepower", systemBasePower);

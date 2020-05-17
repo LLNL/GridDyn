@@ -485,50 +485,48 @@ double zipLoad::getQval() const
 
 double zipLoad::getRealPower() const
 {
-    double V = bus->getVoltage();
-    return getRealPower(V);
+    return getRealPower(bus->getVoltage());
 }
 
 double zipLoad::getReactivePower() const
 {
-    double V = bus->getVoltage();
-    return getReactivePower(V);
+    return getReactivePower(bus->getVoltage());
 }
 
 double
     zipLoad::getRealPower(const IOdata& inputs, const stateData& sD, const solverMode& sMode) const
 {
-    double V = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
-    return getRealPower(V);
+    double voltage = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
+    return getRealPower(voltage);
 }
 
 double zipLoad::getReactivePower(const IOdata& inputs,
                                  const stateData& sD,
                                  const solverMode& sMode) const
 {
-    double V = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
-    return getReactivePower(V);
+    double voltage = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
+    return getReactivePower(voltage);
 }
 
-double zipLoad::getRealPower(const double V) const
+double zipLoad::getRealPower(const double voltage) const
 {
     if (!isConnected()) {
         return 0.0;
     }
-    double val = voltageAdjustment(P, V);
-    val += V * (V * Yp + Ip);
+    double val = voltageAdjustment(P, voltage);
+    val += voltage * (voltage * Yp + Ip);
 
     return val;
 }
 
-double zipLoad::getReactivePower(double V) const
+double zipLoad::getReactivePower(double voltage) const
 {
     if (!isConnected()) {
         return 0.0;
     }
-    double val = voltageAdjustment(getQval(), V);
+    double val = voltageAdjustment(getQval(), voltage);
 
-    val += V * (V * Yq + Iq);
+    val += voltage * (voltage * Yq + Iq);
     return val;
 }
 
@@ -558,32 +556,32 @@ void zipLoad::ioPartialDerivatives(const IOdata& inputs,
     if (sD.time != lastTime) {
         updateLocalCache(inputs, sD, sMode);
     }
-    double V = inputs[voltageInLocation];
+    double voltage = inputs[voltageInLocation];
     double tv = 0.0;
-    if (V < Vpqmin) {
+    if (voltage < Vpqmin) {
         tv = trigVVlow;
-    } else if (V > Vpqmax) {
+    } else if (voltage > Vpqmax) {
         tv = trigVVhigh;
     }
 
     md.assignCheckCol(PoutLocation,
                       inputLocs[voltageInLocation],
-                      2.0 * V * Yp + Ip + 2.0 * V * P * tv);
+                      2.0 * voltage * Yp + Ip + 2.0 * voltage * P * tv);
 
     if (opFlags[use_power_factor_flag]) {
         if (pfq < 1000.0) {
             md.assignCheckCol(QoutLocation,
                               inputLocs[voltageInLocation],
-                              2.0 * V * Yq + Iq + 2.0 * V * P * pfq * tv);
+                              2.0 * voltage * Yq + Iq + 2.0 * voltage * P * pfq * tv);
         } else {
             md.assignCheckCol(QoutLocation,
                               inputLocs[voltageInLocation],
-                              2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
+                              2.0 * voltage * Yq + Iq + 2.0 * voltage * Q * tv);
         }
     } else {
         md.assignCheckCol(QoutLocation,
                           inputLocs[voltageInLocation],
-                          2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
+                          2.0 * voltage * Yq + Iq + 2.0 * voltage * Q * tv);
     }
 }
 
