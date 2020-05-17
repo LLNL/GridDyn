@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef EXE_HELPER_HEADER_
-#define EXE_HELPER_HEADER_
 #pragma once
 
 #include <string>
@@ -30,7 +28,7 @@ class exeTestRunner {
                   const std::string& baseLocation2,
                   const std::string& target);
     bool findFileLocation(const std::string& baseLocation, const std::string& target);
-    bool isActive() const { return active; };
+    bool isActive() const { return active; }
 
     int run(const std::string& args) const;
 
@@ -40,5 +38,3 @@ class exeTestRunner {
   private:
     void buildOutFile();
 };
-
-#endif

@@ -22,8 +22,13 @@ if(ENABLE_ZMQ OR ZMQ_NEEDED)
     )
 
     set(zmqLibrary_headers
-        zmqLibrary/zmqContextManager.h zmqLibrary/zmqHelper.h zmqLibrary/zmqReactor.h
-        zmqLibrary/zmqProxyHub.h zmqLibrary/zmqSocketDescriptor.h
+        zmqLibrary/zmqContextManager.h
+        zmqLibrary/zmqHelper.h
+        zmqLibrary/zmqReactor.h
+        zmqLibrary/zmqProxyHub.h
+        zmqLibrary/zmqSocketDescriptor.h
+        ${GRIDDYN_SOURCE_DIR}/ThirdParty/cppzmq/zmq.hpp
+        ${GRIDDYN_SOURCE_DIR}/ThirdParty/cppzmq/zmq_addon.hpp
     )
 
     set(zmqInterface_sources zmqCommunicator.cpp zmqInterface.cpp)
