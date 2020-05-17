@@ -390,7 +390,7 @@ using cm = comms::controlMessagePayload;
 void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    auto *payload = message->getPayload<cm>();
+    auto* payload = message->getPayload<cm>();
 
     double val;
 
@@ -423,7 +423,8 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
 
             break;
         case cm::GET: {
-            val = get(convertToLowerCase(payload->m_field), units::unit_cast_from_string(payload->m_units));
+            val = get(convertToLowerCase(payload->m_field),
+                      units::unit_cast_from_string(payload->m_units));
             auto reply = std::make_shared<commMessage>(cm::GET_RESULT);
             auto rep = reply->getPayload<cm>();
             assert(rep);
@@ -450,7 +451,8 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
             rep->multiValues.resize(0);
             rep->multiFields = payload->multiFields;
             for (const auto& fieldName : payload->multiFields) {
-                val = get(convertToLowerCase(fieldName), units::unit_cast_from_string(payload->m_units));
+                val = get(convertToLowerCase(fieldName),
+                          units::unit_cast_from_string(payload->m_units));
                 payload->multiValues.push_back(val);
             }
             rep->m_time = prevTime;

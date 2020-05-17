@@ -539,7 +539,7 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
                 //  tsA.data(jj, ii) - tsB.data(jj, 4 * ii));
                 ++diffc;
             }
-			}
+        }
     }
     BOOST_CHECK_EQUAL(diffc, 0U);
     // remove (recname.c_str ());

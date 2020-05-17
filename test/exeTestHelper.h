@@ -38,4 +38,3 @@ class exeTestRunner {
   private:
     void buildOutFile();
 };
-
