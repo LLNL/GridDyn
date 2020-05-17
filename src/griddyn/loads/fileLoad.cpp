@@ -219,9 +219,7 @@ namespace loads {
             inputUnits = units::unit_cast_from_string(val);
         } else if ((param == "mode") || (param == "timemode")) {
             setFlag(val, true);
-        }
-
-        else {
+        } else {
             zipLoad::set(param, val);
         }
     }

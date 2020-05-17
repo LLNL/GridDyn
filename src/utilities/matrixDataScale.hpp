@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_SCALE_H_
-#define _MATRIX_DATA_SCALE_H_
 #pragma once
 
 #include "matrixDataContainer.hpp"
@@ -28,16 +26,14 @@ class matrixDataScale: public matrixDataContainer<ValueT> {
     /** @brief constructor
      */
     matrixDataScale(matrixData<ValueT>& input, ScaleT scaleFactor):
-        matrixDataContainer<ValueT>(input), scalingFactor_(scaleFactor){};
+        matrixDataContainer<ValueT>(input), scalingFactor_(scaleFactor){}
 
     void assign(index_t row, index_t col, ValueT num) override
     {
         matrixDataContainer<ValueT>::md->assign(row, col, num * scalingFactor_);
-    };
+    }
     /** @brief set the scale factor for the array
     @param[in] scaleFactor  the input row to translate
     */
     void setScale(ScaleT scaleFactor) { scalingFactor_ = scaleFactor; }
 };
-
-#endif

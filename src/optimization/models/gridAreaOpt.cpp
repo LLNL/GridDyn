@@ -649,33 +649,31 @@ coreObject* gridAreaOpt::findByUserID(const std::string& typeName, index_t searc
 {
     coreObject* A1;
     if (typeName == "area") {
-        for (auto& subarea : areaList) {
+        for (auto* subarea : areaList) {
             if (subarea->getUserID() == searchID) {
                 return subarea;
             }
         }
     }
     if (typeName == "bus") {
-        for (auto& bus : busList) {
+        for (auto* bus : busList) {
             if (bus->getUserID() == searchID) {
                 return bus;
             }
         }
     } else if (typeName == "link") {
-        for (auto& lnk : linkList) {
+        for (auto* lnk : linkList) {
             if (lnk->getUserID() == searchID) {
                 return lnk;
             }
         }
     } else if (typeName == "relay") {
-        for (auto& rel : relayList) {
+        for (auto* rel : relayList) {
             if (rel->getUserID() == searchID) {
                 return rel;
             }
         }
-    }
-
-    else if ((typeName == "gen") || (typeName == "load") || (typeName == "generator")) {
+    } else if (typeName == "gen"|| typeName == "load" || typeName == "generator") {
         for (auto& bus : busList) {
             A1 = bus->findByUserID(typeName, searchID);
             if (A1) {
@@ -684,7 +682,7 @@ coreObject* gridAreaOpt::findByUserID(const std::string& typeName, index_t searc
         }
     }
     // if we haven't found it yet search the subareas
-    for (auto& subarea : areaList) {
+    for (auto* subarea : areaList) {
         A1 = subarea->findByUserID(typeName, searchID);
         if (A1) {
             return A1;
