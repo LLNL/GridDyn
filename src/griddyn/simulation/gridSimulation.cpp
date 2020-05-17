@@ -47,7 +47,7 @@ gridSimulation::~gridSimulation()
 
 coreObject* gridSimulation::clone(coreObject* obj) const
 {
-    auto sim = cloneBase<gridSimulation, Area>(this, obj);
+    auto* sim = cloneBase<gridSimulation, Area>(this, obj);
     if (sim == nullptr) {
         return obj;
     }
@@ -73,7 +73,7 @@ coreObject* gridSimulation::clone(coreObject* obj) const
 
     EvQ->cloneTo(sim->EvQ.get());
     sim->EvQ->mapObjectsOnto(sim);
-    // TODO:: mapping the collectors
+    // TODO(PT):: mapping the collectors
     return sim;
 }
 
@@ -103,7 +103,7 @@ void gridSimulation::add(std::shared_ptr<eventAdapter> eA)
 
 void gridSimulation::add(const std::vector<std::shared_ptr<Event>>& elist)
 {
-    for (auto& ev : elist) {
+    for (const auto& ev : elist) {
         EvQ->insert(ev);
     }
 }
@@ -424,7 +424,7 @@ void gridSimulation::setLogger(std::function<void(int, const std::string&)> logg
     customLogger = std::move(loggingFunction);
 }
 
-// TODO:: this really shouldn't be a function,  but still debating alternative approaches to the
+// TODO(PT):: this really shouldn't be a function,  but still debating alternative approaches to the
 // need it addressed
 void gridSimulation::resetObjectCounters()
 {
@@ -458,8 +458,8 @@ coreObject* findMatchingObject(coreObject* obj1, gridPrimary* src, gridPrimary* 
     if (dynamic_cast<gridSecondary*>(obj1) !=
         nullptr)  // we know it is a gen or load so it parent should be a bus
     {
-        auto bus = dynamic_cast<gridBus*>(obj1->getParent());
-        auto bus2 = getMatchingBus(bus, src, sec);
+        auto* bus = dynamic_cast<gridBus*>(obj1->getParent());
+        auto* bus2 = getMatchingBus(bus, src, sec);
         if (bus2 != nullptr) {
             if (dynamic_cast<Generator*>(obj1) != nullptr) {
                 obj2 = bus2->getGen(obj1->locIndex);

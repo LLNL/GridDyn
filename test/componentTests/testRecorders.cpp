@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(tsMulti_tests)
         val[kk] = 4.5;
         t = t + 1.0;
     }
-    BOOST_CHECK_EQUAL(ts2.size(), 10u);
+    BOOST_CHECK_EQUAL(ts2.size(), 10U);
     ts3.addData(tv, val);
-    BOOST_CHECK_EQUAL(ts3.size(), 10u);
+    BOOST_CHECK_EQUAL(ts3.size(), 10U);
 
     BOOST_CHECK_SMALL(compare(ts2, ts3), 0.0001);
 
@@ -72,15 +72,15 @@ BOOST_AUTO_TEST_CASE(file_save_tests)
         ts2.addData(t, 4.5);
         t = t + 1.0;
     }
-    BOOST_CHECK_EQUAL(ts2.size(), 10u);
+    BOOST_CHECK_EQUAL(ts2.size(), 10U);
     std::string fileName = std::string(RECORDER_TEST_DIRECTORY "ts_test.dat");
     ts2.writeBinaryFile(fileName);
 
     TimeSeriesMulti<> ts3;
 
     ts3.loadBinaryFile(fileName);
-    BOOST_CHECK_EQUAL(ts3.columns(), 1u);
-    BOOST_CHECK_EQUAL(ts3.size(), 10u);
+    BOOST_CHECK_EQUAL(ts3.columns(), 1U);
+    BOOST_CHECK_EQUAL(ts3.size(), 10U);
     BOOST_CHECK_SMALL(compare(ts2, ts3), 0.00001);
     int ret = remove(fileName.c_str());
 
@@ -100,14 +100,14 @@ BOOST_AUTO_TEST_CASE(file_save_tests2)
         ts2.addData(t, vt);
         t = t + 1.0;
     }
-    BOOST_CHECK_EQUAL(ts2.size(), 30u);
+    BOOST_CHECK_EQUAL(ts2.size(), 30U);
     std::string fileName = std::string(RECORDER_TEST_DIRECTORY "ts_test2.dat");
     ts2.writeBinaryFile(fileName);
 
     TimeSeriesMulti<> ts3(fileName);
 
-    BOOST_CHECK_EQUAL(ts3.columns(), 4u);
-    BOOST_CHECK_EQUAL(ts3.size(), 30u);
+    BOOST_CHECK_EQUAL(ts3.columns(), 4U);
+    BOOST_CHECK_EQUAL(ts3.size(), 30U);
     BOOST_CHECK_SMALL(compare(ts2, ts3), 0.00001);
 
     ts3.updateData(3, 2, 7.0);
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(recorder_test1)
     std::string recname = std::string(RECORDER_TEST_DIRECTORY "loadrec.dat");
     TimeSeriesMulti<> ts3(recname);
     BOOST_CHECK(ts3.getField(0) == "load3:power");
-    BOOST_CHECK_EQUAL(ts3.size(), 31u);
+    BOOST_CHECK_EQUAL(ts3.size(), 31U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(recorder_test2)
     std::string recname = std::string(RECORDER_TEST_DIRECTORY "genrec.dat");
     TimeSeriesMulti<> ts3(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 31u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts3.size(), 31U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 2U);
     int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -177,8 +177,8 @@ BOOST_AUTO_TEST_CASE(recorder_test3)
     std::string recname = std::string(RECORDER_TEST_DIRECTORY "genrec.dat");
     TimeSeriesMulti<> ts3(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 121u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 4u);
+    BOOST_CHECK_EQUAL(ts3.size(), 121U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 4U);
     int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -186,8 +186,8 @@ BOOST_AUTO_TEST_CASE(recorder_test3)
     recname = std::string(RECORDER_TEST_DIRECTORY "busrec.dat");
     ts3.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 2U);
     ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -195,8 +195,8 @@ BOOST_AUTO_TEST_CASE(recorder_test3)
     recname = std::string(RECORDER_TEST_DIRECTORY "loadrec.dat");
     ts3.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 31u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 1u);
+    BOOST_CHECK_EQUAL(ts3.size(), 31U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 1U);
     ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -218,16 +218,16 @@ BOOST_AUTO_TEST_CASE(recorder_test4)
     std::string recname = std::string(RECORDER_TEST_DIRECTORY "busrec.dat");
     TimeSeriesMulti<> ts3(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 2U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
 
     recname = std::string(RECORDER_TEST_DIRECTORY "busrec2.dat");
     TimeSeriesMulti<> ts2(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 61u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts2.size(), 61U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 2U);
     ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -254,8 +254,8 @@ BOOST_AUTO_TEST_CASE(recorder_test5)
     ts3.loadBinaryFile(recname);
 
     BOOST_CHECK_EQUAL(ts3.getField(2), "test1:voltage[2]");
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 4u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 4U);
     int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(recorder_test5)
 
     ts3.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
     BOOST_CHECK_EQUAL(ts3.columns(), 5u);
     ret = remove(recname.c_str());
 
@@ -288,8 +288,8 @@ BOOST_AUTO_TEST_CASE(recorder_test6)
     TimeSeriesMulti<> ts3(recname);
     // ts3.loadBinaryFile ;
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 2U);
     int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -298,8 +298,8 @@ BOOST_AUTO_TEST_CASE(recorder_test6)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 61u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts2.size(), 61U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 2U);
     ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -326,8 +326,8 @@ BOOST_AUTO_TEST_CASE(recorder_test7)
     TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 2U);
     int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -336,8 +336,8 @@ BOOST_AUTO_TEST_CASE(recorder_test7)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 61u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 2u);
+    BOOST_CHECK_EQUAL(ts2.size(), 61U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 2U);
     ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -363,8 +363,8 @@ BOOST_AUTO_TEST_CASE(recorder_test8)
     TimeSeriesMulti<> ts3;
     ts3.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts3.size(), 61u);
-    BOOST_CHECK_EQUAL(ts3.columns(), 3u);
+    BOOST_CHECK_EQUAL(ts3.size(), 61U);
+    BOOST_CHECK_EQUAL(ts3.columns(), 3U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
     // check to make sure the conversion is correct
@@ -374,8 +374,8 @@ BOOST_AUTO_TEST_CASE(recorder_test8)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 61u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 3u);
+    BOOST_CHECK_EQUAL(ts2.size(), 61U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 3U);
     ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
@@ -400,8 +400,8 @@ BOOST_AUTO_TEST_CASE(recorder_test9)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 21u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 4u);
+    BOOST_CHECK_EQUAL(ts2.size(), 21U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 4U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
     BOOST_CHECK_CLOSE(ts2.data(1, 2) - 1.0, ts2.data(3, 2), 0.0001);
@@ -424,8 +424,8 @@ BOOST_AUTO_TEST_CASE(recorder_test10)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 11u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 3u);
+    BOOST_CHECK_EQUAL(ts2.size(), 11U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 3U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
     BOOST_CHECK_CLOSE(ts2.data(0, 2) - ts2.data(1, 2), ts2.data(2, 2), 0.0001);
@@ -448,8 +448,8 @@ BOOST_AUTO_TEST_CASE(recorder_test11)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 11u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 4u);
+    BOOST_CHECK_EQUAL(ts2.size(), 11U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 4U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
     BOOST_CHECK_CLOSE(ts2.data(0, 2) - (ts2.data(1, 2) - ts2.data(2, 2)), ts2.data(3, 2), 0.0001);
@@ -473,8 +473,8 @@ BOOST_AUTO_TEST_CASE(recorder_test12)
     TimeSeriesMulti<> ts2;
     ts2.loadBinaryFile(recname);
 
-    BOOST_CHECK_EQUAL(ts2.size(), 11u);
-    BOOST_CHECK_EQUAL(ts2.columns(), 3u);
+    BOOST_CHECK_EQUAL(ts2.size(), 11U);
+    BOOST_CHECK_EQUAL(ts2.columns(), 3U);
     int ret = remove(recname.c_str());
     BOOST_CHECK_EQUAL(ret, 0);
     BOOST_CHECK_CLOSE(sin(ts2.data(0, 2) - ts2.data(1, 2)), ts2.data(2, 2), 0.0001);
@@ -531,14 +531,15 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
     size_t diffc = 0;
     BOOST_REQUIRE((tsA.size() - 1) * 4 == (tsB.size() - 1));
     for (decltype(tsA.size()) ii = 1; ii < tsA.size(); ++ii) {
-        for (decltype(tsA.columns()) jj = 0; jj < tsA.columns(); ++jj)
+        for (decltype(tsA.columns()) jj = 0; jj < tsA.columns(); ++jj) {
             if (std::abs(tsA.data(jj, ii) - tsB.data(jj, 4 * ii)) >
-                1e-4)  // TODO:: this is still small but bigger than it really should be
+                1e-4)  // TODO(PT):: this is still small but bigger than it really should be
             {
                 //  printf("%d,%d t=%f,diff=%f\n", jj, ii, static_cast<double>(tsA.time()[ii]),
                 //  tsA.data(jj, ii) - tsB.data(jj, 4 * ii));
                 ++diffc;
             }
+			}
     }
     BOOST_CHECK_EQUAL(diffc, 0U);
     // remove (recname.c_str ());
