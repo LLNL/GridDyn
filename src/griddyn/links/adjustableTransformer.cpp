@@ -1025,7 +1025,7 @@ namespace links {
       //          } else if (v1 < Vmin) {
        //         }
                 break;
-            case control_mode_t::MW_control:
+            case control_mode_t::MW_control:  // NOLINT
 
                 updateLocalCache();
         //        if (linkFlows.P1 > Pmax) {
@@ -1285,7 +1285,7 @@ namespace links {
                 if (shift > 0) {
                     shift = stepSize * round(shift / stepSize);
                 } else {
-                    shift = stepSize * round(shift / stepSize);
+                    shift = -stepSize * round(-shift / stepSize);
                 }
                 while (tap + shift > maxTap) {
                     shift = shift - stepSize;
