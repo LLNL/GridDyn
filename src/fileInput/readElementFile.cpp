@@ -90,11 +90,15 @@ void readImports(std::shared_ptr<readerElement>& element,
         if (prefix.empty()) {
             prefix = ri.prefix;
         } else if (!(ri.prefix.empty())) {
-            prefix = ri.prefix + '_' + prefix;
+            auto temp = ri.prefix;
+            temp.push_back('_');
+            temp.append(prefix);
+            prefix = std::move(temp);
         }
 
         // check for type override
-        std::string ext = convertToLowerCase(getElementField(element, "filetype", defMatchType));
+        const std::string ext =
+            convertToLowerCase(getElementField(element, "filetype", defMatchType));
 
         std::swap(prefix, ri.prefix);
         if (ext.empty()) {
@@ -190,9 +194,7 @@ void getElementParam(const std::shared_ptr<readerElement>& element, gridParamete
                 param.stringType = false;
             }
         }
-    }
-
-    else {
+    } else {
         // all other properties
         param.paramUnits = readUnits(element, fieldName);
         if (fieldName.back() == ')') {

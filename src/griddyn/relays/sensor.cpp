@@ -390,7 +390,7 @@ using cm = comms::controlMessagePayload;
 void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    auto m = message->getPayload<cm>();
+    auto* payload = message->getPayload<cm>();
 
     double val;
 
@@ -398,15 +398,15 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
         case cm::SET:
             // only local set
             try {
-                set(convertToLowerCase(m->m_field),
-                    m->m_value,
-                    units::unit_cast_from_string(m->m_units));
+                set(convertToLowerCase(payload->m_field),
+                    payload->m_value,
+                    units::unit_cast_from_string(payload->m_units));
                 if (!opFlags[no_message_reply])  // unless told not to respond return with the
                 {
                     auto gres = std::make_shared<commMessage>(cm::SET_SUCCESS);
                     assert(gres->getPayload<cm>());
                     gres->getPayload<cm>()->m_actionID =
-                        (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+                        (payload->m_actionID > 0) ? payload->m_actionID : instructionCounter;
                     commLink->transmit(sourceID, std::move(gres));
                 }
             }
@@ -416,18 +416,19 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
                     auto gres = std::make_shared<commMessage>(cm::SET_FAIL);
                     assert(gres->getPayload<cm>());
                     gres->getPayload<cm>()->m_actionID =
-                        (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+                        (payload->m_actionID > 0) ? payload->m_actionID : instructionCounter;
                     commLink->transmit(sourceID, std::move(gres));
                 }
             }
 
             break;
         case cm::GET: {
-            val = get(convertToLowerCase(m->m_field), units::unit_cast_from_string(m->m_units));
+            val = get(convertToLowerCase(payload->m_field),
+                      units::unit_cast_from_string(payload->m_units));
             auto reply = std::make_shared<commMessage>(cm::GET_RESULT);
             auto rep = reply->getPayload<cm>();
             assert(rep);
-            rep->m_field = m->m_field;
+            rep->m_field = payload->m_field;
             rep->m_value = val;
             rep->m_time = prevTime;
             commLink->transmit(sourceID, std::move(reply));
@@ -448,10 +449,11 @@ void sensor::receiveMessage(std::uint64_t sourceID, std::shared_ptr<commMessage>
             auto reply = std::make_shared<commMessage>(cm::GET_RESULT_MULTIPLE);
             auto rep = reply->getPayload<cm>();
             rep->multiValues.resize(0);
-            rep->multiFields = m->multiFields;
-            for (const auto& fieldName : m->multiFields) {
-                val = get(convertToLowerCase(fieldName), units::unit_cast_from_string(m->m_units));
-                m->multiValues.push_back(val);
+            rep->multiFields = payload->multiFields;
+            for (const auto& fieldName : payload->multiFields) {
+                val = get(convertToLowerCase(fieldName),
+                          units::unit_cast_from_string(payload->m_units));
+                payload->multiValues.push_back(val);
             }
             rep->m_time = prevTime;
             commLink->transmit(sourceID, std::move(reply));

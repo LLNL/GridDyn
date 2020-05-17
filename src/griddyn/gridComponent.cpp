@@ -19,7 +19,7 @@
 #include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/matrixData.hpp"
 #include <cassert>
-#include <cstdio>
+#include <fmt/format.h>
 #include <iostream>
 #include <map>
 
@@ -115,7 +115,7 @@ coreObject* gridComponent::clone(coreObject* obj) const
 
 void gridComponent::updateObjectLinkages(coreObject* newRoot)
 {
-    for (auto& subobj : getSubObjects()) {
+    for (auto* subobj : getSubObjects()) {
         subobj->updateObjectLinkages(newRoot);
     }
 }
@@ -123,7 +123,7 @@ void gridComponent::updateObjectLinkages(coreObject* newRoot)
 void gridComponent::pFlowInitializeA(coreTime time0, std::uint32_t flags)
 {
     if (localBaseVoltage == kNullVal) {
-        if (isRoot()) {
+        if (isRoot()) {  // NOLINT
             localBaseVoltage = 120.0;
         } else if (dynamic_cast<gridComponent*>(getParent()) != nullptr) {
             localBaseVoltage = static_cast<gridComponent*>(getParent())->localBaseVoltage;
@@ -219,7 +219,7 @@ count_t gridComponent::stateSize(const solverMode& sMode)
 
 count_t gridComponent::stateSize(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     count_t ssize =
         (hasAlgebraic(sMode)) ? (so.total.algSize + so.total.vSize + so.total.aSize) : 0;
     if (hasDifferential(sMode)) {
@@ -239,7 +239,7 @@ count_t gridComponent::totalAlgSize(const solverMode& sMode)
 
 count_t gridComponent::totalAlgSize(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     return (so.total.algSize + so.total.vSize + so.total.aSize);
 }
 
@@ -269,7 +269,7 @@ count_t gridComponent::diffSize(const solverMode& sMode)
 
 count_t gridComponent::diffSize(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     return so.total.diffSize;
 }
 
@@ -284,7 +284,7 @@ count_t gridComponent::rootSize(const solverMode& sMode)
 
 count_t gridComponent::rootSize(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
 
     return so.total.algRoots + so.total.diffRoots;
 }
@@ -300,7 +300,7 @@ count_t gridComponent::jacSize(const solverMode& sMode)
 
 count_t gridComponent::jacSize(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     return so.total.jacSize;
 }
 
@@ -315,7 +315,7 @@ count_t gridComponent::voltageStateCount(const solverMode& sMode)
 
 count_t gridComponent::voltageStateCount(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     return so.total.vSize;
 }
 
@@ -330,7 +330,7 @@ count_t gridComponent::angleStateCount(const solverMode& sMode)
 
 count_t gridComponent::angleStateCount(const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     return so.total.aSize;
 }
 
@@ -681,9 +681,7 @@ void gridComponent::set(const std::string& param, double val, units::unit unitTy
                 disconnect();
             }
         }
-    }
-
-    else if ((param == "basepower") || (param == "basemw") || (param == "basemva")) {
+    } else if ((param == "basepower") || (param == "basemw") || (param == "basemva")) {
         systemBasePower = units::convert(val, unitType, units::MW);
         setAll("all", "basepower", systemBasePower);
     } else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") ||
@@ -748,9 +746,9 @@ double gridComponent::get(const std::string& param, units::unit unitType) const
     } else {
         out = subObjectGet(param, unitType);
         if (out == kNullVal) {
-            auto& outNames = outputNames();
+            const auto& outNames = outputNames();
             for (index_t ii = 0; ii < m_outputSize; ++ii) {
-                for (auto& oname : outNames[ii]) {
+                for (const auto& oname : outNames[ii]) {
                     if (oname == param) {
                         return units::convert(getOutput(ii),
                                               outputUnits(ii),
@@ -936,13 +934,13 @@ void gridComponent::guessState(coreTime time,
                       dstate_dt + so.diffOffset);
         } else {
             if (so.diffOffset == kNullLocation) {
-                printf("%s::%s in mode %d %d ds=%d, do=%d\n",
-                       getParent()->getName().c_str(),
-                       getName().c_str(),
-                       static_cast<int>(isLocal(sMode)),
-                       static_cast<int>(isDAE(sMode)),
-                       static_cast<int>(so.total.diffSize),
-                       static_cast<int>(so.diffOffset));
+                fmt::print("{}::{} in mode {} {} ds={}, do={}\n",
+                           getParent()->getName(),
+                           getName(),
+                           static_cast<int>(isLocal(sMode)),
+                           static_cast<int>(isDAE(sMode)),
+                           static_cast<int>(so.total.diffSize),
+                           static_cast<int>(so.diffOffset));
                 // printStackTrace ();
             }
             assert(so.diffOffset != kNullLocation);
@@ -1065,7 +1063,7 @@ count_t gridComponent::LocalJacobianCount(const solverMode& /*sMode*/) const
 
 std::pair<count_t, count_t> gridComponent::LocalRootCount(const solverMode& /*sMode*/) const
 {
-    auto& lc = offsets.local().local;
+    const auto& lc = offsets.local().local;
     return std::make_pair(lc.algRoots, lc.diffRoots);
 }
 
@@ -1378,7 +1376,7 @@ units::unit gridComponent::outputUnits(index_t /*outputNum*/) const
 
 index_t gridComponent::findIndex(const std::string& field, const solverMode& sMode) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     if (field.compare(0, 5, "state") == 0) {
         auto num = static_cast<index_t>(stringOps::trailingStringInt(field, 0));
         if (stateSize(sMode) > num) {
@@ -1418,7 +1416,7 @@ index_t gridComponent::findIndex(const std::string& field, const solverMode& sMo
     auto stateNames = localStateNames();
     for (index_t nn = 0; nn < static_cast<index_t>(stateNames.size()); ++nn) {
         if (field == stateNames[nn]) {
-            auto& lc = offsets.local();
+            const auto& lc = offsets.local();
             if (nn < lc.local.algSize) {
                 if (so.algOffset != kNullLocation) {
                     return so.algOffset + nn;
@@ -1437,7 +1435,7 @@ index_t gridComponent::findIndex(const std::string& field, const solverMode& sMo
             return kInvalidLocation;
         }
     }
-    for (auto& subobj : subObjectList) {
+    for (auto* subobj : subObjectList) {
         auto ret = subobj->findIndex(field, sMode);
         if (ret != kInvalidLocation) {
             return ret;
@@ -1450,7 +1448,7 @@ void gridComponent::getStateName(stringVec& stNames,
                                  const solverMode& sMode,
                                  const std::string& prefix) const
 {
-    auto& so = offsets.getOffsets(sMode);
+    const auto& so = offsets.getOffsets(sMode);
     auto mxsize = offsets.maxIndex(sMode);
     std::string prefix2 = prefix + getName() + ':';
 
@@ -1517,7 +1515,7 @@ void gridComponent::getStateName(stringVec& stNames,
         }
     }
 
-    for (auto& subobj : subObjectList) {
+    for (auto* subobj : subObjectList) {
         subobj->getStateName(stNames, sMode, prefix2 + ':');
     }
 }
@@ -1753,20 +1751,20 @@ change_code gridComponent::rootCheck(const IOdata& inputs,
 
 index_t gridComponent::lookupOutputIndex(const std::string& outputName) const
 {
-    auto& outputStr = outputNames();
+    const auto& outputStr = outputNames();
     index_t outputsize = (std::min)(static_cast<index_t>(outputStr.size()), m_outputSize);
     for (index_t kk = 0; kk < outputsize; ++kk) {
-        for (auto& onm : outputStr[kk]) {
+        for (const auto& onm : outputStr[kk]) {
             if (outputName == onm) {
                 return kk;
             }
         }
     }
     // didn't find it so lookup the default output names
-    auto& defOutputStr = gridComponent::outputNames();
+    const auto& defOutputStr = gridComponent::outputNames();
     outputsize = m_outputSize;
     for (index_t kk = 0; kk < outputsize; ++kk) {
-        for (auto& onm : defOutputStr[kk]) {
+        for (const auto& onm : defOutputStr[kk]) {
             if (outputName == onm) {
                 return kk;
             }
