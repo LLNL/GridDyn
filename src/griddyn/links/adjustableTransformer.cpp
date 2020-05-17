@@ -42,7 +42,7 @@ namespace links {
 
     coreObject* adjustableTransformer::clone(coreObject* obj) const
     {
-        auto lnk = cloneBase<adjustableTransformer, acLine>(this, obj);
+        auto* lnk = cloneBase<adjustableTransformer, acLine>(this, obj);
         if (lnk == nullptr) {
             return obj;
         }
@@ -137,8 +137,7 @@ namespace links {
                 throw(invalidParameterValue(cmstr));
             }
         } else if ((param == "bus") || (param == "controlbus")) {
-            auto bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
-
+            auto* bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
             if (bus != nullptr) {
                 controlBus = bus;
             } else {
@@ -314,7 +313,7 @@ namespace links {
         } else if (param == "qmin") {
             val = convert(Qmin, puMW, unitType, systemBasePower);
         } else if (param == "qmax") {
-            val = convert(Qmin, puMW, unitType, systemBasePower);
+            val = convert(Qmax, puMW, unitType, systemBasePower);
         } else if (param == "qtarget") {
             val = convert(Qtarget, puMW, unitType, systemBasePower);
         } else if (param == "target") {
@@ -383,7 +382,7 @@ namespace links {
             controlNum = 2;
             direction = 1;
         } else {
-            auto cb = getParent()->findByUserID("bus", busNumber);
+            auto* cb = getParent()->findByUserID("bus", busNumber);
             if (cb != nullptr) {
                 controlBus = static_cast<gridBus*>(cb);
                 controlNum = 0;
@@ -776,7 +775,7 @@ namespace links {
         } else if ((isDynamic(sMode)) && (opFlags[has_dyn_states])) {
             auto dOffset = offsets.getDiffOffset(sMode);
             dstate_dt[dOffset] = 0;
-            // TODO: guessState dynamic states
+            // TODO(PT): guessState dynamic states
         }
     }
 
@@ -937,16 +936,12 @@ namespace links {
         if ((!(isDynamic(sMode))) && (opFlags[has_pflow_states])) {
             if (cMode == control_mode_t::MW_control) {
                 tapAngle = state[offset];
-                if (tapAngle < maxTapAngle) {
-                    tapAngle0 = tapAngle;
-                } else if (tapAngle > minTapAngle) {
+                if (tapAngle < maxTapAngle && tapAngle > minTapAngle) {
                     tapAngle0 = tapAngle;
                 }
             } else {
                 tap = state[offset];
-                if (tap < maxTap) {
-                    tap0 = tap;
-                } else if (tap > minTap) {
+                if (tap < maxTap && tap > minTap) {
                     tap0 = tap;
                 }
             }
@@ -1025,23 +1020,23 @@ namespace links {
         double v1;
         switch (cMode) {
             case control_mode_t::voltage_control:
-                v1 = controlBus->getVoltage();
-                if (v1 > Vmax) {
-                } else if (v1 < Vmin) {
-                }
+         //       v1 = controlBus->getVoltage();
+    //            if (v1 > Vmax) {
+      //          } else if (v1 < Vmin) {
+       //         }
                 break;
             case control_mode_t::MW_control:
 
                 updateLocalCache();
-                if (linkFlows.P1 > Pmax) {
-                } else if (linkFlows.P1 < Pmin) {
-                }
+        //        if (linkFlows.P1 > Pmax) {
+         //       } else if (linkFlows.P1 < Pmin) {
+         //       }
                 break;
             case control_mode_t::MVar_control:
                 updateLocalCache();
-                if (linkFlows.Q2 > Qmax) {
-                } else if (linkFlows.Q2 < Qmin) {
-                }
+         //       if (linkFlows.Q2 > Qmax) {
+         //       } else if (linkFlows.Q2 < Qmin) {
+         //       }
                 break;
             default:
                 assert(false);
@@ -1324,13 +1319,13 @@ namespace links {
         return ret;
     }
 
-    change_code adjustableTransformer::MWControlAdjust()
+    change_code adjustableTransformer::MWControlAdjust() //NOLINT
     {
         auto ret = change_code::no_change;
         return ret;
     }
 
-    change_code adjustableTransformer::MVarControlAdjust()
+    change_code adjustableTransformer::MVarControlAdjust() //NOLINT
     {
         auto ret = change_code::no_change;
         return ret;

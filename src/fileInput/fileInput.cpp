@@ -52,9 +52,9 @@ namespace readerConfig {
         } else if ((level == "1") || (level == "summary")) {
             printMode = READER_SUMMARY_PRINT;
         } else if ((level == "2") || (level == "normal")) {
-            printMode = READER_SUMMARY_PRINT;
+            printMode = READER_NORMAL_PRINT;
         } else if ((level == "3") || (level == "verbose")) {
-            printMode = READER_SUMMARY_PRINT;
+            printMode = READER_VERBOSE_PRINT;
         } else {
             WARNPRINT(READER_WARN_IMPORTANT, "invalid printMode");
         }
@@ -194,7 +194,7 @@ void loadFile(coreObject* parentObject,
         }
     } else if (ext == "csv") {
         loadCSV(parentObject, fileName, *ri);
-    } else if ((ext == "raw") || (ext == "psse") || (ext == "pss/e")) {
+    } else if (ext == "raw" || ext == "psse" || ext == "pss/e" || ext == "pti") {
         loadRAW(parentObject, fileName, *ri);
     } else if (ext == "dyr") {
         loadDYR(parentObject, fileName, *ri);
@@ -207,8 +207,6 @@ void loadFile(coreObject* parentObject,
         loadPSP(parentObject, fileName, *ri);
     } else if (ext == "epc") {
         loadEPC(parentObject, fileName, *ri);
-    } else if (ext == "pti") {
-        loadRAW(parentObject, fileName, *ri);
     } else if (ext == "json") {
         loadElementFile<jsonReaderElement>(parentObject, fileName, ri);
 #ifdef YAML_FOUND
@@ -243,7 +241,7 @@ void addToParentRename(coreObject* objectToAdd, coreObject* parentObject)
 {
     std::string bname = objectToAdd->getName();
     int cnt = 2;
-    auto fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
+    auto* fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
     while (fndObject != nullptr) {
         ++cnt;
         fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
