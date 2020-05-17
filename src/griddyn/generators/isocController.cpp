@@ -128,8 +128,7 @@ void isocController::set(const std::string& param, double val, units::unit unitT
         minLevel = val;
     } else if (param == "m_output") {
         m_output = val;
-    }
-    else {
+    } else {
         gridSubModel::set(param, val, unitType);
     }
 }

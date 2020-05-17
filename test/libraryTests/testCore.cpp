@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(coreObject_test)
     obj1->set("nextupdatetime", ntime);
     obj3 = obj1->clone(obj3);
     BOOST_CHECK_EQUAL(double(obj3->getNextUpdateTime()), ntime);
-    BOOST_CHECK_EQUAL(obj3->getName(),"test_object");
+    BOOST_CHECK_EQUAL(obj3->getName(), "test_object");
     // check the parameter not found function
     try {
         obj3->set("bob", 0.5);  // this should throw and exception
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
         auto componentFactory = cof->getFactory(comp);
         auto typeList = componentFactory->getTypeNames();
         for (auto& type : typeList) {
-            auto *obj = componentFactory->makeObject(type);
+            auto* obj = componentFactory->makeObject(type);
             BOOST_REQUIRE(obj != nullptr);
             obj->setName("bob");  // NOLINT
             BOOST_CHECK_EQUAL(obj->getName(), "bob");
