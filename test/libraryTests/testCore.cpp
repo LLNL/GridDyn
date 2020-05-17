@@ -24,15 +24,14 @@
 
 // test case for coreObject object
 
-using namespace units;
 using namespace griddyn;
 
 BOOST_AUTO_TEST_SUITE(core_tests, *boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE(coreObject_test)
 {
-    coreObject* obj1 = new coreObject();
-    coreObject* obj2 = new coreObject();
+    auto* obj1 = new coreObject();
+    auto* obj2 = new coreObject();
 
     BOOST_CHECK_EQUAL(obj1->getName().compare("object_" + std::to_string(obj1->getID())), 0);
 
@@ -69,7 +68,7 @@ BOOST_AUTO_TEST_CASE(coreObject_test)
     obj1->set("nextupdatetime", ntime);
     obj3 = obj1->clone(obj3);
     BOOST_CHECK_EQUAL(double(obj3->getNextUpdateTime()), ntime);
-    BOOST_CHECK(obj3->getName().compare("test_object") == 0);
+    BOOST_CHECK_EQUAL(obj3->getName(),"test_object");
     // check the parameter not found function
     try {
         obj3->set("bob", 0.5);  // this should throw and exception
@@ -118,7 +117,7 @@ BOOST_AUTO_TEST_CASE(Exciter_test)
 
 BOOST_AUTO_TEST_CASE(Governor_test)
 {
-    Governor* gov = new Governor();
+    auto* gov = new Governor();
     std::string temp1 = "gov 2";
     gov->set("name", temp1);
     BOOST_CHECK_EQUAL(gov->getName().compare(temp1), 0);
@@ -132,6 +131,7 @@ BOOST_AUTO_TEST_CASE(Governor_test)
 
 BOOST_AUTO_TEST_CASE(test_unit_functions)
 {
+    using namespace units;
     // units_t u1;
     // units_t u2;
     double val1;
@@ -181,17 +181,17 @@ BOOST_AUTO_TEST_CASE(gridDynTime_tests)
 {
     coreTime rt(34.123141512);
 
-    double dval = static_cast<double>(rt);
+    auto dval = static_cast<double>(rt);
     BOOST_CHECK_CLOSE(dval, 34.123141512, 0.0000001);
 
     coreTime rt2(-2.3);
 
-    double dval2 = static_cast<double>(rt2);
+    auto dval2 = static_cast<double>(rt2);
     BOOST_CHECK_CLOSE(dval2, -2.3, 0.0000001);
 
     coreTime rt3(-1.0);
 
-    double dval3 = static_cast<double>(rt3);
+    auto dval3 = static_cast<double>(rt3);
     BOOST_CHECK_CLOSE(dval3, -1.0, 0.0000001);
 }
 
@@ -207,17 +207,17 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
         auto componentFactory = cof->getFactory(comp);
         auto typeList = componentFactory->getTypeNames();
         for (auto& type : typeList) {
-            auto obj = componentFactory->makeObject(type);
+            auto *obj = componentFactory->makeObject(type);
             BOOST_REQUIRE(obj != nullptr);
-            obj->setName("bob");
+            obj->setName("bob");  // NOLINT
             BOOST_CHECK_EQUAL(obj->getName(), "bob");
             obj->setName(std::string());
             BOOST_CHECK_EQUAL(obj->getName(), "");
             obj->set("", "empty");  // this should not throw an exception
-            obj->set("", 0.34, defunit);  // this should not throw an exception
+            obj->set("", 0.34, units::defunit);  // this should not throw an exception
             obj->setFlag("", false);  // This should not throw an exception
             obj->set("#unknown", "empty");  // this should not throw an exception
-            obj->set("#unknown", 0.34, defunit);  // this should not throw an exception
+            obj->set("#unknown", 0.34, units::defunit);  // this should not throw an exception
             obj->setFlag("#unknown", false);  // This should not throw an exception
 
             if (obj->isCloneable()) {

@@ -9,7 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
+#include "helicsTest.h"
 #include "../test/exeTestHelper.h"
 #include "../test/testHelper.h"
 #include "core/objectFactory.hpp"
