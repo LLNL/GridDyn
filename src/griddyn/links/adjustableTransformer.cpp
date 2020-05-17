@@ -682,9 +682,8 @@ namespace links {
                 prevValue = linkFlows.P1;
             }
         } else if (cMode == control_mode_t::voltage_control) {
-            if (opFlags[continuous_flag])  // if continuous mode just check the min and max tap
-                                           // angle
-            {
+            if (opFlags[continuous_flag]) {
+                // if continuous mode just check the min and max tap angle
                 if (tap < minTap) {
                     tap = minTap;
                     opFlags.set(at_limit);

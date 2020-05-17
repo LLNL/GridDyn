@@ -24,7 +24,6 @@
 
 // test case for coreObject object
 
-using namespace units;
 using namespace griddyn;
 
 BOOST_AUTO_TEST_SUITE(core_tests, *boost::unit_test::label("quick"))
@@ -132,6 +131,7 @@ BOOST_AUTO_TEST_CASE(Governor_test)
 
 BOOST_AUTO_TEST_CASE(test_unit_functions)
 {
+    using namespace units;
     // units_t u1;
     // units_t u2;
     double val1;
@@ -214,10 +214,10 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
             obj->setName(std::string());
             BOOST_CHECK_EQUAL(obj->getName(), "");
             obj->set("", "empty");  // this should not throw an exception
-            obj->set("", 0.34, defunit);  // this should not throw an exception
+            obj->set("", 0.34, units::defunit);  // this should not throw an exception
             obj->setFlag("", false);  // This should not throw an exception
             obj->set("#unknown", "empty");  // this should not throw an exception
-            obj->set("#unknown", 0.34, defunit);  // this should not throw an exception
+            obj->set("#unknown", 0.34, units::defunit);  // this should not throw an exception
             obj->setFlag("#unknown", false);  // This should not throw an exception
 
             if (obj->isCloneable()) {

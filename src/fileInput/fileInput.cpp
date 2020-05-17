@@ -201,7 +201,7 @@ void loadFile(coreObject* parentObject,
     } else if ((ext == "cdf") || (ext == "txt")) {
         loadCDF(parentObject, fileName, *ri);
     } else if (ext == "uct") {
-    } else if ((ext == "m") || (ext == "matlab")) {
+    } else if (ext == "m" || ext == "matlab") {
         loadMFile(parentObject, fileName, *ri);
     } else if (ext == "psp") {
         loadPSP(parentObject, fileName, *ri);
@@ -211,14 +211,11 @@ void loadFile(coreObject* parentObject,
         loadRAW(parentObject, fileName, *ri);
     } else if (ext == "json") {
         loadElementFile<jsonReaderElement>(parentObject, fileName, ri);
-    }
 #ifdef YAML_FOUND
-    else if ((ext == "yaml") || (ext == "yml")) {
+    } else if ((ext == "yaml") || (ext == "yml")) {
         loadElementFile<yamlReaderElement>(parentObject, fileName, ri);
-    }
 #endif
-    else if (ext == "gdz")  // gridDyn Zipped file
-    {
+    } else if (ext == "gdz") { // gridDyn Zipped file
         loadGDZ(parentObject, fileName, *ri);
     }
 }
