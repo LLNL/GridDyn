@@ -48,9 +48,11 @@ class zmqSocketDescriptor {
     std::vector<socketOperation> ops;  //!< a list of connections of make through bind
     std::function<void(const zmq::multipart_t& res)> callback;  //!< the message handler
     zmqSocketDescriptor(const std::string& socketName = ""):
-        name(socketName){}  // purposefully implicit
+        name(socketName) {}  // purposefully implicit
     zmqSocketDescriptor(const std::string& socketName, zmq::socket_type stype):
-        name(socketName), type(stype){}
+        name(socketName), type(stype)
+    {
+    }
     inline void addOperation(socket_ops op, const std::string& desc) { ops.emplace_back(op, desc); }
     zmq::socket_t makeSocket(zmq::context_t& ctx) const;
     std::unique_ptr<zmq::socket_t> makeSocketPtr(zmq::context_t& ctx) const;

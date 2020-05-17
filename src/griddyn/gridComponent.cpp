@@ -123,7 +123,7 @@ void gridComponent::updateObjectLinkages(coreObject* newRoot)
 void gridComponent::pFlowInitializeA(coreTime time0, std::uint32_t flags)
 {
     if (localBaseVoltage == kNullVal) {
-        if (isRoot()) { // NOLINT
+        if (isRoot()) {  // NOLINT
             localBaseVoltage = 120.0;
         } else if (dynamic_cast<gridComponent*>(getParent()) != nullptr) {
             localBaseVoltage = static_cast<gridComponent*>(getParent())->localBaseVoltage;
@@ -681,8 +681,7 @@ void gridComponent::set(const std::string& param, double val, units::unit unitTy
                 disconnect();
             }
         }
-    }
-    else if ((param == "basepower") || (param == "basemw") || (param == "basemva")) {
+    } else if ((param == "basepower") || (param == "basemw") || (param == "basemva")) {
         systemBasePower = units::convert(val, unitType, units::MW);
         setAll("all", "basepower", systemBasePower);
     } else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") ||
@@ -936,12 +935,12 @@ void gridComponent::guessState(coreTime time,
         } else {
             if (so.diffOffset == kNullLocation) {
                 fmt::print("{}::{} in mode {} {} ds={}, do={}\n",
-                       getParent()->getName(),
-                       getName(),
-                       static_cast<int>(isLocal(sMode)),
-                       static_cast<int>(isDAE(sMode)),
-                       static_cast<int>(so.total.diffSize),
-                       static_cast<int>(so.diffOffset));
+                           getParent()->getName(),
+                           getName(),
+                           static_cast<int>(isLocal(sMode)),
+                           static_cast<int>(isDAE(sMode)),
+                           static_cast<int>(so.total.diffSize),
+                           static_cast<int>(so.diffOffset));
                 // printStackTrace ();
             }
             assert(so.diffOffset != kNullLocation);

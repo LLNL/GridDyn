@@ -97,7 +97,8 @@ void readImports(std::shared_ptr<readerElement>& element,
         }
 
         // check for type override
-        const std::string ext = convertToLowerCase(getElementField(element, "filetype", defMatchType));
+        const std::string ext =
+            convertToLowerCase(getElementField(element, "filetype", defMatchType));
 
         std::swap(prefix, ri.prefix);
         if (ext.empty()) {

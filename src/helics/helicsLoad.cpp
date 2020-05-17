@@ -117,8 +117,7 @@ namespace helicsLib {
                 prevP = newP;
                 prevQ = newQ;
                 prevTime = lastUpdateTime;
-            } else  
-            {
+            } else {
                 // output will ramp up to the specified value in the update period
                 dPdt = (newP - getP()) / updatePeriod;
                 dQdt = (newQ - getQ()) / updatePeriod;
