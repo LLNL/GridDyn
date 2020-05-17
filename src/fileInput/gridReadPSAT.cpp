@@ -870,11 +870,11 @@ void loadPSATExcArray(coreObject* parentObject,
         }
 
         mode = eData[1];
-        if (mode < 1.1)  // second order classical model
-        {
+        if (mode < 1.1)  
+        {// second order classical model
             gm = new Exciter();
-        } else if (mode < 2.1)  // 3rd order model
-        {
+        } else if (mode < 2.1)  
+        {// 3rd order model
             gm = new Exciter();
         }
 

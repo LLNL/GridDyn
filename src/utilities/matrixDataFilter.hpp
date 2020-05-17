@@ -32,8 +32,7 @@ class matrixDataFilter: public matrixDataContainer<ValueT> {
 
     explicit matrixDataFilter(matrixData<ValueT>& input):
         matrixDataContainer<ValueT>(input){
-
-        };
+        }
 
     void assign(index_t row, index_t col, ValueT num) override
     {
