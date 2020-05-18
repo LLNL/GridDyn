@@ -673,7 +673,7 @@ coreObject* gridAreaOpt::findByUserID(const std::string& typeName, index_t searc
                 return rel;
             }
         }
-    } else if (typeName == "gen"|| typeName == "load" || typeName == "generator") {
+    } else if (typeName == "gen" || typeName == "load" || typeName == "generator") {
         for (auto& bus : busList) {
             A1 = bus->findByUserID(typeName, searchID);
             if (A1) {

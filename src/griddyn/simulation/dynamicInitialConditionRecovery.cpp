@@ -179,7 +179,7 @@ int dynamicInitialConditionRecovery::dynamicFix2()
                                         true);
             }
         }
-    } else { // well lets just try again for giggles
+    } else {  // well lets just try again for giggles
         sim->converge(sim->getSimulationTime(),
                       solver->state_data(),
                       solver->deriv_data(),

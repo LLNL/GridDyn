@@ -267,7 +267,7 @@ namespace braid {
                 bdf_strat = uni1;
             else if (!strcmp(str_bdf_strat.c_str(), "uni1-c"))
                 bdf_strat = uni1_c;
-            else { // NOLINT
+            else {  // NOLINT
                 cerr << "Wrong bdf strategy" << endl;
                 abort();
             }

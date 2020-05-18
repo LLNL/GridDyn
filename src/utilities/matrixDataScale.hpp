@@ -26,7 +26,9 @@ class matrixDataScale: public matrixDataContainer<ValueT> {
     /** @brief constructor
      */
     matrixDataScale(matrixData<ValueT>& input, ScaleT scaleFactor):
-        matrixDataContainer<ValueT>(input), scalingFactor_(scaleFactor){}
+        matrixDataContainer<ValueT>(input), scalingFactor_(scaleFactor)
+    {
+    }
 
     void assign(index_t row, index_t col, ValueT num) override
     {
