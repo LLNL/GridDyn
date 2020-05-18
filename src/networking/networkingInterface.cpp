@@ -11,6 +11,7 @@
  */
 
 #include "networkingInterface.h"
+
 #include "griddyn/griddyn-config.h"
 
 #ifdef ENABLE_ZMQ
