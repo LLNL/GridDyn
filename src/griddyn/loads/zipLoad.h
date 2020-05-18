@@ -126,7 +126,7 @@ class zipLoad: public Load {
     void setx(double newx);
 
     /** compute the voltage adjustment by min and max voltages*/
-    double voltageAdjustment(double val, double V) const;
+    double voltageAdjustment(double val, double voltage) const;
     /** get the Q from power factor*/
     double getQval() const;
 };

@@ -53,7 +53,6 @@ namespace loads {
 
       private:
         count_t loadFile();
-        int columnCode(const std::string& ldc);
     };
 }  // namespace loads
 }  // namespace griddyn

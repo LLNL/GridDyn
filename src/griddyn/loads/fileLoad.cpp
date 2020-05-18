@@ -30,7 +30,7 @@ namespace loads {
 
     coreObject* fileLoad::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<fileLoad, rampLoad>(this, obj);
+        auto* nobj = cloneBase<fileLoad, rampLoad>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }
@@ -177,6 +177,30 @@ namespace loads {
         }
     }
 
+    static int columnCode(const std::string& ldc)
+    {
+        auto lc = convertToLowerCase(ldc);
+        int code = -1;
+        if (lc == "p") {
+            code = 0;
+        } else if (lc == "q") {
+            code = 1;
+        } else if (lc == "ip") {
+            code = 2;
+        } else if (lc == "iq") {
+            code = 3;
+        } else if ((lc == "zr") || (lc == "yp") || (lc == "zp") || (lc == "yr")) {
+            code = 4;
+        } else if ((lc == "zq") || (lc == "yq")) {
+            code = 5;
+        } else if (lc == "r") {
+            code = 6;
+        } else if (lc == "x") {
+            code = 7;
+        }
+        return code;
+    }
+
     void fileLoad::set(const std::string& param, const std::string& val)
     {
         if ((param == "fileName") || (param == "file")) {
@@ -219,10 +243,8 @@ namespace loads {
             inputUnits = units::unit_cast_from_string(val);
         } else if ((param == "mode") || (param == "timemode")) {
             setFlag(val, true);
-        }
-
-        else {
-            zipLoad::set(param, val);
+        } else {
+            zipLoad::set(param, val);  // NOLINT
         }
     }
 
@@ -233,7 +255,7 @@ namespace loads {
         } else if (param == "qratio") {
             qratio = val;
         } else {
-            zipLoad::set(param, val, unitType);
+            zipLoad::set(param, val, unitType);  // NOLINT
         }
     }
 
@@ -263,28 +285,5 @@ namespace loads {
         return schedLoad.size();
     }
 
-    int fileLoad::columnCode(const std::string& ldc)
-    {
-        auto lc = convertToLowerCase(ldc);
-        int code = -1;
-        if (lc == "p") {
-            code = 0;
-        } else if (lc == "q") {
-            code = 1;
-        } else if (lc == "ip") {
-            code = 2;
-        } else if (lc == "iq") {
-            code = 3;
-        } else if ((lc == "zr") || (lc == "yp") || (lc == "zp") || (lc == "yr")) {
-            code = 4;
-        } else if ((lc == "zq") || (lc == "yq")) {
-            code = 5;
-        } else if (lc == "r") {
-            code = 6;
-        } else if (lc == "x") {
-            code = 7;
-        }
-        return code;
-    }
 }  // namespace loads
 }  // namespace griddyn
