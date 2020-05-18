@@ -59,9 +59,7 @@ namespace dimeLib {
     void dimeCommunicator::set(const std::string& param, const std::string& val)
     {
         if (param.empty()) {
-        }
-
-        else {
+        } else {
             zmqCommunicator::set(param, val);
         }
     }
