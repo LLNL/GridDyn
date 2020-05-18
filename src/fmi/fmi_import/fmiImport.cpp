@@ -294,8 +294,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
             sopath /= "darwin64";
             sopath /= identifier + ".so";
 #endif
-        }
-    else {
+        } else {
 #ifdef _WIN32
         sopath /= "win32";
         sopath /= identifier + ".dll";

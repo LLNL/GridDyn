@@ -101,8 +101,8 @@ namespace fmi {
                     int ind = findCloseStringMatch(iNames[ii], istrings, string_match_type::close);
                     if (ind >= 0) {
                         inputNames_actual[ii] = istrings[ind];
-                    } else  // now try some alternative representations
-                    {
+                    } else {
+                        // now try some alternative representations
                         stringVec altInames;
                         altInames.reserve(inputNames_actual[ii].size() * 2 + 4);
                         for (auto& iname : iNames[ii]) {
@@ -153,8 +153,7 @@ namespace fmi {
                     int ind = findCloseStringMatch(oNames[ii], ostrings, string_match_type::close);
                     if (ind >= 0) {
                         outputNames_actual[ii] = ostrings[ind];
-                    } else  // now try some alternative representations
-                    {
+                    } else {  // now try some alternative representations
                         stringVec altOnames;
                         altOnames.reserve(outputNames_actual[ii].size() * 2 + 4);
                         for (auto& oname : oNames[ii]) {

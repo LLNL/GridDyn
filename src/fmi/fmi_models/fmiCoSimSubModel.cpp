@@ -87,8 +87,8 @@ namespace fmi {
             }
             */
                 opFlags.set(dyn_initialized);
-            } else  // in pflow mode
-            {
+            } else 
+            {  // in pflow mode
                 cs->setMode(fmuMode::initializationMode);
 
                 cs->setInputs(inputs.data());

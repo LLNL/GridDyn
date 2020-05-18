@@ -21,7 +21,7 @@ jobs:
     docker:
       - image: helics/buildenv:gcc8-builder
     environment:
-      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON'
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON -GRIDDYN_ENABLE_FMI_EXPORT=ON'
     steps:
       - checkout
       - run: *setup_griddyn
@@ -39,7 +39,7 @@ jobs:
     docker:
       - image: helics/buildenv:clang9-builder
     environment:
-      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON'
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_BUILD_C_SHARED_LIBRARY=ON -GRIDDYN_ENABLE_FMI_EXPORT=ON'
     steps:
       - checkout
       - run: *setup_griddyn

@@ -11,7 +11,7 @@
  */
 
 #include "core/coreExceptions.h"
-#include "fmi/FMI2/fmi2Functions.h"
+#include "FMI2/fmi2Functions.h"
 #include "fmiRunner.h"
 #include "griddyn/gridDynSimulation.h"
 #include <memory>
