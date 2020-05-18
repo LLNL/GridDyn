@@ -12,10 +12,11 @@
  * LLNS Copyright End
  */
 
+#include "gridDynfskit.h"
+
 #include "core/factoryTemplates.hpp"
 #include "fskitCommunicator.h"
 #include "fskitRunner.h"
-#include "gridDynfskit.h"
 #include "griddyn-tracer.h"
 #include <memory>
 // static std::vector<std::shared_ptr<objectFactory>> fskitFactories;
