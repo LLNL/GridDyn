@@ -329,8 +329,7 @@ namespace fmi {
         stateSizes SS;
         if (hasDifferential(sMode)) {
             SS.diffSize = m_stateSize;
-        }
-        else if (!isDynamic(sMode) && opFlags[pflow_init_required]) {
+        } else if (!isDynamic(sMode) && opFlags[pflow_init_required]) {
             SS.algSize = m_stateSize;
         }
         return SS;
@@ -541,8 +540,7 @@ namespace fmi {
                 me->setStates(tempState.data());
                 me->getDerivatives(tempdState.data());
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level3)  
-            {
+            } else if (mode == refMode_t::level3) {
                 // max useful for states dependent variables
                 me->getStates(tempState.data());
                 tempState[refIndex] = val2;
@@ -556,16 +554,14 @@ namespace fmi {
                 me->getDerivatives(tempdState.data());
                 me->completedIntegratorStep(false, &evmd, &term);
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level4)  
-            { // for input dependencies only
+            } else if (mode == refMode_t::level4) {  // for input dependencies only
                 me->set(vy, &val2);
                 me->completedIntegratorStep(false, &evmd, &term);
                 me->get(vx, &out2);
                 me->set(vy, &val1);
                 me->completedIntegratorStep(false, &evmd, &term);
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level5)  
-            { // for input dependencies only
+            } else if (mode == refMode_t::level5) {  // for input dependencies only
                 me->set(vy, &val2);
                 me->getStates(tempState.data());
                 me->setStates(tempState.data());
@@ -575,15 +571,13 @@ namespace fmi {
                 me->setStates(tempState.data());
                 me->getDerivatives(tempdState.data());
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level7)  
-            {// use the estimators
+            } else if (mode == refMode_t::level7) {  // use the estimators
                 if (opFlags[fixed_output_interval]) {
                     res = 0;
                 } else {
                     res = oEst[depIndex]->stateDiff[refIndex];
                 }
-            } else if (mode == refMode_t::level8)  
-            { // use the estimators
+            } else if (mode == refMode_t::level8) {  // use the estimators
                 if (opFlags[fixed_output_interval]) {
                     res = 0;
                 } else {
