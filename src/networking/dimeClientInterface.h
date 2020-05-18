@@ -20,13 +20,13 @@
 
 class initFailure: public std::exception {
   public:
-    initFailure(){};
-};
+    initFailure(){}
+}
 
 class sendFailure: public std::exception {
   public:
-    sendFailure(){};
-};
+    sendFailure(){}
+}
 
 class dimeClientInterface {
   private:

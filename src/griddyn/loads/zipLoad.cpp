@@ -93,8 +93,8 @@ void zipLoad::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t flags)
 {
     if ((opFlags[convert_to_constant_impedance]) ||
         CHECK_CONTROLFLAG(flags, all_loads_to_constant_impedence)) {
-        double V = bus->getVoltage();
-        double invVsquared = 1.0 / (V * V);
+        double voltage = bus->getVoltage();
+        double invVsquared = 1.0 / (voltage * voltage);
         Yp = Yp + P * invVsquared;
         P = 0;
         if (opFlags[use_power_factor_flag]) {
@@ -123,10 +123,10 @@ void zipLoad::timestep(coreTime time, const IOdata& inputs, const solverMode& /*
         updateLocalCache(inputs, stateData(time), cLocalSolverMode);
     }
 
-    double V = (inputs.empty()) ? (bus->getVoltage()) : inputs[voltageInLocation];
-    Pout = -getRealPower(V);
+    double voltage = (inputs.empty()) ? (bus->getVoltage()) : inputs[voltageInLocation];
+    Pout = -getRealPower(voltage);
     prevTime = time;
-    Qout = -getReactivePower(V);
+    Qout = -getReactivePower(voltage);
 
 #ifdef SGS_DEBUG
     std::cout << "SGS : " << prevTime << " : " << name
@@ -461,12 +461,12 @@ void zipLoad::setState(coreTime time,
     prevTime = time;
 }
 
-double zipLoad::voltageAdjustment(double val, double V) const
+double zipLoad::voltageAdjustment(double val, double voltage) const
 {
-    if (V < Vpqmin) {
-        val = V * V * val * trigVVlow;
-    } else if (V > Vpqmax) {
-        val = V * V * val * trigVVhigh;
+    if (voltage < Vpqmin) {
+        val = voltage * voltage * val * trigVVlow;
+    } else if (voltage > Vpqmax) {
+        val = voltage * voltage * val * trigVVhigh;
     }
     return val;
 }

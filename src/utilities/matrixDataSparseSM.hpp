@@ -406,7 +406,7 @@ class matrixDataSparseSMB<0, X, ValueT, M>: public matrixData<ValueT> {
       the actual storage space used is approx 2x startCount due to expected unevenness in the array
     @param[in] startCount  the number of elements to reserve
     */
-    explicit matrixDataSparseSMB(index_t startCount = 1000) { dVec.reserve(startCount); };
+    explicit matrixDataSparseSMB(index_t startCount = 1000) { dVec.reserve(startCount); }
     void clear() override { dVec.clear(); }
     void assign(index_t row, index_t col, ValueT num) override
     {

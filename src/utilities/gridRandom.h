@@ -97,7 +97,7 @@ class gridRandom {
     */
     void getNewValues(std::vector<double>& rvec, size_t count);
 
-    static auto& getEngine() { return s_gen; };
+    static auto& getEngine() { return s_gen; }
 
   private:
     std::unique_ptr<distributionObject> dobj;
