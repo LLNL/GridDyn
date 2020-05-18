@@ -37,7 +37,9 @@ class matrixDataOrdered: public matrixData<ValueT> {
     @param[in] rowCount  the number of rows and columns in the matrix
     */
     explicit matrixDataOrdered(index_t RowCount):
-        matrixData<ValueT>(RowCount, RowCount), dVec(RowCount){};
+        matrixData<ValueT>(RowCount, RowCount), dVec(RowCount)
+    {
+    }
     void clear() override
     {
         count = 0;

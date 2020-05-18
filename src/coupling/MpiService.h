@@ -74,9 +74,9 @@ namespace mpi {
          */
         static MpiService* instance(int threadingLevel = 0);
 
-        int getRank() const { return commRank; };
-        int getCommSize() const { return commSize; };
-        int getThreadingLevel() const { return mpiThreadingLevel; };
+        int getRank() const { return commRank; }
+        int getCommSize() const { return commSize; }
+        int getThreadingLevel() const { return mpiThreadingLevel; }
 
         /** get a token for executing MPI calls
     @throws runtime_error if a token cannot be obtained

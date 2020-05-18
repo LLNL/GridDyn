@@ -22,7 +22,7 @@ namespace griddyn {
 isocController::isocController(const std::string& objName): gridSubModel(objName) {}
 coreObject* isocController::clone(coreObject* obj) const
 {
-    auto nobj = cloneBase<isocController, gridSubModel>(this, obj);
+    auto* nobj = cloneBase<isocController, gridSubModel>(this, obj);
     if (nobj == nullptr) {
         return obj;
     }
@@ -128,9 +128,7 @@ void isocController::set(const std::string& param, double val, units::unit unitT
         minLevel = val;
     } else if (param == "m_output") {
         m_output = val;
-    }
-
-    else {
+    } else {
         gridSubModel::set(param, val, unitType);
     }
 }

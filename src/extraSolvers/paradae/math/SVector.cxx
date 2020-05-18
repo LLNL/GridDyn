@@ -138,7 +138,7 @@ namespace paradae {
     {
         SVector res(n);
         for (int i = 0; i < n; i++)
-            res.data[i] = (b - a) * Real(rand()) / Real(RAND_MAX) + a;
+            res.data[i] = (b - a) * Real(rand()) / Real(RAND_MAX) + a;  // NOLINT
         return res;
     }
 }  // namespace paradae
