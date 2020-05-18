@@ -80,7 +80,7 @@ enum class fmi_variable_type_t {
 class fmi_variable_type {
   public:
     fmi_variable_type_t variable = fmi_variable_type_t::real;  //!< variable type data member
-    fmi_variable_type(){};
+    fmi_variable_type(){}
     fmi_variable_type(const std::string& vstring);
     fmi_variable_type(fmi_variable_type_t type): variable(type){}
     std::string to_string() const;
@@ -104,7 +104,7 @@ class fmi_dependency_type {
   public:
     fmi_dependency_type_t dependency =
         fmi_dependency_type_t::dependent;  //!< dependency data member
-    fmi_dependency_type(){};
+    fmi_dependency_type(){}
     fmi_dependency_type(const std::string& vstring);
     fmi_dependency_type(fmi_dependency_type_t type): dependency(type){}
     std::string to_string() const;
