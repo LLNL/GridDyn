@@ -316,7 +316,14 @@ namespace fmi {
             }
         }
 
-        auto binaryLocPath = path(GRIDDYNFMILIBRARY_BINARY_LOC);
+        auto binaryLocPath = path(GRIDDYNFMILIBRARY_LOC);
+        if (exists(binaryLocPath / GRIDDYNFMILIBRARY_NAME)) {
+            create_directory(binary_dir / FMILIBRARY_TYPE);
+            auto source = binaryLocPath / GRIDDYNFMILIBRARY_NAME;
+            auto dest = binary_dir / FMILIBRARY_TYPE / GRIDDYNFMILIBRARY_NAME;
+            testCopyFile(source, dest);
+            return;
+        }
         if (exists(binaryLocPath / "fmiGridDynSharedLib.dll")) {
             create_directory(binary_dir / FMILIBRARY_TYPE);
             auto source = binaryLocPath / "fmiGridDynSharedLib.dll";
@@ -382,6 +389,12 @@ namespace fmi {
         }
 #endif
         // now just search the current directory
+        if (exists(GRIDDYNFMILIBRARY_NAME)) {
+            create_directory(binary_dir / FMILIBRARY_TYPE);
+            testCopyFile(GRIDDYNFMILIBRARY_NAME,
+                         binary_dir / FMILIBRARY_TYPE / GRIDDYNFMILIBRARY_NAME);
+            return;
+        }
         if (exists("fmiGridDynSharedLib.dll")) {
             create_directory(binary_dir / FMILIBRARY_TYPE);
             testCopyFile("fmiGridDynSharedLib.dll",

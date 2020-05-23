@@ -54,8 +54,8 @@ set_target_properties(fmiBuilder PROPERTIES FOLDER fmi)
 
 target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 
-set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
+set(GRIDDYNFMILIBRARY_LOC $<TARGET_FILE_DIR:fmiGridDynSharedLib>)
+set(GRIDDYNFMILIBRARY_NAME $<TARGET_FILE_NAME:fmiGridDynSharedLib>)
 install(
     TARGETS fmiGridDynSharedLib ${GRIDDYN_EXPORT_COMMAND}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -112,8 +112,13 @@ else(WIN32)
 endif(WIN32)
 
 target_compile_definitions(
-    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}"
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_LOC="${GRIDDYNFMILIBRARY_LOC}"
 )
+
+target_compile_definitions(
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_NAME="${GRIDDYNFMILIBRARY_NAME}"
+)
+
 target_compile_definitions(fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")
 
 list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/testFMIExport.cpp)
