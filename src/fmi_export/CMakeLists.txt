@@ -54,8 +54,6 @@ set_target_properties(fmiBuilder PROPERTIES FOLDER fmi)
 
 target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 
-set(GRIDDYNFMILIBRARY_LOC $<TARGET_FILE_DIR:fmiGridDynSharedLib>)
-set(GRIDDYNFMILIBRARY_NAME $<TARGET_FILE_NAME:fmiGridDynSharedLib>)
 install(
     TARGETS fmiGridDynSharedLib ${GRIDDYN_EXPORT_COMMAND}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -63,6 +61,7 @@ install(
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+set_target_properties(fmiGridDynSharedLib PROPERTIES NO_SONAME ON)
 # Todo when minimum CMake version becomes 3.6: re-add EXCLUDE_FROM_ALL to these two install FILES
 # commands for fmiGridDynSharedLib
 install(FILES $<TARGET_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -112,11 +111,15 @@ else(WIN32)
 endif(WIN32)
 
 target_compile_definitions(
-    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_LOC="${GRIDDYNFMILIBRARY_LOC}"
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_LOC="$<TARGET_FILE_DIR:fmiGridDynSharedLib>"
 )
 
 target_compile_definitions(
-    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_NAME="${GRIDDYNFMILIBRARY_NAME}"
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_NAME="$<TARGET_FILE_NAME:fmiGridDynSharedLib>"
+)
+
+target_compile_definitions(
+    fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_BASE_NAME="$<TARGET_FILE_BASE_NAME:fmiGridDynSharedLib>"
 )
 
 target_compile_definitions(fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")

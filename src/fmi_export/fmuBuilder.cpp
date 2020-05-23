@@ -460,7 +460,7 @@ namespace fmi {
 
         // the cosimulation description section
         auto pElement = doc.NewElement("CoSimulation");
-        pElement->SetAttribute("modelIdentifier", "fmiGridDynSharedLib");
+        pElement->SetAttribute("modelIdentifier", GRIDDYNFMILIBRARY_BASE_NAME);
         pElement->SetAttribute("canHandleVariableCommunicationStepSize", "true");
 
         pRoot->InsertEndChild(pElement);
