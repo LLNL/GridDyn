@@ -113,10 +113,10 @@ endif(WIN32)
 target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYN_TEST_DIRECTORY="${test_dir}")
 
 target_compile_definitions(
-    griddyn_test_base INTERFACE -DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}"
+    griddyn_test_base INTERFACE -DGRIDDYNMAIN_LOCATION="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
 )
 target_compile_definitions(
-    griddyn_test_base INTERFACE -DGRIDDYNSERVER_LOCATION="${GRIDYNSERVER_BINARY_LOC}"
+    griddyn_test_base INTERFACE -DGRIDDYNSERVER_LOCATION="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
 )
 target_compile_definitions(
     griddyn_test_base INTERFACE -DGRIDDYNINSTALL_LOCATION="${CMAKE_INSTALL_PREFIX}"
