@@ -294,6 +294,10 @@ path fmiLibrary::findSoPath(fmutype_t type)
             if (exists(sopath)) {
                 return sopath;
             }
+            else
+            {
+                printf("checking %s but doesn't exist\n", sopath.string().c_str());
+            }
 #ifdef MACOS
             sopath /= "darwin64";
             sopath /= identifier + ".so";
