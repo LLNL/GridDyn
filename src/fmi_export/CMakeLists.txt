@@ -61,7 +61,7 @@ install(
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-set_target_properties(fmiGridDynSharedLib PROPERTIES NO_SONAME ON)
+set_target_properties(fmiGridDynSharedLib PROPERTIES NO_SONAME ON PREFIX "")
 # Todo when minimum CMake version becomes 3.6: re-add EXCLUDE_FROM_ALL to these two install FILES
 # commands for fmiGridDynSharedLib
 install(FILES $<TARGET_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_BINDIR}
