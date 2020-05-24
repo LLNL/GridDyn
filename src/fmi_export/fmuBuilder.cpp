@@ -82,7 +82,7 @@ namespace fmi {
 
         app->add_flag("--keep_dir", keep_dir, "keep the temporary directory after building")
             ->ignore_underscore();
-
+        loadFmiExportReaderInfoDefinitions(ri);
         return app;
     }
 
