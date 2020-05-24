@@ -221,8 +221,12 @@ void fmiLibrary::loadSharedLibrary(fmutype_t type)
         lib = std::make_shared<boost::dll::shared_library>(sopath);
         if (lib->is_loaded()) {
             loaded = true;
+        } else {
+            printf("unable to load shared file %s\n", sopath.string().c_str());
         }
-    }
+    } else {
+        printf("unable to locate shared file \n");
+        }
     if (loaded) {
         loadBaseFunctions();
         loadCommonFunctions();
@@ -294,7 +298,8 @@ path fmiLibrary::findSoPath(fmutype_t type)
             sopath /= "darwin64";
             sopath /= identifier + ".so";
 #endif
-        } else {
+        }
+    else {
 #ifdef _WIN32
         sopath /= "win32";
         sopath /= identifier + ".dll";
