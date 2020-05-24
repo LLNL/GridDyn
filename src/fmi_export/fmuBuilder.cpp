@@ -90,6 +90,7 @@ namespace fmi {
     /** helper function to copy a file and overwrite if requested*/
     bool testCopyFile(path const& source, path const& dest, bool overwrite = false)
     {
+        std::cout << "copying " << source << " to " << dest << std::endl;
         copy_option option = copy_option::fail_if_exists;
         if (overwrite) {
             option = copy_option::overwrite_if_exists;
