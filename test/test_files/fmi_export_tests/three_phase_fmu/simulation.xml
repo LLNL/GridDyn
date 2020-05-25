@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--xml file to test matdyn execution-->
+<!--xml file to test cdf execution-->
 <griddyn name="ieee14bus_cyme_link" version="0.0.1">
    <import file="ieee14.cdf"/>
 

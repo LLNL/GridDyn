@@ -136,9 +136,9 @@ namespace loads {
                         bus->getVoltage(), puV, unitType, systemBasePower, localBaseVoltage);
                 }
                 case 'a': {
-                    double A = getBaseAngle();
+                    double angle = getBaseAngle();
                     double phaseAngle = phaseSelector(
-                        param[1], A, A + 2.0 * kPI / 3.0, A + 4.0 * kPI / 3.0, kNullVal);
+                        param[1], angle, angle + 2.0 * kPI / 3.0, angle + 4.0 * kPI / 3.0, kNullVal);
                     return convert(phaseAngle, rad, unitType, systemBasePower, localBaseVoltage);
                 }
                 default:

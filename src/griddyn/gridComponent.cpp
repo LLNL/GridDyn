@@ -124,11 +124,11 @@ void gridComponent::pFlowInitializeA(coreTime time0, std::uint32_t flags)
 {
     if (localBaseVoltage == kNullVal) {
         if (isRoot()) {  // NOLINT
-            localBaseVoltage = 120.0;
+            localBaseVoltage = 120000.0;
         } else if (dynamic_cast<gridComponent*>(getParent()) != nullptr) {
             localBaseVoltage = static_cast<gridComponent*>(getParent())->localBaseVoltage;
         } else {
-            localBaseVoltage = 120.0;
+            localBaseVoltage = 120000.0;
         }
     }
     if (isEnabled()) {
@@ -686,7 +686,7 @@ void gridComponent::set(const std::string& param, double val, units::unit unitTy
         setAll("all", "basepower", systemBasePower);
     } else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") ||
                (param == "basev") || (param == "bv") || (param == "base voltage")) {
-        localBaseVoltage = units::convert(val, unitType, units::kV);
+        localBaseVoltage = units::convert(val, unitType, units::V);
     } else if ((param == "basefreq") || (param == "basefrequency") ||
                (param == "systembasefrequency")) {
         systemBaseFrequency = units::convert(val, unitType, units::rad / units::s);
