@@ -300,7 +300,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
             sopath /= identifier + ".so";
 #endif
         }
-    else {
+    else {  // NOLINT
 #ifdef _WIN32
         sopath /= "win32";
         sopath /= identifier + ".dll";
