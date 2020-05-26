@@ -22,11 +22,11 @@ else()
     cmake_policy(VERSION 3.17)
 endif()
 
-project(GRIDDYN VERSION 0.9.2)
+project(GRIDDYN VERSION 0.9.3)
 
 # version number
 set(GRIDDYN_VERSION_BUILD)
-set(GRIDDYN_DATE "05-12-2020")
+set(GRIDDYN_DATE "05-19-2020")
 
 set(GRIDDYN_VERSION_UNDERSCORE
     "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}"
@@ -79,10 +79,21 @@ include(CTest)
 include(ucm)
 include(GNUInstallDirs)
 
+# Set the build output paths
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Archive output dir.")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Library output dir.")
+    set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        CACHE PATH "PDB (MSVC debug symbol)output dir."
+    )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" CACHE PATH
+                                                                       "Executable/dll output dir."
+    )
+endif()
 # ------------------------------------------------------------
 # set the install path to a local directory
 # ------------------------------------------------------------
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(WIN32)
         if(MSVC)
             set(CMAKE_INSTALL_PREFIX "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"

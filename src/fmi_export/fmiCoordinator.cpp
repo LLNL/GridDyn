@@ -54,7 +54,7 @@ namespace fmi {
     void fmiCoordinator::registerInput(const std::string& inputName, fmiEvent* evnt)
     {
         auto fnd = vrNames.find(inputName);
-        if (fnd != vrNames.end()) {
+        if (fnd == vrNames.end()) {
             auto vr = nextVR++;
             inputVR.emplace_back(vr, inputSet{inputName, evnt});
             vrNames.emplace(inputName, vr);
