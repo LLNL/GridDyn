@@ -11,6 +11,7 @@
  */
 
 #include "fmiEnumDefinitions.h"
+
 #include "fmiInfo.h"
 #include "gmlc/containers/mapOps.hpp"
 #include "gmlc/utilities/stringOps.h"

@@ -279,7 +279,7 @@ namespace fmi {
                 cs->set(param, val);
                 resetState();
             } else {
-                gridSubModel::set(param, val,unitType);
+                gridSubModel::set(param, val, unitType);
             }
         }
     }
@@ -407,7 +407,9 @@ namespace fmi {
         return res;
     }
 
-    void fmiCoSimSubModel::timestep(coreTime /*time*/, const IOdata& /*inputs*/, const solverMode& /*sMode*/)
+    void fmiCoSimSubModel::timestep(coreTime /*time*/,
+                                    const IOdata& /*inputs*/,
+                                    const solverMode& /*sMode*/)
     {
         assert(unimplemented);
         /*
@@ -460,7 +462,7 @@ namespace fmi {
 
     void fmiCoSimSubModel::ioPartialDerivatives(const IOdata& /*inputs*/,
                                                 const stateData& /*sD*/,
-                                                matrixData<double>&/* md*/,
+                                                matrixData<double>& /* md*/,
                                                 const IOlocs& /*inputLocs*/,
                                                 const solverMode& /*sMode*/)
     {
@@ -511,11 +513,11 @@ namespace fmi {
         if (cs->getCurrentMode() >= fmuMode::initializationMode) {
             // updateInfo(inputs, sD, sMode);
             cs->getOutputs(out.data());
-         /*   printf("time=%f, out1 =%f, out 2=%f\n",
-                   static_cast<double>((!sD.empty()) ? sD.time : prevTime),
-                   out[0],
-                   out[1]);
-                   */
+            /*   printf("time=%f, out1 =%f, out 2=%f\n",
+                      static_cast<double>((!sD.empty()) ? sD.time : prevTime),
+                      out[0],
+                      out[1]);
+                      */
             if ((opFlags[use_output_estimator]) && (!sD.empty()) &&
                 (!opFlags[fixed_output_interval]) && (isDynamic(sMode))) {
                 for (index_t pp = 0; pp < m_outputSize; ++pp) {
@@ -643,11 +645,11 @@ namespace fmi {
         }
     }
 
-    void fmiCoSimSubModel::loadOutputJac(int index) // NOLINT
+    void fmiCoSimSubModel::loadOutputJac(int index)  // NOLINT
     {
         // double pd;
         // int ct = 0;
-        if (index == -1) { // NOLINT
+        if (index == -1) {  // NOLINT
             /*
         for (auto &out : outputInformation)
         {
@@ -670,7 +672,7 @@ namespace fmi {
             }
         }
         */
-        } else { // NOLINT
+        } else {  // NOLINT
             /*
         if (outputInformation[index].refMode >= refMode_t::level4)
         {
