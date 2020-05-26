@@ -126,7 +126,7 @@ namespace fmi {
     void fmiCoSimSubModel::getParameterStrings(stringVec& pstr, paramStringType pstype) const
     {
         int strpcnt = 0;
-        auto* info = cs->fmuInformation();
+        const auto* info = cs->fmuInformation();
         auto vcnt = info->getCounts("variables");
         switch (pstype) {
             case paramStringType::all:

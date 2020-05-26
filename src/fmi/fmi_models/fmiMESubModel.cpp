@@ -129,7 +129,7 @@ namespace fmi {
     void fmiMESubModel::getParameterStrings(stringVec& pstr, paramStringType pstype) const
     {
         int strpcnt{0};
-        auto* info = me->fmuInformation();
+        const auto* info = me->fmuInformation();
         auto vcnt = info->getCounts("variables");
         switch (pstype) {
             case paramStringType::all:
