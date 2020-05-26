@@ -304,8 +304,9 @@ BOOST_AUTO_TEST_CASE(test_fmi_runner2)
         val2 = val2b;
         val3 = val3b;
         auto gb = runner->Get(ivr);
+        // this won't be that close since it is averaged across 3 phases
         BOOST_CHECK_SMALL(std::abs(gb - 100.0),
-                          0.5);  // this won't be that close since it is averaged across 3 phases
+                          0.5); 
     }
 
     const std::set<std::string> currentAngleInputs{"Bus11_IAngleA",
