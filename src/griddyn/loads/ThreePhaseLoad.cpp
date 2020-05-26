@@ -44,7 +44,7 @@ namespace loads {
 
     coreObject* ThreePhaseLoad::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<ThreePhaseLoad, Load>(this, obj);
+        auto* nobj = cloneBase<ThreePhaseLoad, Load>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }
@@ -132,13 +132,19 @@ namespace loads {
                                    unitType,
                                    systemBasePower);
                 case 'v': {
-                    return convert(
-                        bus->getVoltage(), puV, unitType, systemBasePower, localBaseVoltage);
+                    return convert(bus->getVoltage(),
+                                   puV,
+                                   unitType,
+                                   systemBasePower * 1000000.0,
+                                   localBaseVoltage);
                 }
                 case 'a': {
-                    double A = getBaseAngle();
-                    double phaseAngle = phaseSelector(
-                        param[1], A, A + 2.0 * kPI / 3.0, A + 4.0 * kPI / 3.0, kNullVal);
+                    double angle = getBaseAngle();
+                    double phaseAngle = phaseSelector(param[1],
+                                                      angle,
+                                                      angle + 2.0 * kPI / 3.0,
+                                                      angle + 4.0 * kPI / 3.0,
+                                                      kNullVal);
                     return convert(phaseAngle, rad, unitType, systemBasePower, localBaseVoltage);
                 }
                 default:
@@ -149,13 +155,15 @@ namespace loads {
             {
                 auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
                 Vc = Vc * phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
-                return convert(Vc.real(), puV, unitType, systemBasePower, localBaseVoltage);
+                return convert(
+                    Vc.real(), puV, unitType, systemBasePower * 1000000.0, localBaseVoltage);
             }
             if (param.compare(0, 2, "vj") == 0)  // get the reactive part of the voltage
             {
                 auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
                 Vc = Vc * phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
-                return convert(Vc.imag(), puV, unitType, systemBasePower, localBaseVoltage);
+                return convert(
+                    Vc.imag(), puV, unitType, systemBasePower * 1000000.0, localBaseVoltage);
             }
         } else if (param.compare(0, 4, "imag") == 0) {
             switch (param[4]) {
@@ -166,7 +174,7 @@ namespace loads {
                     return convert(std::abs(ia) / multiplier,
                                    puA,
                                    unitType,
-                                   systemBasePower,
+                                   systemBasePower * 1000000.0,
                                    localBaseVoltage);
                 }
                 case 'b': {
@@ -177,7 +185,7 @@ namespace loads {
                     return convert(std::abs(ib) / multiplier,
                                    puA,
                                    unitType,
-                                   systemBasePower,
+                                   systemBasePower * 1000000.0,
                                    localBaseVoltage);
                 }
                 case 'c': {
@@ -188,7 +196,7 @@ namespace loads {
                     return convert(std::abs(ic) / multiplier,
                                    puA,
                                    unitType,
-                                   systemBasePower,
+                                   systemBasePower * 1000000.0,
                                    localBaseVoltage);
                 }
             }
@@ -285,10 +293,10 @@ namespace loads {
                     auto sa = std::complex<double>(Pa, Qa);
                     auto ia = sa / va;
 
-                    auto newia =
-                        std::polar(convert(val, unitType, puA, systemBasePower, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ia));
+                    auto newia = std::polar(
+                        convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
+                            multiplier,
+                        std::arg(ia));
                     auto newP = newia * va;
                     setPa(newP.real());
                     setQa(newP.imag());
@@ -300,10 +308,10 @@ namespace loads {
                     auto sb = std::complex<double>(Pb, Qb);
                     auto ib = sb / vb;
 
-                    auto newib =
-                        std::polar(convert(val, unitType, puA, systemBasePower, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ib));
+                    auto newib = std::polar(
+                        convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
+                            multiplier,
+                        std::arg(ib));
                     auto newP = newib * vb;
                     setPb(newP.real());
                     setQb(newP.imag());
@@ -313,10 +321,10 @@ namespace loads {
                     auto sc = std::complex<double>(Pc, Qc);
                     auto ic = sc / vc;
 
-                    auto newic =
-                        std::polar(convert(val, unitType, puA, systemBasePower, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ic));
+                    auto newic = std::polar(
+                        convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
+                            multiplier,
+                        std::arg(ic));
                     auto newP = newic * vc;
                     setPc(newP.real());
                     setQc(newP.imag());
