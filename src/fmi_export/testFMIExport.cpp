@@ -25,7 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 // test case for fmi_export functions
 
 #include "../test/testHelper.h"
@@ -185,15 +185,15 @@ BOOST_AUTO_TEST_CASE(load_griddyn_fmu)
     b2->setMode(fmuMode::initializationMode);
 
     BOOST_CHECK(b->getCurrentMode() == fmuMode::initializationMode);
-    BOOST_CHECK_EQUAL(b->inputSize(), 1);
-    BOOST_CHECK_EQUAL(b->outputSize(), 1);
+    BOOST_REQUIRE_EQUAL(b->inputSize(), 1);
+    BOOST_REQUIRE_EQUAL(b->outputSize(), 1);
 
     double input = 0.6;
     b->setInputs(&input);
     auto inputName = b->getInputNames();
-    BOOST_CHECK_EQUAL(inputName[0], "power");
+    BOOST_REQUIRE_EQUAL(inputName[0], "power");
     auto outputName = b->getOutputNames();
-    BOOST_CHECK_EQUAL(outputName[0], "load");
+    BOOST_REQUIRE_EQUAL(outputName[0], "load");
     b->setMode(fmuMode::stepMode);
     b2->setMode(fmuMode::stepMode);
     BOOST_CHECK(b2->getCurrentMode() == fmuMode::stepMode);
@@ -304,8 +304,9 @@ BOOST_AUTO_TEST_CASE(test_fmi_runner2)
         val2 = val2b;
         val3 = val3b;
         auto gb = runner->Get(ivr);
+        // this won't be that close since it is averaged across 3 phases
         BOOST_CHECK_SMALL(std::abs(gb - 100.0),
-                          0.5);  // this won't be that close since it is averaged across 3 phases
+                          0.5); 
     }
 
     const std::set<std::string> currentAngleInputs{"Bus11_IAngleA",

@@ -169,8 +169,8 @@ class fmiLibrary {
 
     std::unique_ptr<fmi2ModelExchangeObject> createModelExchangeObject(const std::string& name);
     std::unique_ptr<fmi2CoSimObject> createCoSimulationObject(const std::string& name);
-    std::string getTypes();
-    std::string getVersion();
+    std::string getTypes() const;
+    std::string getVersion() const;
 
   private:  // private functions
     void loadInformation();

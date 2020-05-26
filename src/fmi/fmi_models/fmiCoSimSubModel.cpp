@@ -58,8 +58,8 @@ namespace fmi {
     }
 
     void fmiCoSimSubModel::dynObjectInitializeB(const IOdata& inputs,
-                                                const IOdata& desiredOutput,
-                                                IOdata& fieldSet)
+                                                const IOdata& /*desiredOutput*/,
+                                                IOdata& /*fieldSet*/)
     {
         if (opFlags[pflow_init_required]) {
             if (opFlags[pFlow_initialized]) {
@@ -87,8 +87,7 @@ namespace fmi {
             }
             */
                 opFlags.set(dyn_initialized);
-            } else  // in pflow mode
-            {
+            } else {  // in pflow mode
                 cs->setMode(fmuMode::initializationMode);
 
                 cs->setInputs(inputs.data());
@@ -127,7 +126,7 @@ namespace fmi {
     void fmiCoSimSubModel::getParameterStrings(stringVec& pstr, paramStringType pstype) const
     {
         int strpcnt = 0;
-        auto info = cs->fmuInformation();
+        const auto* info = cs->fmuInformation();
         auto vcnt = info->getCounts("variables");
         switch (pstype) {
             case paramStringType::all:
@@ -280,7 +279,7 @@ namespace fmi {
                 cs->set(param, val);
                 resetState();
             } else {
-                gridSubModel::set(param, val);
+                gridSubModel::set(param, val,unitType);
             }
         }
     }
@@ -296,7 +295,7 @@ namespace fmi {
         return gridSubModel::get(param, unitType);
     }
 
-    double fmiCoSimSubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
+    double fmiCoSimSubModel::getPartial(int depIndex, int refIndex, refMode_t /*mode*/)
     {
         double res = 0.0;
         double ich = 1.0;
@@ -408,7 +407,7 @@ namespace fmi {
         return res;
     }
 
-    void fmiCoSimSubModel::timestep(coreTime time, const IOdata& inputs, const solverMode& sMode)
+    void fmiCoSimSubModel::timestep(coreTime /*time*/, const IOdata& /*inputs*/, const solverMode& /*sMode*/)
     {
         assert(unimplemented);
         /*
@@ -459,11 +458,11 @@ namespace fmi {
     */
     }
 
-    void fmiCoSimSubModel::ioPartialDerivatives(const IOdata& inputs,
-                                                const stateData& sD,
-                                                matrixData<double>& md,
-                                                const IOlocs& inputLocs,
-                                                const solverMode& sMode)
+    void fmiCoSimSubModel::ioPartialDerivatives(const IOdata& /*inputs*/,
+                                                const stateData& /*sD*/,
+                                                matrixData<double>&/* md*/,
+                                                const IOlocs& /*inputLocs*/,
+                                                const solverMode& /*sMode*/)
     {
         assert(unimplemented);
         /*
@@ -504,7 +503,7 @@ namespace fmi {
     */
     }
 
-    IOdata fmiCoSimSubModel::getOutputs(const IOdata& inputs,
+    IOdata fmiCoSimSubModel::getOutputs(const IOdata& /*inputs*/,
                                         const stateData& sD,
                                         const solverMode& sMode) const
     {
@@ -512,10 +511,11 @@ namespace fmi {
         if (cs->getCurrentMode() >= fmuMode::initializationMode) {
             // updateInfo(inputs, sD, sMode);
             cs->getOutputs(out.data());
-            printf("time=%f, out1 =%f, out 2=%f\n",
+         /*   printf("time=%f, out1 =%f, out 2=%f\n",
                    static_cast<double>((!sD.empty()) ? sD.time : prevTime),
                    out[0],
                    out[1]);
+                   */
             if ((opFlags[use_output_estimator]) && (!sD.empty()) &&
                 (!opFlags[fixed_output_interval]) && (isDynamic(sMode))) {
                 for (index_t pp = 0; pp < m_outputSize; ++pp) {
@@ -533,14 +533,14 @@ namespace fmi {
     }
 
     double fmiCoSimSubModel::getDoutdt(const IOdata& /*inputs*/,
-                                       const stateData& sD,
-                                       const solverMode& sMode,
-                                       index_t outputNum) const
+                                       const stateData& /*sD*/,
+                                       const solverMode& /*sMode*/,
+                                       index_t /*outputNum*/) const
     {
         return 0;
     }
 
-    double fmiCoSimSubModel::getOutput(const IOdata& inputs,
+    double fmiCoSimSubModel::getOutput(const IOdata& /*inputs*/,
                                        const stateData& sD,
                                        const solverMode& sMode,
                                        index_t outputNum) const
@@ -643,11 +643,11 @@ namespace fmi {
         }
     }
 
-    void fmiCoSimSubModel::loadOutputJac(int index)
+    void fmiCoSimSubModel::loadOutputJac(int index) // NOLINT
     {
         // double pd;
         // int ct = 0;
-        if (index == -1) {
+        if (index == -1) { // NOLINT
             /*
         for (auto &out : outputInformation)
         {
@@ -670,7 +670,7 @@ namespace fmi {
             }
         }
         */
-        } else {
+        } else { // NOLINT
             /*
         if (outputInformation[index].refMode >= refMode_t::level4)
         {

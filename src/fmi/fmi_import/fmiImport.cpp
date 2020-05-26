@@ -131,7 +131,7 @@ void fmiLibrary::loadInformation()
     }
 }
 
-std::string fmiLibrary::getTypes()
+std::string fmiLibrary::getTypes() const
 {
     if (isSoLoaded()) {
         return std::string(baseFunctions.fmi2GetTypesPlatform());
@@ -139,7 +139,7 @@ std::string fmiLibrary::getTypes()
     return "";
 }
 
-std::string fmiLibrary::getVersion()
+std::string fmiLibrary::getVersion() const
 {
     if (isSoLoaded()) {
         return std::string(baseFunctions.fmi2GetVersion());
@@ -166,7 +166,7 @@ std::unique_ptr<fmi2ModelExchangeObject>
         if (!callbacks) {
             makeCallbackFunctions();
         }
-        auto comp =
+        auto* comp =
             baseFunctions.fmi2Instantiate(name.c_str(),
                                           fmi2ModelExchange,
                                           information->getString("guid").c_str(),
@@ -194,7 +194,7 @@ std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject(const std:
         if (!callbacks) {
             makeCallbackFunctions();
         }
-        auto comp =
+        auto* comp =
             baseFunctions.fmi2Instantiate(name.c_str(),
                                           fmi2CoSimulation,
                                           information->getString("guid").c_str(),
@@ -221,8 +221,12 @@ void fmiLibrary::loadSharedLibrary(fmutype_t type)
         lib = std::make_shared<boost::dll::shared_library>(sopath);
         if (lib->is_loaded()) {
             loaded = true;
+        } else {
+            printf("unable to load shared file %s\n", sopath.string().c_str()); //NOLINT
         }
-    }
+    } else {
+        printf("unable to locate shared file \n");  //NOLINT
+        }
     if (loaded) {
         loadBaseFunctions();
         loadCommonFunctions();
@@ -290,6 +294,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
             if (exists(sopath)) {
                 return sopath;
             }
+            printf("checking %s but doesn't exist\n", sopath.string().c_str()); // NOLINT
 #ifdef MACOS
             sopath /= "darwin64";
             sopath /= identifier + ".so";
@@ -324,7 +329,7 @@ void fmiLibrary::loadBaseFunctions()
     baseFunctions.fmi2Instantiate = lib->get<fmi2InstantiateTYPE>("fmi2Instantiate");
 }
 
-// TODO:: PT move these to the constructors of the function libraries
+// TODO(PT): move these to the constructors of the function libraries
 void fmiLibrary::loadCommonFunctions()
 {
     commonFunctions = std::make_shared<fmiCommonFunctions>();
@@ -432,6 +437,7 @@ void fmiLibrary::makeCallbackFunctions()
 }
 
 #define STRING_BUFFER_SIZE 1000
+// NOLINTNEXTLINE
 void loggerFunc(fmi2ComponentEnvironment /* compEnv */,
                 fmi2String /* instanceName */,
                 fmi2Status /* status */,
@@ -439,10 +445,10 @@ void loggerFunc(fmi2ComponentEnvironment /* compEnv */,
                 fmi2String message,
                 ...)
 {
-    std::array<char, STRING_BUFFER_SIZE> temp;
-    va_list arglist;
-    va_start(arglist, message);
+    std::array<char, STRING_BUFFER_SIZE> temp;  // NOLINT
+    va_list arglist; 
+    va_start(arglist, message); //NOLINT
     vsnprintf(temp.data(), STRING_BUFFER_SIZE, message, arglist);
     va_end(arglist);
-    printf("%s\n", temp.data());
+    printf("%s\n", temp.data()); // NOLINT
 }

@@ -9,12 +9,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _FMI_RUNNER_H_
-#define _FMI_RUNNER_H_
+#pragma once
 
 #include "core/coreOwningPtr.hpp"
-#include "fmi/FMI2/fmi2FunctionTypes.h"
+#include "FMI2/fmi2FunctionTypes.h"
 #include "runner/gridDynRunner.h"
 #include <bitset>
 #include <future>
@@ -104,4 +102,3 @@ it inherits from gridDynRunner and adds some extra features necessary for execut
 
 }  // namespace fmi
 }  // namespace griddyn
-#endif
