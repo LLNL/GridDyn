@@ -10,8 +10,8 @@
  * LLNS Copyright End
  */
 
-#include "core/coreExceptions.h"
 #include "FMI2/fmi2Functions.h"
+#include "core/coreExceptions.h"
 #include "fmiRunner.h"
 #include "griddyn/gridDynSimulation.h"
 #include <memory>

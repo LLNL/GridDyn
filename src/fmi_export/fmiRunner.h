@@ -11,8 +11,8 @@
  */
 #pragma once
 
-#include "core/coreOwningPtr.hpp"
 #include "FMI2/fmi2FunctionTypes.h"
+#include "core/coreOwningPtr.hpp"
 #include "runner/gridDynRunner.h"
 #include <bitset>
 #include <future>
