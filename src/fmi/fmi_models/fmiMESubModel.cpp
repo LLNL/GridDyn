@@ -485,18 +485,18 @@ namespace fmi {
         updateLocalCache(inputs, sD, sMode);
         if (isDynamic(sMode)) {
             me->getDerivatives(Loc.destDiffLoc);
-       /*     printf("tt=%f,I=%f, state=%f deriv=%e\n",
-                   static_cast<double>(sD.time),
-                   inputs[0],
-                   Loc.diffStateLoc[0],
-                   Loc.destDiffLoc[0]);*/
+            /*     printf("tt=%f,I=%f, state=%f deriv=%e\n",
+                        static_cast<double>(sD.time),
+                        inputs[0],
+                        Loc.diffStateLoc[0],
+                        Loc.destDiffLoc[0]);*/
         } else {
             me->getDerivatives(Loc.destLoc);
-      /*      printf("tt=%f,I=%f, state=%f,deriv=%e\n",
-                   static_cast<double>(sD.time),
-                   inputs[0],
-                   Loc.algStateLoc[0],
-                   Loc.destLoc[0]);*/
+            /*      printf("tt=%f,I=%f, state=%f,deriv=%e\n",
+                         static_cast<double>(sD.time),
+                         inputs[0],
+                         Loc.algStateLoc[0],
+                         Loc.destLoc[0]);*/
         }
     }
 

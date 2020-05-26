@@ -140,8 +140,11 @@ namespace loads {
                 }
                 case 'a': {
                     double angle = getBaseAngle();
-                    double phaseAngle = phaseSelector(
-                        param[1], angle, angle + 2.0 * kPI / 3.0, angle + 4.0 * kPI / 3.0, kNullVal);
+                    double phaseAngle = phaseSelector(param[1],
+                                                      angle,
+                                                      angle + 2.0 * kPI / 3.0,
+                                                      angle + 4.0 * kPI / 3.0,
+                                                      kNullVal);
                     return convert(phaseAngle, rad, unitType, systemBasePower, localBaseVoltage);
                 }
                 default:
@@ -193,7 +196,7 @@ namespace loads {
                     return convert(std::abs(ic) / multiplier,
                                    puA,
                                    unitType,
-                                   systemBasePower*1000000.0,
+                                   systemBasePower * 1000000.0,
                                    localBaseVoltage);
                 }
             }
@@ -290,10 +293,10 @@ namespace loads {
                     auto sa = std::complex<double>(Pa, Qa);
                     auto ia = sa / va;
 
-                    auto newia =
-                        std::polar(convert(val, unitType, puA, systemBasePower*1000000.0, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ia));
+                    auto newia = std::polar(
+                        convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
+                            multiplier,
+                        std::arg(ia));
                     auto newP = newia * va;
                     setPa(newP.real());
                     setQa(newP.imag());
@@ -307,8 +310,8 @@ namespace loads {
 
                     auto newib = std::polar(
                         convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ib));
+                            multiplier,
+                        std::arg(ib));
                     auto newP = newib * vb;
                     setPb(newP.real());
                     setQb(newP.imag());
@@ -320,8 +323,8 @@ namespace loads {
 
                     auto newic = std::polar(
                         convert(val, unitType, puA, systemBasePower * 1000000.0, localBaseVoltage) *
-                                       multiplier,
-                                   std::arg(ic));
+                            multiplier,
+                        std::arg(ic));
                     auto newP = newic * vc;
                     setPc(newP.real());
                     setQc(newP.imag());

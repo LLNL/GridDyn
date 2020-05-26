@@ -222,11 +222,11 @@ void fmiLibrary::loadSharedLibrary(fmutype_t type)
         if (lib->is_loaded()) {
             loaded = true;
         } else {
-            printf("unable to load shared file %s\n", sopath.string().c_str()); //NOLINT
+            printf("unable to load shared file %s\n", sopath.string().c_str());  // NOLINT
         }
     } else {
-        printf("unable to locate shared file \n");  //NOLINT
-        }
+        printf("unable to locate shared file \n");  // NOLINT
+    }
     if (loaded) {
         loadBaseFunctions();
         loadCommonFunctions();
@@ -294,7 +294,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
             if (exists(sopath)) {
                 return sopath;
             }
-            printf("checking %s but doesn't exist\n", sopath.string().c_str()); // NOLINT
+            printf("checking %s but doesn't exist\n", sopath.string().c_str());  // NOLINT
 #ifdef MACOS
             sopath /= "darwin64";
             sopath /= identifier + ".so";
@@ -446,9 +446,9 @@ void loggerFunc(fmi2ComponentEnvironment /* compEnv */,
                 ...)
 {
     std::array<char, STRING_BUFFER_SIZE> temp;  // NOLINT
-    va_list arglist; 
-    va_start(arglist, message); //NOLINT
+    va_list arglist;
+    va_start(arglist, message);  // NOLINT
     vsnprintf(temp.data(), STRING_BUFFER_SIZE, message, arglist);
     va_end(arglist);
-    printf("%s\n", temp.data()); // NOLINT
+    printf("%s\n", temp.data());  // NOLINT
 }

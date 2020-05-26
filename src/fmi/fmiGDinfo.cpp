@@ -25,6 +25,7 @@ You should have received a copy of the FMILIB_License.txt file
 along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 */
 #include "fmiGDinfo.h"
+
 #include "core/objectFactoryTemplates.hpp"
 #include "fmi_importGD.h"
 #include "fmi_models/CymeDistLoad.h"
