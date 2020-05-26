@@ -115,8 +115,7 @@ namespace helicsLib {
                     mp_dOdt = 0;
                 }
                 prevVal = newVal;
-            } else  // output will ramp up to the specified value in the update period
-            {
+            } else {  // output will ramp up to the specified value in the update period
                 mp_dOdt = (newVal - m_output) / updatePeriod;
                 prevVal = m_output;
             }

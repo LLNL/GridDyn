@@ -128,8 +128,8 @@ namespace fmi {
 
     void fmiMESubModel::getParameterStrings(stringVec& pstr, paramStringType pstype) const
     {
-        int strpcnt = 0;
-        auto info = me->fmuInformation();
+        int strpcnt{0};
+        const auto* info = me->fmuInformation();
         auto vcnt = info->getCounts("variables");
         switch (pstype) {
             case paramStringType::all:
@@ -329,9 +329,7 @@ namespace fmi {
         stateSizes SS;
         if (hasDifferential(sMode)) {
             SS.diffSize = m_stateSize;
-        }
-
-        else if (!isDynamic(sMode) && opFlags[pflow_init_required]) {
+        } else if (!isDynamic(sMode) && opFlags[pflow_init_required]) {
             SS.algSize = m_stateSize;
         }
         return SS;
@@ -367,7 +365,7 @@ namespace fmi {
             me->setTime(time);
             int eventMode;
             int terminate;
-            me->completedIntegratorStep(true, &eventMode, &terminate);
+            me->completedIntegratorStep(fmi2True, &eventMode, &terminate);
 
             if ((opFlags[use_output_estimator]) && (!opFlags[fixed_output_interval])) {
                 IOdata ip(m_inputSize);
@@ -394,7 +392,7 @@ namespace fmi {
             me->setTime(time);
             int eventMode;
             int terminate;
-            me->completedIntegratorStep(true, &eventMode, &terminate);
+            me->completedIntegratorStep(fmi2True, &eventMode, &terminate);
         }
         prevTime = time;
     }
@@ -487,33 +485,35 @@ namespace fmi {
         updateLocalCache(inputs, sD, sMode);
         if (isDynamic(sMode)) {
             me->getDerivatives(Loc.destDiffLoc);
-            printf("tt=%f,I=%f, state=%f deriv=%e\n",
-                   static_cast<double>(sD.time),
-                   inputs[0],
-                   Loc.diffStateLoc[0],
-                   Loc.destDiffLoc[0]);
+            /*     printf("tt=%f,I=%f, state=%f deriv=%e\n",
+                        static_cast<double>(sD.time),
+                        inputs[0],
+                        Loc.diffStateLoc[0],
+                        Loc.destDiffLoc[0]);*/
         } else {
             me->getDerivatives(Loc.destLoc);
-            printf("tt=%f,I=%f, state=%f,deriv=%e\n",
-                   static_cast<double>(sD.time),
-                   inputs[0],
-                   Loc.algStateLoc[0],
-                   Loc.destLoc[0]);
+            /*      printf("tt=%f,I=%f, state=%f,deriv=%e\n",
+                         static_cast<double>(sD.time),
+                         inputs[0],
+                         Loc.algStateLoc[0],
+                         Loc.destLoc[0]);*/
         }
     }
 
-    const static double gap = 1e-8;
+    static constexpr double gap{1e-8};
     double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
     {
-        double res = 0.0;
-        double ich = 1.0;
+        double res{0.0};
+        double ich{1.0};
         fmiVariableSet vx = me->getVariableSet(depIndex);
         fmiVariableSet vy = me->getVariableSet(refIndex);
         if (opFlags[has_derivative_function]) {
             res = me->getPartialDerivative(depIndex, refIndex, ich);
         } else {
-            double out1, out2;
-            double val1, val2;
+            double out1;
+            double out2;
+            double val1;
+            double val2;
             fmi2Boolean evmd;
             fmi2Boolean term;
 
@@ -542,30 +542,28 @@ namespace fmi {
                 me->setStates(tempState.data());
                 me->getDerivatives(tempdState.data());
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level3)  // max useful for states dependent variables
-            {
+            } else if (mode == refMode_t::level3) {
+                // max useful for states dependent variables
                 me->getStates(tempState.data());
                 tempState[refIndex] = val2;
                 me->setStates(tempState.data());
-                me->completedIntegratorStep(false, &evmd, &term);
+                me->completedIntegratorStep(fmi2False, &evmd, &term);
                 me->getDerivatives(tempdState.data());
 
                 me->get(vx, &out2);
                 tempState[refIndex] = val1;
                 me->setStates(tempState.data());
                 me->getDerivatives(tempdState.data());
-                me->completedIntegratorStep(false, &evmd, &term);
+                me->completedIntegratorStep(fmi2False, &evmd, &term);
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level4)  // for input dependencies only
-            {
+            } else if (mode == refMode_t::level4) {  // for input dependencies only
                 me->set(vy, &val2);
-                me->completedIntegratorStep(false, &evmd, &term);
+                me->completedIntegratorStep(fmi2False, &evmd, &term);
                 me->get(vx, &out2);
                 me->set(vy, &val1);
-                me->completedIntegratorStep(false, &evmd, &term);
+                me->completedIntegratorStep(fmi2False, &evmd, &term);
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level5)  // for input dependencies only
-            {
+            } else if (mode == refMode_t::level5) {  // for input dependencies only
                 me->set(vy, &val2);
                 me->getStates(tempState.data());
                 me->setStates(tempState.data());
@@ -575,19 +573,17 @@ namespace fmi {
                 me->setStates(tempState.data());
                 me->getDerivatives(tempdState.data());
                 res = (out2 - out1) / gap;
-            } else if (mode == refMode_t::level7)  // use the estimators
-            {
+            } else if (mode == refMode_t::level7) {  // use the estimators
                 if (opFlags[fixed_output_interval]) {
                     res = 0;
                 } else {
                     res = oEst[depIndex]->stateDiff[refIndex];
                 }
-            } else if (mode == refMode_t::level8)  // use the estimators
-            {
+            } else if (mode == refMode_t::level8) {  // use the estimators
                 if (opFlags[fixed_output_interval]) {
                     res = 0;
                 } else {
-                    res = oEst[depIndex]->inputDiff[refIndex];  // TODO:: this is wrong
+                    res = oEst[depIndex]->inputDiff[refIndex];  // TODO(PT):: this is wrong
                 }
             }
         }
@@ -691,7 +687,7 @@ namespace fmi {
             me->setStates(m_state.data());
 
             // get event indicators at t = time
-            me->completedIntegratorStep(false, &eventMode, &terminateSim);
+            me->completedIntegratorStep(fmi2False, &eventMode, &terminateSim);
 
             h = (curTime + h > Tend) ? (Tend - curTime) : localIntegrationTime;
         }
@@ -775,7 +771,7 @@ namespace fmi {
                                     const solverMode& /*sMode*/)
     {
         me->setMode(fmuMode::eventMode);
-        // TODO: deal with the event
+        // TODO(PT): deal with the event
         me->setMode(fmuMode::continuousTimeMode);
     }
 
@@ -876,7 +872,7 @@ namespace fmi {
                     me->getDerivatives(tempdState.data());
                 }
                 if (!isDynamic(sMode)) {
-                    me->completedIntegratorStep(false, &eventMode, &terminateSim);
+                    me->completedIntegratorStep(fmi2False, &eventMode, &terminateSim);
                 }
             }
         } else if (!inputs.empty()) {
@@ -885,7 +881,7 @@ namespace fmi {
                 me->getDerivatives(tempdState.data());
             }
             if (!isDynamic(sMode)) {
-                me->completedIntegratorStep(false, &eventMode, &terminateSim);
+                me->completedIntegratorStep(fmi2False, &eventMode, &terminateSim);
             }
         }
     }

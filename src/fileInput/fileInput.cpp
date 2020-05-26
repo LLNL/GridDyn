@@ -52,9 +52,9 @@ namespace readerConfig {
         } else if ((level == "1") || (level == "summary")) {
             printMode = READER_SUMMARY_PRINT;
         } else if ((level == "2") || (level == "normal")) {
-            printMode = READER_SUMMARY_PRINT;
+            printMode = READER_NORMAL_PRINT;
         } else if ((level == "3") || (level == "verbose")) {
-            printMode = READER_SUMMARY_PRINT;
+            printMode = READER_VERBOSE_PRINT;
         } else {
             WARNPRINT(READER_WARN_IMPORTANT, "invalid printMode");
         }
@@ -194,31 +194,26 @@ void loadFile(coreObject* parentObject,
         }
     } else if (ext == "csv") {
         loadCSV(parentObject, fileName, *ri);
-    } else if ((ext == "raw") || (ext == "psse") || (ext == "pss/e")) {
+    } else if (ext == "raw" || ext == "psse" || ext == "pss/e" || ext == "pti") {
         loadRAW(parentObject, fileName, *ri);
     } else if (ext == "dyr") {
         loadDYR(parentObject, fileName, *ri);
     } else if ((ext == "cdf") || (ext == "txt")) {
         loadCDF(parentObject, fileName, *ri);
     } else if (ext == "uct") {
-    } else if ((ext == "m") || (ext == "matlab")) {
+    } else if (ext == "m" || ext == "matlab") {
         loadMFile(parentObject, fileName, *ri);
     } else if (ext == "psp") {
         loadPSP(parentObject, fileName, *ri);
     } else if (ext == "epc") {
         loadEPC(parentObject, fileName, *ri);
-    } else if (ext == "pti") {
-        loadRAW(parentObject, fileName, *ri);
     } else if (ext == "json") {
         loadElementFile<jsonReaderElement>(parentObject, fileName, ri);
-    }
 #ifdef YAML_FOUND
-    else if ((ext == "yaml") || (ext == "yml")) {
+    } else if ((ext == "yaml") || (ext == "yml")) {
         loadElementFile<yamlReaderElement>(parentObject, fileName, ri);
-    }
 #endif
-    else if (ext == "gdz")  // gridDyn Zipped file
-    {
+    } else if (ext == "gdz") {  // gridDyn Zipped file
         loadGDZ(parentObject, fileName, *ri);
     }
 }
@@ -246,7 +241,7 @@ void addToParentRename(coreObject* objectToAdd, coreObject* parentObject)
 {
     std::string bname = objectToAdd->getName();
     int cnt = 2;
-    auto fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
+    auto* fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
     while (fndObject != nullptr) {
         ++cnt;
         fndObject = parentObject->find(bname + '-' + std::to_string(cnt));

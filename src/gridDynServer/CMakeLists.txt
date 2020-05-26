@@ -14,8 +14,6 @@ set(griddynServer_headers gridDynServer.h)
 
 link_directories(${external_link_directories})
 
-set(GRIDYNSERVER_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-
 add_executable(griddynServer ${griddynServer_sources} ${griddynServer_headers})
 target_include_directories(griddynServer SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 

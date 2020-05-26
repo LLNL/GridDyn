@@ -12,6 +12,8 @@
  * LLNS Copyright End
  */
 
+#include "gridDynfskit.h"
+
 #include "core/factoryTemplates.hpp"
 #include "fskitCommunicator.h"
 #include "fskitRunner.h"

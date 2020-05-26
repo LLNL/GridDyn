@@ -12,9 +12,9 @@
 
 #include "fmiRunner.h"
 
+#include "FMI2/fmi2Functions.h"
 #include "core/coreOwningPtr.hpp"
 #include "fileInput/fileInput.h"
-#include "fmi/FMI2/fmi2Functions.h"
 #include "fmiCoordinator.h"
 #include "gridDynLoader/libraryLoader.h"
 #include "griddyn/gridDynSimulation.h"
