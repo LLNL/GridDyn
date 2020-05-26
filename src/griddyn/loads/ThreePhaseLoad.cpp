@@ -44,7 +44,7 @@ namespace loads {
 
     coreObject* ThreePhaseLoad::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<ThreePhaseLoad, Load>(this, obj);
+        auto* nobj = cloneBase<ThreePhaseLoad, Load>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }

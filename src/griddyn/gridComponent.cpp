@@ -41,7 +41,7 @@ gridComponent::~gridComponent()
 
 coreObject* gridComponent::clone(coreObject* obj) const
 {
-    auto nobj = cloneBase<gridComponent, coreObject>(this, obj);
+    auto* nobj = cloneBase<gridComponent, coreObject>(this, obj);
     if (nobj == nullptr) {
         return obj;
     }
