@@ -44,7 +44,7 @@ stringVec componentFactory::getTypeNames()
 {
     stringVec tnames;
     tnames.reserve(m_factoryMap.size());
-    for (const auto &tname : m_factoryMap) {
+    for (const auto& tname : m_factoryMap) {
         tnames.push_back(tname.first);
     }
     return tnames;
@@ -132,7 +132,7 @@ std::shared_ptr<coreObjectFactory> coreObjectFactory::instance()
 }
 
 void coreObjectFactory::registerFactory(const std::string& name,
-                                        const std::shared_ptr<componentFactory> &tf)
+                                        const std::shared_ptr<componentFactory>& tf)
 {
     auto ret = m_factoryMap.emplace(name, tf);
     if (!ret.second) {
@@ -140,7 +140,7 @@ void coreObjectFactory::registerFactory(const std::string& name,
     }
 }
 
-void coreObjectFactory::registerFactory(const std::shared_ptr<componentFactory> &tf)
+void coreObjectFactory::registerFactory(const std::shared_ptr<componentFactory>& tf)
 {
     auto ret = m_factoryMap.emplace(tf->name, tf);
     if (!ret.second) {
@@ -152,7 +152,7 @@ stringVec coreObjectFactory::getFactoryNames()
 {
     stringVec factoryNames;
     factoryNames.reserve(m_factoryMap.size());
-    for (const auto &factoryName : m_factoryMap) {
+    for (const auto& factoryName : m_factoryMap) {
         factoryNames.push_back(factoryName.first);
     }
     return factoryNames;

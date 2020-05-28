@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #pragma once
-#    include "griddyn/gridDynDefinitions.hpp"
-#    include <iostream>
-#    include <stdexcept>
+#include "griddyn/gridDynDefinitions.hpp"
+#include <iostream>
+#include <stdexcept>
 
-#    define READER_DEFAULT_PRINT READER_NO_PRINT
+#define READER_DEFAULT_PRINT READER_NO_PRINT
 
-#    define LEVELPRINT(LEVEL, X)                                                                   \
-        if (LEVEL <= readerConfig::printMode) (std::cout << X << '\n')
+#define LEVELPRINT(LEVEL, X)                                                                       \
+    if (LEVEL <= readerConfig::printMode) (std::cout << X << '\n')
 
-#    define WARNPRINT(LEVEL, X)                                                                    \
-        if (LEVEL <= readerConfig::warnMode)                                                       \
-        (++readerConfig::warnCount,                                                                \
-         std::cout << "WARNING(" << readerConfig::warnCount << "): " << X << '\n')
+#define WARNPRINT(LEVEL, X)                                                                        \
+    if (LEVEL <= readerConfig::warnMode)                                                           \
+    (++readerConfig::warnCount,                                                                    \
+     std::cout << "WARNING(" << readerConfig::warnCount << "): " << X << '\n')
 
 // helper function for grabbing parameters and attributes from an xml file
 
