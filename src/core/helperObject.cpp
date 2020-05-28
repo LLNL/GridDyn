@@ -40,7 +40,7 @@ void helperObject::set(const std::string& param, double val)
 {
     setFlag(param, (val > 0.1));
 }
-void helperObject::setDescription(const std::string& description)
+void helperObject::setDescription(const std::string& description) // NOLINT
 {
     descriptionDictionary.update(m_oid, description);
 }
