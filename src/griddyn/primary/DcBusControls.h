@@ -70,4 +70,3 @@ class DcBusControls {
 };
 
 }  // namespace griddyn
-

@@ -46,4 +46,3 @@ automatically recovers
     };
 }  // namespace relays
 }  // namespace griddyn
-

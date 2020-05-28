@@ -61,4 +61,3 @@ comparing to specific thresholds. This zonal relays runs off a single impedance 
     };
 }  // namespace relays
 }  // namespace griddyn
-

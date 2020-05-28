@@ -13,7 +13,6 @@ contributions must be made under this [LICENSE](LICENSE) in accordance with the 
 
 If you just have a question check out [![Gitter chat](https://badges.gitter.im/LLNL/GridDyn.png)](https://gitter.im/LLNL/GridDyn)
 
-
 ## How Can I Contribute?
 
 ### Reporting Bugs
@@ -31,7 +30,6 @@ This section guides you through submitting a feature request, or enhancement for
 Please include as much detail as possible including the steps that you imagine you would take if the feature you're requesting existed, and the rational and reasoning of why this feature would be a good idea for a co-simulation framework.
 
 A pull request including a bug fix or feature will always be welcome.
-
 
 #### Before Submitting An Enhancement Suggestion
 
