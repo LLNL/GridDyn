@@ -1,12 +1,11 @@
-# LLNS Copyright Start
-# Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department
-# of Energy by Lawrence Livermore National Laboratory in part under
-# Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-# Produced at the Lawrence Livermore National Laboratory.
-# All rights reserved.
-# For details, see the LICENSE file.
-# LLNS Copyright End
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Copyright (c) 2014-2020, Lawrence Livermore National Security
+# See the top-level NOTICE for additional details. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set(testComponent_sources
     componentTests/ConditionTests.cpp
@@ -128,17 +127,6 @@ add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 
 set_target_properties(testLibrary testComponents testSystem testExtra PROPERTIES FOLDER tests)
-
-foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
-    add_custom_command(
-        TARGET testComponents
-        POST_BUILD # Adds a post-build event to testComponents
-        COMMAND
-            ${CMAKE_COMMAND} -E copy_if_different # which executes "cmake - E copy_if_different..."
-            "${keyfile}" # <--this is in-file
-            $<TARGET_FILE_DIR:testComponents>
-    ) # <--this is out-file path
-endforeach(keyfile)
 
 target_link_libraries(testLibrary fileInput griddyn_test_base)
 target_link_libraries(testComponents griddyn_optional fileInput griddyn_test_base)
