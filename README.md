@@ -70,11 +70,18 @@ The current git master branch is considered experimental so there is no stable b
 ## Authors
 
 GridDyn was originally written by Philip Top, top1@llnl.gov.
-A number of other people have contributed, see the Users Guide for more details
+A number of other people have contributed, see [CONTRIBUTORS](CONTRIBUTORS.md) for more details
+
+## Source Repo
+
+The GridDyn source code is hosted on GitHub: [https://github.com/LLNL/GridDyn](https://github.com/LLNL/GridDyn)
 
 ## Release
 
-GridDyn is released under a BSD license. For more details see the
-[LICENSE](LICENSE) file.
+GridDyn is distributed under the terms of the BSD-3 clause license. All new
+contributions must be made under this license. [LICENSE](LICENSE)
 
+SPDX-License-Identifier: BSD-3-Clause
+
+portions of the code written by LLNL with release number
 `LLNL-CODE-681053`
