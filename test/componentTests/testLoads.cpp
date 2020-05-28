@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(file_load_test2)
     auto tod = Tdata.data()[0];
     BOOST_CHECK_CLOSE(val, tod, 0.0001);
 }
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
 BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
 {
     std::string fileName = gridlabd_test_directory + "IEEE_13_mod.xml";

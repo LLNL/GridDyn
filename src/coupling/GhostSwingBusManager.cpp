@@ -11,7 +11,7 @@
  */
 
 #include "GhostSwingBusManager.h"
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
 #    include "MpiService.h"
 #    include <mpi.h>
 #endif
@@ -32,7 +32,7 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::m_pInstance = nullpt
 std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
 {
     if (!m_pInstance) {
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
         throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
 #else  // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything \
     // without MPI
@@ -59,7 +59,7 @@ bool GhostSwingBusManager::isInstance()
 
 GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
 {
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     servicer = mpi::MpiService::instance(argc, argv);
 
     m_numTasks = servicer->getCommSize();
@@ -93,7 +93,7 @@ int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
              << endl;
     }
 
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     auto* arguments_c = const_cast<char*>(arguments.c_str());
     m_initializeCompleted[taskId] = false;
     auto token = servicer->getToken();
@@ -148,7 +148,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
     m_voltSendMessage[taskId].numThreePhaseVoltage = numThreePhaseVoltage;
     m_voltSendMessage[taskId].deltaTime = deltaTime;
 
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     auto token = servicer->getToken();
     if (!m_initializeCompleted[taskId]) {
         MPI_Status status;
@@ -193,7 +193,7 @@ void GhostSwingBusManager::sendStopMessage(int taskId)
     if (g_printStuff) {
         cout << "Sending STOP message to Distribution task " << taskId << endl;
     }
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     // Blocking send to gridlabd task
     auto token = servicer->getToken();
     MPI_Send(&m_voltSendMessage[taskId], 1, MPI_BYTE, taskId, STOPTAG, MPI_COMM_WORLD);
@@ -208,7 +208,7 @@ void GhostSwingBusManager::getCurrent(int taskId, cvec& current)
         cout << "Transmission *waiting* to get current from Task: " << taskId << endl;
     }
 
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     {
         MPI_Status status;
         auto token = servicer->getToken();
@@ -248,7 +248,7 @@ void GhostSwingBusManager::endSimulation()
         sendStopMessage(i);
     }
 
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
 
     if (g_printStuff) {
         cout << "end task : " << m_taskId << endl;
