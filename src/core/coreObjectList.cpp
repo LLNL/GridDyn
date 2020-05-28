@@ -73,7 +73,7 @@ bool coreObjectList::isMember(const coreObject* obj) const
 
 void coreObjectList::deleteAll(coreObject* parent)
 {
-    for (auto& it : m_objects) {
+    for (auto* it : m_objects) {
         removeReference(it, parent);
     }
 }
