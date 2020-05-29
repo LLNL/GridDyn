@@ -189,12 +189,8 @@ endif(GRIDDYN_ENABLE_MPI)
 
 target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})
 
-# install(
-#     TARGETS extraSolverLibrary
-#     EXPORT griddyn-targets
-#     DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     COMPONENT libraries
-# )
+# install( TARGETS extraSolverLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}
+# COMPONENT libraries )
 
 install(FILES ${extra_solver_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
         COMPONENT headers
