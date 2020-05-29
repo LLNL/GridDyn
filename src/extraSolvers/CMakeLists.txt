@@ -196,9 +196,9 @@ target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLU
 #     COMPONENT libraries
 # )
 
-# install(FILES ${extra_solver_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
-#         COMPONENT headers
-# )
+install(FILES ${extra_solver_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
+        COMPONENT headers
+)
 
 list(APPEND optional_library_key_headers extraSolvers/extraSolvers.h)
 list(APPEND optional_library_functions loadExtraSolvers)
