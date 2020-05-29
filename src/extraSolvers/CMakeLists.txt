@@ -140,7 +140,7 @@ elseif(BUILD_PARADAE_SOLVERS)
     list(APPEND extra_solver_headers ${paradae_headers})
 endif()
 
-if(ENABLE_MPI)
+if(GRIDDYN_ENABLE_MPI)
     list(APPEND extra_solver_sources paradae/common/MapParam.cxx paradae/common/Timer.cxx)
     list(APPEND extra_solver_headers paradae/common/def_mpi.h paradae/common/MapParam.h
          paradae/common/Timer.h
@@ -149,7 +149,7 @@ elseif(BUILD_BRAID_SOLVER)
     message(WARNING "Braid requires MPI to function")
 endif()
 
-find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
+# find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
 
 # find_package(LAPACKE) if (LAPACKE_FOUND) INCLUDE_DIRECTORIES(${LAPACKE_INCLUDE_DIRS}) endif()
 
@@ -166,7 +166,7 @@ endif(WIN32)
 
 target_link_libraries(extraSolverLibrary PUBLIC griddyn)
 target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARIES})
-target_link_libraries(extraSolverLibrary PUBLIC SuiteSparse::umfpack)
+target_link_libraries(extraSolverLibrary PUBLIC ${SuiteSparse_UMFPACK_LIBRARY_RELEASE})
 
 if(BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
     # source_group("paradae" FILES ${paradae_sources} ${paradae_headers})
@@ -183,18 +183,18 @@ if(BUILD_BRAID_SOLVER)
     target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
 
-if(ENABLE_MPI)
+if(GRIDDYN_ENABLE_MPI)
     target_link_libraries(extraSolverLibrary PUBLIC MPI::MPI_C)
-endif(ENABLE_MPI)
+endif(GRIDDYN_ENABLE_MPI)
 
 target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})
 
-install(
-    TARGETS extraSolverLibrary
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
+# install(
+#     TARGETS extraSolverLibrary
+#     EXPORT griddyn-targets
+#     DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#     COMPONENT libraries
+# )
 
 install(FILES ${extra_solver_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraSolver
         COMPONENT headers

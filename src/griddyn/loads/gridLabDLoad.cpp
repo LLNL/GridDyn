@@ -50,7 +50,7 @@ namespace loads {
                 }
 
                 opFlags.set(file_sent_flag);
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
                 for (size_t kk = 0; kk < gridlabDfile.size(); ++kk) {
                     if (!(dummy_load[kk])) {
                         dummy_load[kk] = std::make_unique<zipLoad>(0.3, 0.1, "dummy");
@@ -191,7 +191,7 @@ namespace loads {
     {
         double V = inputs[voltageInLocation];
         double th = inputs[angleInLocation];
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
         // if we have a dummy load progress it in time appropriately
         for (auto& dl : dummy_load) {
             if (dl) {
@@ -231,7 +231,7 @@ namespace loads {
         IOdata inputs(2);
         inputs[voltageInLocation] = V;
         inputs[angleInLocation] = th;
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
         // if we have a dummy load progress it in time appropriately
         for (auto& dl : dummy_load) {
             if (dl) {
@@ -860,7 +860,7 @@ namespace loads {
                 if (num > static_cast<int>(gridlabDfile.size())) {
                     gridlabDfile.resize(num);
                     workdir.resize(num);
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
                     dummy_load.resize(num);
                     dummy_load_forward.resize(num);
 #endif
@@ -869,7 +869,7 @@ namespace loads {
             } else {
                 gridlabDfile.push_back(val);
                 workdir.resize(gridlabDfile.size());
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
                 dummy_load.resize(gridlabDfile.size());
                 dummy_load_forward.resize(gridlabDfile.size());
 #endif
@@ -881,7 +881,7 @@ namespace loads {
                 if (num > static_cast<int>(gridlabDfile.size())) {
                     gridlabDfile.resize(num);
                     workdir.resize(num);
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
                     dummy_load.resize(num);
                     dummy_load_forward.resize(num);
 #endif
@@ -1025,7 +1025,7 @@ namespace loads {
         return cnt;
     }
 
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
     void gridLabDLoad::run_dummy_load(index_t kk, VoltageMessage* vm, CurrentMessage* cm)
     {
         for (int ii = 0; ii < vm->numThreePhaseVoltage; ii++) {
@@ -1081,7 +1081,7 @@ namespace loads {
         }
         cm->numThreePhaseCurrent = vm->numThreePhaseVoltage;
     }
-#endif  // ENABLE_MPI
+#endif  // GRIDDYN_ENABLE_MPI
 
 }  // namespace loads
 }  // namespace griddyn

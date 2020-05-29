@@ -40,7 +40,7 @@ GridDyn uses C++11 extensively and will make use of some C++14 features in the n
 - **LOAD_CVODE** build in support for CVODE for solving differential equations Neither cvode or arkode are used at present but will be in the near future
 - **ENABLE_EXTRA_MODELS** select to build an additional library containing a few optional models-more will likely be added in the future
 - **ENABLE_GRIDDYN_LOGGING** unselect to turn off all logging functions
-- **ENABLE_MPI** select to build with MPI support using an MPI compatible compiler
+- **GRIDDYN_ENABLE_MPI** select to build with MPI support using an MPI compatible compiler
 - **ENABLE_OPENMP** option to build in support for openMP in both the solvers and in GridDyn
 - **ENABLE_OPTIMIZATION_LIBRARY** enable building of the optimization extension. This is a work in progress and doesn't do much yet, recommended to leave unselected unless you are developing on that section.
 - **SUNDIALS_INSTALLATION_DIR** point to the installation location for SUNDIALS

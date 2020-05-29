@@ -60,7 +60,7 @@ if (KLU_DIR)
 
 
     # The set of required KLU libraries
-    set(KLU_REQUIRED_LIBS klu amd colamd btf)
+    set(KLU_REQUIRED_LIBS klu amd colamd btf umfpack)
     set(KLU_REQUIRED_IFFOUND_LIBS cxsparse suitesparseconfig)
 
     foreach(TEST_LIB IN LISTS KLU_REQUIRED_LIBS)
