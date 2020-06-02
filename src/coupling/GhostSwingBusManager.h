@@ -1,13 +1,7 @@
 /*
- * LLNS Copyright Start
- * Copyright (c) 2014-2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department
- * of Energy by Lawrence Livermore National Laboratory in part under
- * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
- * Produced at the Lawrence Livermore National Laboratory.
- * All rights reserved.
- * For details, see the LICENSE file.
- * LLNS Copyright End
+ * Copyright (c) 2014-2020, Lawrence Livermore National Security
+ * See the top-level NOTICE for additional details. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #pragma once
@@ -15,7 +9,7 @@
 #include "GhostSwingBusMessageTypes.h"
 #include "griddyn/griddyn-config.h"
 
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
 #    include <functional>
 #endif
 
@@ -104,7 +98,7 @@ class GhostSwingBusManager {
 
     static void SetDebug(bool debug) { g_printStuff = debug; }
 
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
     /**
      * sets the dummy load function
      */
@@ -117,7 +111,7 @@ class GhostSwingBusManager {
 
   private:
     static bool g_printStuff;  //!< public boolean to change whether things are printed or not
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     mpi::MpiService* servicer;  //!< pointer to the global MpiService
 #endif
     /**
@@ -146,7 +140,7 @@ class GhostSwingBusManager {
     static std::shared_ptr<GhostSwingBusManager> m_pInstance;
 
     int m_numTasks = 20;
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     int m_taskId = 0;
     /*
      * Async send requests

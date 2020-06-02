@@ -1,10 +1,10 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore
-# National Security, LLC; Alliance for Sustainable Energy, LLC.
-# See the top-level NOTICE for additional details.
-# All rights reserved.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Copyright (c) 2014-2020, Lawrence Livermore National Security
+# See the top-level NOTICE for additional details. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
+#
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # file to include KLU
@@ -42,7 +42,7 @@ set(SuiteSparseNameSpace Suitesparse)
 cmake_dependent_advanced_option(${PROJECT_NAME}_USE_SUITESPARSE_STATIC_LIBRARY "use the suitesparse static library" OFF  "NOT ${PROJECT_NAME}_USE_SYSTEM_SUITESPARSE_ONLY"
         OFF)
 
-set (SUITESPARSE_COMPONENTS klu btf amd colamd suitesparseconfig)
+set (SUITESPARSE_COMPONENTS klu btf amd colamd umfpack suitesparseconfig)
 if(${PROJECT_NAME}_USE_SYSTEM_SUITESPARSE_ONLY)
     find_package(SuiteSparse COMPONENTS ${SUITESPARSE_COMPONENTS})
     set(${PROJECT_NAME}_SUITESPARSE_LOCAL_BUILD OFF CACHE INTERNAL "")

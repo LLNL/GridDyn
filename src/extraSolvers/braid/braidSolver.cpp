@@ -24,8 +24,8 @@
 #include "griddyn/gridDynSimulation.h"
 #include "griddyn/solvers/solverInterface.h"
 #include "mpi.h"
-#include "utilities/string_viewConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/string_viewConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
 #include <sstream>
@@ -191,7 +191,7 @@ namespace braid {
         if ((param == "configfile") || (param == "file") || (param == "config_file")) {
             configFile = val;
         } else if (param == "discontinuities") {
-            discontinuities = str2vector<double>(val, 0.0);
+            discontinuities = gmlc::utilities::str2vector<double>(val, 0.0);
             std::sort(discontinuities.begin(), discontinuities.end(), std::less<>());
         } else {
             SolverInterface::set(param, val);

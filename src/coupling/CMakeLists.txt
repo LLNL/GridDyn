@@ -1,21 +1,20 @@
-# LLNS Copyright Start
-# Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department
-# of Energy by Lawrence Livermore National Laboratory in part under
-# Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-# Produced at the Lawrence Livermore National Laboratory.
-# All rights reserved.
-# For details, see the LICENSE file.
-# LLNS Copyright End
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Copyright (c) 2014-2020, Lawrence Livermore National Security
+# See the top-level NOTICE for additional details. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # set variable shared_sources with the sources for the coupling library
 set(coupling_sources GhostSwingBusManager.cpp)
 
 set(coupling_headers GhostSwingBusManager.h GhostSwingBusMessageTypes.h)
-if(ENABLE_MPI)
+if(GRIDDYN_ENABLE_MPI)
     list(APPEND coupling_sources MpiService.cpp)
     list(APPEND coupling_headers MpiService.h)
-endif(ENABLE_MPI)
+endif(GRIDDYN_ENABLE_MPI)
 # require MPI for this project
 
 add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})
