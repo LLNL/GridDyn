@@ -9,7 +9,7 @@
 #include "GhostSwingBusMessageTypes.h"
 #include "griddyn/griddyn-config.h"
 
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
 #    include <functional>
 #endif
 
@@ -98,7 +98,7 @@ class GhostSwingBusManager {
 
     static void SetDebug(bool debug) { g_printStuff = debug; }
 
-#ifndef ENABLE_MPI
+#ifndef GRIDDYN_ENABLE_MPI
     /**
      * sets the dummy load function
      */
@@ -111,7 +111,7 @@ class GhostSwingBusManager {
 
   private:
     static bool g_printStuff;  //!< public boolean to change whether things are printed or not
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     mpi::MpiService* servicer;  //!< pointer to the global MpiService
 #endif
     /**
@@ -140,7 +140,7 @@ class GhostSwingBusManager {
     static std::shared_ptr<GhostSwingBusManager> m_pInstance;
 
     int m_numTasks = 20;
-#ifdef ENABLE_MPI
+#ifdef GRIDDYN_ENABLE_MPI
     int m_taskId = 0;
     /*
      * Async send requests
