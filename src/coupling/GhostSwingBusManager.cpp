@@ -17,7 +17,17 @@
 using namespace std;
 
 namespace griddyn {
-bool GhostSwingBusManager::g_printStuff = false;
+
+#ifdef GRIDDYN_ENABLE_MPI
+    class MPIRequests
+    {
+  public:
+    std::vector<MPI_Request> m_mpiSendRequests;
+    std::vector<MPI_Request> m_mpiRecvRequests;
+    };
+#endif
+
+        bool GhostSwingBusManager::g_printStuff = false;
 
 // Global pointer to ensure single instance of class
 std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::m_pInstance = nullptr;
@@ -57,11 +67,12 @@ GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
     servicer = mpi::MpiService::instance(argc, argv);
 
     m_numTasks = servicer->getCommSize();
-    m_mpiSendRequests.resize(m_numTasks);
-    m_mpiRecvRequests.resize(m_numTasks);
+    
 
     m_initializeCompleted.resize(m_numTasks);
-
+    requests = new MPIRequests;
+    requests->m_mpiSendRequests.resize(m_numTasks);
+    requests->m_mpiRecvRequests.resize(m_numTasks);
 #else
     (void)argc;
     (void)argv;
@@ -72,7 +83,10 @@ GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
     m_currReceiveMessage.resize(m_numTasks);
 }
 
-GhostSwingBusManager::~GhostSwingBusManager() = default;
+GhostSwingBusManager::~GhostSwingBusManager()
+{
+    delete requests;
+}
 
 // for Transmission
 int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
@@ -97,7 +111,7 @@ int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
               taskId,
               MODELSPECTAG,
               MPI_COMM_WORLD,
-              &m_mpiSendRequests[taskId]);
+              &requests->m_mpiSendRequests[taskId]);
 
 #else
     if (taskId >= m_numTasks) {
@@ -150,7 +164,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
         // SGS TODO add timer for this.
 
         // Make sure async initialize Send has completed.
-        MPI_Wait(&m_mpiSendRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiSendRequests[taskId], &status);
 
         m_initializeCompleted[taskId] = true;
     }
@@ -161,7 +175,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
               taskId,
               VOLTAGESTEPTAG,
               MPI_COMM_WORLD,
-              &m_mpiSendRequests[taskId]);
+              &requests->m_mpiSendRequests[taskId]);
 
     MPI_Irecv(&m_currReceiveMessage[taskId],
               sizeof(CurrentMessage),
@@ -169,7 +183,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
               taskId,
               CURRENTTAG,
               MPI_COMM_WORLD,
-              &m_mpiRecvRequests[taskId]);
+              &requests->m_mpiRecvRequests[taskId]);
 
 #else
 
@@ -207,10 +221,10 @@ void GhostSwingBusManager::getCurrent(int taskId, cvec& current)
         MPI_Status status;
         auto token = servicer->getToken();
         // Make sure async Send has completed.
-        MPI_Wait(&m_mpiSendRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiSendRequests[taskId], &status);
 
         // Make sure async Recv has completed.
-        MPI_Wait(&m_mpiRecvRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiRecvRequests[taskId], &status);
     }
 #endif
 
