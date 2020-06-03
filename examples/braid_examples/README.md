@@ -16,20 +16,25 @@ events.
 
 In a GridDyn XML input file, parallel-in-time integration with XBraid is enabled
 with the option
+
 ```
 <solver name="braid">  </solver>
 <defdae>braid</defdae>
 ```
+
 All the relevant XBraid parameters are set in the XBraid parameter file. The
 default name for this file is `braid_params.ini`. An alternative input file
 name can be specified in the GridDyn XML input file with
+
 ```
 <solver name="braid">
    <configfile>braid_params.ini</configfile>
 </solver>
 <defdae>braid</defdae>
 ```
+
 The set of event locations can be set with
+
 ```
 <solver name="braid">
    <configfile>braid_params.ini</configfile>
@@ -37,7 +42,9 @@ The set of event locations can be set with
 </solver>
 <defdae>braid</defdae>
 ```
+
 The time domain size and the time-step size are controlled with
+
 ```
 <timestart>0</timestart>
 <timestop>10</timestop>
