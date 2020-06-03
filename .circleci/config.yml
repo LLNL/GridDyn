@@ -46,11 +46,11 @@ jobs:
       - run: *run_griddyn_tests
   build_xbraid:
     docker:
-      - image: helics/buildenv:gcc9-builder
+      - image: helics/buildenv:gcc8-builder
     environment:
       CMAKE_FLAGS: ' -DGRIDDYN_ENABLE_MPI=ON'
     steps:
-      - run: apt install libopenmpi-dev
+      - run: apt -y install libopenmpi-dev
       - checkout
       - run: *setup_griddyn
 
