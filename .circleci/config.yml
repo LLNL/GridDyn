@@ -54,6 +54,7 @@ jobs:
       - run: apt update && apt install -y libopenmpi-dev liblapacke-dev
       - run: scripts/xbraid_build.sh
       - run: *setup_griddyn
+      - run: build/bin/gridDynMain examples/braid_examples/179busDynamicTest_BraidNoEvents.xml
 
 workflows:
   version: 2
