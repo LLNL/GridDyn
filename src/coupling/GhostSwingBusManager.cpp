@@ -197,7 +197,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
 
 #endif
 }
-
+//NOLINTNEXTLINE
 void GhostSwingBusManager::sendStopMessage(int taskId)
 {
     if (g_printStuff) {
