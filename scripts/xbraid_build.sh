@@ -1,5 +1,5 @@
 #!/bin/bash
-pushd
+pushd .
 cd ..
 git clone https://github.com/XBraid/xbraid.git xbraid
 cd xbraid
