@@ -52,6 +52,7 @@ jobs:
     steps:
       - checkout
       - run: apt update && apt install -y libopenmpi-dev
+      - run: scripts/xbraid_build.sh
       - run: *setup_griddyn
 
 workflows:
