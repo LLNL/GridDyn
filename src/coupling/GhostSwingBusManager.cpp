@@ -19,15 +19,14 @@ using namespace std;
 namespace griddyn {
 
 #ifdef GRIDDYN_ENABLE_MPI
-    class MPIRequests
-    {
+class MPIRequests {
   public:
     std::vector<MPI_Request> m_mpiSendRequests;
     std::vector<MPI_Request> m_mpiRecvRequests;
-    };
+};
 #endif
 
-        bool GhostSwingBusManager::g_printStuff = false;
+bool GhostSwingBusManager::g_printStuff = false;
 
 // Global pointer to ensure single instance of class
 std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::m_pInstance = nullptr;
@@ -39,7 +38,8 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
 #ifdef GRIDDYN_ENABLE_MPI
         throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
 #else
-    // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything without MPI
+        // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't
+        // do anything without MPI
         m_pInstance =
             std::shared_ptr<GhostSwingBusManager>(new GhostSwingBusManager(nullptr, nullptr));
 #endif
@@ -67,7 +67,6 @@ GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
     servicer = mpi::MpiService::instance(argc, argv);
 
     m_numTasks = servicer->getCommSize();
-    
 
     m_initializeCompleted.resize(m_numTasks);
     requests = new MPIRequests;
