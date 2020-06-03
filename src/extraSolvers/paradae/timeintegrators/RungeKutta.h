@@ -70,4 +70,3 @@ namespace paradae {
     };
 }  // namespace paradae
 }  // namespace griddyn
-
