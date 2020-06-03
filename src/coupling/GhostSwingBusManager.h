@@ -142,7 +142,8 @@ class GhostSwingBusManager {
     int m_taskId = 0;
     /*
      * Async send requests
-     would have preferred unique ptr but compilers complain about not knowing the definition in the destructor
+     would have preferred unique ptr but compilers complain about not knowing the definition in the
+     destructor
      */
     MPIRequests* requests{nullptr};
 
