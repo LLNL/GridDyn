@@ -48,7 +48,7 @@ jobs:
     docker:
       - image: helics/buildenv:gcc8-builder
     environment:
-      CMAKE_FLAGS: ' -DGRIDDYN_ENABLE_MPI=ON'
+      CMAKE_FLAGS: ' -DGRIDDYN_ENABLE_MPI=ON -DGRIDDYN_ENABLE_OPENMP=OFF -DGRIDDYN_ENABLE_EXTRA_SOLVERS=ON -D BUILD_SHARED_LIBS=OFF -D CMAKE_POSITION_INDEPENDENT_CODE=ON'
     steps:
       - checkout
       - run: apt update && apt install -y libopenmpi-dev
