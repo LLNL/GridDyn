@@ -3,8 +3,7 @@
  * See the top-level NOTICE for additional details. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#ifndef RungeKutta_hxx
-#define RungeKutta_hxx
+#pragma once
 
 #include "../equations/Equation.h"
 #include "../math/DenseMatrix.h"
@@ -72,4 +71,3 @@ namespace paradae {
 }  // namespace paradae
 }  // namespace griddyn
 
-#endif

@@ -85,7 +85,9 @@ GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
 
 GhostSwingBusManager::~GhostSwingBusManager()
 {
+#ifdef GRIDDYN_ENABLE_MPI
     delete requests;
+#endif
 }
 
 // for Transmission
