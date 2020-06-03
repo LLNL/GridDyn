@@ -38,8 +38,8 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
     if (!m_pInstance) {
 #ifdef GRIDDYN_ENABLE_MPI
         throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
-#else  // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything \
-    // without MPI
+#else
+    // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything without MPI
         m_pInstance =
             std::shared_ptr<GhostSwingBusManager>(new GhostSwingBusManager(nullptr, nullptr));
 #endif
