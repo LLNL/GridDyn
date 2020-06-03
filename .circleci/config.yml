@@ -44,6 +44,15 @@ jobs:
       - checkout
       - run: *setup_griddyn
       - run: *run_griddyn_tests
+  build_xbraid:
+    docker:
+      - image: helics/buildenv:gcc9-builder
+    environment:
+      CMAKE_FLAGS: ' -DGRIDDYN_ENABLE_MPI=ON'
+    steps:
+      - checkout
+      - run: sudo apt install openmpi
+      - run: *setup_griddyn
 
 workflows:
   version: 2
@@ -52,3 +61,4 @@ workflows:
       - build_gcc8
       - build_gcc7
       - build_clang9
+      - build_xbraid
