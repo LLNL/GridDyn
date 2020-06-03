@@ -42,14 +42,14 @@ class GhostSwingBusManager {
      * MPI_Init.
      */
     static std::shared_ptr<GhostSwingBusManager>
-        Initialize(int* argc, char** argv[]);  // only constructor that creates Instance
+        initialize(int* argc, char** argv[]);  // only constructor that creates instance
 
     /**
      * Return the current instance of the singleton.
      *
-     * This will fail if Initialize has not been called.
+     * This will fail if initialize has not been called.
      */
-    static std::shared_ptr<GhostSwingBusManager> Instance();
+    static std::shared_ptr<GhostSwingBusManager> instance();
 
     /**
      * Returns true if instance of the manager exists.

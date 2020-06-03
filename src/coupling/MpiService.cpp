@@ -40,7 +40,7 @@ namespace mpi {
 
     MpiService::MpiService(int* argc, char** argv[], int threadingLevel)
     {
-        // Initialize MPI with MPI_THREAD_FUNNELED
+        // initialize MPI with MPI_THREAD_FUNNELED
         int mpi_initialized;
 
         MPI_Initialized(&mpi_initialized);

@@ -33,11 +33,11 @@ namespace griddyn {
 std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::m_pInstance = nullptr;
 
 // This constructor requires instance to exist
-std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
+std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::instance()
 {
     if (!m_pInstance) {
 #ifdef GRIDDYN_ENABLE_MPI
-        throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
+        throw(std::runtime_error("GhostSwingBusManager instance does not exist!"));
 #else
     // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything without MPI
         m_pInstance =
@@ -47,8 +47,8 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
     return m_pInstance;
 }
 
-// create Instance if doesn't exist...requires argc, argv for MPI
-std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Initialize(int* argc, char** argv[])
+// create instance if doesn't exist...requires argc, argv for MPI
+std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::initialize(int* argc, char** argv[])
 {
     if (!m_pInstance) {
         m_pInstance = std::shared_ptr<GhostSwingBusManager>(new GhostSwingBusManager(argc, argv));
@@ -61,6 +61,7 @@ bool GhostSwingBusManager::isInstance()
     return static_cast<bool>(m_pInstance);
 }
 
+//NOLINTNEXTLINE(readability-non-const-parameter)
 GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
 {
 #ifdef GRIDDYN_ENABLE_MPI

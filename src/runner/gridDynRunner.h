@@ -36,7 +36,7 @@ class GriddynRunner {
     int InitializeFromString(const std::string& cmdargs);
 
     /**
-     * Initialize a simulation run from command line arguments.
+     * initialize a simulation run from command line arguments.
      @param[in] argc the number of console arguments
      @param[in] argv the actual console arguments
      @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be
@@ -45,7 +45,7 @@ class GriddynRunner {
      */
     virtual int Initialize(int argc, char* argv[], bool allowUnrecognized = false);
     /**
-    * Initialize a simulation run from command line arguments using a given readerInfo structure
+    * initialize a simulation run from command line arguments using a given readerInfo structure
     @param[in] argc the number of console arguments
     @param[in] argv the actual console arguments
     @param[in] ri the readerInfo structure that contains any additional reader information

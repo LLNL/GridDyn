@@ -107,7 +107,7 @@ namespace paradae {
                                     Vector& rv){};
         // Change the state depending on which root is found (should be private?)
         virtual void root_crossings(const Vector& iroot, Vector& state){};
-        // Initialize the state
+        // initialize the state
         virtual void root_init_state(const Real t, Vector& state){};
         // Check if a root has been crossed. If so, estimate the time t and change the state.
         bool CheckAllRoots(IPoly& P, Real tlo, Vector& glo, Real& thi, Vector& ghi, Vector& state);
