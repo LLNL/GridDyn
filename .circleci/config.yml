@@ -51,7 +51,7 @@ jobs:
       CMAKE_FLAGS: ' -DGRIDDYN_ENABLE_MPI=ON'
     steps:
       - checkout
-      - run: sudo apt install openmpi
+      - run: apt install openmpi
       - run: *setup_griddyn
 
 workflows:
