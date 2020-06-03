@@ -11,13 +11,13 @@
 
 #ifndef GRIDDYN_ENABLE_MPI
 #    include <functional>
+#else
+#    include <mpi.h>
 #endif
 
 #include <complex>
 #include <memory>
 #include <vector>
-
-typedef int MPI_Request;
 
 namespace griddyn {
 namespace mpi {
