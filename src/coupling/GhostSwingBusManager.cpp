@@ -61,7 +61,7 @@ bool GhostSwingBusManager::isInstance()
     return static_cast<bool>(m_pInstance);
 }
 
-//NOLINTNEXTLINE(readability-non-const-parameter)
+// NOLINTNEXTLINE(readability-non-const-parameter)
 GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
 {
 #ifdef GRIDDYN_ENABLE_MPI
@@ -197,7 +197,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
 
 #endif
 }
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 void GhostSwingBusManager::sendStopMessage(int taskId)
 {
     if (g_printStuff) {
