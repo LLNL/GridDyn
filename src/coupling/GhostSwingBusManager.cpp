@@ -17,19 +17,29 @@
 using namespace std;
 
 namespace griddyn {
+
+#ifdef GRIDDYN_ENABLE_MPI
+class MPIRequests {
+  public:
+    std::vector<MPI_Request> m_mpiSendRequests;
+    std::vector<MPI_Request> m_mpiRecvRequests;
+};
+#endif
+
 bool GhostSwingBusManager::g_printStuff = false;
 
 // Global pointer to ensure single instance of class
 std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::m_pInstance = nullptr;
 
 // This constructor requires instance to exist
-std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
+std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::instance()
 {
     if (!m_pInstance) {
 #ifdef GRIDDYN_ENABLE_MPI
-        throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
-#else  // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything \
-    // without MPI
+        throw(std::runtime_error("GhostSwingBusManager instance does not exist!"));
+#else
+        // mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't
+        // do anything without MPI
         m_pInstance =
             std::shared_ptr<GhostSwingBusManager>(new GhostSwingBusManager(nullptr, nullptr));
 #endif
@@ -37,8 +47,8 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance()
     return m_pInstance;
 }
 
-// create Instance if doesn't exist...requires argc, argv for MPI
-std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Initialize(int* argc, char** argv[])
+// create instance if doesn't exist...requires argc, argv for MPI
+std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::initialize(int* argc, char** argv[])
 {
     if (!m_pInstance) {
         m_pInstance = std::shared_ptr<GhostSwingBusManager>(new GhostSwingBusManager(argc, argv));
@@ -51,17 +61,18 @@ bool GhostSwingBusManager::isInstance()
     return static_cast<bool>(m_pInstance);
 }
 
+//NOLINTNEXTLINE(readability-non-const-parameter)
 GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
 {
 #ifdef GRIDDYN_ENABLE_MPI
     servicer = mpi::MpiService::instance(argc, argv);
 
     m_numTasks = servicer->getCommSize();
-    m_mpiSendRequests.resize(m_numTasks);
-    m_mpiRecvRequests.resize(m_numTasks);
 
     m_initializeCompleted.resize(m_numTasks);
-
+    requests = new MPIRequests;
+    requests->m_mpiSendRequests.resize(m_numTasks);
+    requests->m_mpiRecvRequests.resize(m_numTasks);
 #else
     (void)argc;
     (void)argv;
@@ -72,7 +83,12 @@ GhostSwingBusManager::GhostSwingBusManager(int* argc, char** argv[])
     m_currReceiveMessage.resize(m_numTasks);
 }
 
-GhostSwingBusManager::~GhostSwingBusManager() = default;
+GhostSwingBusManager::~GhostSwingBusManager()
+{
+#ifdef GRIDDYN_ENABLE_MPI
+    delete requests;
+#endif
+}
 
 // for Transmission
 int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
@@ -97,7 +113,7 @@ int GhostSwingBusManager::createGridlabDInstance(const string& arguments)
               taskId,
               MODELSPECTAG,
               MPI_COMM_WORLD,
-              &m_mpiSendRequests[taskId]);
+              &requests->m_mpiSendRequests[taskId]);
 
 #else
     if (taskId >= m_numTasks) {
@@ -150,7 +166,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
         // SGS TODO add timer for this.
 
         // Make sure async initialize Send has completed.
-        MPI_Wait(&m_mpiSendRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiSendRequests[taskId], &status);
 
         m_initializeCompleted[taskId] = true;
     }
@@ -161,7 +177,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
               taskId,
               VOLTAGESTEPTAG,
               MPI_COMM_WORLD,
-              &m_mpiSendRequests[taskId]);
+              &requests->m_mpiSendRequests[taskId]);
 
     MPI_Irecv(&m_currReceiveMessage[taskId],
               sizeof(CurrentMessage),
@@ -169,7 +185,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
               taskId,
               CURRENTTAG,
               MPI_COMM_WORLD,
-              &m_mpiRecvRequests[taskId]);
+              &requests->m_mpiRecvRequests[taskId]);
 
 #else
 
@@ -181,7 +197,7 @@ void GhostSwingBusManager::sendVoltageStep(int taskId, cvec& voltage, unsigned i
 
 #endif
 }
-
+//NOLINTNEXTLINE
 void GhostSwingBusManager::sendStopMessage(int taskId)
 {
     if (g_printStuff) {
@@ -207,10 +223,10 @@ void GhostSwingBusManager::getCurrent(int taskId, cvec& current)
         MPI_Status status;
         auto token = servicer->getToken();
         // Make sure async Send has completed.
-        MPI_Wait(&m_mpiSendRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiSendRequests[taskId], &status);
 
         // Make sure async Recv has completed.
-        MPI_Wait(&m_mpiRecvRequests[taskId], &status);
+        MPI_Wait(&requests->m_mpiRecvRequests[taskId], &status);
     }
 #endif
 
