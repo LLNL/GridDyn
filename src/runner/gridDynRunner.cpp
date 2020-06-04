@@ -77,7 +77,7 @@ int GriddynRunner::Initialize(int argc, char* argv[], readerInfo& ri, bool allow
     }
     m_gds->log(nullptr, print_level::summary, "GridDyn version:" GRIDDYN_VERSION_STRING);
     // TODO:: do something different with this
-    GhostSwingBusManager::Initialize(&argc, &argv);
+    GhostSwingBusManager::initialize(&argc, &argv);
 
     argv_vals = argv;
     argc_val = argc;
@@ -241,7 +241,7 @@ void GriddynRunner::StopRecording()
 void GriddynRunner::Finalize()
 {
     StopRecording();
-    GhostSwingBusManager::Instance()->endSimulation();
+    GhostSwingBusManager::instance()->endSimulation();
 }
 
 int GriddynRunner::loadCommandArgument(readerInfo& ri, bool allowUnrecognized)

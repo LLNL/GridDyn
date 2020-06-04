@@ -1,13 +1,7 @@
 /*
- * LLNS Copyright Start
- * Copyright (c) 2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department
- * of Energy by Lawrence Livermore National Laboratory in part under
- * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
- * Produced at the Lawrence Livermore National Laboratory.
- * All rights reserved.
- * For details, see the LICENSE file.
- * LLNS Copyright End
+ * Copyright (c) 2018-2020, Lawrence Livermore National Security
+ * See the top-level NOTICE for additional details. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 #ifndef Equation_h
 #define Equation_h
@@ -113,7 +107,7 @@ namespace paradae {
                                     Vector& rv){};
         // Change the state depending on which root is found (should be private?)
         virtual void root_crossings(const Vector& iroot, Vector& state){};
-        // Initialize the state
+        // initialize the state
         virtual void root_init_state(const Real t, Vector& state){};
         // Check if a root has been crossed. If so, estimate the time t and change the state.
         bool CheckAllRoots(IPoly& P, Real tlo, Vector& glo, Real& thi, Vector& ghi, Vector& state);
