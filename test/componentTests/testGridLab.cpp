@@ -22,7 +22,7 @@ using namespace griddyn;
 BOOST_AUTO_TEST_CASE(gridlab_test1)
 {
     int argc = 0;
-    GhostSwingBusManager::Initialize(&argc, nullptr);
+    GhostSwingBusManager::initialize(&argc, nullptr);
     GhostSwingBusManager::SetDebug(false);
     std::string fileName = std::string(GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod.xml");
     gds = readSimXMLFile(fileName);
@@ -52,13 +52,13 @@ BOOST_AUTO_TEST_CASE(gridlab_test1)
     val = ld->get("q");
     BOOST_CHECK_CLOSE(val, 0.27, 0.01);
 
-    GhostSwingBusManager::Instance()->endSimulation();
+    GhostSwingBusManager::instance()->endSimulation();
 }
 
 BOOST_AUTO_TEST_CASE(gridlab_test2)
 {
     int argc = 0;
-    GhostSwingBusManager::Initialize(&argc, nullptr);
+    GhostSwingBusManager::initialize(&argc, nullptr);
     GhostSwingBusManager::SetDebug(false);
     std::string fileName = std::string(GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod3x.xml");
     gds = readSimXMLFile(fileName);
@@ -90,13 +90,13 @@ BOOST_AUTO_TEST_CASE(gridlab_test2)
     BOOST_CHECK_CLOSE(val, 0.09, 0.01);
 
     gds->run(30.0);
-    GhostSwingBusManager::Instance()->endSimulation();
+    GhostSwingBusManager::instance()->endSimulation();
 }
 
 BOOST_AUTO_TEST_CASE(gridlab_test3)
 {
     int argc = 0;
-    GhostSwingBusManager::Initialize(&argc, nullptr);
+    GhostSwingBusManager::initialize(&argc, nullptr);
     GhostSwingBusManager::SetDebug(false);
     std::string fileName = std::string(GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod3x_current.xml");
     gds = readSimXMLFile(fileName);
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(gridlab_test3)
     BOOST_CHECK_SMALL(val, 0.000001);
 
     gds->run(30.0);
-    GhostSwingBusManager::Instance()->endSimulation();
+    GhostSwingBusManager::instance()->endSimulation();
 }
 
 BOOST_AUTO_TEST_CASE(test_gridlabArray)
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_gridlabArray)
     // test the define functionality
     int argc = 0;
     std::string fileName = std::string(GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod3x_mix_scale.xml");
-    GhostSwingBusManager::Initialize(&argc, nullptr);
+    GhostSwingBusManager::initialize(&argc, nullptr);
     GhostSwingBusManager::SetDebug(false);
     readerInfo ri;
     ri.keepdefines = true;
