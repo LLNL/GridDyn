@@ -34,7 +34,7 @@ namespace loads {
     void gridLabDLoad::gridLabDInitialize()
     {
         if (!opFlags[file_sent_flag]) {
-            auto gsm = GhostSwingBusManager::Instance();
+            auto gsm = GhostSwingBusManager::instance();
             if (gsm) {
                 task_id.resize(gridlabDfile.size());
                 if (opFlags[dual_mode_flag]) {
@@ -412,14 +412,14 @@ namespace loads {
         Vg[1] = Vg[0] * rotn120;
         Vg[2] = Vg[0] * rotp120;
 
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             for (size_t kk = 0; kk < task_id.size(); ++kk) {
                 gsm->sendVoltageStep(task_id[kk], Vg, tInt);
                 if (opFlags[dual_mode_flag]) {
                     if (opFlags[dyn_initialized]) {
                         (void)kk;  // ignore for loop conversion suggestion
-                        // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk],
+                        // GhostSwingBusManager::instance ()->sendVoltageStep (forward_task_id[kk],
                         // Vg, tInt);
                     }
                 }
@@ -441,7 +441,7 @@ namespace loads {
         Vg[2] = Vg[0] * rotp120;
 
         // get the current in a blocking call;
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             int ii = 0;
             for (auto& tid : task_id) {
@@ -520,14 +520,14 @@ namespace loads {
         Vg[0] = Vg[3] * r1;
         Vg[1] = Vg[4] * r1;
         Vg[2] = Vg[5] * r1;
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             for (size_t kk = 0; kk < task_id.size(); ++kk) {
-                GhostSwingBusManager::Instance()->sendVoltageStep(task_id[kk], Vg, tInt);
+                GhostSwingBusManager::instance()->sendVoltageStep(task_id[kk], Vg, tInt);
                 if (opFlags[dual_mode_flag]) {
                     if (opFlags[dyn_initialized]) {
                         (void)kk;  // ignore for loop conversion suggestion
-                        // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk],
+                        // GhostSwingBusManager::instance ()->sendVoltageStep (forward_task_id[kk],
                         // Vg, tInt);
                     }
                 }
@@ -557,7 +557,7 @@ namespace loads {
         Vg[2] = Vg[5] * r1;
 
         // get the current in a blocking call;
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             int ii = 0;
             for (auto& tid : task_id) {
@@ -649,14 +649,14 @@ namespace loads {
         Vg[4] = Vg[7] * r1;
         Vg[5] = Vg[8] * r1;
 
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             for (size_t kk = 0; kk < task_id.size(); ++kk) {
                 gsm->sendVoltageStep(task_id[kk], Vg, static_cast<unsigned int>(tInt));
                 if (opFlags[dual_mode_flag]) {
                     if (opFlags[dyn_initialized]) {
                         (void)kk;  // ignore for loop conversion suggestion
-                        // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk],
+                        // GhostSwingBusManager::instance ()->sendVoltageStep (forward_task_id[kk],
                         // Vg, tInt);
                     }
                 }
@@ -691,7 +691,7 @@ namespace loads {
         Vg[5] = Vg[8] * r1;
 
         // get the current in a blocking call;
-        auto gsm = GhostSwingBusManager::Instance();
+        auto gsm = GhostSwingBusManager::instance();
         if (gsm) {
             int ii = 0;
             for (auto& tid : task_id) {

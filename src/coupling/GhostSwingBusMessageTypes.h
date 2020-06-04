@@ -3,10 +3,7 @@
  * See the top-level NOTICE for additional details. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
-#ifndef GHOSTSWINGBUSMESSAGETYPES_H_
-#define GHOSTSWINGBUSMESSAGETYPES_H_
-
+#pragma once
 #include <climits>
 #include <vector>
 
@@ -61,4 +58,3 @@ typedef struct {
 } CommandLineMessage;
 
 }  // namespace griddyn
-#endif

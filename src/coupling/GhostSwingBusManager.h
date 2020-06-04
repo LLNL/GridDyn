@@ -17,12 +17,12 @@
 #include <memory>
 #include <vector>
 
-typedef int MPI_Request;
-
 namespace griddyn {
 namespace mpi {
     class MpiService;
 }
+
+class MPIRequests;
 
 class GhostSwingBusManager {
   public:
@@ -42,14 +42,14 @@ class GhostSwingBusManager {
      * MPI_Init.
      */
     static std::shared_ptr<GhostSwingBusManager>
-        Initialize(int* argc, char** argv[]);  // only constructor that creates Instance
+        initialize(int* argc, char** argv[]);  // only constructor that creates instance
 
     /**
      * Return the current instance of the singleton.
      *
-     * This will fail if Initialize has not been called.
+     * This will fail if initialize has not been called.
      */
-    static std::shared_ptr<GhostSwingBusManager> Instance();
+    static std::shared_ptr<GhostSwingBusManager> instance();
 
     /**
      * Returns true if instance of the manager exists.
@@ -124,8 +124,6 @@ class GhostSwingBusManager {
      * Private so cannot be called
      */
     GhostSwingBusManager(int* argc, char** argv[]);
-    GhostSwingBusManager(GhostSwingBusManager const&) = delete;
-    GhostSwingBusManager& operator=(GhostSwingBusManager const&) = delete;
 
     /**
      * End the distribution system model.
@@ -144,9 +142,10 @@ class GhostSwingBusManager {
     int m_taskId = 0;
     /*
      * Async send requests
+     would have preferred unique ptr but compilers complain about not knowing the definition in the
+     destructor
      */
-    std::vector<MPI_Request> m_mpiSendRequests;
-    std::vector<MPI_Request> m_mpiRecvRequests;
+    MPIRequests* requests{nullptr};
 
     /*
      * True if initialization send has completed.
