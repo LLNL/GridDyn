@@ -170,7 +170,8 @@ void zmqReactor::reactorLoop()
             }
             // deal with any socket updates as triggered by a message on socket 0
             if ((socketPolls[0].revents & ZMQ_POLLIN) != 0) {
-                sockets[0].recv(zmq::mutable_buffer(&messageCode, sizeof(unsigned int)));  // clear the message
+                sockets[0].recv(
+                    zmq::mutable_buffer(&messageCode, sizeof(unsigned int)));  // clear the message
                 auto socketop = updates.pop();
                 while (socketop) {
                     int index;

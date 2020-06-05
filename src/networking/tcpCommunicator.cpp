@@ -34,22 +34,22 @@ namespace tcpLib {
     void tcpCommunicator::cloneTo(Communicator* comm) const
     {
         Communicator::cloneTo(comm);
-       // auto zmqComm = dynamic_cast<tcpCommunicator*>(comm);
-      //  if (zmqComm == nullptr) {
-      //      return;
-      //  }
-     //   zmqComm->proxyName = proxyName;
-      //  zmqComm->contextName = contextName;
-     //   zmqComm->flags = flags;
+        // auto zmqComm = dynamic_cast<tcpCommunicator*>(comm);
+        //  if (zmqComm == nullptr) {
+        //      return;
+        //  }
+        //   zmqComm->proxyName = proxyName;
+        //  zmqComm->contextName = contextName;
+        //   zmqComm->flags = flags;
     }
 
     void tcpCommunicator::transmit(const std::string& destName,
                                    std::shared_ptr<commMessage> /* message */)
     {
-      //  zmq::multipart_t txmsg;
-      //  if (!flags[no_transmit_dest]) {
-       //     txmsg.addstr(destName);
-       // }
+        //  zmq::multipart_t txmsg;
+        //  if (!flags[no_transmit_dest]) {
+        //     txmsg.addstr(destName);
+        // }
         // addHeader(txmsg, message);
         // addMessageBody(txmsg, message);
         // txmsg.send(*txSocket);
@@ -57,8 +57,8 @@ namespace tcpLib {
 
     void tcpCommunicator::transmit(std::uint64_t destID, std::shared_ptr<commMessage> /* message */)
     {
-      //  zmq::multipart_t txmsg;
-       // if (!flags[no_transmit_dest]) {
+        //  zmq::multipart_t txmsg;
+        // if (!flags[no_transmit_dest]) {
         //    txmsg.addmem(&destID, 8);
         //}
         // addHeader(txmsg, message);
@@ -193,20 +193,20 @@ namespace tcpLib {
         }
     }
 
-   /* void tcpCommunicator::messageHandler(const multipart_t& msg)
-    {
-        auto sz = msg.size();
-        // size should be either 2 or 3
-        auto msgBody = (sz == 2) ? msg.peek(1) : msg.peek(2);
+    /* void tcpCommunicator::messageHandler(const multipart_t& msg)
+     {
+         auto sz = msg.size();
+         // size should be either 2 or 3
+         auto msgBody = (sz == 2) ? msg.peek(1) : msg.peek(2);
 
-        std::string msgString(static_cast<const char*>(msgBody->data()), msgBody->size());
-        std::shared_ptr<commMessage> gdMsg;
-        gdMsg->from_datastring(msgString);
+         std::string msgString(static_cast<const char*>(msgBody->data()), msgBody->size());
+         std::shared_ptr<commMessage> gdMsg;
+         gdMsg->from_datastring(msgString);
 
-        // call the lower level receive function
-        receive(0, getName(), std::move(gdMsg));
-    }
-    */
+         // call the lower level receive function
+         receive(0, getName(), std::move(gdMsg));
+     }
+     */
 
 }  // namespace tcpLib
 }  // namespace griddyn

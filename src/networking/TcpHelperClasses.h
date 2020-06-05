@@ -23,8 +23,8 @@ namespace griddyn {
 namespace tcpLib {
     namespace asio = boost::asio;
     using error_type = boost::system::error_code;
-        /** tcp socket generation for a receiving server*/
-        class TcpConnection: public std::enable_shared_from_this<TcpConnection> {
+    /** tcp socket generation for a receiving server*/
+    class TcpConnection: public std::enable_shared_from_this<TcpConnection> {
       public:
         /** enumeration of the possible states of a connection*/
         enum class connection_state_t {
@@ -330,5 +330,5 @@ namespace tcpLib {
         std::vector<TcpConnection::pointer> connections;
     };
 
-}  // namespace tcp
-}  // namespace helics
+}  // namespace tcpLib
+}  // namespace griddyn
