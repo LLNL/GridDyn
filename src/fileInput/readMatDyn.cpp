@@ -39,64 +39,64 @@ void loadMatDyn(coreObject* parentObject,
 
     std::vector<Generator*> genList;
     // read the frequency
-    size_t A = ftext.find_first_of('[', 0);
-    size_t B = ftext.find_first_of(']', 0);
-    auto tstr = ftext.substr(A + 1, B - A - 1);
+    size_t Aindex = ftext.find_first_of('[', 0);
+    size_t Bindex = ftext.find_first_of(']', 0);
+    auto tstr = ftext.substr(Aindex + 1, Bindex - Aindex - 1);
     auto Tline = split(tstr, "\t ,", delimiter_compression::on);
 
-    size_t D = B;
-    size_t C;
-    A = ftext.find(Tline[3], D);  // freq
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        C = ftext.find_first_of(";\n", A);
-        tstr = ftext.substr(B + 1, C - B - 1);
+    size_t Dindex = Bindex;
+    size_t Cindex;
+    Aindex = ftext.find(Tline[3], Dindex);  // freq
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double freq = numeric_conversion(tstr, kNullVal);
         parentObject->set("basefreq", freq);
     }
     // get the timestep parameter
-    A = ftext.find(Tline[4], D);  // steptime
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        C = ftext.find_first_of(";\n", A);
-        tstr = ftext.substr(B + 1, C - B - 1);
+    Aindex = ftext.find(Tline[4], Dindex);  // steptime
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double val = numeric_conversion(tstr, kNullVal);
         parentObject->set("timestep", val);
     }
     // get the stoptime parameter
-    A = ftext.find(Tline[5], D);  // stoptime
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        C = ftext.find_first_of(";\n", A);
-        tstr = ftext.substr(B + 1, C - B - 1);
+    Aindex = ftext.find(Tline[5], Dindex);  // stoptime
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double val = numeric_conversion(tstr, kNullVal);
         parentObject->set("timestop", val);
     }
-    A = ftext.find(Tline[0], D);  // gen
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, M1);
+    Aindex = ftext.find(Tline[0], Dindex);  // gen
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenDynArray(parentObject, M1, genList);
     }
 
-    A = ftext.find(Tline[1], D);  // exc
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, M1);
+    Aindex = ftext.find(Tline[1], Dindex);  // exc
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenExcArray(parentObject, M1, genList);
     }
 
-    A = ftext.find(Tline[2], D);  // gov
-    if (A != string_view::npos) {
-        B = ftext.find_first_of('=', A);
-        readMatlabArray(filetext, B + 1, M1);
+    Aindex = ftext.find(Tline[2], Dindex);  // gov
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenGovArray(parentObject, M1, genList);
     }
-    A = 1;
+    Aindex = 1;
     for (auto& ngen : genList) {
         auto* gen =
-            static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(A)));
-        A++;
+            static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(Aindex)));
+        Aindex++;
         if (gen == nullptr) {
             std::cout
                 << "the number of generators does not match the matdyn file please run with matching "

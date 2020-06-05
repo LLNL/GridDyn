@@ -30,7 +30,7 @@ jobs:
     docker:
       - image: helics/buildenv:gcc7-builder
     environment:
-      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON'
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_ENABLE_OPTIMIZATION_LIBRARY=ON'
     steps:
       - checkout
       - run: *setup_griddyn
