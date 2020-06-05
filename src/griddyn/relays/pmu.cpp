@@ -214,7 +214,7 @@ namespace relays {
     {
         // 4 different scenarios
         if (opFlags[three_phase_active]) {
-            if (opFlags[current_active]) { // NOLINT
+            if (opFlags[current_active]) {  // NOLINT
                 // three phase voltage and current
             } else {
                 // three phase voltage

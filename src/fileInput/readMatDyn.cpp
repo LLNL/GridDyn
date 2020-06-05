@@ -94,8 +94,8 @@ void loadMatDyn(coreObject* parentObject,
     }
     Aindex = 1;
     for (auto& ngen : genList) {
-        auto* gen =
-            static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(Aindex)));
+        auto* gen = static_cast<Generator*>(
+            parentObject->findByUserID("gen", static_cast<index_t>(Aindex)));
         Aindex++;
         if (gen == nullptr) {
             std::cout
