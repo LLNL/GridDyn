@@ -30,7 +30,7 @@ namespace relays {
 
     coreObject* breaker::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<breaker, Relay>(this, obj);
+        auto* nobj = cloneBase<breaker, Relay>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }
@@ -131,7 +131,7 @@ std::string commType;
         auto gc2 = std::make_shared<Condition>();
 
         auto cg = std::make_unique<customGrabber>();
-        cg->setGrabberFunction("I2T", [this](coreObject*) { return cTI; });
+        cg->setGrabberFunction("I2T", [this](coreObject* /*unused*/) { return cTI; });
 
         auto cgst = std::make_unique<customStateGrabber>(this);
         cgst->setGrabberFunction(
@@ -255,12 +255,12 @@ std::string commType;
             auto inputs = bus->getOutputs(noInputs, sD, sMode);
             auto inputLocs = bus->getOutputLocs(sMode);
             if (opFlags[nonlink_source_flag]) {
-                auto gs = static_cast<gridSecondary*>(m_sourceObject);
+                auto* gs = static_cast<gridSecondary*>(m_sourceObject);
                 out = gs->getOutputs(inputs, sD, sMode);
                 gs->outputPartialDerivatives(inputs, sD, d, sMode);
                 gs->ioPartialDerivatives(inputs, sD, d, inputLocs, sMode);
             } else {
-                auto lnk = static_cast<Link*>(m_sourceObject);
+                auto* lnk = static_cast<Link*>(m_sourceObject);
                 auto bid = bus->getID();
                 lnk->updateLocalCache(noInputs, sD, sMode);
                 out = lnk->getOutputs(bid, sD, sMode);

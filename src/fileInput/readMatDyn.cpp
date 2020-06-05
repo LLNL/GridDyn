@@ -39,64 +39,64 @@ void loadMatDyn(coreObject* parentObject,
 
     std::vector<Generator*> genList;
     // read the frequency
-    size_t Aloc = ftext.find_first_of('[', 0);
-    size_t Bloc = ftext.find_first_of(']', 0);
-    auto tstr = ftext.substr(Aloc + 1, Bloc - Aloc - 1);
+    size_t Aindex = ftext.find_first_of('[', 0);
+    size_t Bindex = ftext.find_first_of(']', 0);
+    auto tstr = ftext.substr(Aindex + 1, Bindex - Aindex - 1);
     auto Tline = split(tstr, "\t ,", delimiter_compression::on);
 
-    size_t Dloc = Bloc;
-    size_t Cloc;
-    Aloc = ftext.find(Tline[3], Dloc);  // freq
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        Cloc = ftext.find_first_of(";\n", Aloc);
-        tstr = ftext.substr(Bloc + 1, Cloc - Bloc - 1);
+    size_t Dindex = Bindex;
+    size_t Cindex;
+    Aindex = ftext.find(Tline[3], Dindex);  // freq
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double freq = numeric_conversion(tstr, kNullVal);
         parentObject->set("basefreq", freq);
     }
     // get the timestep parameter
-    Aloc = ftext.find(Tline[4], Dloc);  // steptime
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        Cloc = ftext.find_first_of(";\n", Aloc);
-        tstr = ftext.substr(Bloc + 1, Cloc - Bloc - 1);
+    Aindex = ftext.find(Tline[4], Dindex);  // steptime
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double val = numeric_conversion(tstr, kNullVal);
         parentObject->set("timestep", val);
     }
     // get the stoptime parameter
-    Aloc = ftext.find(Tline[5], Dloc);  // stoptime
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        Cloc = ftext.find_first_of(";\n", Aloc);
-        tstr = ftext.substr(Bloc + 1, Cloc - Bloc - 1);
+    Aindex = ftext.find(Tline[5], Dindex);  // stoptime
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        Cindex = ftext.find_first_of(";\n", Aindex);
+        tstr = ftext.substr(Bindex + 1, Cindex - Bindex - 1);
         double val = numeric_conversion(tstr, kNullVal);
         parentObject->set("timestop", val);
     }
-    Aloc = ftext.find(Tline[0], Dloc);  // gen
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        readMatlabArray(filetext, Bloc + 1, M1);
+    Aindex = ftext.find(Tline[0], Dindex);  // gen
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenDynArray(parentObject, M1, genList);
     }
 
-    Aloc = ftext.find(Tline[1], Dloc);  // exc
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        readMatlabArray(filetext, Bloc + 1, M1);
+    Aindex = ftext.find(Tline[1], Dindex);  // exc
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenExcArray(parentObject, M1, genList);
     }
 
-    Aloc = ftext.find(Tline[2], Dloc);  // gov
-    if (Aloc != string_view::npos) {
-        Bloc = ftext.find_first_of('=', Aloc);
-        readMatlabArray(filetext, Bloc + 1, M1);
+    Aindex = ftext.find(Tline[2], Dindex);  // gov
+    if (Aindex != string_view::npos) {
+        Bindex = ftext.find_first_of('=', Aindex);
+        readMatlabArray(filetext, Bindex + 1, M1);
         loadGenGovArray(parentObject, M1, genList);
     }
-    Aloc = 1;
+    Aindex = 1;
     for (auto& ngen : genList) {
         auto* gen =
-            static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(Aloc)));
-        Aloc++;
+            static_cast<Generator*>(parentObject->findByUserID("gen", static_cast<index_t>(Aindex)));
+        Aindex++;
         if (gen == nullptr) {
             std::cout
                 << "the number of generators does not match the matdyn file please run with matching "

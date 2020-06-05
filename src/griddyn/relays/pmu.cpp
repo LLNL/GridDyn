@@ -29,7 +29,7 @@ namespace relays {
 
     coreObject* pmu::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<pmu, sensor>(this, obj);
+        auto* nobj = cloneBase<pmu, sensor>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }
@@ -214,13 +214,13 @@ namespace relays {
     {
         // 4 different scenarios
         if (opFlags[three_phase_active]) {
-            if (opFlags[current_active]) {
+            if (opFlags[current_active]) { // NOLINT
                 // three phase voltage and current
             } else {
                 // three phase voltage
             }
         } else {
-            auto vBlock = new blocks::delayBlock(Tv);
+            auto* vBlock = new blocks::delayBlock(Tv);
             vBlock->setName("voltage");
             add(vBlock);
             vBlock = new blocks::delayBlock(Ttheta);
@@ -246,7 +246,7 @@ namespace relays {
                 setupOutput(2, "block2");
                 setupOutput(3, "block3");
             }
-            auto fblock = new blocks::filteredDerivativeBlock("freq");
+            auto* fblock = new blocks::filteredDerivativeBlock("freq");
             fblock->set("t1", Ttheta);
             fblock->set("t2", Trocof);
             add(fblock);
@@ -280,12 +280,12 @@ namespace relays {
     void pmu::generateAndTransmitMessage() const
     {
         if (opFlags[use_commLink]) {
-            auto& oname = outputNames();
+            const auto& oname = outputNames();
 
             auto message =
                 std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
 
-            auto payload = message->getPayload<comms::controlMessagePayload>();
+            auto* payload = message->getPayload<comms::controlMessagePayload>();
             auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
 
             payload->multiFields.resize(res.size());
