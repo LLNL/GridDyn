@@ -728,5 +728,5 @@ namespace tcpLib {
         }
     }
 
-}  // namespace tcp
-}  // namespace helics
+}  // namespace tcpLib
+}  // namespace griddyn

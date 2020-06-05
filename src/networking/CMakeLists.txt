@@ -43,7 +43,6 @@ if(GRIDDYN_ENABLE_ZMQ OR ZMQ_NEEDED)
 endif()
 add_library(griddyn::zmq ALIAS zmq)
 
-
 if(GRIDDYN_ENABLE_ZMQ OR ZMQ_NEEDED)
     set(zmqLibrary_sources
         zmqLibrary/zmqContextManager.cpp zmqLibrary/zmqHelper.cpp zmqLibrary/zmqReactor.cpp
@@ -130,9 +129,9 @@ set(optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set(optional_library_functions ${optional_library_functions} PARENT_SCOPE)
 
 if(GRIDDYN_ENABLE_ZMQ OR ZMQ_NEEDED)
-list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp)
-set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
+    list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp)
+    set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-list(APPEND optional_component_test_linkages griddyn::zmq)
-set(optional_component_test_linkages ${optional_component_test_linkages} PARENT_SCOPE)
+    list(APPEND optional_component_test_linkages griddyn::zmq)
+    set(optional_component_test_linkages ${optional_component_test_linkages} PARENT_SCOPE)
 endif()

@@ -129,7 +129,9 @@ add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 set_target_properties(testLibrary testComponents testSystem testExtra PROPERTIES FOLDER tests)
 
 target_link_libraries(testLibrary fileInput griddyn_test_base)
-target_link_libraries(testComponents griddyn_optional fileInput griddyn_test_base ${optional_component_test_linkages})
+target_link_libraries(
+    testComponents griddyn_optional fileInput griddyn_test_base ${optional_component_test_linkages}
+)
 target_link_libraries(testSystem fileInput griddyn_test_base)
 target_link_libraries(testExtra fileInput griddyn_test_base)
 
