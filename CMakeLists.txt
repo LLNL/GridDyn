@@ -525,25 +525,6 @@ else(GRIDDYN_ENABLE_HELICS_EXECUTABLE)
 endif(GRIDDYN_ENABLE_HELICS_EXECUTABLE)
 
 # ------------------------------------------------------------
-# Enable ZMQ interfacing
-# ------------------------------------------------------------
-if(GRIDDYN_ENABLE_DIME)
-    set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
-endif(GRIDDYN_ENABLE_DIME)
-
-hide_variable(ZMQ_NEEDED)
-
-# If ZMQ library is enabled try to locate it and link against it
-cmake_dependent_option(GRIDDYN_ENABLE_ZMQ "Enable ZMQ networking library" OFF "NOT ZMQ_NEEDED" OFF)
-
-if(GRIDDYN_ENABLE_ZMQ OR ZMQ_NEEDED)
-    include(addZeroMQ)
-    if(NOT ZeroMQ_FOUND)
-        message(SEND_ERROR "unable to locate zmq library")
-    endif()
-endif()
-
-# ------------------------------------------------------------
 # setting the RPATH
 # ------------------------------------------------------------
 # use, i.e. don't skip the full RPATH for the build tree

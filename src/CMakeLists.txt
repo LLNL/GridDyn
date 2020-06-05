@@ -109,6 +109,7 @@ endif(GRIDDYN_BUILD_C_SHARED_LIBRARY)
 add_subdirectory(gridDynLoader)
 
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
+set(optional_component_test_linkages ${optional_component_test_linkages} PARENT_SCOPE)
 set(optional_system_test_files ${optional_system_test_files} PARENT_SCOPE)
 set(optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set(optional_library_functions ${optional_library_functions} PARENT_SCOPE)

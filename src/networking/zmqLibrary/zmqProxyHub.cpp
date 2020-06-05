@@ -55,7 +55,7 @@ void zmqProxyHub::startProxy()
 {
     proxyThread = std::thread(&zmqProxyHub::proxyLoop, this);
     int active = 0;
-    controllerSocket->recv(&active, 4);
+    controllerSocket->recv(zmq::mutable_buffer(&active, 4));
     if (active == 1) {
         proxyRunning = true;
     }
@@ -64,7 +64,7 @@ void zmqProxyHub::startProxy()
 void zmqProxyHub::stopProxy()
 {
     if (proxyRunning) {
-        controllerSocket->send("TERMINATE", 9, 0);
+        controllerSocket->send(zmq::const_buffer("TERMINATE", 9));
         proxyThread.join();
     }
     std::lock_guard<std::mutex> proxyLock(proxyCreationMutex);
@@ -116,9 +116,9 @@ void zmqProxyHub::proxyLoop()
     control.connect(std::string("inproc://proxy_" + name).c_str());
 
     int active = 1;
-    control.send(&active, sizeof(int), 0);
+    control.send(zmq::const_buffer(&active, sizeof(int)));
 
-    zmq::proxy_steerable(inputSocket, outputSocket, nullptr, control);
+    zmq::proxy_steerable(inputSocket, outputSocket, zmq::socket_ref(nullptr), control);
 
     // if we exit the proxy function we are no longer running
     proxyRunning = false;

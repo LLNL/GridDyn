@@ -1,13 +1,7 @@
 /*
- * LLNS Copyright Start
- * Copyright (c) 2014-2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department
- * of Energy by Lawrence Livermore National Laboratory in part under
- * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
- * Produced at the Lawrence Livermore National Laboratory.
- * All rights reserved.
- * For details, see the LICENSE file.
- * LLNS Copyright End
+ * Copyright (c) 2014-2020, Lawrence Livermore National Security
+ * See the top-level NOTICE for additional details. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "tcpCommunicator.h"
@@ -18,8 +12,6 @@
 
 namespace griddyn {
 namespace tcpLib {
-    using namespace zmq;
-    using namespace zmqlib;
 
     tcpCommunicator::tcpCommunicator(const std::string& name): Communicator(name) {}
 
@@ -42,22 +34,22 @@ namespace tcpLib {
     void tcpCommunicator::cloneTo(Communicator* comm) const
     {
         Communicator::cloneTo(comm);
-        auto zmqComm = dynamic_cast<tcpCommunicator*>(comm);
-        if (zmqComm == nullptr) {
-            return;
-        }
-        zmqComm->proxyName = proxyName;
-        zmqComm->contextName = contextName;
-        zmqComm->flags = flags;
+       // auto zmqComm = dynamic_cast<tcpCommunicator*>(comm);
+      //  if (zmqComm == nullptr) {
+      //      return;
+      //  }
+     //   zmqComm->proxyName = proxyName;
+      //  zmqComm->contextName = contextName;
+     //   zmqComm->flags = flags;
     }
 
     void tcpCommunicator::transmit(const std::string& destName,
                                    std::shared_ptr<commMessage> /* message */)
     {
-        zmq::multipart_t txmsg;
-        if (!flags[no_transmit_dest]) {
-            txmsg.addstr(destName);
-        }
+      //  zmq::multipart_t txmsg;
+      //  if (!flags[no_transmit_dest]) {
+       //     txmsg.addstr(destName);
+       // }
         // addHeader(txmsg, message);
         // addMessageBody(txmsg, message);
         // txmsg.send(*txSocket);
@@ -65,10 +57,10 @@ namespace tcpLib {
 
     void tcpCommunicator::transmit(std::uint64_t destID, std::shared_ptr<commMessage> /* message */)
     {
-        zmq::multipart_t txmsg;
-        if (!flags[no_transmit_dest]) {
-            txmsg.addmem(&destID, 8);
-        }
+      //  zmq::multipart_t txmsg;
+       // if (!flags[no_transmit_dest]) {
+        //    txmsg.addmem(&destID, 8);
+        //}
         // addHeader(txmsg, message);
         // addMessageBody(txmsg, message);
         // txmsg.send(*txSocket);
@@ -201,7 +193,7 @@ namespace tcpLib {
         }
     }
 
-    void tcpCommunicator::messageHandler(const multipart_t& msg)
+   /* void tcpCommunicator::messageHandler(const multipart_t& msg)
     {
         auto sz = msg.size();
         // size should be either 2 or 3
@@ -214,6 +206,7 @@ namespace tcpLib {
         // call the lower level receive function
         receive(0, getName(), std::move(gdMsg));
     }
+    */
 
 }  // namespace tcpLib
 }  // namespace griddyn
