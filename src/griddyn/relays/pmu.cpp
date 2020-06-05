@@ -220,12 +220,12 @@ namespace relays {
                 // three phase voltage
             }
         } else {
-            auto B = new blocks::delayBlock(Tv);
-            B->setName("voltage");
-            add(B);
-            B = new blocks::delayBlock(Ttheta);
-            B->setName("angle");
-            add(B);
+            auto vBlock = new blocks::delayBlock(Tv);
+            vBlock->setName("voltage");
+            add(vBlock);
+            vBlock = new blocks::delayBlock(Ttheta);
+            vBlock->setName("angle");
+            add(vBlock);
             set("input0", "voltage");
             set("input1", "angle");
             set("blockinput0", 0);
@@ -233,12 +233,12 @@ namespace relays {
             setupOutput(0, "block0");
             setupOutput(1, "block1");
             if (opFlags[current_active]) {
-                B = new blocks::delayBlock(Tcurrent);
-                B->setName("current_real");
-                add(B);
-                B = new blocks::delayBlock(Tcurrent);
-                B->setName("current_reactive");
-                add(B);
+                vBlock = new blocks::delayBlock(Tcurrent);
+                vBlock->setName("current_real");
+                add(vBlock);
+                vBlock = new blocks::delayBlock(Tcurrent);
+                vBlock->setName("current_reactive");
+                add(vBlock);
                 set("input2", "current_real");
                 set("input3", "current_reactive");
                 set("blockinput2", 2);
