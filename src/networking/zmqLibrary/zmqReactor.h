@@ -19,7 +19,7 @@ Livermore National Security, LLC.
  */
 #pragma once
 
-#include "gmlc/containers/simpleQueue.hpp"
+#include "gmlc/containers/SimpleQueue.hpp"
 #include "zmqSocketDescriptor.h"
 #include <atomic>
 #include <memory>
