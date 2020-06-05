@@ -52,7 +52,7 @@ void zmqReactor::terminateReactor()
 {
     if (reactorLoopRunning) {
         updates.emplace(reactorInstruction::terminate, std::string());
-        notifier->send(&zero, sizeof(int));
+        notifier->send(zmq::const_buffer(&zero, sizeof(int)));
         loopThread.join();
     }
     std::lock_guard<std::mutex> creationLock(reactorCreationLock);
@@ -83,27 +83,27 @@ std::shared_ptr<zmqReactor> zmqReactor::getReactorInstance(const std::string& re
 void zmqReactor::addSocket(const zmqSocketDescriptor& desc)
 {
     updates.emplace(reactorInstruction::newSocket, desc);
-    notifier->send(&zero, sizeof(int));
+    notifier->send(zmq::const_buffer(&zero, sizeof(int)));
 }
 
 void zmqReactor::modifySocket(const zmqSocketDescriptor& desc)
 {
     updates.emplace(reactorInstruction::modify, desc);
-    notifier->send(&zero, sizeof(int));
+    notifier->send(zmq::const_buffer(&zero, sizeof(int)));
 }
 
 void zmqReactor::closeSocket(const std::string& socketName)
 {
     updates.emplace(reactorInstruction::close, socketName);
-    notifier->send(&zero, sizeof(int));
+    notifier->send(zmq::const_buffer(&zero, sizeof(int)));
 }
 
 void zmqReactor::addSocketBlocking(const zmqSocketDescriptor& desc)
 {
     unsigned int one(1);
     updates.emplace(reactorInstruction::newSocket, desc);
-    notifier->send(&one, sizeof(int));
-    notifier->recv(&one, 4, 0);
+    notifier->send(zmq::const_buffer(&one, sizeof(int)));
+    notifier->recv(zmq::mutable_buffer(&one, 4));
 }
 
 void zmqReactor::modifySocketBlocking(const zmqSocketDescriptor& desc)
@@ -111,17 +111,17 @@ void zmqReactor::modifySocketBlocking(const zmqSocketDescriptor& desc)
     unsigned int one(1);
 
     updates.emplace(reactorInstruction::modify, desc);
-    notifier->send(&one, sizeof(int));
+    notifier->send(zmq::const_buffer(&one, sizeof(int)));
 
-    notifier->recv(&one, 4, 0);
+    notifier->recv(zmq::mutable_buffer(&one, 4));
 }
 
 void zmqReactor::closeSocketBlocking(const std::string& socketName)
 {
     unsigned int one(1);
     updates.emplace(reactorInstruction::close, socketName);
-    notifier->send(&one, sizeof(int));
-    notifier->recv(&one, 4, 0);
+    notifier->send(zmq::const_buffer(&one, sizeof(int)));
+    notifier->recv(zmq::mutable_buffer(&one, 4));
 }
 
 // this is not a member function but a helper function for the reactorLoop
@@ -170,7 +170,8 @@ void zmqReactor::reactorLoop()
             }
             // deal with any socket updates as triggered by a message on socket 0
             if ((socketPolls[0].revents & ZMQ_POLLIN) != 0) {
-                sockets[0].recv(&messageCode, sizeof(unsigned int), 0);  // clear the message
+                sockets[0].recv(
+                    zmq::mutable_buffer(&messageCode, sizeof(unsigned int)));  // clear the message
                 auto socketop = updates.pop();
                 while (socketop) {
                     int index;
@@ -218,7 +219,7 @@ void zmqReactor::reactorLoop()
                     socketop = updates.pop();
                 }
                 if (messageCode > 0) {
-                    sockets[0].send(&messageCode, sizeof(unsigned int), 0);
+                    sockets[0].send(zmq::const_buffer(&messageCode, sizeof(unsigned int)));
                 }
             }
         }
