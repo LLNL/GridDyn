@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2020, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -121,7 +121,7 @@ else()
 endif() # ${PROJECT_NAME}_USE_SYSTEM_ZEROMQ_ONLY
 hide_variable(ZeroMQ_DIR)
 
-if(WIN32)
+if(WIN32 AND NOT MSYS AND NOT CYGWIN)
     if(TARGET libzmq)
         install(
             FILES $<TARGET_FILE:libzmq>
