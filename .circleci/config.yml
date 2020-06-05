@@ -30,7 +30,16 @@ jobs:
     docker:
       - image: helics/buildenv:gcc7-builder
     environment:
-      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON '
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON'
+    steps:
+      - checkout
+      - run: *setup_griddyn
+      - run: *run_griddyn_tests
+  build_gcc9:
+    docker:
+      - image: helics/buildenv:gcc9-builder
+    environment:
+      CMAKE_FLAGS: ' -DGRIDDYN_BUILD_TESTS=ON -DGRIDDYN_ENABLE_ZMQ=ON -DGRIDDYN_ENABLE_NETWORKING_LIBRARY=ON -DGRIDDYN_ENABLE_TCP=ON'
     steps:
       - checkout
       - run: *setup_griddyn
@@ -66,5 +75,6 @@ workflows:
     jobs:
       - build_gcc8
       - build_gcc7
+      - build_gcc9
       - build_clang9
       - build_xbraid

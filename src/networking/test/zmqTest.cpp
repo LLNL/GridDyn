@@ -22,7 +22,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 static const std::string zmq_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/zmq_tests/");
 
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE(test_socket_descriptor)
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::string mess1 = "test1:hello";
-    sock1.send(mess1.c_str(), mess1.size(), 0);
+    sock1.send(mess1);
 
     message_t rxMessage;
-    sock2.recv(&rxMessage);
+    sock2.recv(rxMessage);
 
     BOOST_CHECK(rxMessage.size() == mess1.size());
 
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(test_reactorA)
     reactor->addSocketBlocking(zDescriptor2);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     std::string mess1 = "test1:hello";
-    sock1.send(mess1.c_str(), mess1.size(), 0);
+    sock1.send(mess1);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count == 1);
     // send a message it shouldn't receive
     std::string mess2 = "test2:hello";
-    sock1.send(mess2.c_str(), mess2.size(), 0);
+    sock1.send(mess2);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count == 1);
 
@@ -114,13 +114,13 @@ BOOST_AUTO_TEST_CASE(test_reactorA)
 
     reactor->modifySocketBlocking(zDescriptorMod);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    sock1.send(mess2.c_str(), mess2.size(), 0);
+    sock1.send(mess2);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count == 2);
     // close the socket  and make sure it doesn't receive the message
     reactor->closeSocket("test_socketr");
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    sock1.send(mess2.c_str(), mess2.size(), 0);
+    sock1.send(mess2);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count == 2);
 }
@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE(test_reactorB)
     reactor->addSocketBlocking(zDescriptor3);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     std::string mess1 = "test1:hello";
-    sock1.send(mess1.c_str(), mess1.size(), 0);
+    sock1.send(mess1);
     // send a message it shouldn't receive
     std::string mess2 = "test2:hello";
-    sock1.send(mess2.c_str(), mess2.size(), 0);
+    sock1.send(mess2);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count1 == 1);
     BOOST_CHECK(count2 == 1);
@@ -171,15 +171,15 @@ BOOST_AUTO_TEST_CASE(test_reactorB)
     reactor->modifySocketBlocking(zDescriptorMod);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     std::string mess3 = "test3:hello";
-    sock1.send(mess3.c_str(), mess3.size(), 0);
+    sock1.send(mess3);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     BOOST_CHECK(count1 == 2);
     BOOST_CHECK(count2 == 2);
     // close the socket  and make sure it doesn't receive the message
     reactor->closeSocket("test_socketr1");
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    sock1.send(mess3.c_str(), mess3.size(), 0);
-    sock1.send(mess2.c_str(), mess2.size(), 0);
+    sock1.send(mess3);
+    sock1.send(mess2);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     BOOST_CHECK_EQUAL(count1, 2);
     BOOST_CHECK_EQUAL(count2, 4);
