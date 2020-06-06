@@ -30,7 +30,7 @@ namespace relays {
 
     coreObject* breaker::clone(coreObject* obj) const
     {
-        auto nobj = cloneBase<breaker, Relay>(this, obj);
+        auto* nobj = cloneBase<breaker, Relay>(this, obj);
         if (nobj == nullptr) {
             return obj;
         }
@@ -131,7 +131,7 @@ std::string commType;
         auto gc2 = std::make_shared<Condition>();
 
         auto cg = std::make_unique<customGrabber>();
-        cg->setGrabberFunction("I2T", [this](coreObject*) { return cTI; });
+        cg->setGrabberFunction("I2T", [this](coreObject* /*unused*/) { return cTI; });
 
         auto cgst = std::make_unique<customStateGrabber>(this);
         cgst->setGrabberFunction(
@@ -255,12 +255,12 @@ std::string commType;
             auto inputs = bus->getOutputs(noInputs, sD, sMode);
             auto inputLocs = bus->getOutputLocs(sMode);
             if (opFlags[nonlink_source_flag]) {
-                auto gs = static_cast<gridSecondary*>(m_sourceObject);
+                auto* gs = static_cast<gridSecondary*>(m_sourceObject);
                 out = gs->getOutputs(inputs, sD, sMode);
                 gs->outputPartialDerivatives(inputs, sD, d, sMode);
                 gs->ioPartialDerivatives(inputs, sD, d, inputLocs, sMode);
             } else {
-                auto lnk = static_cast<Link*>(m_sourceObject);
+                auto* lnk = static_cast<Link*>(m_sourceObject);
                 auto bid = bus->getID();
                 lnk->updateLocalCache(noInputs, sD, sMode);
                 out = lnk->getOutputs(bid, sD, sMode);
@@ -272,10 +272,10 @@ std::string commType;
 
             double I = getConditionValue(0, sD, sMode);
 
-            double V = bus->getVoltage(sD, sMode);
+            double voltage = bus->getVoltage(sD, sMode);
 
-            double S = std::hypot(out[PoutLocation], out[QoutLocation]);
-            double temp = 1.0 / (S * V);
+            double apparentPower = std::hypot(out[PoutLocation], out[QoutLocation]);
+            double temp = 1.0 / (apparentPower * voltage);
             double dIdP = out[PoutLocation] * temp;
             double dIdQ = out[QoutLocation] * temp;
 
@@ -284,7 +284,7 @@ std::string commType;
             d.translateRow(PoutLocation, offset);
             d.translateRow(QoutLocation, offset);
 
-            d.assignCheck(offset, Voffset, -S / (V * V));
+            d.assignCheck(offset, Voffset, -apparentPower / (voltage * voltage));
             double dRdI;
             if (I > limit) {
                 dRdI = pow((recloserTap / (pow(I - limit, 1.5)) + minClearingTime), -2.0) *
