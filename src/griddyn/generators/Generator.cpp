@@ -644,11 +644,11 @@ void Generator::algebraicUpdate(const IOdata& /*inputs*/,
 {
     if ((!isDynamic(sMode)) &&
         (opFlags[indirect_voltage_control])) {  // the bus is managing a remote bus voltage
-        double V = remoteBus->getVoltage(sD, sMode);
+        double voltage = remoteBus->getVoltage(sD, sMode);
         auto offset = offsets.getAlgOffset(sMode);
         // printf("Q=%f\n",sD.state[offset]);
         if (!opFlags[at_limit]) {
-            update[offset] = -Qbias + (V - m_Vtarget) * vRegFraction * 10000.0;
+            update[offset] = -Qbias + (voltage - m_Vtarget) * vRegFraction * 10000.0;
         } else {
             update[offset] = -Q;
         }
@@ -662,11 +662,11 @@ void Generator::residual(const IOdata& /*inputs*/,
 {
     if ((!isDynamic(sMode)) &&
         (opFlags[indirect_voltage_control])) {  // the bus is managing a remote bus voltage
-        double V = remoteBus->getVoltage(sD, sMode);
+        double voltage = remoteBus->getVoltage(sD, sMode);
         auto offset = offsets.getAlgOffset(sMode);
         // printf("Q=%f\n",sD.state[offset]);
         if (!opFlags[at_limit]) {
-            resid[offset] = sD.state[offset] + Qbias - (V - m_Vtarget) * vRegFraction * 10000.0;
+            resid[offset] = sD.state[offset] + Qbias - (voltage - m_Vtarget) * vRegFraction * 10000.0;
         } else {
             resid[offset] = sD.state[offset] + Q;
         }

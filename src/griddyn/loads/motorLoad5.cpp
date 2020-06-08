@@ -63,15 +63,15 @@ namespace loads {
 
     void motorLoad5::converge()
     {
-        double V = bus->getVoltage();
+        double voltage = bus->getVoltage();
         double theta = bus->getAngle();
         double slip = m_state[2];
-        double Qtest = qPower(V, m_state[2]);
+        double Qtest = qPower(voltage, m_state[2]);
         double im, ir;
         double er, em;
 
-        double Vr = -V * Vcontrol * sin(theta);
-        double Vm = V * Vcontrol * cos(theta);
+        double Vr = -voltage * Vcontrol * sin(theta);
+        double Vm = voltage * Vcontrol * cos(theta);
         gmlc::utilities::solve2x2(Vr, Vm, Vm, -Vr, getP(), Qtest, ir, im);
         double err = 10;
         int ccnt = 0;
@@ -195,7 +195,7 @@ namespace loads {
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, resid, sMode, this);
 
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
             double theta = inputs[angleInLocation];
             const double* gm = Loc.algStateLoc;
             const double* gmd = Loc.diffStateLoc;
@@ -204,8 +204,8 @@ namespace loads {
             double* rva = Loc.destLoc;
             double* rvd = Loc.destDiffLoc;
 
-            double Vr = -V * Vcontrol * sin(theta);
-            double Vm = V * Vcontrol * cos(theta);
+            double Vr = -voltage * Vcontrol * sin(theta);
+            double Vm = voltage * Vcontrol * cos(theta);
 
             // ir
             rva[irA] = Vm - gmd[emppD] - r * gm[imA] - xpp * gm[irA];
@@ -310,12 +310,12 @@ namespace loads {
                                     const solverMode& sMode)
     {
         auto Loc = offsets.getLocations(sD, const_cast<double*>(sD.state), sMode, this);
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
 
         double vr, vm;
-        vr = -V * Vcontrol * sin(theta);
-        vm = V * Vcontrol * cos(theta);
+        vr = -voltage * Vcontrol * sin(theta);
+        vm = voltage * Vcontrol * cos(theta);
 
         gmlc::utilities::solve2x2(r,
                                   -xpp,
@@ -390,14 +390,14 @@ namespace loads {
             cj = 0;
         }
 
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
         auto VLoc = inputLocs[voltageInLocation];
         auto TLoc = inputLocs[angleInLocation];
         double Vr, Vm;
 
-        Vr = -V * Vcontrol * sin(theta);
-        Vm = V * Vcontrol * cos(theta);
+        Vr = -voltage * Vcontrol * sin(theta);
+        Vm = voltage * Vcontrol * cos(theta);
 
         // ir
         // rva[0] = Vm - gmd[2] - r*gm[1] - xp*gm[0];
@@ -411,8 +411,8 @@ namespace loads {
         }
         // Q
         if (VLoc != kNullLocation) {
-            md.assign(refAlg, VLoc, Vm / V);
-            md.assign(refAlg + 1, VLoc, Vr / V);
+            md.assign(refAlg, VLoc, Vm / voltage);
+            md.assign(refAlg + 1, VLoc, Vr / voltage);
         }
 
         md.assign(refAlg, refAlg, -xpp);

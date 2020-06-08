@@ -92,18 +92,18 @@ void acLine::pFlowCheck(std::vector<Violation>& Violation_vector)
 
         Violation_vector.push_back(violation);
     } else if (angle > maxAngle) {
-        Violation V;
-        V.m_objectName = getName();
-        V.violationCode = MAXIMUM_ANGLE_EXCEEDED;
-        V.level = angle;
-        V.limit = maxAngle;
+        Violation violation;
+        violation.m_objectName = getName();
+        violation.violationCode = MAXIMUM_ANGLE_EXCEEDED;
+        violation.level = angle;
+        violation.limit = maxAngle;
         if (maxAngle != 0.0) {
-            V.percentViolation = (angle - maxAngle) / std::abs(maxAngle) * 100.0;
+            violation.percentViolation = (angle - maxAngle) / std::abs(maxAngle) * 100.0;
         } else {
-            V.percentViolation = 100.0;
+            violation.percentViolation = 100.0;
         }
 
-        Violation_vector.push_back(V);
+        Violation_vector.push_back(violation);
     }
 }
 

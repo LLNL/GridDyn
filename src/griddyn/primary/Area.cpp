@@ -868,8 +868,8 @@ double Area::get(const std::string& param, unit unitType) const
         val += m_Relays.size();
     } else if ((param == "gencount") || (param == "loadcount")) {
         for (auto obj : primaryObjects) {
-            double count = obj->get(param);
-            val += (count != kNullVal ? count : 0.0);
+            double objCount = obj->get(param);
+            val += (objCount != kNullVal ? objCount : 0.0);
         }
     } else if (param == "subobjectcount") {
         vali = primaryObjects.size();
