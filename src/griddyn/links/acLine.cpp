@@ -31,13 +31,14 @@ using namespace gmlc::utilities;
 #define DERIVCOMP (this->*(derivCalc[getLinkApprox(sMode)]))
 #define DEFAULTDERIVCOMP (this->*(derivCalc[0]))
 
+//NOLINTNEXTLINE
 acLine::acLine(const std::string& objName): Link(objName)
 {
     // default values
     loadApproxFunctions();
     opFlags.set(network_connected);
 }
-
+//NOLINTNEXTLINT
 acLine::acLine(double rP, double xP, const std::string& objName): Link(objName), r(rP), x(xP)
 {
     // default values

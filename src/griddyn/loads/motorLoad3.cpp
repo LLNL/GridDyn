@@ -21,7 +21,7 @@ namespace loads {
     motorLoad3::motorLoad3(const std::string& objName): motorLoad(objName) {}
     coreObject* motorLoad3::clone(coreObject* obj) const
     {
-        auto ld = cloneBase<motorLoad3, motorLoad>(this, obj);
+        auto* ld = cloneBase<motorLoad3, motorLoad>(this, obj);
         if (ld == nullptr) {
             return obj;
         }
@@ -298,9 +298,8 @@ namespace loads {
         double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
 
-        double vr, vm;
-        vr = -voltage * Vcontrol * sin(theta);
-        vm = voltage * Vcontrol * cos(theta);
+        double vr = -voltage * Vcontrol * sin(theta);
+        double vm = voltage * Vcontrol * cos(theta);
 
         gmlc::utilities::solve2x2(r,
                                   -xp,
