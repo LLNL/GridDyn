@@ -53,7 +53,7 @@ namespace loads {
             m_state[2] = 1.0;
             opFlags.set(init_transient);
         }
-        //NOLINTNEXTLINE
+        // NOLINTNEXTLINE
         Load::pFlowObjectInitializeA(time0, flags);
         converge();
 
@@ -370,9 +370,9 @@ namespace loads {
                                       const solverMode& sMode)
     {
         index_t refAlg;
-        const double *gm;
+        const double* gm;
         index_t refDiff;
-        const double *dst;
+        const double* dst;
         double cj = sD.cj;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);

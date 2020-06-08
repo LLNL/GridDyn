@@ -666,7 +666,8 @@ void Generator::residual(const IOdata& /*inputs*/,
         auto offset = offsets.getAlgOffset(sMode);
         // printf("Q=%f\n",sD.state[offset]);
         if (!opFlags[at_limit]) {
-            resid[offset] = sD.state[offset] + Qbias - (voltage - m_Vtarget) * vRegFraction * 10000.0;
+            resid[offset] =
+                sD.state[offset] + Qbias - (voltage - m_Vtarget) * vRegFraction * 10000.0;
         } else {
             resid[offset] = sD.state[offset] + Q;
         }

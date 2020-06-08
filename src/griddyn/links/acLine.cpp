@@ -31,7 +31,7 @@ using namespace gmlc::utilities;
 #define DERIVCOMP (this->*(derivCalc[getLinkApprox(sMode)]))
 #define DEFAULTDERIVCOMP (this->*(derivCalc[0]))
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 acLine::acLine(const std::string& objName): Link(objName)
 {
     // default values
@@ -39,7 +39,7 @@ acLine::acLine(const std::string& objName): Link(objName)
     opFlags.set(network_connected);
 }
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 acLine::acLine(double rP, double xP, const std::string& objName): Link(objName), r(rP), x(xP)
 {
     // default values
@@ -346,7 +346,7 @@ int acLine::fixRealPower(double power,
         return 0;
     }
     if (fixedTerminal == 0) {
-        //NOLINTNEXTLINE
+        // NOLINTNEXTLINE
         if (measureTerminal == 1) {
         } else {
         }

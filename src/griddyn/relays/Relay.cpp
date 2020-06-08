@@ -712,8 +712,7 @@ std::unique_ptr<eventAdapter> Relay::make_alarm(const std::string& val)
 }
 
 // NOLINTNEXTLINE
-void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {
-}  
+void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {}
 
 void Relay::sendAlarm(std::uint32_t code)
 {
