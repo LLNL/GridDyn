@@ -842,10 +842,10 @@ double Area::get(const std::string& param, unit unitType) const
     } else if (param == "relaycount") {
         vali = m_Relays.size();
     } else if (param == "totalbuscount") {
-        for (auto gA : m_Areas) {
+        for (auto* gA : m_Areas) {
             val += gA->get(param);
         }
-        for (auto gA : m_Links) {
+        for (auto* gA : m_Links) {
             val += gA->get("buscount");
         }
         val += static_cast<double>(m_Buses.size());
@@ -1162,7 +1162,7 @@ count_t Area::getBusName(stringVec& names, index_t start) const
     auto bsize = static_cast<index_t>(m_Buses.size());
     ensureSizeAtLeast(names, start + bsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         *nmloc = bus->getName();
         ++nmloc;
     }
@@ -1179,7 +1179,7 @@ count_t Area::getLinkName(stringVec& names, index_t start) const
     auto Lsize = static_cast<index_t>(m_Links.size());
     ensureSizeAtLeast(names, start + Lsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         *nmloc = link->getName();
         ++nmloc;
     }
@@ -1196,8 +1196,8 @@ count_t Area::getLinkBus(stringVec& names, index_t start, int busNumber) const
     auto Lsize = static_cast<index_t>(m_Links.size());
     ensureSizeAtLeast(names, start + Lsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& link : m_Links) {
-        auto bus = link->getBus(busNumber);
+    for (auto* link : m_Links) {
+        auto* bus = link->getBus(busNumber);
         if (bus != nullptr) {
             *nmloc = bus->getName();
         }
@@ -1217,7 +1217,7 @@ double Area::getAdjustableCapacityUp(coreTime time) const
     for (auto* area : m_Areas) {
         adjUp += area->getAdjustableCapacityUp(time);
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             adjUp += bus->getAdjustableCapacityUp(time);
         }
@@ -1397,7 +1397,7 @@ void Area::rootTest(const IOdata& inputs,
                     double roots[],
                     const solverMode& sMode)
 {
-    for (auto ro : rootObjects) {
+    for (auto* ro : rootObjects) {
         ro->rootTest(inputs, sD, roots, sMode);
     }
 #ifdef DEBUG_PRINT
@@ -1457,7 +1457,7 @@ void Area::rootTrigger(coreTime time,
     opFlags.set(disable_flag_updates);  // root triggers can cause a flag change and the flag update
                                         // currently
     // checks the root object
-    // TODO::May be wise at some point to revisit the combination of the flags and root object
+    // TODO(PT) ::May be wise at some point to revisit the combination of the flags and root object
     // checking
     for (auto rc : RF) {
         if (rc < rootOffset + cloc) {
@@ -1762,7 +1762,7 @@ count_t Area::LocalJacobianCount(const solverMode& /*sMode*/) const
 
 std::pair<count_t, count_t> Area::LocalRootCount(const solverMode& /*sMode*/) const
 {
-    auto& lc = offsets.local().local;
+    const auto& lc = offsets.local().local;
     return std::make_pair(lc.algRoots, lc.diffRoots);
 }
 
@@ -1888,7 +1888,7 @@ Area* getMatchingArea(Area* area, gridPrimary* src, gridPrimary* sec)
     }
 
     std::vector<index_t> lkind;
-    auto par = dynamic_cast<gridPrimary*>(area->getParent());
+    auto* par = dynamic_cast<gridPrimary*>(area->getParent());
     if (par == nullptr) {
         return nullptr;
     }

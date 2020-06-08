@@ -38,7 +38,8 @@ acLine::acLine(const std::string& objName): Link(objName)
     loadApproxFunctions();
     opFlags.set(network_connected);
 }
-//NOLINTNEXTLINT
+
+//NOLINTNEXTLINE
 acLine::acLine(double rP, double xP, const std::string& objName): Link(objName), r(rP), x(xP)
 {
     // default values
