@@ -102,8 +102,8 @@ namespace loads {
         virtual double getReactivePower(const IOdata& inputs,
                                         const stateData& sD,
                                         const solverMode& sMode) const override;
-        virtual double getRealPower(double V) const override;
-        virtual double getReactivePower(double V) const override;
+        virtual double getRealPower(double voltage) const override;
+        virtual double getReactivePower(double voltage) const override;
         virtual double getRealPower() const override;
         virtual double getReactivePower() const override;
         virtual void

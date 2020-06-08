@@ -34,7 +34,7 @@ namespace loads {
 
     coreObject* motorLoad::clone(coreObject* obj) const
     {
-        auto ld = cloneBase<motorLoad, Load>(this, obj);
+        auto* ld = cloneBase<motorLoad, Load>(this, obj);
         if (ld == nullptr) {
             return obj;
         }
@@ -321,19 +321,19 @@ namespace loads {
             if (hasDifferential(sMode)) {
                 auto offset = offsets.getDiffOffset(sMode);
                 double slip = sD.state[offset];
-                double V = inputs[voltageInLocation];
+                double voltage = inputs[voltageInLocation];
                 if (opFlags[stalled]) {
                     md.assign(offset, offset, -sD.cj);
                 } else {
                     md.assignCheck(offset,
                                    inputLocs[voltageInLocation],
                                    -(1.0 / H) *
-                                       (V * Vcontrol * Vcontrol * r1 * slip /
+                                       (voltage * Vcontrol * Vcontrol * r1 * slip /
                                         (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
                     // this is a really ugly looking derivative so I am computing it numerically
-                    double test1 = 0.5 / H * (mechPower(slip) - rPower(V, slip));
+                    double test1 = 0.5 / H * (mechPower(slip) - rPower(voltage, slip));
                     double test2 = 0.5 / H *
-                        (mechPower(slip + cSmallDiff) - rPower(V * Vcontrol, slip + cSmallDiff));
+                        (mechPower(slip + cSmallDiff) - rPower(voltage * Vcontrol, slip + cSmallDiff));
                     md.assign(offset, offset, (test2 - test1) / cSmallDiff - sD.cj);
                 }
             }
@@ -362,32 +362,32 @@ namespace loads {
 
             auto offset = offsets.getDiffOffset(sMode);
             double slip = sD.state[offset];
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
 
             md.assign(PoutLocation,
                       offset,
                       scale *
-                          (rPower(V * Vcontrol, slip + cSmallDiff) - rPower(V * Vcontrol, slip)) /
+                          (rPower(voltage * Vcontrol, slip + cSmallDiff) - rPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
 
             md.assign(QoutLocation,
                       offset,
                       scale *
-                          (qPower(V * Vcontrol, slip + cSmallDiff) - qPower(V * Vcontrol, slip)) /
+                          (qPower(voltage * Vcontrol, slip + cSmallDiff) - qPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
         } else if (!opFlags[init_transient]) {
             auto offset = offsets.getAlgOffset(sMode);
             double slip = sD.state[offset];
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
             md.assign(QoutLocation,
                       offset,
                       scale *
-                          (qPower(V * Vcontrol, slip + cSmallDiff) - qPower(V * Vcontrol, slip)) /
+                          (qPower(voltage * Vcontrol, slip + cSmallDiff) - qPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
             md.assign(PoutLocation,
                       offset,
                       scale *
-                          (rPower(V * Vcontrol, slip + cSmallDiff) - rPower(V * Vcontrol, slip)) /
+                          (rPower(voltage * Vcontrol, slip + cSmallDiff) - rPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
         }
     }
@@ -404,18 +404,18 @@ namespace loads {
     {
         if (inputLocs[voltageInLocation] != kNullLocation) {
             double slip = m_state[0];
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
             if (isDynamic(sMode)) {
                 auto Loc = offsets.getLocations(sD, sMode, this);
                 slip = Loc.diffStateLoc[0];
             } else if (!opFlags[init_transient]) {
                 slip = sD.state[offsets.getAlgOffset(sMode)];
             }
-            double temp = V * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1));
+            double temp = voltage * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1));
             md.assign(PoutLocation, inputLocs[voltageInLocation], scale * (2 * r1 * temp));
             md.assign(QoutLocation,
                       inputLocs[voltageInLocation],
-                      scale * (2 * V / xm + 2 * slip * (x + x1) * temp));
+                      scale * (2 * voltage / xm + 2 * slip * (x + x1) * temp));
         }
     }
 
@@ -481,40 +481,40 @@ namespace loads {
 
     double motorLoad::getRealPower() const
     {
-        const double V = bus->getVoltage();
+        const double voltage = bus->getVoltage();
 
         double slip = m_state[0];
-        return rPower(V * Vcontrol, slip) * scale;
+        return rPower(voltage * Vcontrol, slip) * scale;
     }
 
     double motorLoad::getReactivePower() const
     {
-        const double V = bus->getVoltage();
+        const double voltage = bus->getVoltage();
 
         double slip = m_state[0];
 
-        return qPower(V * Vcontrol, slip) * scale;
+        return qPower(voltage * Vcontrol, slip) * scale;
     }
 
     double motorLoad::getRealPower(const IOdata& inputs,
                                    const stateData& sD,
                                    const solverMode& sMode) const
     {
-        const double V = inputs[voltageInLocation];
+        const double voltage = inputs[voltageInLocation];
 
         double Ptemp;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);
 
             double slip = Loc.diffStateLoc[0];
-            Ptemp = rPower(V * Vcontrol, slip);
+            Ptemp = rPower(voltage * Vcontrol, slip);
         } else if (opFlags[init_transient]) {
             double slip = m_state[0];
-            Ptemp = rPower(V * Vcontrol, slip);
+            Ptemp = rPower(voltage * Vcontrol, slip);
         } else {
             auto offset = offsets.getAlgOffset(sMode);
             double slip = sD.state[offset];
-            Ptemp = rPower(V * Vcontrol, slip);
+            Ptemp = rPower(voltage * Vcontrol, slip);
         }
 
         return Ptemp * scale;
@@ -524,35 +524,35 @@ namespace loads {
                                        const stateData& sD,
                                        const solverMode& sMode) const
     {
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
         double Qtemp;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);
 
             double slip = Loc.diffStateLoc[0];
-            Qtemp = qPower(V, slip);
+            Qtemp = qPower(voltage, slip);
         } else if (opFlags[init_transient]) {
             double slip = m_state[0];
-            Qtemp = qPower(V * Vcontrol, slip);
+            Qtemp = qPower(voltage * Vcontrol, slip);
         } else {
             auto offset = offsets.getAlgOffset(sMode);
             double slip = sD.state[offset];
-            Qtemp = qPower(V * Vcontrol, slip);
+            Qtemp = qPower(voltage * Vcontrol, slip);
         }
         return Qtemp * scale;
     }
 
-    double motorLoad::getRealPower(const double V) const
+    double motorLoad::getRealPower(const double voltage) const
     {
         double slip = m_state[0];
 
-        return rPower(V * Vcontrol, slip) * scale;
+        return rPower(voltage * Vcontrol, slip) * scale;
     }
 
-    double motorLoad::getReactivePower(double V) const
+    double motorLoad::getReactivePower(double voltage) const
     {
         double slip = m_state[0];
-        return qPower(V * Vcontrol, slip) * scale;
+        return qPower(voltage * Vcontrol, slip) * scale;
     }
 
     double motorLoad::mechPower(double slip) const

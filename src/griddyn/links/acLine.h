@@ -51,20 +51,20 @@ Each link has a disconnect switch at the from bus and the to bus
 class acLine: public Link {
   public:
   protected:
-    model_parameter mp_B = 0.0;  //!< [pu] per unit shunt capacitance (jb/2 on each end of the line)
-    model_parameter mp_G = 0.0;  //!< [pu] per unit shunt conductance (g/2 on each end of the line)
-    model_parameter fault = -1.0;  //!< fault location along the line keep at <0 for no fault
-    double g = 0.0;  //!< [pu] per unit conductance (calculated parameter)
-    double b = 0.0;  //!< [pu] per unit susceptance (calculated parameter)
-    model_parameter tap = 1.0;  //!< tap position, neutral t = 1;
-    model_parameter tapAngle = 0.0;  //!< [deg] phase angle for phase shifting transformer
+    model_parameter mp_B{0.0};  //!< [pu] per unit shunt capacitance (jb/2 on each end of the line)
+    model_parameter mp_G{0.0};  //!< [pu] per unit shunt conductance (g/2 on each end of the line)
+    model_parameter fault{-1.0};  //!< fault location along the line keep at <0 for no fault
+    double g{0.0};  //!< [pu] per unit conductance (calculated parameter)
+    double b{0.0};  //!< [pu] per unit susceptance (calculated parameter)
+    model_parameter tap{1.0};  //!< tap position, neutral t = 1;
+    model_parameter tapAngle{0.0};  //!< [deg] phase angle for phase shifting transformer
 
-    model_parameter minAngle = -kPI / 2.0;  //!< the minimum angle of the link can handle
+    model_parameter minAngle{-kPI / 2.0};  //!< the minimum angle of the link can handle
     model_parameter maxAngle =
         kPI / 2.0;  //!< the maximum angle the link can handle--related to rating
-    model_parameter length = 0.0;  //!< [km] transmission line length
-    model_parameter r = 0;  //!< [pu] per unit resistance
-    model_parameter x = 0.00000001;  //!< [pu] per unit reactance
+    model_parameter length{0.0};  //!< [km] transmission line length
+    model_parameter r{0.0};  //!< [pu] per unit resistance
+    model_parameter x{0.00000001};  //!< [pu] per unit reactance
     linkI constLinkInfo;  //!< holder for static link bus information
     linkC linkComp;  //!< holder for some computed information
     linkPart LinkDeriv;  //!< holder for computed derivative information

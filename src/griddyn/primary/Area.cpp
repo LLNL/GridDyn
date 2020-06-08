@@ -40,7 +40,7 @@ Area::Area(const std::string& objName): gridPrimary(objName)
 
 coreObject* Area::clone(coreObject* obj) const
 {
-    auto area = cloneBase<Area, gridPrimary>(this, obj);
+    auto* area = cloneBase<Area, gridPrimary>(this, obj);
     if (area == nullptr) {
         return obj;
     }
@@ -50,7 +50,7 @@ coreObject* Area::clone(coreObject* obj) const
     // clone all the areas
     for (size_t kk = 0; kk < m_Areas.size(); kk++) {
         if (kk >= area->m_Areas.size()) {
-            auto gA = static_cast<Area*>(m_Areas[kk]->clone());
+            auto* gA = static_cast<Area*>(m_Areas[kk]->clone());
             area->add(gA);
         } else {
             m_Areas[kk]->clone(area->m_Areas[kk]);
@@ -59,7 +59,7 @@ coreObject* Area::clone(coreObject* obj) const
     // clone all the buses
     for (size_t kk = 0; kk < m_Buses.size(); kk++) {
         if (kk >= area->m_Buses.size()) {
-            auto bus = static_cast<gridBus*>(m_Buses[kk]->clone());
+            auto* bus = static_cast<gridBus*>(m_Buses[kk]->clone());
             area->add(bus);
         } else {
             m_Buses[kk]->clone(area->m_Buses[kk]);
@@ -69,7 +69,7 @@ coreObject* Area::clone(coreObject* obj) const
     // clone all the relays
     for (size_t kk = 0; kk < m_Relays.size(); kk++) {
         if (kk >= area->m_Relays.size()) {
-            auto relay = static_cast<Relay*>(m_Relays[kk]->clone());
+            auto* relay = static_cast<Relay*>(m_Relays[kk]->clone());
             area->add(relay);
         } else {
             m_Relays[kk]->clone(area->m_Relays[kk]);
@@ -79,10 +79,10 @@ coreObject* Area::clone(coreObject* obj) const
     // clone all the links
     for (size_t kk = 0; kk < m_Links.size(); kk++) {
         if (kk >= area->m_Links.size()) {
-            auto lnk = static_cast<Link*>(m_Links[kk]->clone());
+            auto* lnk = static_cast<Link*>(m_Links[kk]->clone());
             // now we need to make sure the links are mapped properly
             for (index_t tt = 0; tt < lnk->terminalCount(); ++tt) {
-                auto bus =
+                auto* bus =
                     static_cast<gridBus*>(findMatchingObject(m_Links[kk]->getBus(tt + 1), area));
 
                 if (bus != nullptr) {
@@ -93,7 +93,7 @@ coreObject* Area::clone(coreObject* obj) const
         } else {
             m_Links[kk]->clone(area->m_Links[kk]);
             for (index_t tt = 0; tt < area->m_Links[kk]->terminalCount(); ++tt) {
-                auto bus =
+                auto* bus =
                     static_cast<gridBus*>(findMatchingObject(m_Links[kk]->getBus(tt + 1), area));
                 area->m_Links[kk]->updateBus(bus, tt + 1);
             }
@@ -114,7 +114,7 @@ coreObject* Area::clone(coreObject* obj) const
 
 void Area::updateObjectLinkages(coreObject* newRoot)
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->updateObjectLinkages(newRoot);
     }
 }
@@ -122,7 +122,7 @@ void Area::updateObjectLinkages(coreObject* newRoot)
 // destructor
 Area::~Area()
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         removeReference(obj, this);
     }
 }
@@ -204,6 +204,10 @@ void Area::add(Relay* relay)
 // --------------- remove components ---------------
 void Area::remove(coreObject* obj)
 {
+    if (obj == nullptr)
+    {
+        return;
+    }
     if (dynamic_cast<gridBus*>(obj) != nullptr) {
         return remove(static_cast<gridBus*>(obj));
     }
@@ -329,14 +333,14 @@ Relay* Area::getRelay(index_t x) const
 
 Generator* Area::getGen(index_t x)
 {
-    for (auto a : m_Areas) {
+    for (auto* a : m_Areas) {
         auto tcnt = static_cast<count_t>(a->get("gencount"));
         if (x < tcnt) {
             return (a->getGen(x));
         }
         x = x - tcnt;
     }
-    for (auto b : m_Buses) {
+    for (auto* b : m_Buses) {
         count_t tcnt = static_cast<count_t>(b->get("gencount"));
         if (x < tcnt) {
             return b->getGen(x);
@@ -463,13 +467,13 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
     if ((typeName == "gen") || (typeName == "load") || (typeName == "generator")) {
         // this is potentially computationally expensive, wouldn't recommend doing this search in a
         // big system
-        for (auto& bus : m_Buses) {
+        for (auto* bus : m_Buses) {
             coreObject* obj = bus->findByUserID(typeName, searchID);
             if (obj != nullptr) {
                 return obj;
             }
         }
-        for (auto& area : m_Areas) {
+        for (auto* area : m_Areas) {
             coreObject* obj = area->findByUserID(typeName, searchID);
             if (obj != nullptr) {
                 return obj;
@@ -479,7 +483,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
     }
     auto possObjs = obList->find(searchID);
     if (possObjs.empty()) {
-        for (auto& area : m_Areas) {
+        for (auto* area : m_Areas) {
             coreObject* obj = area->findByUserID(typeName, searchID);
             if (obj != nullptr) {
                 return obj;
@@ -488,7 +492,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
         return nullptr;
     }
     if (typeName == "bus") {
-        for (auto po : possObjs) {
+        for (auto* po : possObjs) {
             if (isValidIndex(po->locIndex, m_Buses)) {
                 if (isSameObject(po, m_Buses[po->locIndex])) {
                     return po;
@@ -496,7 +500,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
             }
         }
     } else if (typeName == "link") {
-        for (auto po : possObjs) {
+        for (auto* po : possObjs) {
             if (isValidIndex(po->locIndex, m_Links)) {
                 if (isSameObject(po, m_Links[po->locIndex])) {
                     return po;
@@ -504,7 +508,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
             }
         }
     } else if (typeName == "area") {
-        for (auto po : possObjs) {
+        for (auto* po : possObjs) {
             if (isValidIndex(po->locIndex, m_Areas)) {
                 if (isSameObject(po, m_Areas[po->locIndex])) {
                     return po;
@@ -512,7 +516,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
             }
         }
     } else if (typeName == "relay") {
-        for (auto po : possObjs) {
+        for (auto* po : possObjs) {
             if (isValidIndex(po->locIndex, m_Relays)) {
                 if (isSameObject(po, m_Relays[po->locIndex])) {
                     return po;
@@ -521,7 +525,7 @@ coreObject* Area::findByUserID(const std::string& typeName, index_t searchID) co
         }
     }
     // if we haven't found something try the subareas
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         coreObject* obj = area->findByUserID(typeName, searchID);
         if (obj != nullptr) {
             return obj;
@@ -539,7 +543,7 @@ bool Area::isMember(const coreObject* object) const
 // reset the bus parameters
 void Area::reset(reset_levels level)
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->reset(level);
     }
 }
@@ -547,7 +551,7 @@ void Area::reset(reset_levels level)
 // dynInitializeB states
 void Area::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->pFlowInitializeA(time0, flags);
     }
 }
@@ -558,7 +562,7 @@ void Area::pFlowObjectInitializeB()
 
     // links need to be initialized first so the initial power flow can be computed through the
     // buses
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->checkFlag(late_b_initialize)) {
             lateBObjects.push_back(link);
         } else {
@@ -566,28 +570,28 @@ void Area::pFlowObjectInitializeB()
         }
     }
 
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->checkFlag(late_b_initialize)) {
             lateBObjects.push_back(area);
         } else {
             area->pFlowInitializeB();
         }
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->checkFlag(late_b_initialize)) {
             lateBObjects.push_back(bus);
         } else {
             bus->pFlowInitializeB();
         }
     }
-    for (auto& rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->checkFlag(late_b_initialize)) {
             lateBObjects.push_back(rel);
         } else {
             rel->pFlowInitializeB();
         }
     }
-    for (auto& obj : lateBObjects) {
+    for (auto* obj : lateBObjects) {
         obj->pFlowInitializeB();
     }
 
@@ -597,22 +601,22 @@ void Area::pFlowObjectInitializeB()
 void Area::updateLocalCache()
 {
     // links should come first
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             link->updateLocalCache();
         }
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             area->updateLocalCache();
         }
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             bus->updateLocalCache();
         }
     }
-    for (auto& rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->isEnabled()) {
             rel->updateLocalCache();
         }
@@ -622,22 +626,22 @@ void Area::updateLocalCache()
 void Area::updateLocalCache(const IOdata& inputs, const stateData& sD, const solverMode& sMode)
 {
     // links should come first
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             link->updateLocalCache(inputs, sD, sMode);
         }
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             area->updateLocalCache(inputs, sD, sMode);
         }
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             bus->updateLocalCache(inputs, sD, sMode);
         }
     }
-    for (auto& rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->isEnabled()) {
             rel->updateLocalCache(inputs, sD, sMode);
         }
@@ -651,14 +655,14 @@ change_code Area::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, che
                                         // the middle of
     // this computation
     if (level < check_level_t::low_voltage_check) {
-        for (auto obj : pFlowAdjustObjects) {
+        for (auto* obj : pFlowAdjustObjects) {
             auto iret = obj->powerFlowAdjust(inputs, flags, level);
             if (iret > ret) {
                 ret = iret;
             }
         }
     } else {
-        for (auto& obj : primaryObjects) {
+        for (auto* obj : primaryObjects) {
             if (obj->isEnabled()) {
                 auto iret = obj->powerFlowAdjust(inputs, flags, level);
                 if (iret > ret) {
@@ -677,7 +681,7 @@ change_code Area::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, che
 
 void Area::pFlowCheck(std::vector<Violation>& Violation_vector)
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->pFlowCheck(Violation_vector);
     }
 }
@@ -685,7 +689,7 @@ void Area::pFlowCheck(std::vector<Violation>& Violation_vector)
 // dynInitializeB states for dynamic solution
 void Area::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
-    for (auto obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         if (obj->isEnabled()) {
             obj->dynInitializeA(time0, flags);
         }
@@ -697,7 +701,7 @@ void Area::dynObjectInitializeB(const IOdata& inputs, const IOdata& desiredOutpu
 {
     std::vector<gridPrimary*> lateBObjects;
 
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             if (link->checkFlag(late_b_initialize)) {
                 lateBObjects.push_back(link);
@@ -706,7 +710,7 @@ void Area::dynObjectInitializeB(const IOdata& inputs, const IOdata& desiredOutpu
             }
         }
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             if (area->checkFlag(late_b_initialize)) {
                 lateBObjects.push_back(area);
@@ -716,7 +720,7 @@ void Area::dynObjectInitializeB(const IOdata& inputs, const IOdata& desiredOutpu
         }
     }
     double pmx = 0;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             if (bus->checkFlag(late_b_initialize)) {
                 lateBObjects.push_back(bus);
@@ -730,7 +734,7 @@ void Area::dynObjectInitializeB(const IOdata& inputs, const IOdata& desiredOutpu
             }
         }
     }
-    for (auto& rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->isEnabled()) {
             if (rel->checkFlag(late_b_initialize)) {
                 lateBObjects.push_back(rel);
@@ -739,14 +743,14 @@ void Area::dynObjectInitializeB(const IOdata& inputs, const IOdata& desiredOutpu
             }
         }
     }
-    for (auto& obj : lateBObjects) {
+    for (auto* obj : lateBObjects) {
         obj->dynInitializeB(inputs, desiredOutput, fieldSet);
     }
 
     opObjectLists->makePreList(primaryObjects);
 }
 
-// TODO:: PT make this do something or remove it
+// TODO(PT): make this do something or remove it
 void Area::updateTheta(coreTime /*time*/) {}
 
 void Area::converge(coreTime time,
@@ -808,7 +812,7 @@ void Area::set(const std::string& param, double val, unit unitType)
 {
     if (param == "basepower") {
         systemBasePower = convert(val, unitType, MW);
-        for (auto& obj : primaryObjects) {
+        for (auto* obj : primaryObjects) {
             obj->set(param, val);
         }
     } else if ((param == "basefrequency") || (param == "basefreq")) {
@@ -817,7 +821,7 @@ void Area::set(const std::string& param, double val, unit unitType)
 
         systemBaseFrequency = convert(val, (unitType == defunit) ? Hz : unitType, rad / s);
 
-        for (auto obj : primaryObjects) {
+        for (auto* obj : primaryObjects) {
             obj->set(param, systemBaseFrequency, rad / s);
         }
     } else {
@@ -838,38 +842,38 @@ double Area::get(const std::string& param, unit unitType) const
     } else if (param == "relaycount") {
         vali = m_Relays.size();
     } else if (param == "totalbuscount") {
-        for (auto gA : m_Areas) {
+        for (auto* gA : m_Areas) {
             val += gA->get(param);
         }
-        for (auto gA : m_Links) {
+        for (auto* gA : m_Links) {
             val += gA->get("buscount");
         }
         val += static_cast<double>(m_Buses.size());
     } else if (param == "totallinkcount") {
-        for (auto gA : m_Areas) {
+        for (auto* gA : m_Areas) {
             val += gA->get(param);
         }
-        for (auto gA : m_Links) {
+        for (auto* gA : m_Links) {
             val += gA->get("linkcount");
         }
         // links should return 1 from getting link count so don't need to add the links size again.
     } else if (param == "totalareacount") {
-        for (auto gA : m_Areas) {
+        for (auto* gA : m_Areas) {
             val += gA->get(param);
         }
         val += m_Areas.size();
     } else if (param == "totalrelaycount") {
-        for (auto gA : m_Areas) {
+        for (auto* gA : m_Areas) {
             val += gA->get(param);
         }
-        for (auto gA : m_Links) {
+        for (auto* gA : m_Links) {
             val += gA->get("relaycount");
         }
         val += m_Relays.size();
     } else if ((param == "gencount") || (param == "loadcount")) {
-        for (auto obj : primaryObjects) {
-            double count = obj->get(param);
-            val += (count != kNullVal ? count : 0.0);
+        for (auto* obj : primaryObjects) {
+            double objCount = obj->get(param);
+            val += (objCount != kNullVal ? objCount : 0.0);
         }
     } else if (param == "subobjectcount") {
         vali = primaryObjects.size();
@@ -886,22 +890,22 @@ double Area::get(const std::string& param, unit unitType) const
 void Area::timestep(coreTime time, const IOdata& inputs, const solverMode& sMode)
 {
     // update the tie lines first
-    for (auto gL : m_Links) {
+    for (auto* gL : m_Links) {
         if (gL->isEnabled()) {
             gL->timestep(time, inputs, sMode);
         }
     }
-    for (auto gA : m_Areas) {
+    for (auto* gA : m_Areas) {
         if (gA->isEnabled()) {
             gA->timestep(time, inputs, sMode);
         }
     }
-    for (auto bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             bus->timestep(time, inputs, sMode);
         }
     }
-    for (auto rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->isEnabled()) {
             rel->timestep(time, inputs, sMode);
         }
@@ -916,7 +920,7 @@ count_t Area::getBusVector(std::vector<gridBus*>& busVector, index_t start) cons
         ensureSizeAtLeast(busVector, start + cnt);
         std::copy(m_Buses.begin(), m_Buses.end(), busVector.begin() + start);
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusVector(busVector, start + cnt);
     }
     return cnt;
@@ -929,7 +933,7 @@ count_t Area::getLinkVector(std::vector<Link*>& linkVector, index_t start) const
         ensureSizeAtLeast(linkVector, start + cnt);
         std::copy(m_Links.begin(), m_Links.end(), linkVector.begin() + start);
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getLinkVector(linkVector, start + cnt);
     }
     return cnt;
@@ -938,7 +942,7 @@ count_t Area::getLinkVector(std::vector<Link*>& linkVector, index_t start) const
 count_t Area::getVoltage(std::vector<double>& voltages, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getVoltage(voltages, start + cnt);
     }
 
@@ -958,7 +962,7 @@ count_t Area::getVoltage(std::vector<double>& voltages,
 {
     count_t cnt = 0;
 
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getVoltage(voltages, state, sMode, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -974,7 +978,7 @@ count_t Area::getVoltage(std::vector<double>& voltages,
 count_t Area::getAngle(std::vector<double>& angles, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getAngle(angles, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -992,7 +996,7 @@ count_t Area::getAngle(std::vector<double>& angles,
                        index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getAngle(angles, state, sMode, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1007,7 +1011,7 @@ count_t Area::getAngle(std::vector<double>& angles,
 count_t Area::getFreq(std::vector<double>& frequencies, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getFreq(frequencies, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1044,7 +1048,7 @@ start) const
 count_t Area::getLinkRealPower(std::vector<double>& powers, index_t start, int busNumber) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getLinkRealPower(powers, start + cnt, busNumber);
     }
     auto Lsize = static_cast<index_t>(m_Links.size());
@@ -1060,7 +1064,7 @@ count_t Area::getLinkRealPower(std::vector<double>& powers, index_t start, int b
 count_t Area::getLinkReactivePower(std::vector<double>& powers, index_t start, int busNumber) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getLinkReactivePower(powers, start + cnt, busNumber);
     }
     auto Lsize = static_cast<index_t>(m_Links.size());
@@ -1075,7 +1079,7 @@ count_t Area::getLinkReactivePower(std::vector<double>& powers, index_t start, i
 count_t Area::getBusGenerationReal(std::vector<double>& powers, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusGenerationReal(powers, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1091,7 +1095,7 @@ count_t Area::getBusGenerationReal(std::vector<double>& powers, index_t start) c
 count_t Area::getBusGenerationReactive(std::vector<double>& powers, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusGenerationReactive(powers, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1106,7 +1110,7 @@ count_t Area::getBusGenerationReactive(std::vector<double>& powers, index_t star
 count_t Area::getBusLoadReal(std::vector<double>& powers, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusLoadReal(powers, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1121,7 +1125,7 @@ count_t Area::getBusLoadReal(std::vector<double>& powers, index_t start) const
 count_t Area::getBusLoadReactive(std::vector<double>& powers, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusLoadReactive(powers, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
@@ -1136,7 +1140,7 @@ count_t Area::getBusLoadReactive(std::vector<double>& powers, index_t start) con
 count_t Area::getLinkLoss(std::vector<double>& losses, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             cnt += area->getLinkLoss(losses, start + cnt);
         }
@@ -1152,13 +1156,13 @@ count_t Area::getLinkLoss(std::vector<double>& losses, index_t start) const
 count_t Area::getBusName(stringVec& names, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getBusName(names, start + cnt);
     }
     auto bsize = static_cast<index_t>(m_Buses.size());
     ensureSizeAtLeast(names, start + bsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         *nmloc = bus->getName();
         ++nmloc;
     }
@@ -1169,13 +1173,13 @@ count_t Area::getBusName(stringVec& names, index_t start) const
 count_t Area::getLinkName(stringVec& names, index_t start) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getLinkName(names, start + cnt);
     }
     auto Lsize = static_cast<index_t>(m_Links.size());
     ensureSizeAtLeast(names, start + Lsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         *nmloc = link->getName();
         ++nmloc;
     }
@@ -1186,14 +1190,14 @@ count_t Area::getLinkName(stringVec& names, index_t start) const
 count_t Area::getLinkBus(stringVec& names, index_t start, int busNumber) const
 {
     count_t cnt = 0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         cnt += area->getLinkBus(names, start + cnt, busNumber);
     }
     auto Lsize = static_cast<index_t>(m_Links.size());
     ensureSizeAtLeast(names, start + Lsize);
     auto nmloc = names.begin() + start + cnt;
-    for (auto& link : m_Links) {
-        auto bus = link->getBus(busNumber);
+    for (auto* link : m_Links) {
+        auto* bus = link->getBus(busNumber);
         if (bus != nullptr) {
             *nmloc = bus->getName();
         }
@@ -1210,10 +1214,10 @@ count_t Area::getLinkBus(stringVec& names, index_t start, int busNumber) const
 double Area::getAdjustableCapacityUp(coreTime time) const
 {
     double adjUp = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         adjUp += area->getAdjustableCapacityUp(time);
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             adjUp += bus->getAdjustableCapacityUp(time);
         }
@@ -1224,10 +1228,10 @@ double Area::getAdjustableCapacityUp(coreTime time) const
 double Area::getAdjustableCapacityDown(coreTime time) const
 {
     double adjDown = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         adjDown += area->getAdjustableCapacityDown(time);
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             adjDown += bus->getAdjustableCapacityDown(time);
         }
@@ -1238,15 +1242,15 @@ double Area::getAdjustableCapacityDown(coreTime time) const
 double Area::getLoss() const
 {
     double loss = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         loss += area->getLoss();
     }
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             loss += link->getLoss();
         }
     }
-    for (auto& link : m_externalLinks) {
+    for (auto* link : m_externalLinks) {
         if (link->isEnabled()) {  // half of losses of the tie lines get attributed to the area
             loss += 0.5 * link->getLoss();
         }
@@ -1257,10 +1261,10 @@ double Area::getLoss() const
 double Area::getGenerationReal() const
 {
     double genP = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         genP += area->getGenerationReal();
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             genP += bus->getGenerationReal();
         }
@@ -1271,10 +1275,10 @@ double Area::getGenerationReal() const
 double Area::getGenerationReactive() const
 {
     double genQ = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         genQ += area->getGenerationReactive();
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             genQ += bus->getGenerationReactive();
         }
@@ -1285,10 +1289,10 @@ double Area::getGenerationReactive() const
 double Area::getLoadReal() const
 {
     double loadP = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         loadP += area->getLoadReal();
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             loadP += bus->getLoadReal();
         }
@@ -1299,10 +1303,10 @@ double Area::getLoadReal() const
 double Area::getLoadReactive() const
 {
     double loadQ = 0.0;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         loadQ += area->getLoadReactive();
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
             loadQ += bus->getLoadReactive();
         }
@@ -1314,7 +1318,7 @@ double Area::getAvgAngle() const
 {
     double a = 0.0;
     double cnt = 0.0;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->hasInertialAngle()) {
             a += bus->getAngle();
             cnt += 1.0;
@@ -1327,7 +1331,7 @@ double Area::getAvgAngle(const stateData& sD, const solverMode& sMode) const
 {
     double a = 0.0;
     double cnt = 0.0;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->hasInertialAngle()) {
             a += bus->getAngle(sD, sMode);
             cnt += 1.0;
@@ -1341,7 +1345,7 @@ double Area::getAvgFreq() const
 {
     double a = 0.0;
     double cnt = 0.0;
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->hasInertialAngle()) {
             a += bus->getFreq();
             cnt += 1.0;
@@ -1393,7 +1397,7 @@ void Area::rootTest(const IOdata& inputs,
                     double roots[],
                     const solverMode& sMode)
 {
-    for (auto ro : rootObjects) {
+    for (auto* ro : rootObjects) {
         ro->rootTest(inputs, sD, roots, sMode);
     }
 #ifdef DEBUG_PRINT
@@ -1412,7 +1416,7 @@ change_code Area::rootCheck(const IOdata& inputs,
     // root checks can trigger flag updates disable and just do the update once
     opFlags.set(disable_flag_updates);
     if (level >= check_level_t::low_voltage_check) {
-        for (auto& obj : primaryObjects) {
+        for (auto* obj : primaryObjects) {
             if (obj->isEnabled()) {
                 auto iret = obj->rootCheck(inputs, sD, sMode, level);
                 if (iret > ret) {
@@ -1421,7 +1425,7 @@ change_code Area::rootCheck(const IOdata& inputs,
             }
         }
     } else {
-        for (auto& ro : rootObjects) {
+        for (auto* ro : rootObjects) {
             if (ro->checkFlag(has_alg_roots)) {
                 auto iret = ro->rootCheck(inputs, sD, sMode, level);
                 if (iret > ret) {
@@ -1453,7 +1457,7 @@ void Area::rootTrigger(coreTime time,
     opFlags.set(disable_flag_updates);  // root triggers can cause a flag change and the flag update
                                         // currently
     // checks the root object
-    // TODO::May be wise at some point to revisit the combination of the flags and root object
+    // TODO(PT) ::May be wise at some point to revisit the combination of the flags and root object
     // checking
     for (auto rc : RF) {
         if (rc < rootOffset + cloc) {
@@ -1490,23 +1494,23 @@ void Area::setState(coreTime time,
     prevTime = time;
 
     // links come first
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             link->setState(time, state, dstate_dt, sMode);
         }
     }
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             area->setState(time, state, dstate_dt, sMode);
         }
     }
 
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             bus->setState(time, state, dstate_dt, sMode);
         }
     }
-    for (auto& rel : m_Relays) {
+    for (auto* rel : m_Relays) {
         if (rel->isEnabled()) {
             rel->setState(time, state, dstate_dt, sMode);
         }
@@ -1518,12 +1522,12 @@ void Area::getVoltageStates(double vStates[], const solverMode& sMode) const
 
 {
     index_t Voffset;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             area->getVoltageStates(vStates, sMode);
         }
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             Voffset = bus->getOutputLoc(sMode, voltageInLocation);
             if (Voffset != kNullLocation) {
@@ -1531,7 +1535,7 @@ void Area::getVoltageStates(double vStates[], const solverMode& sMode) const
             }
         }
     }
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             if (link->voltageStateCount(sMode) > 0) {
                 const auto& linkOffsets = link->getOffsets(sMode);
@@ -1548,12 +1552,12 @@ void Area::getAngleStates(double aStates[], const solverMode& sMode) const
 
 {
     index_t Aoffset;
-    for (auto& area : m_Areas) {
+    for (auto* area : m_Areas) {
         if (area->isEnabled()) {
             area->getAngleStates(aStates, sMode);
         }
     }
-    for (auto& bus : m_Buses) {
+    for (auto* bus : m_Buses) {
         if (bus->isEnabled()) {
             Aoffset = bus->getOutputLoc(sMode, angleInLocation);
             if (Aoffset != kNullLocation) {
@@ -1561,7 +1565,7 @@ void Area::getAngleStates(double aStates[], const solverMode& sMode) const
             }
         }
     }
-    for (auto& link : m_Links) {
+    for (auto* link : m_Links) {
         if (link->isEnabled()) {
             if (link->angleStateCount(sMode) > 0) {
                 const auto& linkOffsets = link->getOffsets(sMode);
@@ -1679,7 +1683,7 @@ void Area::updateFlags(bool /*dynOnly*/)
     pFlowAdjustObjects.clear();
     opFlags &= (~flagMask);  // clear the cascading flags
 
-    for (auto& obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         if (obj->isEnabled()) {
             opFlags |= obj->cascadingFlags();
             if (obj->checkFlag(has_powerflow_adjustments)) {
@@ -1698,7 +1702,7 @@ void Area::setOffsets(const solverOffsets& newOffsets, const solverMode& sMode)
     solverOffsets no(newOffsets);
     no.localIncrement(offsets.getOffsets(sMode));
 
-    for (auto& obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->setOffsets(no, sMode);
         no.increment(obj->getOffsets(sMode));
     }
@@ -1709,7 +1713,7 @@ void Area::setOffset(index_t offset, const solverMode& sMode)
     if (!isEnabled()) {
         return;
     }
-    for (auto& obj : primaryObjects) {
+    for (auto* obj : primaryObjects) {
         obj->setOffset(offset, sMode);
         offset += obj->stateSize(sMode);
     }
@@ -1721,7 +1725,7 @@ void Area::setRootOffset(index_t Roffset, const solverMode& sMode)
     offsets.setRootOffset(Roffset, sMode);
     const auto& so = offsets.getOffsets(sMode);
     auto nR = so.local.algRoots + so.local.diffRoots;
-    for (auto& ro : rootObjects) {
+    for (auto* ro : rootObjects) {
         ro->setRootOffset(Roffset + nR, sMode);
         nR += ro->rootSize(sMode);
     }
@@ -1758,7 +1762,7 @@ count_t Area::LocalJacobianCount(const solverMode& /*sMode*/) const
 
 std::pair<count_t, count_t> Area::LocalRootCount(const solverMode& /*sMode*/) const
 {
-    auto& lc = offsets.local().local;
+    const auto& lc = offsets.local().local;
     return std::make_pair(lc.algRoots, lc.diffRoots);
 }
 
@@ -1884,7 +1888,7 @@ Area* getMatchingArea(Area* area, gridPrimary* src, gridPrimary* sec)
     }
 
     std::vector<index_t> lkind;
-    auto par = dynamic_cast<gridPrimary*>(area->getParent());
+    auto* par = dynamic_cast<gridPrimary*>(area->getParent());
     if (par == nullptr) {
         return nullptr;
     }

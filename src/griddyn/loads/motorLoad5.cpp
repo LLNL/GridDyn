@@ -21,7 +21,7 @@ namespace loads {
     motorLoad5::motorLoad5(const std::string& objName): motorLoad3(objName) { H = 4; }
     coreObject* motorLoad5::clone(coreObject* obj) const
     {
-        auto ld = cloneBase<motorLoad5, motorLoad3>(this, obj);
+        auto* ld = cloneBase<motorLoad5, motorLoad3>(this, obj);
         if (ld == nullptr) {
             return obj;
         }
@@ -53,7 +53,7 @@ namespace loads {
             m_state[2] = 1.0;
             opFlags.set(init_transient);
         }
-
+        //NOLINTNEXTLINE
         Load::pFlowObjectInitializeA(time0, flags);
         converge();
 
@@ -63,21 +63,22 @@ namespace loads {
 
     void motorLoad5::converge()
     {
-        double V = bus->getVoltage();
+        double voltage = bus->getVoltage();
         double theta = bus->getAngle();
         double slip = m_state[2];
-        double Qtest = qPower(V, m_state[2]);
-        double im, ir;
-        double er, em;
-
-        double Vr = -V * Vcontrol * sin(theta);
-        double Vm = V * Vcontrol * cos(theta);
+        double Qtest = qPower(voltage, m_state[2]);
+        double im;
+        double em;
+        double ir;
+        double er;
+        double Vr = -voltage * Vcontrol * sin(theta);
+        double Vm = voltage * Vcontrol * cos(theta);
         gmlc::utilities::solve2x2(Vr, Vm, Vm, -Vr, getP(), Qtest, ir, im);
-        double err = 10;
-        int ccnt = 0;
+        double err{10.0};
+        int ccnt{0};
         double fbs = slip * systemBaseFrequency;
 
-        double perr = 10;
+        double perr{10.0};
         while (err > 1e-6) {
             double erp = Vr - r * ir + xp * im;
             double emp = Vm - r * im - xp * ir;
@@ -195,7 +196,7 @@ namespace loads {
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, resid, sMode, this);
 
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
             double theta = inputs[angleInLocation];
             const double* gm = Loc.algStateLoc;
             const double* gmd = Loc.diffStateLoc;
@@ -204,8 +205,8 @@ namespace loads {
             double* rva = Loc.destLoc;
             double* rvd = Loc.destDiffLoc;
 
-            double Vr = -V * Vcontrol * sin(theta);
-            double Vm = V * Vcontrol * cos(theta);
+            double Vr = -voltage * Vcontrol * sin(theta);
+            double Vm = voltage * Vcontrol * cos(theta);
 
             // ir
             rva[irA] = Vm - gmd[emppD] - r * gm[imA] - xpp * gm[irA];
@@ -226,14 +227,14 @@ namespace loads {
             rvd[4] -= gmp[4];
         } else {
             auto offset = offsets.getAlgOffset(sMode);
-            double V = inputs[voltageInLocation];
+            double voltage = inputs[voltageInLocation];
             double theta = inputs[angleInLocation];
 
             const double* gm = sD.state + offset;
             double* rv = resid + offset;
 
-            double Vr = -V * Vcontrol * sin(theta);
-            double Vm = V * Vcontrol * cos(theta);
+            double Vr = -voltage * Vcontrol * sin(theta);
+            double Vm = voltage * Vcontrol * cos(theta);
 
             // ir
             rv[irA] = Vm - gm[emppA] - r * gm[imA] - xpp * gm[irA];
@@ -310,12 +311,11 @@ namespace loads {
                                     const solverMode& sMode)
     {
         auto Loc = offsets.getLocations(sD, const_cast<double*>(sD.state), sMode, this);
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
 
-        double vr, vm;
-        vr = -V * Vcontrol * sin(theta);
-        vm = V * Vcontrol * cos(theta);
+        double vr = -voltage * Vcontrol * sin(theta);
+        double vm = voltage * Vcontrol * cos(theta);
 
         gmlc::utilities::solve2x2(r,
                                   -xpp,
@@ -369,8 +369,10 @@ namespace loads {
                                       const IOlocs& inputLocs,
                                       const solverMode& sMode)
     {
-        index_t refAlg, refDiff;
-        const double *gm, *dst;
+        index_t refAlg;
+        const double *gm;
+        index_t refDiff;
+        const double *dst;
         double cj = sD.cj;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);
@@ -390,14 +392,13 @@ namespace loads {
             cj = 0;
         }
 
-        double V = inputs[voltageInLocation];
+        double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
         auto VLoc = inputLocs[voltageInLocation];
         auto TLoc = inputLocs[angleInLocation];
-        double Vr, Vm;
 
-        Vr = -V * Vcontrol * sin(theta);
-        Vm = V * Vcontrol * cos(theta);
+        double Vr = -voltage * Vcontrol * sin(theta);
+        double Vm = voltage * Vcontrol * cos(theta);
 
         // ir
         // rva[0] = Vm - gmd[2] - r*gm[1] - xp*gm[0];
@@ -411,8 +412,8 @@ namespace loads {
         }
         // Q
         if (VLoc != kNullLocation) {
-            md.assign(refAlg, VLoc, Vm / V);
-            md.assign(refAlg + 1, VLoc, Vr / V);
+            md.assign(refAlg, VLoc, Vm / voltage);
+            md.assign(refAlg + 1, VLoc, Vr / voltage);
         }
 
         md.assign(refAlg, refAlg, -xpp);
