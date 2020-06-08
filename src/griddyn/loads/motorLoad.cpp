@@ -34,7 +34,7 @@ namespace loads {
 
     coreObject* motorLoad::clone(coreObject* obj) const
     {
-        auto ld = cloneBase<motorLoad, Load>(this, obj);
+        auto* ld = cloneBase<motorLoad, Load>(this, obj);
         if (ld == nullptr) {
             return obj;
         }

@@ -45,8 +45,8 @@ namespace loads {
             m_state[2] = 1.0;
             opFlags.set(init_transient);
         }
-
-        Load::pFlowObjectInitializeA(time0, flags);
+        
+        Load::pFlowObjectInitializeA(time0, flags); // NOLINT
         converge();
 
         loadStateSizes(cLocalSolverMode);
@@ -59,9 +59,10 @@ namespace loads {
         double theta = bus->getAngle();
         double slip = m_state[2];
         double Qtest = qPower(voltage, m_state[2]);
-        double im, ir;
-        double er, em;
-
+        double im;
+        double em;
+        double ir;
+        double er;
         double Vr = -voltage * Vcontrol * sin(theta);
         double Vm = voltage * Vcontrol * cos(theta);
         gmlc::utilities::solve2x2(Vr, Vm, Vm, -Vr, Pmot / scale, Qtest, ir, im);
@@ -167,6 +168,7 @@ namespace loads {
                               const double dstate_dt[],
                               const solverMode& sMode)
     {
+        //NOLINTNEXTLINE
         gridComponent::setState(time, state, dstate_dt, sMode);
     }
 
@@ -175,6 +177,7 @@ namespace loads {
                                 double dstate_dt[],
                                 const solverMode& sMode)
     {
+        //NOLINTNEXTLINE
         gridComponent::guessState(time, state, dstate_dt, sMode);
     }
 
@@ -195,10 +198,9 @@ namespace loads {
 
             double* rva = Loc.destLoc;
             double* rvd = Loc.destDiffLoc;
-            double Vr, Vm;
 
-            Vr = -voltage * Vcontrol * sin(theta);
-            Vm = voltage * Vcontrol * cos(theta);
+            double Vr = -voltage * Vcontrol * sin(theta);
+            double Vm = voltage * Vcontrol * cos(theta);
 
             // ir
             rva[0] = Vm - gmd[2] - r * gm[1] - xp * gm[0];
@@ -226,10 +228,9 @@ namespace loads {
 
             const double* gm = sD.state + offset;
             double* rv = resid + offset;
-            double Vr, Vm;
 
-            Vr = -voltage * Vcontrol * sin(theta);
-            Vm = voltage * Vcontrol * cos(theta);
+            double Vr = -voltage * Vcontrol * sin(theta);
+            double Vm = voltage * Vcontrol * cos(theta);
 
             // ir
             rv[0] = Vm - gm[4] - r * gm[1] - xp * gm[0];
@@ -347,8 +348,10 @@ namespace loads {
                                       const IOlocs& inputLocs,
                                       const solverMode& sMode)
     {
-        index_t refAlg, refDiff;
-        const double *gm, *dst;
+        index_t refAlg;
+        index_t refDiff;
+        const double *gm;
+        const double *dst;
         double cj = sD.cj;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);
@@ -451,9 +454,8 @@ namespace loads {
         double voltage = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
 
-        double vr, vm;
-        vr = -voltage * Vcontrol * sin(theta);
-        vm = voltage * Vcontrol * cos(theta);
+        double vr = -voltage * Vcontrol * sin(theta);
+        double vm = voltage * Vcontrol * cos(theta);
 
         // vr*m_state[0] + vm*m_state[1];
 
@@ -481,9 +483,9 @@ namespace loads {
 
         double voltage = inputs[voltageInLocation];
         double angle = inputs[angleInLocation];
-        double vr, vm;
-        vr = -voltage * Vcontrol * sin(angle);
-        vm = voltage * Vcontrol * cos(angle);
+
+        double vr = -voltage * Vcontrol * sin(angle);
+        double vm = voltage * Vcontrol * cos(angle);
 
         const double* gm = Loc.algStateLoc;
 

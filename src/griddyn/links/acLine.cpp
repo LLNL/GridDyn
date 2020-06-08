@@ -51,7 +51,7 @@ static typeFactory<acLine> glf("link", "tie");
 
 coreObject* acLine::clone(coreObject* obj) const
 {
-    auto lnk = cloneBaseFactory<acLine, Link>(this, obj, &glf);
+    auto* lnk = cloneBaseFactory<acLine, Link>(this, obj, &glf);
     if (lnk == nullptr) {
         return obj;
     }
@@ -344,10 +344,11 @@ int acLine::fixRealPower(double power,
         return 0;
     }
     if (fixedTerminal == 0) {
+        //NOLINTNEXTLINE
         if (measureTerminal == 1) {
         } else {
         }
-        // TODO:: PT automatically figure out appropriate terminal to adjust
+        // TODO(PT) automatically figure out appropriate terminal to adjust
     } else if ((fixedTerminal == 1) || (isSameObject(fixedTerminal, B1))) {
         double newAng = B1->getAngle() - ang - tapAngle;
         B2->set("angle", newAng);
@@ -444,9 +445,14 @@ int acLine::fixPower(double rPower,
     double pErr = err;
 
     matrixDataCompact<2, 2> md;
-    double dP, dQ;
-    double dA, dV;
-    double Pvii, Ptii, Qvii, Qtii;
+    double dP;
+    double dQ;
+    double dA;
+    double dV;
+    double Pvii;
+    double Ptii;
+    double Qvii;
+    double Qtii;
     bool aboveTol = ((err > atol) || (err > vtol));
 
     while (aboveTol) {
@@ -548,11 +554,13 @@ int acLine::fixPower(double rPower,
     }
 
     updateLocalCache();
+    /*
     if (measureTerminal == 1) {
         err = std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq);
     } else {
         err = std::abs(linkFlows.P2 - valp) + std::abs(linkFlows.Q2 - valq);
     }
+    */
     return ret;
 }
 
