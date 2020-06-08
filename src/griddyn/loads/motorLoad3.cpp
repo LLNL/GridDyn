@@ -45,8 +45,8 @@ namespace loads {
             m_state[2] = 1.0;
             opFlags.set(init_transient);
         }
-        
-        Load::pFlowObjectInitializeA(time0, flags); // NOLINT
+
+        Load::pFlowObjectInitializeA(time0, flags);  // NOLINT
         converge();
 
         loadStateSizes(cLocalSolverMode);
@@ -168,7 +168,7 @@ namespace loads {
                               const double dstate_dt[],
                               const solverMode& sMode)
     {
-        //NOLINTNEXTLINE
+        // NOLINTNEXTLINE
         gridComponent::setState(time, state, dstate_dt, sMode);
     }
 
@@ -177,7 +177,7 @@ namespace loads {
                                 double dstate_dt[],
                                 const solverMode& sMode)
     {
-        //NOLINTNEXTLINE
+        // NOLINTNEXTLINE
         gridComponent::guessState(time, state, dstate_dt, sMode);
     }
 
@@ -349,8 +349,8 @@ namespace loads {
     {
         index_t refAlg;
         index_t refDiff;
-        const double *gm;
-        const double *dst;
+        const double* gm;
+        const double* dst;
         double cj = sD.cj;
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, sMode, this);
@@ -495,9 +495,13 @@ namespace loads {
 
         // Q=vm*m_state[0] - vr*m_state[1];
         md.assignCheckCol(PoutLocation, inputLocs[angleInLocation], -ir * vm + vr * im);
-        md.assignCheckCol(PoutLocation, inputLocs[voltageInLocation], ir * vr / voltage + vm * im / voltage);
+        md.assignCheckCol(PoutLocation,
+                          inputLocs[voltageInLocation],
+                          ir * vr / voltage + vm * im / voltage);
         md.assignCheckCol(QoutLocation, inputLocs[angleInLocation], vr * ir + vm * im);
-        md.assignCheckCol(QoutLocation, inputLocs[voltageInLocation], vm * ir / voltage - vr * im / voltage);
+        md.assignCheckCol(QoutLocation,
+                          inputLocs[voltageInLocation],
+                          vm * ir / voltage - vr * im / voltage);
     }
 
     index_t motorLoad3::findIndex(const std::string& field, const solverMode& sMode) const

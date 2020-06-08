@@ -204,8 +204,7 @@ void Area::add(Relay* relay)
 // --------------- remove components ---------------
 void Area::remove(coreObject* obj)
 {
-    if (obj == nullptr)
-    {
+    if (obj == nullptr) {
         return;
     }
     if (dynamic_cast<gridBus*>(obj) != nullptr) {

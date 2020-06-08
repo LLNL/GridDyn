@@ -546,7 +546,7 @@ double Link::getBusAngle(id_type_t busId) const
         return (B2 != nullptr) ? B2->getAngle() : kNullVal;
     }
     // now just default to the original behavior
-    auto *bus = getBus(static_cast<index_t>(busId));
+    auto* bus = getBus(static_cast<index_t>(busId));
     if (bus != nullptr) {
         return bus->getAngle();
     }

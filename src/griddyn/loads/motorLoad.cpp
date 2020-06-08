@@ -333,7 +333,8 @@ namespace loads {
                     // this is a really ugly looking derivative so I am computing it numerically
                     double test1 = 0.5 / H * (mechPower(slip) - rPower(voltage, slip));
                     double test2 = 0.5 / H *
-                        (mechPower(slip + cSmallDiff) - rPower(voltage * Vcontrol, slip + cSmallDiff));
+                        (mechPower(slip + cSmallDiff) -
+                         rPower(voltage * Vcontrol, slip + cSmallDiff));
                     md.assign(offset, offset, (test2 - test1) / cSmallDiff - sD.cj);
                 }
             }
@@ -367,13 +368,15 @@ namespace loads {
             md.assign(PoutLocation,
                       offset,
                       scale *
-                          (rPower(voltage * Vcontrol, slip + cSmallDiff) - rPower(voltage * Vcontrol, slip)) /
+                          (rPower(voltage * Vcontrol, slip + cSmallDiff) -
+                           rPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
 
             md.assign(QoutLocation,
                       offset,
                       scale *
-                          (qPower(voltage * Vcontrol, slip + cSmallDiff) - qPower(voltage * Vcontrol, slip)) /
+                          (qPower(voltage * Vcontrol, slip + cSmallDiff) -
+                           qPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
         } else if (!opFlags[init_transient]) {
             auto offset = offsets.getAlgOffset(sMode);
@@ -382,12 +385,14 @@ namespace loads {
             md.assign(QoutLocation,
                       offset,
                       scale *
-                          (qPower(voltage * Vcontrol, slip + cSmallDiff) - qPower(voltage * Vcontrol, slip)) /
+                          (qPower(voltage * Vcontrol, slip + cSmallDiff) -
+                           qPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
             md.assign(PoutLocation,
                       offset,
                       scale *
-                          (rPower(voltage * Vcontrol, slip + cSmallDiff) - rPower(voltage * Vcontrol, slip)) /
+                          (rPower(voltage * Vcontrol, slip + cSmallDiff) -
+                           rPower(voltage * Vcontrol, slip)) /
                           cSmallDiff);
         }
     }
