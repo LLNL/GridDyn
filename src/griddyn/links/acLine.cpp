@@ -31,6 +31,7 @@ using namespace gmlc::utilities;
 #define DERIVCOMP (this->*(derivCalc[getLinkApprox(sMode)]))
 #define DEFAULTDERIVCOMP (this->*(derivCalc[0]))
 
+// NOLINTNEXTLINE
 acLine::acLine(const std::string& objName): Link(objName)
 {
     // default values
@@ -38,6 +39,7 @@ acLine::acLine(const std::string& objName): Link(objName)
     opFlags.set(network_connected);
 }
 
+// NOLINTNEXTLINE
 acLine::acLine(double rP, double xP, const std::string& objName): Link(objName), r(rP), x(xP)
 {
     // default values
@@ -51,7 +53,7 @@ static typeFactory<acLine> glf("link", "tie");
 
 coreObject* acLine::clone(coreObject* obj) const
 {
-    auto lnk = cloneBaseFactory<acLine, Link>(this, obj, &glf);
+    auto* lnk = cloneBaseFactory<acLine, Link>(this, obj, &glf);
     if (lnk == nullptr) {
         return obj;
     }
@@ -92,18 +94,18 @@ void acLine::pFlowCheck(std::vector<Violation>& Violation_vector)
 
         Violation_vector.push_back(violation);
     } else if (angle > maxAngle) {
-        Violation V;
-        V.m_objectName = getName();
-        V.violationCode = MAXIMUM_ANGLE_EXCEEDED;
-        V.level = angle;
-        V.limit = maxAngle;
+        Violation violation;
+        violation.m_objectName = getName();
+        violation.violationCode = MAXIMUM_ANGLE_EXCEEDED;
+        violation.level = angle;
+        violation.limit = maxAngle;
         if (maxAngle != 0.0) {
-            V.percentViolation = (angle - maxAngle) / std::abs(maxAngle) * 100.0;
+            violation.percentViolation = (angle - maxAngle) / std::abs(maxAngle) * 100.0;
         } else {
-            V.percentViolation = 100.0;
+            violation.percentViolation = 100.0;
         }
 
-        Violation_vector.push_back(V);
+        Violation_vector.push_back(violation);
     }
 }
 
@@ -344,10 +346,11 @@ int acLine::fixRealPower(double power,
         return 0;
     }
     if (fixedTerminal == 0) {
+        // NOLINTNEXTLINE
         if (measureTerminal == 1) {
         } else {
         }
-        // TODO:: PT automatically figure out appropriate terminal to adjust
+        // TODO(PT) automatically figure out appropriate terminal to adjust
     } else if ((fixedTerminal == 1) || (isSameObject(fixedTerminal, B1))) {
         double newAng = B1->getAngle() - ang - tapAngle;
         B2->set("angle", newAng);
@@ -444,9 +447,14 @@ int acLine::fixPower(double rPower,
     double pErr = err;
 
     matrixDataCompact<2, 2> md;
-    double dP, dQ;
-    double dA, dV;
-    double Pvii, Ptii, Qvii, Qtii;
+    double dP;
+    double dQ;
+    double dA;
+    double dV;
+    double Pvii;
+    double Ptii;
+    double Qvii;
+    double Qtii;
     bool aboveTol = ((err > atol) || (err > vtol));
 
     while (aboveTol) {
@@ -548,11 +556,13 @@ int acLine::fixPower(double rPower,
     }
 
     updateLocalCache();
+    /*
     if (measureTerminal == 1) {
         err = std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq);
     } else {
         err = std::abs(linkFlows.P2 - valp) + std::abs(linkFlows.Q2 - valq);
     }
+    */
     return ret;
 }
 

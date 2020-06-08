@@ -711,8 +711,8 @@ std::unique_ptr<eventAdapter> Relay::make_alarm(const std::string& val)
     return nullptr;
 }
 
-void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {
-}  // NOLINT
+// NOLINTNEXTLINE
+void Relay::receiveMessage(std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {}
 
 void Relay::sendAlarm(std::uint32_t code)
 {
@@ -736,23 +736,23 @@ change_code Relay::triggerCondition(index_t conditionNum,
     conditionTriggerTimes[conditionNum] = conditionTriggerTime;
     ++triggerCount;
     conditionTriggered(conditionNum, conditionTriggerTime);
-    for (index_t mm = 0; mm < static_cast<index_t>(actionTriggers[conditionNum].size()); ++mm) {
-        if (actionDelays[conditionNum][mm] <= minimumDelayTime) {
+    for (index_t ii = 0; ii < static_cast<index_t>(actionTriggers[conditionNum].size()); ++ii) {
+        if (actionDelays[conditionNum][ii] <= minimumDelayTime) {
             auto iret =
-                executeAction(actionTriggers[conditionNum][mm], conditionNum, conditionTriggerTime);
+                executeAction(actionTriggers[conditionNum][ii], conditionNum, conditionTriggerTime);
             if (iret > eventReturn) {
                 eventReturn = iret;
             }
         } else {
             condChecks.emplace_back(conditionNum,
-                                    mm,
-                                    conditionTriggerTime + actionDelays[conditionNum][mm]);
+                                    ii,
+                                    conditionTriggerTime + actionDelays[conditionNum][ii]);
             if (hasUpdates()) {
                 nextUpdateTime =
-                    std::min(nextUpdateTime, conditionTriggerTime + actionDelays[conditionNum][mm]);
+                    std::min(nextUpdateTime, conditionTriggerTime + actionDelays[conditionNum][ii]);
                 alert(this, UPDATE_TIME_CHANGE);
             } else {
-                nextUpdateTime = conditionTriggerTime + actionDelays[conditionNum][mm];
+                nextUpdateTime = conditionTriggerTime + actionDelays[conditionNum][ii];
                 enable_updates();
                 alert(this, UPDATE_REQUIRED);
             }

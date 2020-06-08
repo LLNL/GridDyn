@@ -21,6 +21,7 @@
 #include "utilities/matrixDataCompact.hpp"
 #include <cmath>
 #include <complex>
+#include <fmt/printf.h>
 
 namespace griddyn {
 using namespace units;
@@ -61,7 +62,7 @@ Link::Link(const std::string& objName): gridPrimary(objName)
 
 coreObject* Link::clone(coreObject* obj) const
 {
-    auto lnk = cloneBaseFactory<Link, gridPrimary>(this, obj, &glf);
+    auto* lnk = cloneBaseFactory<Link, gridPrimary>(this, obj, &glf);
     if (lnk == nullptr) {
         return obj;
     }
@@ -173,7 +174,7 @@ void Link::getParameterStrings(stringVec& pstr, paramStringType pstype) const
 void Link::set(const std::string& param, const std::string& val)
 {
     if ((param == "bus1") || (param == "from")) {
-        auto bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
+        auto* bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
 
         if (bus != nullptr) {
             updateBus(bus, 1);
@@ -181,7 +182,7 @@ void Link::set(const std::string& param, const std::string& val)
             throw(invalidParameterValue(param));
         }
     } else if ((param == "bus2") || (param == "to")) {
-        auto bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
+        auto* bus = dynamic_cast<gridBus*>(locateObject(val, getParent()));
         if (bus != nullptr) {
             updateBus(bus, 2);
         } else {
@@ -429,9 +430,7 @@ int Link::fixPower(double rPower,
 
 void Link::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
 {
-    if ((B1 == nullptr) || (B2 == nullptr)) {
-        disable();
-    } else if ((!B1->isEnabled()) || (!B2->isEnabled())) {
+    if ((B1 == nullptr || !B1->isEnabled()) || (B2 == nullptr || !B2->isEnabled())) {
         disable();
     }
 }
@@ -534,7 +533,7 @@ double Link::getMaxTransfer() const
 double Link::getBusAngle(id_type_t busId) const
 {
     if (busId < 500_ind) {
-        auto bus = getBus(static_cast<index_t>(busId));
+        const auto* bus = getBus(static_cast<index_t>(busId));
         if (bus != nullptr) {
             return bus->getAngle();
         }
@@ -547,9 +546,9 @@ double Link::getBusAngle(id_type_t busId) const
         return (B2 != nullptr) ? B2->getAngle() : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus(static_cast<index_t>(busId));
-    if (B != nullptr) {
-        return B->getAngle();
+    auto* bus = getBus(static_cast<index_t>(busId));
+    if (bus != nullptr) {
+        return bus->getAngle();
     }
     return kNullVal;
 }
@@ -557,9 +556,9 @@ double Link::getBusAngle(id_type_t busId) const
 double Link::getBusAngle(const stateData& sD, const solverMode& sMode, id_type_t busId) const
 {
     if (busId < 500_ind) {
-        auto B = getBus(static_cast<index_t>(busId));
-        if (B != nullptr) {
-            return B->getAngle();
+        const auto* bus = getBus(static_cast<index_t>(busId));
+        if (bus != nullptr) {
+            return bus->getAngle();
         }
     }
     // these are special cases for getting opposite angles as called by the attached buses
@@ -570,7 +569,7 @@ double Link::getBusAngle(const stateData& sD, const solverMode& sMode, id_type_t
         return (B2 != nullptr) ? B2->getAngle(sD, sMode) : kNullVal;
     }
     // now just default to the original behavior
-    auto bus = getBus(static_cast<index_t>(busId));
+    const auto* bus = getBus(static_cast<index_t>(busId));
     if (bus != nullptr) {
         return bus->getAngle(sD, sMode);
     }
@@ -771,7 +770,7 @@ Link* getMatchingLink(Link* lnk, gridPrimary* src, gridPrimary* sec)
         L2 = sec->getLink(lnk->locIndex);
     } else {
         std::vector<int> lkind;
-        auto par = dynamic_cast<gridPrimary*>(lnk->getParent());
+        auto* par = dynamic_cast<gridPrimary*>(lnk->getParent());
         if (par == nullptr) {
             return nullptr;
         }
@@ -802,26 +801,26 @@ bool compareLink(Link* lnk1, Link* lnk2, bool cmpBus, bool printDiff)
     }
     if (typeid(lnk1) != typeid(lnk2)) {
         if (printDiff) {
-            printf("Links are of different types\n");
+            fmt::printf("Links are of different types\n");
         }
         return false;
     }
     if ((dynamic_cast<acLine*>(lnk1) != nullptr) && (dynamic_cast<acLine*>(lnk2) != nullptr)) {
         if (std::abs(lnk1->get("r") - lnk2->get("r")) > 0.0001) {
             if (printDiff) {
-                printf("Links have different r\n");
+                fmt::printf("Links have different r\n");
             }
             return false;
         }
         if (std::abs(lnk1->get("x") - lnk2->get("x")) > 0.0001) {
             if (printDiff) {
-                printf("Links have different x\n");
+                fmt::printf("Links have different x\n");
             }
             return false;
         }
         if (std::abs(lnk1->get("b") - lnk2->get("b")) > 0.0001) {
             if (printDiff) {
-                printf("Links have different b\n");
+                fmt::printf("Links have different b\n");
             }
             return false;
         }
