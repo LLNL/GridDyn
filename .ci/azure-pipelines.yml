@@ -82,8 +82,8 @@ jobs:
           griddyn.options: -DGRIDDYN_ENABLE_HELICS_EXECUTABLE=ON
     container: $[ variables['containerImage'] ]
     steps:
-      - template: .ci/azure-build.yml
-      - template: .ci/azure-test.yml
+      - template: azure-build.yml
+      - template: azure-test.yml
 
   - job: Windows
     strategy:
