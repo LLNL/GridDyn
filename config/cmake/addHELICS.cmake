@@ -10,18 +10,21 @@
 
 IF (MSVC)
     set(HELICS_PATH_HINTS
-        C:/local/helics_2_3_0
+        C:/local/helics_2_5_0
+		C:/local/helics_2_5_1
+		C:/local/helics_2_5_2
+		C:/local/helics_2_6_0
         )
 ENDIF(MSVC)
 
-SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
+SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${CMAKE_BINARY_OUTPUT_DIR}")
 
 
 set(HELICS_CMAKE_SUFFIXES
     lib/cmake/HELICS/
             cmake/HELICS/)
 
-find_package(HELICS 2.3
+find_package(HELICS 2.5
     HINTS
         ${HELICS_INSTALL_PATH}
         $ENV{HELICS_INSTALL_PATH}

@@ -1,3 +1,9 @@
+variables:
+  griddyn.std: 14
+  griddyn.build_type: Release
+  griddyn.options:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  
 jobs:
   - job: macOS_latest
     pool:
@@ -64,6 +70,20 @@ jobs:
       - bash: ctest --output-on-failure --timeout 480 -C Release -L "Continuous"
         displayName: 'Test GridDyn'
         workingDirectory: build
+  - job: Docker
+    variables:
+      griddyn.options:
+    pool:
+      v1mImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        helics:
+          containerImage: helics/helics:helics-builder
+          griddyn.options: -DGRIDDYN_ENABLE_HELICS_EXECUTABLE=ON
+    container: $[ variables['containerImage'] ]
+    steps:
+      - template: .ci/azure-build.yml
+      - template: .ci/azure-test.yml
 
   - job: Windows
     strategy:

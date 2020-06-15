@@ -46,7 +46,7 @@ Link* readLinkElement(std::shared_ptr<readerElement>& element,
                 lnk->updateBus(bus, 1);
             }
             catch (const objectAddFailure& oaf) {
-                WARNPRINT(READER_WARN_IMPORTANT, "unable to load 'from' bus " << busname);
+                WARNPRINT(READER_WARN_IMPORTANT, "unable to load 'from' bus " << busname << oaf.what());
             }
         } else if (warnlink) {
             WARNPRINT(READER_WARN_IMPORTANT, "link must specify a 'from' bus");
@@ -68,7 +68,7 @@ Link* readLinkElement(std::shared_ptr<readerElement>& element,
                 lnk->updateBus(bus, 2);
             }
             catch (const objectAddFailure& oaf) {
-                WARNPRINT(READER_WARN_IMPORTANT, "unable to load 'to' bus " << busname);
+                WARNPRINT(READER_WARN_IMPORTANT, "unable to load 'to' bus " << busname << " error: "<<oaf.what());
             }
         } else if (warnlink) {
             WARNPRINT(READER_WARN_IMPORTANT, "link must specify a 'to' bus");

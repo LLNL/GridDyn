@@ -465,9 +465,9 @@ void ptiReadGen(Generator* gen, const std::string& line, basicReaderInfo& /*opt*
     if (q != 0.0) {
         gen->set("qmin", q, MVAR);
     }
-    auto V = numeric_conversion<double>(strvec[6], 0.0);
-    if (V > 0) {
-        gen->set("vset", V);
+    auto voltage = numeric_conversion<double>(strvec[6], 0.0);
+    if (voltage > 0) {
+        gen->set("vset", voltage);
     }
     rbus = numeric_conversion<int>(strvec[7], 0);
 

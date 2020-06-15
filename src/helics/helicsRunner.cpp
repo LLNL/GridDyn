@@ -126,7 +126,7 @@ namespace helicsLib {
             }
             catch (const std::runtime_error& re) {
                 std::cerr << "execution error in GridDyn" << re.what() << '\n';
-                fed_->error(m_gds->getErrorCode(), re.what());
+                fed_->localError(m_gds->getErrorCode(), re.what());
 
                 throw(re);
             }
