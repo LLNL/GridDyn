@@ -148,23 +148,20 @@ elseif(BUILD_BRAID_SOLVER)
     message(WARNING "Braid requires MPI to function")
 endif()
 
-# find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
-
-# find_package(LAPACKE) if (LAPACKE_FOUND) INCLUDE_DIRECTORIES(${LAPACKE_INCLUDE_DIRS}) endif()
-
 add_library(extraSolverLibrary STATIC ${extra_solver_sources} ${extra_solver_headers})
 set_target_properties(extraSolverLibrary PROPERTIES FOLDER libraries)
 
 if(WIN32)
 
 else(WIN32)
+    # replace with FindLAPACKE
+    find_path(LAPACKE_INCLUDE_DIRS lapacke.h PATHS ${AUTOBUILD_INSTALL_PATH}/include /usr/include/lapacke)
+    target_include_directories(extraSolverLibrary PRIVATE ${LAPACKE_INCLUDE_DIRS})
     find_library(LAPACKE_LIBRARY lapacke HINTS /lib64 PATHS ${AUTOBUILD_INSTALL_PATH}/lib)
     target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARY})
-    include_directories(/usr/include/lapacke)
 endif(WIN32)
 
 target_link_libraries(extraSolverLibrary PUBLIC griddyn)
-target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARIES})
 target_link_libraries(extraSolverLibrary PUBLIC ${SuiteSparse_UMFPACK_LIBRARY_RELEASE})
 
 if(BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
