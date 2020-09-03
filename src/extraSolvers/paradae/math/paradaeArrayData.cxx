@@ -13,7 +13,6 @@ namespace paradae {
     {
         J = mat;
         setRowLimit(static_cast<count_t>(mat->GetM()));
-
         setColLimit(static_cast<count_t>(mat->GetM()));
     }
 

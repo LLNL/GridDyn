@@ -54,7 +54,6 @@ namespace paradae {
     void operator delete[](void* ptr) noexcept;
     void operator delete(void* ptr, const std::nothrow_t&);
     void operator delete[](void* ptr, const std::nothrow_t&);
-
 #endif
 }  // namespace paradae
 }  // namespace griddyn

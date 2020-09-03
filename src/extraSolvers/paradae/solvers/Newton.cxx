@@ -37,7 +37,8 @@ namespace paradae {
         // Real R=20./21., ndx1=0;
 
         int it = 0;
-        app->EvaluateFunAndJac(x, fdx, true, true);
+        app->EvaluateFunAndJac(x, fdx, true, true);  // evaluates fdx = f(x) and J(x) stored in the
+                                                     // solver app as current jacobian
 
         if (tol > 0)
             residual_fx = app->FxNorm(fdx, tol);
@@ -53,16 +54,16 @@ namespace paradae {
 #endif
 
         while (residual_fx > 1 && it < max_iter) {
-            app->GetCurrentJacobian()->Solve(fdx);
-            x.AXPBY(-1.0, 1.0, fdx);
+            app->GetCurrentJacobian()->Solve(fdx);  // Solve J(x) \delta x = f(x), stores \delta x in fdx.
+            x.AXPBY(-1.0, 1.0, fdx);  //  x = x - \delta x
             if (tol > 0)
-                residual_dx = app->XNorm(fdx, x, tol);
+                residual_dx = app->XNorm(fdx, x, tol);  // res_dx = || delta x||_x / tol ?
             else
                 residual_dx = app->XNorm(fdx, x);
 
-            app->EvaluateFunAndJac(x, fdx, newton_always_update_jac, true);
+            app->EvaluateFunAndJac(x, fdx, newton_always_update_jac, true);  // eval f(x) = fdx, J(x) = current Jacobian
             if (tol > 0)
-                residual_fx = app->FxNorm(fdx, tol);
+                residual_fx = app->FxNorm(fdx, tol);  // res_fx = || f(x) ||
             else
                 residual_fx = app->FxNorm(fdx);
 
@@ -116,6 +117,7 @@ namespace paradae {
             for (int i = 0; i < it; i++) {
                 history_x.GetPVector(i, hi);
                 file << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
+                cout << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
             }
             file.close();
             delete[] history_dx;

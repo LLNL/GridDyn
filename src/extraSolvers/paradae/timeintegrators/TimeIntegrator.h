@@ -31,7 +31,7 @@ namespace paradae {
        - a root was on the way.
        - we do variable time steps.
        - we are in sequential mode.
-    */
+        */
         Real used_dt;
 
         /* Values at the root, when one is found inside ]t,t+used_dt[ */
