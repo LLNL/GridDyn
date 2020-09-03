@@ -14,7 +14,7 @@ namespace paradae {
 
     using namespace std;
 
-    Equation::Equation(): nb_calls(0), nb_calls_root(0), nb_calls_jac(0), name("undefined") {}
+    Equation::Equation(): nb_calls(0), nb_calls_root(0), nb_calls_limit_func(0), nb_limit_cross(0), nb_calls_jac(0), name("undefined") {}
 
     bool Equation::CheckAllRoots(IPoly& P,
                                  Real tlo,
@@ -297,5 +297,8 @@ namespace paradae {
             dyh(j) -= h;
         }
     }
+
+    void Equation::PostProcess(const Real t, const Vector& y) {}
+    void Equation::PrepareOutput(std::ostream& output) {}
 }  // namespace paradae
 }  // namespace griddyn

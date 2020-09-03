@@ -17,6 +17,17 @@ namespace paradae {
 
     enum type_Equation { ODE, DAE };
 
+    class LimitManager {
+      public:
+        int n_limits;  // Number of limit functions
+
+        LimitManager(): n_limits(0){};
+        LimitManager(int n_lim): n_limits(n_lim){};
+        inline bool HasLimits() const { return n_limits > 0; };
+        inline int GetNLimits() { return n_limits; };
+        ~LimitManager(){};
+    };
+
     class RootManager {
       public:
         int n_sroots;  // Number of scheduled roots
@@ -62,11 +73,14 @@ namespace paradae {
         int N_unistep;
         int nb_calls;
         int nb_calls_root;
+        int nb_calls_limit_func;
+        int nb_limit_cross;
         int nb_calls_jac;
         Real t0, Tmax;
         std::string name;
         SVector y0;
         RootManager roots;
+        LimitManager limits;
 
       public:
         Equation();
@@ -159,6 +173,8 @@ namespace paradae {
         inline int GetNbFunCalls() { return nb_calls; };
         inline int GetNbJacCalls() { return nb_calls_jac; };
         inline int GetNbRootCalls() { return nb_calls_root; };
+        inline int GetNbLimitCalls() { return nb_calls_limit_func; };
+        inline int GetNbLimitCross() { return nb_limit_cross; };
         inline bool HasEvents() { return roots.HasRoots(); };
         inline bool HasSEvents() { return roots.HasSRoots(); };
         inline bool HasUEvents() { return roots.HasURoots(); };
@@ -166,6 +182,18 @@ namespace paradae {
         inline int GetNURoots() { return roots.GetNURoots(); };
         inline int GetNSRoots() { return roots.GetNSRoots(); };
         virtual int GetNState() { return 0; };
+        inline RootManager GetRoots() { return roots; };
+
+        virtual void PostProcess(const Real t, const Vector& y);
+        virtual void PrepareOutput(std::ostream& output);
+
+        inline bool HasLimits() { return limits.HasLimits(); };
+        inline int GetNLimits() { return limits.GetNLimits(); };
+
+        /* User-defined limit function: acceptable range is rv(x)>=0 componentwise .*/
+        virtual void limit_functions(Vector& y, Vector& dy, Vector& flimit){};
+        /* User defined: Change y and dy depending on what limit has been crossed */
+        virtual void limit_crossings(Vector& y, Vector& dy, Vector& flimit){};
     };
 }  // namespace paradae
 }  // namespace griddyn
