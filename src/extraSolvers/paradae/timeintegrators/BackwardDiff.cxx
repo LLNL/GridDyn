@@ -139,6 +139,7 @@ namespace paradae {
             // ComputeBDFCoeff
             if (use_dx_as_unknown)
                 val.xnext.CopyData(val.dxnext);
+            // if (do_varstep)
             else if (do_varstep)
                 val.xnext.CopyData(x0predicted);
 

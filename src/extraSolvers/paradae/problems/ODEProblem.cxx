@@ -183,6 +183,7 @@ namespace paradae {
             output = new ofstream;
             output->open(file.c_str());
             *output << setprecision(20);
+            //equation->PrepareOutput(*output);
         }
     }
 }  // namespace paradae
