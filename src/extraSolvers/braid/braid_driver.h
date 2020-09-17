@@ -33,6 +33,13 @@ enum BDF_STRAT {
     extrap_c
 };
 
+/* Strategy for handling a root point in braid */
+enum ROOT_STRAT {
+    doublestep, /* Step towards the root, then do another step from root to tstop */
+    addrootpoint, /* Add the root point to the time grid. Only if do_varstep. */
+    ignoreroot /* Ignore the root */
+};
+
 /*!< Basic Vector structure for braid driver
  */
 typedef struct _braid_Vector_struct {
@@ -56,6 +63,7 @@ typedef struct _braid_App_struct {
     int size_x; /*!< Size of the problem */
     int size_state;
     BDF_STRAT bdf_strat;
+    ROOT_STRAT root_strat;
     // bool do_bdf_uniform;
     // bool do_lowerorder; /*!< Do we lower the order of BDF method ? */
     int lowered_by_level; /*!< Lowered by how much each level ? */

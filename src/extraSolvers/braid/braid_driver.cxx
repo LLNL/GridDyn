@@ -29,7 +29,11 @@ using namespace griddyn::paradae;
 _braid_App_struct::_braid_App_struct(ODEProblem* ode_):
     ode(ode_), nb_multisteps(ode->GetTI()->GetType() == BDF ? ode->GetTI()->GetOrder() : 1),
     size_x(ode->GetEq()->GetM()), size_state(ode->GetEq()->GetNState()), prevlvl(-1),
-    solution_tfinal(NULL), alloc_data(size_x, nb_multisteps, ode->GetEq()->GetNURoots(), size_state)
+    solution_tfinal(NULL), alloc_data(size_x,
+                                      nb_multisteps,
+                                      ode->GetEq()->GetNURoots(),
+                                      size_state,
+                                      ode->GetEq()->GetNLimits())
 {
 }
 
@@ -257,25 +261,79 @@ namespace braid {
                 }
             }
 
+            /* Limit xprev (and initial guess in xnext) on all grid levels */
+            app->ode->GetTI()->CheckLimits(app->alloc_data.xprev,
+                                           app->alloc_data.dxprev,
+                                           app->alloc_data.flimit);
+            app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
+                                           app->alloc_data.dxnext,
+                                           app->alloc_data.flimit);
+
             /* Take Step */
             return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
 
-            if (t <= app->ode->GetEq()->GetTmax())
+            /* Get refinement from local error measure */
+            if (t <= app->ode->GetEq()->GetTmax()) {
                 refinement = max(refinement, app->alloc_data.used_dt / app->alloc_data.next_dt);
-
-            if (return_code == WARN_ROOT && level == 0) {
                 refinement = min(refinement, app->ode->GetTI()->GetMaxRFactor());
             }
 
-            app->alloc_data.Rotate();
-        }
+            /* Only check for root here in the multistep case (ns != 1) */
+            if (ns != 1 && return_code == WARN_ROOT && level == 0) {
+                refinement = min(refinement, app->ode->GetTI()->GetMaxRFactor());
+            }
 
-        /* Save new values in u */
-        app->SetAllFromDataStruct(u);
+            /* Only rotate data in the multistep case (ns != 1) */
+            if (ns != 1) {
+                app->alloc_data.Rotate();
+            }
+        }
 
         /* Reset the BDF order if it was modified */
         if (app->bdf_strat != nobdf && level > 0) {
             if (bdf->GetOrder() != ns) bdf->SetOrder(ns);
+        }
+
+        /* Handle a root, if needed */
+        if (level == 0 && return_code == WARN_ROOT) {
+            /* Handle the root only if it is away from tstart or tstop */
+            Real dist = min(app->alloc_data.troot - tstart, tstop - app->alloc_data.troot);
+            if (dist > app->ode->GetEq()->GetRoots().tol) {
+                /* We found a root on level 0. Either put a root point to the grid, or do a double step,
+                 * or ignore the root */
+                if (app->root_strat == addrootpoint) {
+                    /* Add the root point to the current grid, if local error measure wouldn't already
+                     * refine this interval. */
+                    if (refinement <= 2.0) {
+                        refinement = 2;
+                        Real dt_secondstep = app->alloc_data.troot - tstart;
+                        if (app->ode->GetTI()->DoVarstep()) {
+                            braid_StatusSetRefinementDtValues((braid_Status)status,
+                                                              refinement,
+                                                             &dt_secondstep);
+                        }
+                    }
+                } else if (app->root_strat == doublestep) {
+                    /* Perform a double step: Step to the root, then step from root to tstop. */
+                    app->alloc_data.SetNextAtRoot();
+                    app->alloc_data.Rotate();
+                    app->alloc_data.next_dt = tstop - app->alloc_data.troot;
+                    // Step from troot to tstop
+                    return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
+                    // If second root is found, refine by a minimum of 2
+                    if (return_code == WARN_ROOT) {
+                        dist = min(app->alloc_data.troot - app->alloc_data.t,
+                                   app->alloc_data.t + app->alloc_data.used_dt - app->alloc_data.troot);
+                        if (dist > app->ode->GetEq()->GetRoots().tol) {
+                            // printf("Crossing a second root at %1.12f.\n", app->alloc_data.troot);
+                            refinement = max(refinement, 2.0);
+                        }
+                    }
+                } else {
+                    /* Original interface behavior.for (ns == 1) */
+                    refinement = min(refinement, app->ode->GetTI()->GetMaxRFactor());
+                }
+            }
         }
 
         /* Set the refinement if needed */
@@ -283,6 +341,17 @@ namespace braid {
             if (refinement < 1.001) refinement = 1;
             braid_StepStatusSetRFactor(status, ceil(refinement));
         }
+
+        /* Limit ustop on the finest grid */
+        if (level == 0) {
+            app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
+                                           app->alloc_data.dxnext,
+                                           app->alloc_data.flimit);
+        }
+
+        /* Rotate data and pass back to braid (Save new values in u) */
+        app->alloc_data.Rotate();
+        app->SetAllFromDataStruct(u);
     }
 
     int my_Step(braid_App app,
@@ -418,7 +487,8 @@ namespace braid {
                 DATA_Struct init_data(app->size_x,
                                       1,
                                       app->ode->GetEq()->GetNURoots(),
-                                      app->size_state);
+                                      app->size_state,
+                                      app->ode->GetEq()->GetNLimits());
                 init_data.tprev(0) = tstart;
                 init_data.xprev.CopyData(x0);
                 init_data.xnext.CopyData(x0);
@@ -561,7 +631,8 @@ namespace braid {
                 DATA_Struct init_data(app->size_x,
                                       1,
                                       app->ode->GetEq()->GetNURoots(),
-                                      app->size_state);
+                                      app->size_state,
+                                      app->ode->GetEq()->GetNLimits());
                 init_data.tprev(0) = tstart;
                 init_data.xprev.CopyData(x0);
                 init_data.xnext.CopyData(x0);
@@ -658,7 +729,11 @@ namespace braid {
         int idx = find_closest_idx(app->grid_initial, app->nb_initial, t);
 
         if (t == app->ode->GetEq()->GetT0()) {
-            DATA_Struct init_data(app->size_x, 1, app->ode->GetEq()->GetNURoots(), app->size_state);
+            DATA_Struct init_data(app->size_x,
+                                  1,
+                                  app->ode->GetEq()->GetNURoots(),
+                                  app->size_state,
+                                  app->ode->GetEq()->GetNLimits());
             init_data.t = t;
             init_data.tprev(0) = t;
             PVector x0;

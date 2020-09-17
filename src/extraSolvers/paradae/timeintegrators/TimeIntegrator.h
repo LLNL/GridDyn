@@ -34,6 +34,9 @@ namespace paradae {
         */
         Real used_dt;
 
+        /* Holds evaluation of user's limit function */
+        SVector flimit;
+
         /* Values at the root, when one is found inside ]t,t+used_dt[ */
         Real troot;
         SVector xroot;
@@ -55,7 +58,7 @@ namespace paradae {
      */
         Real next_dt;
 
-        DATA_Struct(int size_x, int size_b, int size_g, int size_s);
+        DATA_Struct(int size_x, int size_b, int size_g, int size_s, int size_l);
         void Rotate(RCODE rc = OK);
         void RollBack();
         void SetNextAtRoot();
@@ -102,7 +105,9 @@ namespace paradae {
         };
         void CopyNewtonSolverOpt(const TimeIntegrator& ti) { newton = ti.newton; };
         bool CheckRoots(DATA_Struct& val);
-        RCODE PostStep(DATA_Struct& val, bool success, bool solver_failed, bool found_root);
+        RCODE PostStep(DATA_Struct& val, bool success_solver, bool found_root, bool success_error_test);
+
+        bool CheckLimits(Vector& y, Vector& dy, Vector& flimit);
 
         inline bool DoBraid() const { return do_braid; };
         inline bool& DoBraid() { return do_braid; };

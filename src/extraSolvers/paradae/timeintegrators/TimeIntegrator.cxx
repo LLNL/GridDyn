@@ -10,10 +10,10 @@ namespace griddyn {
 namespace paradae {
     using namespace std;
 
-    DATA_Struct::DATA_Struct(int nx, int nb, int ng, int ns):
+    DATA_Struct::DATA_Struct(int nx, int nb, int ng, int ns, int nl):
         tprev(nb, 1), xprev(nb, nx), dxprev(nx), gprev(ng), sprev(ns), xroot(ng > 0 ? nx : 0),
         dxroot(ng > 0 ? nx : 0), groot(ng), sroot(ng > 0 ? ns : 0), xnext(nx), dxnext(nx),
-        gnext(ng), snext(ns)
+        gnext(ng), snext(ns), flimit(nl)
     {
     }
 
@@ -49,6 +49,28 @@ namespace paradae {
         dxnext.CopyData(dxroot);
         gnext.CopyData(groot);
         snext.CopyData(sroot);
+    }
+
+    bool TimeIntegrator::CheckLimits(Vector& y, Vector& dy, Vector& flimit)
+    {
+        bool limit_exceeded = false;
+
+        Real tol = 1e-10;  // HACK: Should be using the root tolerance?
+
+        if (equation->HasLimits()) {
+            /* Call limit function to check if limits are exceeded*/
+            equation->limit_functions(y, dy, flimit);
+            for (int i = 0; i < equation->GetNLimits(); i++) {
+                if (flimit(i) <= tol) limit_exceeded = true;
+            }
+        }
+
+        /* Treat exceeding limits */
+        if (limit_exceeded) {
+            equation->limit_crossings(y, dy, flimit);
+        }
+
+        return limit_exceeded;
     }
 
     bool TimeIntegrator::CheckRoots(DATA_Struct& val)
@@ -97,6 +119,10 @@ namespace paradae {
                 val.groot.CopyData(val.gnext);
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
+
+            /* If troot == t: no root!! */
+            if (thi - val.t < equation->GetRoots().tol) root_crossed = false;
+
             if (root_crossed) {
                 val.troot = thi;
                 val.snext.CopyData(val.sroot);
@@ -123,12 +149,16 @@ namespace paradae {
             return NONLIN_FAIL;
         }
         if (!success_error_test) {
-            if (found_root && !do_braid) {
+            if (found_root) {
                 // The error test failed but there was a root. Set the next_dt to get to the root
-                // and redo step
-                val.RollBack();
+                val.next_dt = val.troot - val.t;
                 // JBS COMMENT OUT val.next_dt=val.troot-val.t;
-                val.next_dt = (val.troot - val.t) / max_rfactor;  // JBS Comment in
+                // DJG COMMENT OUT val.next_dt = (val.troot - val.t) / max_rfactor;  // JBS Comment in
+
+                // If serial: Redo the step with new step size.
+                // Else: keep information and let braid deal with the root
+                if (!do_braid) val.RollBack();
+
                 return WARN_ROOT;
             }
             // TODO if a root was found, use that information...
@@ -147,16 +177,22 @@ namespace paradae {
             return OK;
         }
         /* Now, everything is ok, but there was a root on the way... */
-        if (do_varstep && !do_braid) {
-            /* We integrate until the root only, used_dt was modified. Just keep going... */
-            val.SetNextAtRoot();
-            return OK_ROOT;
-        } else {
-            /* We passed a root taking the step, going too far. We keep troot in next_dx for future
-             * use */
-            val.next_dt = val.troot - val.t;
-            val.snext.CopyData(val.sroot);
+        if (do_braid) {
+            /* Let Braid deal with the root. Keep next_dt from adaptive error measure */
             return WARN_ROOT;
+        } else {
+            /* Serial: either go to the root adaptively, or step over the root ignoring it */
+            if (do_varstep) {
+                /* We integrate until the root only, used_dt was modified. Just keep going. */
+                val.SetNextAtRoot();
+                return OK_ROOT;
+            } else {
+                /* We passed a root taking the step, going too far. We keep troot in next_dx for future
+                 * use */
+                val.next_dt = val.troot - val.t;
+                val.snext.CopyData(val.sroot);
+                return WARN_ROOT;
+            }
         }
     }
 
