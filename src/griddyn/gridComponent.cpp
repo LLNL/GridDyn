@@ -492,7 +492,8 @@ static const std::map<std::string, operation_flags> flagmap{
     {"separate_processing", separate_processing},
     {"three_phase_only", three_phase_only},
     {"three_phase_capable", three_phase_capable},
-    {"three_phase_terminal2", three_phase_terminal2}};
+    {"three_phase_terminal2", three_phase_terminal2},
+    {"limits", has_limits}};
 
 bool gridComponent::getFlag(const std::string& flag) const
 {
@@ -1700,11 +1701,15 @@ void gridComponent::rootTest(const IOdata& inputs,
                              double roots[],
                              const solverMode& sMode)
 {
+    std::cout << "gridComponent::rootTest" << std::endl;
     for (auto& subobj : subObjectList) {
         if (!subobj->checkFlag(separate_processing)) {
+            std::cout << "!separate_processing" << std::endl;
             if (!(subobj->checkFlag(has_roots))) {
+                std::cout << "!has_roots" << std::endl;
                 continue;
             }
+            std::cout << "call subobj rooTest" << std::endl;
             subobj->rootTest(inputs, sD, roots, sMode);
         }
     }
@@ -1741,6 +1746,36 @@ change_code gridComponent::rootCheck(const IOdata& inputs,
         }
     }
     return ret;
+}
+
+void gridComponent::limitTest(const IOdata& inputs,
+                              const stateData& sD,
+                              double limits[],
+                              const solverMode& sMode)
+{
+    for (auto& subobj : subObjectList) {
+        if (!subobj->checkFlag(separate_processing)) {
+            if (!(subobj->checkFlag(has_limits))) {
+                continue;
+            }
+            subobj->limitTest(inputs, sD, limits, sMode);
+        }
+    }
+}
+
+void gridComponent::limitTrigger(coreTime time,
+                                 const IOdata& inputs,
+                                 const std::vector<int>& limitMask,
+                                 const solverMode& sMode)
+{
+    for (auto& subobj : subObjectList) {
+        if (!(subobj->checkFlag(has_limits))) {
+            continue;
+        }
+        if (!subobj->checkFlag(separate_processing)) {
+            subobj->limitTrigger(time, inputs, limitMask, sMode);
+        }
+    }
 }
 
 index_t gridComponent::lookupOutputIndex(const std::string& outputName) const

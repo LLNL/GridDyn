@@ -133,6 +133,7 @@ enum operation_flags {
     three_phase_capable = 62,  //!< flag indicating the object can be attached to a 3 phase bus
     three_phase_terminal2 =
         63,  //!< flag indicating the terminal 2 must be attached to a 3 phase bus
+    has_limits = 64,  //!< flag indicating if an object uses limit checking
 
 };
 /** alternate names for some of the flags*/

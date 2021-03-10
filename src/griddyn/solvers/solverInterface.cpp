@@ -137,6 +137,7 @@ int SolverInterface::calcIC(coreTime /*t0*/,
 void SolverInterface::getCurrentData() {}
 void SolverInterface::getRoots() {}
 void SolverInterface::setRootFinding(index_t /*numRoots*/) {}
+void SolverInterface::getLimits() {}
 void SolverInterface::setSimulationData(const solverMode& sMode)
 {
     mode = sMode;

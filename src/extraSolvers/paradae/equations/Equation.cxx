@@ -23,23 +23,26 @@ namespace paradae {
                                  Vector& ghi,
                                  Vector& state)
     {
-        SVector iroot(roots.GetNRoots());
+        //SVector iroot(roots.GetNRoots());
         bool scheduled_roots = false, unscheduled_roots = false;
         Real t_scheduled = thi;
         Real t_unscheduled = thi;
         int idx_scheduled = -1;
+
+        // cout << "Equation::CheckAllRoots" << endl;
+        roots.iroot.Fill(0);
 
         if (roots.HasSRoots())
             scheduled_roots = CheckScheduledRoots(tlo, t_scheduled, idx_scheduled);
 
         if (roots.HasURoots())
             unscheduled_roots =
-                CheckUnscheduledRoots(P, tlo, glo, t_unscheduled, ghi, iroot, state);
+                CheckUnscheduledRoots(P, tlo, glo, t_unscheduled, ghi, roots.iroot, state);
 
         if (scheduled_roots && unscheduled_roots) {
             if (abs(t_scheduled - t_unscheduled) < roots.tol) {
                 thi = (std::min)(t_scheduled, t_unscheduled);
-                iroot(idx_scheduled) = 1;
+                roots.iroot(idx_scheduled) = 1;
             } else if (t_unscheduled < t_scheduled)
                 scheduled_roots = false;
             else
@@ -47,14 +50,16 @@ namespace paradae {
         }
         if (scheduled_roots && !unscheduled_roots) {
             thi = t_scheduled;
-            iroot.Fill(0);
-            iroot(idx_scheduled) = 1;
+            roots.iroot.Fill(0);
+            roots.iroot(idx_scheduled) = 1;
         }
         if (unscheduled_roots && !scheduled_roots) {
             thi = t_unscheduled;
         }
         if (scheduled_roots || unscheduled_roots) {
-            this->root_crossings(iroot, state);
+            // std::cout << "s root = " << scheduled_roots
+            //           << " u root = " << unscheduled_roots << std::endl;
+            // this->root_crossings(roots.iroot, state);
             return true;
         }
         return false;
@@ -64,6 +69,8 @@ namespace paradae {
     // 'thi' and return the index of the root in 'i'
     bool Equation::CheckScheduledRoots(Real tlo, Real& thi, int& i)
     {
+        // cout << "Equation::CheckScheduledRoots" << endl;
+
         for (i = 0; i < roots.n_sroots; i++)
             if (roots.is_active(i))
                 if (roots.t_sroot(i) - tlo > 1e-12 && thi - roots.t_sroot(i) >= 0) {
@@ -91,11 +98,18 @@ namespace paradae {
         int nroots = roots.n_uroots;
         Real tol = roots.tol;
 
+        // cout << "Equation::CheckUnscheduledRoots" << endl;
+
         for (int i = 0; i < nroots; i++) {
+            std::cout << " glo(" << i << ") = " << glo(i)
+                      << " ghi(" << i << ") = " << ghi(i) << std::endl;
             if (roots.is_active(i + roots.n_sroots)) {
                 if (abs(ghi(i)) < tol) {
                     if (roots.dir_root(i) * glo(i) <= 0) {
-                        zroot = true;
+                        // std::cout << "dir_root(" << i << ") = " << roots.dir_root(i)
+                        //           << " glo(" << i << ") = " << glo(i)
+                        //           << " ghi(" << i << ") = " << ghi(i) << std::endl;
+                        //zroot = true; // DJG: This seems to create a false positive since dir_root is always 0
                         iroot(i + roots.n_sroots) = (glo(i) > 0) ? -1 : 1;  // TODO check
                     }
                 } else {
@@ -112,6 +126,8 @@ namespace paradae {
         }
 
         if (!sgnchg) return zroot;
+
+        cout << "Equation::CheckUnscheduledRoots -- Sign change!" << endl;
 
         Real alpha = 1, tmid, fracint, fracsub;
         int side = 0, side_prev = -1;

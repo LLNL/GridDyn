@@ -29,7 +29,8 @@ namespace paradae {
                                      gridDynSimulation* gds_,
                                      const Vector& y0_,
                                      solverMode* mode_,
-                                     vector<double>& discontinuities)
+                                     vector<double>& discontinuities,
+                                     vector<int>& rootsfound)
     {
         // n=gds_->stateSize(cDaeSolverMode);
         n = gds_->stateSize(*mode_);
@@ -56,11 +57,15 @@ namespace paradae {
         //}
 
         // New code, import discontinuity locations from XML file
-        roots = RootManager(discontinuities.size(), 1, 0, 1e-10);
+        roots = RootManager(discontinuities.size(), rootsfound.size(), 0, 1e-10);
         roots.n_sactive = discontinuities.size();
+        roots.n_uactive = rootsfound.size();
         for (int i = 0; i < discontinuities.size(); i++) {
             roots.is_active(i) = 1;
             roots.t_sroot(i) = discontinuities[i];
+        }
+        for (int i = discontinuities.size(); i < rootsfound.size(); i++) {
+            roots.is_active(i) = 1;
         }
 
         // This will print out all of the variable names
@@ -117,5 +122,61 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
 }
 */
 
+
+    void EquationGridDyn::root_functions(const Real t,
+                                         const Vector& y,
+                                         const Vector& dy,
+                                         const Vector& state,
+                                         Vector& rv)
+    {
+        std::cout << "EquationGridDyn::root_functions" << std::endl;
+        gds->rootFindingFunction(t, y.GetData(), dy.GetData(), rv.GetData(),
+                                 *mode);
+    };
+
+    void EquationGridDyn::root_action(const Real troot,
+                                      const Vector& yroot,
+                                      const Vector& dyroot,
+                                      const Vector& iroot)
+    {
+        std::cout << "EquationGridDyn::root_action" << std::endl;
+        // std::cout << "Scheduled roots " << roots.n_sroots << std::endl;
+        // std::cout << "Unscheduled roots " << roots.n_uroots << std::endl;
+        std::vector<int> rootMask(iroot.GetData() + roots.n_sroots,
+                                  iroot.GetData() + roots.n_sroots + roots.n_uroots);
+        gds->rootActionFunction(troot, yroot.GetData(), dyroot.GetData(),
+                                rootMask, *mode);
+    };
+
+
+    void EquationGridDyn::limit_functions(const Vector& y,
+                                          const Vector& dy,
+                                          Vector& flimit)
+    {
+        Real t = 0.0;
+        // Need to add time as an input here? for calling stateData sD(time,...) in GridDyn
+        gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),
+                                   flimit.GetData(), *mode);
+    };
+
+    // NEED TO CHANGE THIS FUNCTION?
+    // Should we pass vectors or gds? Is DynData same as the gds we have stored
+    // I dont think so dyndata is the solver interface?
+    // can use setState?
+    // If pass vectors should this look more like rootfindingfunction?
+    // void EquationGridDyn::limit_crossing(Vector &y, Vector &dy, Vector& flimit)
+    // {
+    //     Real t = 0.0;
+    //     gds->handleLimitViolation(3, t,
+    // }
+
 }  // namespace paradae
 }  // namespace griddyn
+
+// need to call root trigger some where?
+// does root trigger need to propagate anything back to ParaDAE? It should not
+// need to since we'll contine from the last state at the root. So really,
+// rootTrigger should just adjust the RHS/Jacobian as needed.
+
+// handleLimitViolation will need to update the state in GridDyn? Maybe not
+// since we use getData to pass the raw arrays back into GridDyn.

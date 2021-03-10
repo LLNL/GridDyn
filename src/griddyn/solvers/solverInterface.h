@@ -49,6 +49,7 @@ class InvalidSolverOperation: public solverException {
 
 // solver return codes from the solve and initIC functions
 #define SOLVER_ROOT_FOUND 2
+#define SOLVER_LIMIT_VIOLATED 3
 #define SOLVER_INVALID_STATE_ERROR (-36)
 #define SOLVER_INITIAL_SETUP_ERROR (-38)
 #define SOLVER_CONVERGENCE_ERROR (-12)
@@ -107,6 +108,7 @@ class SolverInterface: public helperObject {
     };
 
     std::vector<int> rootsfound;  //!< mask vector for which roots were found
+    std::vector<int> limitscrossed;  //!< mask vector for which limits were crossed
   protected:
     std::string lastErrorString;  //!< string containing the last error
 
@@ -117,10 +119,12 @@ class SolverInterface: public helperObject {
     solver_print_level printLevel = solver_print_level::s_error_trap;  //!< print_level for solver
     int solverPrintLevel = 1;  //!< print level for internal solver logging
     count_t rootCount = 0;  //!< the number of root finding functions
+    count_t limitCount = 0;  //!< the number of limit functions
     count_t solverCallCount = 0;  //!< the number of times the solver has been called
     count_t jacCallCount = 0;  //!< the number of times the Jacobian function has been called
     count_t funcCallCount = 0;  //!< the number of times the function evaluation has been called
     count_t rootCallCount = 0;
+    count_t limitCallCount = 0;
     count_t max_iterations = 10000;  //!< the maximum number of iterations in the solver loop
     solverMode mode;  //!< to the solverMode
     double tolerance = 1e-8;  //!< the default solver tolerance
@@ -228,6 +232,10 @@ class SolverInterface: public helperObject {
     @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
     */
     virtual void setRootFinding(index_t numRoots);
+    /** @brief get the locations of any limits crossed
+    @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
+    */
+    virtual void getLimits();
 
     /** @brief get a parameter from the solver
   @param[in] param  a string with the desired name of the parameter or result

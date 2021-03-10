@@ -70,6 +70,7 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     // CSW: Need to send in the number of roots to find so that memory
     // can be allocated to for the array indicating indices of roots.
     // do the final Ida initialization
+    std::cout << "gridDynSimulation::dynInitialize" << std::endl;
     if (controlFlags[roots_disabled]) {
         offsets.local().local.algRoots = 0;
         offsets.local().local.diffRoots = 0;
@@ -86,6 +87,10 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
             opFlags[has_alg_roots] = false;
         }
     }
+
+    // check for objects with limits
+    count_t totalLimits = 0;
+    // DJG: NEED TO ADD ALLOCATION HERE
 
     dynData->allocate(ssize, totalRoots);
 
@@ -143,10 +148,12 @@ int gridDynSimulation::runDynamicSolverStep(std::shared_ptr<SolverInterface>& dy
             }
         }
     } else {
+        //std::cout << "dynData->solve" << std::endl;
         retval = dynData->solve(nextStop, timeActual);
     }
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
-        //   dynData->printStates(true);
+        std::cout << "call handleEarlySolverReturn at " << timeActual
+                  << std::endl;
         handleEarlySolverReturn(retval, timeActual, dynData);
     }
     return retval;
@@ -249,6 +256,7 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         {  // the most likely cause of this is numerical instability in recorders and events
             timeReturn = nextStop;
         } else {
+            std::cout << "runDynamicSolverStep 1" << std::endl;
             runDynamicSolverStep(dynData, nextStop, timeReturn);
         }
 
@@ -266,6 +274,7 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
             }
             // update the stopping time just in case the events have changed
             nextStop = (std::min)(tStop, EvQ->getNextTime());
+            std::cout << "runDynamicSolverStep 2" << std::endl;
             retval = runDynamicSolverStep(dynData, nextStop, timeReturn);
 
             currentTime = timeReturn;
@@ -303,6 +312,7 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         updateLocalCache();
         auto ret = EvQ->executeEvents(currentTime);
         if (ret > change_code::non_state_change) {
+            std::cout << "In change_code::non_state_change" << std::endl;
             dynamicCheckAndReset(sMode);
             retval = generateDaeDynamicInitialConditions(sMode);
             if (retval != FUNCTION_EXECUTION_SUCCESS) {
@@ -658,31 +668,64 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
     }
 }
 
+void gridDynSimulation::handleLimitViolation(int retval,
+                                             coreTime timeActual,
+                                             std::shared_ptr<SolverInterface>& dynData)
+{
+    if (opFlags[has_limits]) {
+        if (retval == SOLVER_LIMIT_VIOLATED)  // a limit was violated
+        {
+            // THIS IS PROBABLY STILL THE ACTUAL TIME IN THE DOUBLE STEP CASE
+            // BUT I'LL NEED TO DOBULE CHECK CHECK. IT'S EITHER THE START OR END
+            // TIME OF A STEP BUT BOTH SHOULD BE OK.
+
+            dynData->getLimits(); // DJG: NEED TO ADD getLimits and limitscrossed array
+            currentTime = timeActual;
+            setState(timeActual,
+                     dynData->state_data(),
+                     dynData->deriv_data(),
+                     dynData->getSolverMode());
+            LOG_DEBUG("Limit crossed");
+            rootTrigger(timeActual, noInputs, dynData->limitscrossed, dynData->getSolverMode());
+        }
+    }
+}
+
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
+    std::cout << "gridDynSimulation::dynamicCheckAndReset" << std::endl;
     auto dynData = getSolverInterface(sMode);
     if (opFlags[connectivity_change_flag]) {
+        std::cout << "if 1" << std::endl;
         checkNetwork(network_check_type::simplified);
     }
     if ((opFlags[state_change_flag]) || (change == change_code::state_count_change)) {
         // we changed object states so we have to do a full reset
+        std::cout << "if 2" << std::endl;
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
+            std::cout << "if 2a" << std::endl;
             return true;
         }
         reInitDyn(sMode);
     } else if ((opFlags[object_change_flag]) || (change == change_code::object_change)) {
         // the object count changed
+        std::cout << "if 3" << std::endl;
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
+            std::cout << "if 3a" << std::endl;
             return true;
         }
 
         if (dynData->size() != stateSize(sMode)) {
+            std::cout << "if 3b" << std::endl;
             reInitDyn(sMode);
         } else {
+            std::cout << "if 3c" << std::endl;
             updateOffsets(sMode);
         }
     } else if ((opFlags[jacobian_count_change_flag]) || (change == change_code::jacobian_change)) {
+        std::cout << "if 4" << std::endl;
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
+            std::cout << "if 4a" << std::endl;
             return true;
         }
         handleRootChange(sMode, dynData);
@@ -691,9 +734,11 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
         // non-zeros
         dynData->sparseReInit(SolverInterface::sparse_reinit_modes::resize);
     } else if (opFlags[root_change_flag]) {
+        std::cout << "if 5" << std::endl;
         handleRootChange(sMode, dynData);
     } else {
         // mode ==0
+        std::cout << "if 6" << std::endl;
         opFlags &= RESET_CHANGE_FLAG_MASK;
         return false;
     }
@@ -704,6 +749,8 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
 
 int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMode)
 {
+    std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions"
+              << std::endl;
     auto dynData = getSolverInterface(sMode);
     int retval = FUNCTION_EXECUTION_FAILURE;
     // check and deal with voltage Reset
@@ -713,6 +760,8 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         while (frr.hasMoreFixes()) {
             retval = frr.attemptFix();
             if (retval == FUNCTION_EXECUTION_SUCCESS) {
+                std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- check Alg roots 1"
+                          << std::endl;
                 retval = checkAlgebraicRoots(dynData);
                 if (retval == FUNCTION_EXECUTION_SUCCESS) {
                     return retval;
@@ -721,6 +770,8 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         }
     }
     if (opFlags[low_bus_voltage]) {
+        std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- low bus voltage"
+                  << std::endl;
         stateData sD(getSimulationTime(), dynData->state_data(), dynData->deriv_data());
 
         rootCheck(noInputs, sD, dynData->getSolverMode(), check_level_t::low_voltage_check);
@@ -728,6 +779,9 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         // SolverInterface::ic_modes::fixed_diff, true);
         opFlags.reset(low_bus_voltage);
     }
+    std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- guess state"
+              << std::endl;
+
     // Do the first cut guessState at the solution
     guessState(currentTime, dynData->state_data(), dynData->deriv_data(), sMode);
     auto maxResid = checkResid(this, dynData);
@@ -744,6 +798,9 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         // JacobianCheck(sMode);
         //  printStateNames(this,sMode);
     }
+
+    std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- calcIC"
+              << std::endl;
 
     retval =
         dynData->calcIC(currentTime, probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
@@ -763,6 +820,9 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
                                  true);
     }
     if (retval == FUNCTION_EXECUTION_SUCCESS) {
+        std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- check Alg roots 2"
+                  << std::endl;
+
         retval = checkAlgebraicRoots(dynData);
     }
     // if we still haven't fixed it call the recovery object and let it try to deal with it
@@ -771,6 +831,9 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
         while (dicr.hasMoreFixes()) {
             retval = dicr.attemptFix();
             if (retval == FUNCTION_EXECUTION_SUCCESS) {
+                std::cout << "gridDynSimulation::generateDaeDynamicInitialConditions -- check Alg roots 3"
+                          << std::endl;
+
                 retval = checkAlgebraicRoots(dynData);
                 if (retval == FUNCTION_EXECUTION_SUCCESS) {
                     return retval;
@@ -827,7 +890,9 @@ int gridDynSimulation::generatePartitionedDynamicInitialConditions(const solverM
 
 int gridDynSimulation::checkAlgebraicRoots(std::shared_ptr<SolverInterface>& dynData)
 {
+    std::cout << "gridDynSimulation::checkAlgebraicRoots" << std::endl;
     if (opFlags[has_alg_roots]) {
+        std::cout << "gridDynSimulation::checkAlgebraicRoots -- has roots" << std::endl;
         const solverMode& sMode = dynData->getSolverMode();
         dynData->getCurrentData();
         setState(currentTime + probeStepTime, dynData->state_data(), dynData->deriv_data(), sMode);
@@ -877,10 +942,13 @@ int gridDynSimulation::handleStateChange(const solverMode& sMode)
 void gridDynSimulation::handleRootChange(const solverMode& sMode,
                                          std::shared_ptr<SolverInterface>& dynData)
 {
+    std::cout << "gridDynSimulation::handleRootChange" << std::endl;
     if (opFlags[root_change_flag])  // something with the roots changed
     {
+        std::cout << "case 1" << std::endl;
         auto rs = rootSize(sMode);
         if (rs != static_cast<index_t>(dynData->rootsfound.size())) {
+            std::cout << "case 1a" << std::endl;
             dynData->setRootFinding(rs);
             if (rs > 0) {
                 setRootOffset(0, sMode);
@@ -888,7 +956,9 @@ void gridDynSimulation::handleRootChange(const solverMode& sMode,
         }
         opFlags.reset(root_change_flag);
     } else if (rootSize(sMode) > 0) {
+        std::cout << "case 2" << std::endl;
         if (offsets.getRootOffset(sMode) == kNullLocation) {
+            std::cout << "case 2a" << std::endl;
             setRootOffset(0, sMode);
         }
     }
@@ -913,6 +983,7 @@ void gridDynSimulation::updateOffsets(const solverMode& sMode)
 
 int gridDynSimulation::reInitDyn(const solverMode& sMode)
 {
+    std::cout << "gridDynSimulation::reInitDyn" << std::endl;
     auto dynData = getSolverInterface(sMode);
     updateOffsets(sMode);
 
@@ -1177,9 +1248,48 @@ int gridDynSimulation::rootFindingFunction(coreTime time,
                                            double roots[],
                                            const solverMode& sMode) noexcept
 {
+    std::cout << "gridDynSimulation::rootFindingFunction" << std::endl;
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     rootTest(noInputs, sD, roots, sMode);
+    return FUNCTION_EXECUTION_SUCCESS;
+}
+
+int gridDynSimulation::rootActionFunction(coreTime time,
+                                          const double state[],
+                                          const double dstate_dt[],
+                                          const std::vector<int>& rootMask,
+                                          const solverMode& sMode) noexcept
+{
+    currentTime = time;
+    setState(time, state, dstate_dt, sMode);
+    rootTrigger(time, noInputs, rootMask, sMode);
+
+    // THIS WILL ONLY GET DATA INTO GRIDDYN NOT BACK INTO PARADAE (does not help, remove)
+    auto dynData  = getSolverInterface(sMode);
+    count_t ssize = stateSize(sMode);
+
+    double* state_data = dynData->state_data();
+    double* deriv_data = dynData->deriv_data();
+
+    std::memcpy(state_data, state, ssize * sizeof(double));
+    std::memcpy(deriv_data, dstate_dt, ssize * sizeof(double));
+
+    dynamicCheckAndReset(sMode);
+    generateDaeDynamicInitialConditions(sMode);
+
+    return FUNCTION_EXECUTION_SUCCESS;
+}
+
+int gridDynSimulation::limitCheckingFunction(coreTime time,
+                                             const double state[],
+                                             const double dstate_dt[],
+                                             double limits[],
+                                             const solverMode& sMode) noexcept
+{
+    stateData sD(time, state, dstate_dt, residCount);
+    fillExtraStateData(sD, sMode);
+    limitTest(noInputs, sD, limits, sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }
 

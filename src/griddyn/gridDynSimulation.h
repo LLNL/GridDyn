@@ -395,6 +395,39 @@ class gridDynSimulation: public gridSimulation {
                             double roots[],
                             const solverMode& sMode) noexcept;
 
+
+
+    /** @brief take action after a root values is found
+    @param[in] time  the simulation time of the root
+    @param[in] state  the state at the root
+    @param[in] dstate_dt  the time derivative of the state at the root
+    @param[in] rootMask  the mask vector for which roots were found
+    @param[in] sMode the solverMode to solve for
+    @return integer indicating success (0) or failure (non-zero)
+    */
+    int rootActionFunction(coreTime time,
+                           const double state[],
+                           const double dstate_dt[],
+                           const std::vector<int>& rootMask,
+                           const solverMode& sMode) noexcept;
+
+
+
+    /** @brief compute any limit values
+      computes the limits for any limit checking functions used in the system
+    @param[in] time  the simulation time of the evaluation
+    @param[in] state  the state information to evaluation
+    @param[in] dstate_dt  the time derivative of the state
+    @param[out] roots the storage location for the limits
+    @param[in] sMode the solverMode to solve for
+    @return integer indicating success (0) or failure (non-zero)
+    */
+    int limitCheckingFunction(coreTime time,
+                              const double state[],
+                              const double dstate_dt[],
+                              double limits[],
+                              const solverMode& sMode) noexcept;
+
     /** @brief find the derivatives of the residual function with respect to the given parameters
     @param[in] time  the simulation time of the evaluation
     @param[in] indices the indices of the parameters
@@ -664,6 +697,15 @@ class gridDynSimulation: public gridSimulation {
     void handleEarlySolverReturn(int retval,
                                  coreTime timeActual,
                                  std::shared_ptr<SolverInterface>& dynData);
+
+    /** @brief function to help with XBraid solving steps
+    @param[in] retval the return code from the solver
+    @param[in] timeActual the actual time returned
+    @param[in] dynData the SolverInterface currently in use
+     */
+    void handleLimitViolation(int retval,
+                              coreTime timeActual,
+                              std::shared_ptr<SolverInterface>& dynData);
 
     /** @brief reset the dynamic simulation
      function checks for various conditions that cause specific things in the solver or simulation

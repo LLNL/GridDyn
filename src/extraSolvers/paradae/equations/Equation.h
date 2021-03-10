@@ -48,14 +48,15 @@ namespace paradae {
                            //    0: both direction would create a discontinuity
 
         SVector t_sroot;  // The times of the scheduled discontinuities
+        SVector iroot;    // Mask for which roots have been crossed
         Real tol;  // Root finding tolerance
 
         RootManager():
             n_sroots(0), n_uroots(0), n_sactive(0), n_uactive(0), n_state(0), is_active(0),
-            dir_root(0), t_sroot(0), tol(0){};
+            dir_root(0), t_sroot(0), iroot(0), tol(0){};
         RootManager(int n_sr, int n_ur, int n_st, Real tol_):
             n_sroots(n_sr), n_uroots(n_ur), n_sactive(0), n_uactive(0), n_state(n_st),
-            is_active(n_sr + n_ur), dir_root(n_ur), t_sroot(n_sr), tol(tol_){};
+            is_active(n_sr + n_ur), dir_root(n_ur), t_sroot(n_sr), iroot(n_sr + n_ur), tol(tol_){};
         inline bool HasSRoots() const { return n_sactive > 0; };
         inline bool HasURoots() const { return n_uactive > 0; };
         inline bool HasRoots() const { return (n_sactive > 0) || (n_uactive > 0); };
@@ -121,6 +122,10 @@ namespace paradae {
                                     Vector& rv){};
         // Change the state depending on which root is found (should be private?)
         virtual void root_crossings(const Vector& iroot, Vector& state){};
+
+        virtual void root_action(const Real troot, const Vector &xroot,
+                                 const Vector &dxroot, const Vector &iroot){};
+
         // Initialize the state
         virtual void root_init_state(const Real t, Vector& state){};
         // Check if a root has been crossed. If so, estimate the time t and change the state.

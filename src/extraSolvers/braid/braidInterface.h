@@ -70,6 +70,7 @@ namespace braid {
                           step_mode stepMode = step_mode::normal) override;
         /** execute the braid solve*/
         virtual int RunBraid(ODEProblem* ode, MapParam* param, Real*& timegrid, int Ngridpoints);
+        virtual void getRoots() override;
     };
 }  // namespace braid
 }  // namespace griddyn

@@ -151,6 +151,9 @@ namespace braid {
             flags.set(allocated_flag);
             rootsfound.resize(numRoots);
         }
+        // update the rootCount
+        rootCount = numRoots;
+        rootsfound.resize(numRoots);
     }
 
     void braidSolver::initialize(coreTime t0)
@@ -175,7 +178,8 @@ namespace braid {
         m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode);  // cDaeSolverMode);
         // y0_.dump("new_code_init_con.txt");
         equation = new EquationGridDyn(
-            static_cast<double>(tStart), stopTime, N_unistep_, m_gds, y0_, &mode, discontinuities);
+            static_cast<double>(tStart), stopTime, N_unistep_, m_gds, y0_, &mode,
+            discontinuities, rootsfound);
     }
 
     double braidSolver::get(const std::string& param) const
@@ -377,6 +381,7 @@ namespace braid {
         }
 
         // Run Braid simulation
+        std::cout << "braid_Drive(core)" << std::endl;
         braid_Drive(core);
 
         // Last processor owns the solution at t-final. Extract the t-final solution
@@ -434,7 +439,7 @@ namespace braid {
         double* timegrid;
         ode.GetTI()->DoBraid() = true;
         BuildGrid(&ode, param, Nsteps, timegrid);
-        this->RunBraid(&ode, &param, timegrid, Nsteps + 1);
+        this->RunBraid(&ode, &param, timegrid, Nsteps + 1); // solve happens!
         delete[] timegrid;
 
         // Begin diagnostic output on Braid run
@@ -467,5 +472,14 @@ namespace braid {
     {
         return 0;
     }
+
+    void braidSolver::getRoots()
+    {
+        // Need to fill array of active roots. Note this is not the is_active
+        // array in RootManager. That is set by the user to enable/disable
+        // root functions.
+        return;
+    }
+
 }  // namespace braid
 }  // namespace griddyn

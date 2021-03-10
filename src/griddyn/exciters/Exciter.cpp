@@ -13,6 +13,8 @@
 #include "utilities/matrixData.hpp"
 #include <cmath>
 
+#include <iostream>
+
 // note that there is only 1 dynamic state since V_R = E_f
 
 namespace griddyn {
@@ -167,6 +169,8 @@ void Exciter::rootTrigger(coreTime time,
     int rootOffset = offsets.getRootOffset(sMode);
     if (rootMask[rootOffset] != 0) {
         if (opFlags[outside_vlim]) {
+            std::cout << "root trigger back in bounds at t = " << time
+                      << std::endl;
             LOG_NORMAL("root trigger back in bounds");
             alert(this, JAC_COUNT_INCREASE);
             opFlags.reset(outside_vlim);
@@ -174,9 +178,13 @@ void Exciter::rootTrigger(coreTime time,
         } else {
             opFlags.set(outside_vlim);
             if (opFlags[etrigger_high]) {
+                std::cout << "root trigger above bounds at t = " << time
+                          << std::endl;
                 LOG_NORMAL("root trigger above bounds");
                 m_state[limitState] -= 0.0001;
             } else {
+                std::cout << "root trigger below bounds at t = " << time
+                          << std::endl;
                 LOG_NORMAL("root trigger below bounds");
                 m_state[limitState] += 0.0001;
             }

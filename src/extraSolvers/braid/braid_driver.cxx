@@ -28,7 +28,8 @@ using namespace griddyn::paradae;
 
 _braid_App_struct::_braid_App_struct(ODEProblem* ode_):
     ode(ode_), nb_multisteps(ode->GetTI()->GetType() == BDF ? ode->GetTI()->GetOrder() : 1),
-    size_x(ode->GetEq()->GetM()), size_state(ode->GetEq()->GetNState()), prevlvl(-1),
+    size_x(ode->GetEq()->GetM()), size_state(ode->GetEq()->GetNState()), root_strat(doublestep),
+    prevlvl(-1),
     solution_tfinal(NULL), alloc_data(size_x,
                                       nb_multisteps,
                                       ode->GetEq()->GetNURoots(),
@@ -296,6 +297,9 @@ namespace braid {
 
         /* Handle a root, if needed */
         if (level == 0 && return_code == WARN_ROOT) {
+
+            cout << "Root found at " << app->alloc_data.troot << endl;
+
             /* Handle the root only if it is away from tstart or tstop */
             Real dist = min(app->alloc_data.troot - tstart, tstop - app->alloc_data.troot);
             if (dist > app->ode->GetEq()->GetRoots().tol) {
@@ -314,6 +318,7 @@ namespace braid {
                         }
                     }
                 } else if (app->root_strat == doublestep) {
+                    cout << "Take Double Step" << endl;
                     /* Perform a double step: Step to the root, then step from root to tstop. */
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();

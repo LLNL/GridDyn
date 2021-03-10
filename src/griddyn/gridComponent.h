@@ -29,7 +29,7 @@ class Violation;
  **/
 class gridComponent: public coreObject {
   protected:
-    std::bitset<64> opFlags;  //!< operational flags these flags are designed to be normal false
+    std::bitset<65> opFlags;  //!< operational flags these flags are designed to be normal false
                               //!< @see ::operation_flags
     offsetTable offsets;  //!< a table of offsets for the different solver modes
     count_t m_inputSize = 0;  //!< the required size of the inputs input
@@ -689,6 +689,36 @@ see gridComponent::dynInitializeA for more details
                                   const stateData& sD,
                                   const solverMode& sMode,
                                   check_level_t level);
+
+    /******************************************
+    Functions related to limiting
+    *******************************************/
+    /**
+    *evaluate the limit functions and return the value
+    @param[in] inputs the inputs for the secondary object
+    * @param[in] sD the state of the system
+    * @param[out] limits the memory to store the limit evaluation
+    * @param[in] sMode the mode the solver is in
+    **/
+    virtual void limitTest(const IOdata& inputs,
+                           const stateData& sD,
+                           double limits[],
+                           const solverMode& sMode);
+
+    /**
+    *a limit has violated now take action
+    * @param[in] time the simulation time the limit evaluation takes place
+    @param[in] limitMask a vector of integers representing a limitMask  (only object having a value of
+    1 in their limit locations should actually trigger
+    * @param[in] limitMask an integer array the same size as limits where a 1 indicates a root has
+    been found
+    * @param[in] sMode the mode the solver is in
+    **/
+    virtual void limitTrigger(coreTime time,
+                              const IOdata& inputs,
+                              const std::vector<int>& limitMask,
+                              const solverMode& sMode);
+
     /******************************************
     output functions
     *******************************************/
