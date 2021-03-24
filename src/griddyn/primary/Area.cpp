@@ -19,6 +19,7 @@
 #include "core/objectInterpreter.h"
 #include "gmlc/utilities/vectorOps.hpp"
 #include "listMaintainer.h"
+#include <iostream>
 
 namespace griddyn {
 using namespace units;
@@ -1391,6 +1392,13 @@ void Area::getTols(double tols[], const solverMode& sMode)
 }
 
 //#define DEBUG_PRINT
+void Area::printhasroots()
+{
+    for (auto* ro : rootObjects) {
+        ro->printhasroots();
+    }
+}
+
 void Area::rootTest(const IOdata& inputs,
                     const stateData& sD,
                     double roots[],
@@ -1445,6 +1453,9 @@ void Area::rootTrigger(coreTime time,
                        const std::vector<int>& rootMask,
                        const solverMode& sMode)
 {
+    std::cout << "area-start-rootTrigger" << std::endl;
+    printhasroots();
+
     auto RF = vecFindne(rootMask, 0);
     size_t cloc = 0;
     size_t rs = rootSize(sMode);
@@ -1458,6 +1469,10 @@ void Area::rootTrigger(coreTime time,
     // checks the root object
     // TODO(PT) ::May be wise at some point to revisit the combination of the flags and root object
     // checking
+
+    std::cout << "area-pre-loop-rootTrigger" << std::endl;
+    printhasroots();
+
     for (auto rc : RF) {
         if (rc < rootOffset + cloc) {
             continue;
@@ -1477,6 +1492,10 @@ void Area::rootTrigger(coreTime time,
         }
         ors = (*currentRootObject)->rootSize(sMode);
     }
+
+    std::cout << "area-pre-flagupdates-rootTrigger" << std::endl;
+    printhasroots();
+
     opFlags.reset(disable_flag_updates);
     if (opFlags[flag_update_required]) {
         updateFlags();

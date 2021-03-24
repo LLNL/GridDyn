@@ -1376,6 +1376,11 @@ change_code gridBus::rootCheck(const IOdata& /*inputs*/,
     return gridComponent::rootCheck(inputs, sD, sMode, level);
 }
 
+void gridBus::printhasroots()
+{
+    gridComponent::printhasroots();
+}
+
 void gridBus::rootTest(const IOdata& /*inputs*/,
                        const stateData& sD,
                        double roots[],
@@ -1390,6 +1395,9 @@ void gridBus::rootTrigger(coreTime time,
                           const std::vector<int>& rootMask,
                           const solverMode& sMode)
 {
+    std::cout << "gridBus-start-rootTrigger" << std::endl;
+    printhasroots();
+
     size_t rootCount = 0;
     int rootOffset = offsets.getRootOffset(sMode);
 
@@ -1406,10 +1414,22 @@ void gridBus::rootTrigger(coreTime time,
             if ((gen->checkFlag(has_roots)) && (gen->isEnabled())) {
                 rootCount += gen->rootSize(sMode);
                 if (nR < rootOffset + rootCount) {
+
+                    std::cout << "gridBus-pre-gen-rootTrigger" << std::endl;
+                    printhasroots();
+
                     gen->rootTrigger(time, inputs, rootMask, sMode);
+
+                    std::cout << "gridBus-post-gen-rootTrigger" << std::endl;
+                    printhasroots();
+
                     do {
                         ++rootFoundIndex;
                         if (rootFoundIndex >= rootsfound.size()) {
+
+                            std::cout << "gridBus-return-1-rootTrigger" << std::endl;
+                            printhasroots();
+
                             return;
                         }
                         nR = rootsfound[rootFoundIndex];
@@ -1425,6 +1445,10 @@ void gridBus::rootTrigger(coreTime time,
                     do {
                         ++rootFoundIndex;
                         if (rootFoundIndex >= rootsfound.size()) {
+
+                            std::cout << "gridBus-return-2-rootTrigger" << std::endl;
+                            printhasroots();
+
                             return;
                         }
                         nR = rootsfound[rootFoundIndex];

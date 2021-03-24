@@ -424,6 +424,7 @@ class gridBus: public gridPrimary {
     **/
     virtual double getFreq(const stateData& sD, const solverMode& sMode) const;
 
+    virtual void printhasroots();
     virtual void rootTest(const IOdata& inputs,
                           const stateData& sD,
                           double roots[],

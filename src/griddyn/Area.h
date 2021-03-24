@@ -275,6 +275,7 @@ class Area: public gridPrimary {
 
     virtual void reset(reset_levels level) override;
     // root finding functions
+    virtual void printhasroots();
     virtual void rootTest(const IOdata& inputs,
                           const stateData& sD,
                           double roots[],

@@ -272,11 +272,11 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
                 LOG_ERROR(dynData->getLastErrorString());
                 return FUNCTION_EXECUTION_FAILURE;
             }
+
             // update the stopping time just in case the events have changed
             nextStop = (std::min)(tStop, EvQ->getNextTime());
             std::cout << "runDynamicSolverStep 2" << std::endl;
             retval = runDynamicSolverStep(dynData, nextStop, timeReturn);
-
             currentTime = timeReturn;
 
             if (retval != SOLVER_ROOT_FOUND) {
@@ -310,7 +310,15 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         // transmit the current state to the various objects for updates and recorders
         setState(currentTime, dynData->state_data(), dynData->deriv_data(), sMode);
         updateLocalCache();
+
+        std::cout << "post-updateLocalCache" << std::endl;
+        printhasroots();
+
         auto ret = EvQ->executeEvents(currentTime);
+
+        std::cout << "post-executeEvents" << std::endl;
+        printhasroots();
+
         if (ret > change_code::non_state_change) {
             std::cout << "In change_code::non_state_change" << std::endl;
             dynamicCheckAndReset(sMode);
@@ -649,7 +657,22 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
                      dynData->deriv_data(),
                      dynData->getSolverMode());
             LOG_DEBUG("Root detected");
+
+            std::cout << "before-rootTrigger" << std::endl;
+            printhasroots();
+
+            std::cout << "timeActual = " << timeActual << std::endl;
+            std::cout << "rootsfound = " << std::endl;
+            for (int i=0; i<dynData->rootsfound.size();i++){
+                std::cout << dynData->rootsfound[i] << std::endl;
+            }
+            //std::cout << "smode      = " << dynData->getSolverMode() << endl;
+
             rootTrigger(timeActual, noInputs, dynData->rootsfound, dynData->getSolverMode());
+
+            std::cout << "after-rootTrigger" << std::endl;
+            printhasroots();
+
         } else if (retval == SOLVER_INVALID_STATE_ERROR) {
             // if we get into here the most likely cause is a very low voltage bus
             stateData sD(timeActual, dynData->state_data(), dynData->deriv_data());
@@ -666,34 +689,41 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
 #endif
         }
     }
+
+    std::cout << "end-handleEarlySolverReturn" << std::endl;
+    printhasroots();
 }
 
 void gridDynSimulation::handleLimitViolation(int retval,
                                              coreTime timeActual,
                                              std::shared_ptr<SolverInterface>& dynData)
 {
-    if (opFlags[has_limits]) {
-        if (retval == SOLVER_LIMIT_VIOLATED)  // a limit was violated
-        {
-            // THIS IS PROBABLY STILL THE ACTUAL TIME IN THE DOUBLE STEP CASE
-            // BUT I'LL NEED TO DOBULE CHECK CHECK. IT'S EITHER THE START OR END
-            // TIME OF A STEP BUT BOTH SHOULD BE OK.
+    // if (opFlags[has_limits]) {
+    //     if (retval == SOLVER_LIMIT_VIOLATED)  // a limit was violated
+    //     {
+    //         // THIS IS PROBABLY STILL THE ACTUAL TIME IN THE DOUBLE STEP CASE
+    //         // BUT I'LL NEED TO DOBULE CHECK CHECK. IT'S EITHER THE START OR END
+    //         // TIME OF A STEP BUT BOTH SHOULD BE OK.
 
-            dynData->getLimits(); // DJG: NEED TO ADD getLimits and limitscrossed array
-            currentTime = timeActual;
-            setState(timeActual,
-                     dynData->state_data(),
-                     dynData->deriv_data(),
-                     dynData->getSolverMode());
-            LOG_DEBUG("Limit crossed");
-            rootTrigger(timeActual, noInputs, dynData->limitscrossed, dynData->getSolverMode());
-        }
-    }
+    //         dynData->getLimits(); // DJG: NEED TO ADD getLimits and limitscrossed array
+    //         currentTime = timeActual;
+    //         setState(timeActual,
+    //                  dynData->state_data(),
+    //                  dynData->deriv_data(),
+    //                  dynData->getSolverMode());
+    //         LOG_DEBUG("Limit crossed");
+    //         rootTrigger(timeActual, noInputs, dynData->limitscrossed, dynData->getSolverMode());
+    //     }
+    // }
 }
 
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
     std::cout << "gridDynSimulation::dynamicCheckAndReset" << std::endl;
+
+    std::cout << "start-dynamicCheckAndReset" << std::endl;
+    printhasroots();
+
     auto dynData = getSolverInterface(sMode);
     if (opFlags[connectivity_change_flag]) {
         std::cout << "if 1" << std::endl;
@@ -744,6 +774,10 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
     }
 
     opFlags &= RESET_CHANGE_FLAG_MASK;
+
+    std::cout << "end-dynamicCheckAndReset" << std::endl;
+    printhasroots();
+
     return true;
 }
 
@@ -845,6 +879,10 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
     if ((consolePrintLevel >= print_level::trace) || (logPrintLevel >= print_level::trace)) {
         dynData->logSolverStats(print_level::trace, true);
     }
+
+    std::cout << "end-generateDaeDynamicInitialConditions" << std::endl;
+    printhasroots();
+
     return retval;
 }
 
@@ -1261,9 +1299,26 @@ int gridDynSimulation::rootActionFunction(coreTime time,
                                           const std::vector<int>& rootMask,
                                           const solverMode& sMode) noexcept
 {
+    std::cout << "start-rootActionFunction" << std::endl;
+    printhasroots();
+
     currentTime = time;
     setState(time, state, dstate_dt, sMode);
+
+    std::cout << "before-rootTrigger" << std::endl;
+    printhasroots();
+
+    std::cout << "time     = " << time     << std::endl;
+    std::cout << "rootmask = " << std::endl;
+    for (int i=0; i<rootMask.size();i++){
+        std::cout << rootMask[i] << std::endl;
+    }
+    //std::cout << "smode    = " << sMode << endl;
+
     rootTrigger(time, noInputs, rootMask, sMode);
+
+    std::cout << "after-rootTrigger" << std::endl;
+    printhasroots();
 
     // THIS WILL ONLY GET DATA INTO GRIDDYN NOT BACK INTO PARADAE (does not help, remove)
     auto dynData  = getSolverInterface(sMode);

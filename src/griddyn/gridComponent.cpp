@@ -506,6 +506,8 @@ bool gridComponent::getFlag(const std::string& flag) const
 
 bool gridComponent::checkFlag(index_t flagID) const
 {
+    // std::cout << "opFlags[" << flagID << "] = " << opFlags[flagID] << std::endl;
+    // std::cout << "opFlags.test = " << opFlags.test(flagID) << std::endl;
     return opFlags.test(flagID);
 }
 bool gridComponent::hasStates(const solverMode& sMode) const
@@ -1696,6 +1698,13 @@ void gridComponent::jacobianElements(const IOdata& inputs,
         }
     }
 }
+void gridComponent::printhasroots()
+{
+    std::cout << "gridComponent::printhasroots" << std::endl;
+    for (auto& subobj : subObjectList) {
+        std::cout << "subobj->opFlags[has_roots] = " << subobj->opFlags[has_roots] << std::endl;
+    }
+}
 void gridComponent::rootTest(const IOdata& inputs,
                              const stateData& sD,
                              double roots[],
@@ -1704,7 +1713,9 @@ void gridComponent::rootTest(const IOdata& inputs,
     std::cout << "gridComponent::rootTest" << std::endl;
     for (auto& subobj : subObjectList) {
         if (!subobj->checkFlag(separate_processing)) {
-            std::cout << "!separate_processing" << std::endl;
+            // std::cout << "!separate_processing" << std::endl;
+            // std::cout << "opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            // std::cout << "subobj->opFlags[has_roots] = " << subobj->opFlags[has_roots] << std::endl;
             if (!(subobj->checkFlag(has_roots))) {
                 std::cout << "!has_roots" << std::endl;
                 continue;
