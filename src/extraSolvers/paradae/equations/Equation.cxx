@@ -101,8 +101,8 @@ namespace paradae {
         // cout << "Equation::CheckUnscheduledRoots" << endl;
 
         for (int i = 0; i < nroots; i++) {
-            std::cout << " glo(" << i << ") = " << glo(i)
-                      << " ghi(" << i << ") = " << ghi(i) << std::endl;
+            // std::cout << " glo(" << i << ") = " << glo(i)
+            //           << " ghi(" << i << ") = " << ghi(i) << std::endl;
             if (roots.is_active(i + roots.n_sroots)) {
                 if (abs(ghi(i)) < tol) {
                     if (roots.dir_root(i) * glo(i) <= 0) {

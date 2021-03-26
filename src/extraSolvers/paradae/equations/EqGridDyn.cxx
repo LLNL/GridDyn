@@ -129,7 +129,7 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
                                          const Vector& state,
                                          Vector& rv)
     {
-        std::cout << "EquationGridDyn::root_functions" << std::endl;
+        //std::cout << "EquationGridDyn::root_functions" << std::endl;
         gds->rootFindingFunction(t, y.GetData(), dy.GetData(), rv.GetData(),
                                  *mode);
     };
@@ -139,7 +139,7 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
                                       const Vector& dyroot,
                                       const Vector& iroot)
     {
-        std::cout << "EquationGridDyn::root_action" << std::endl;
+        //std::cout << "EquationGridDyn::root_action" << std::endl;
         // std::cout << "Scheduled roots " << roots.n_sroots << std::endl;
         // std::cout << "Unscheduled roots " << roots.n_uroots << std::endl;
         std::vector<int> rootMask(iroot.GetData() + roots.n_sroots,
@@ -155,8 +155,8 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
     {
         Real t = 0.0;
         // Need to add time as an input here? for calling stateData sD(time,...) in GridDyn
-        gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),
-                                   flimit.GetData(), *mode);
+        // gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),
+        //                            flimit.GetData(), *mode);
     };
 
     // NEED TO CHANGE THIS FUNCTION?

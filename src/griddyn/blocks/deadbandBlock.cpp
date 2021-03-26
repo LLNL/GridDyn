@@ -10,6 +10,7 @@
 #include "gmlc/utilities/stringOps.h"
 #include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/matrixData.hpp"
+#include <iostream>
 
 namespace griddyn {
 namespace blocks {
@@ -44,6 +45,7 @@ namespace blocks {
         Block::dynObjectInitializeA(time0, flags);
         if (deadbandLow < deadbandHigh)  // this means it was set to some value
         {
+            std::cout << "deadbandBlock::dynObjectInitializeA algRoots" << std::endl;
             opFlags[has_roots] = true;
             offsets.local().local.algRoots++;
             opFlags.set(has_alg_roots);

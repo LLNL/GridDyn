@@ -79,6 +79,7 @@ namespace loads {
         switch (dynCoupling) {
             case coupling_mode_t::none:
                 opFlags.reset(preEx_requested);
+                std::cout << "approximatingLoad::dynObjectInitializeA algRoots 0" << std::endl;
                 offsets.local().local.algRoots = 0;
                 break;
             case coupling_mode_t::interval:
@@ -87,6 +88,7 @@ namespace loads {
                 break;
             case coupling_mode_t::trigger:
                 opFlags.reset(preEx_requested);
+                std::cout << "approximatingLoad::dynObjectInitializeA algRoots 1" << std::endl;
                 offsets.local().local.algRoots = 1;
                 break;
 

@@ -178,10 +178,10 @@ namespace exciters {
         if (opFlags[outside_vlim]) {
             roots[rootOffset] = es[2] - es[0] * Kf / Tf +
                 (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
-            std::cout << "root test 1 = " << roots[rootOffset] << std::endl;
+            //std::cout << "root test 1 = " << roots[rootOffset] << std::endl;
         } else {
             roots[rootOffset] = std::min(Vrmax - es[1], es[1] - Vrmin) + 0.00001;
-            std::cout << "root test 2 = " << roots[rootOffset] << std::endl;
+            //std::cout << "root test 2 = " << roots[rootOffset] << std::endl;
             if (es[1] >= Vrmax) {
                 std::cout << "root test 2 trigger" << std::endl;
                 opFlags.set(etrigger_high);

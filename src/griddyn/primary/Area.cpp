@@ -1742,6 +1742,10 @@ void Area::setRootOffset(index_t Roffset, const solverMode& sMode)
 {
     offsets.setRootOffset(Roffset, sMode);
     const auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "Aread::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
+    std::cout << "Aread::setRootOffset so.total.diffRoots " << so.total.diffRoots << std::endl;
+
     auto nR = so.local.algRoots + so.local.diffRoots;
     for (auto* ro : rootObjects) {
         ro->setRootOffset(Roffset + nR, sMode);

@@ -117,9 +117,11 @@ namespace loads {
 
     std::pair<count_t, count_t> motorLoad::LocalRootCount(const solverMode& /*sMode*/) const
     {
+        std::cout << "motorLoad::LocalRootCount" << std::endl;
         count_t algRoots = 0;
         count_t diffRoots = 0;
         if ((opFlags[stalled]) && (opFlags[resettable])) {
+            std::cout << "motorLoad::LocalRootCount algRoots 1" << std::endl;
             algRoots = 1;
         } else {
             diffRoots = 1;

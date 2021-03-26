@@ -63,6 +63,7 @@ void Exciter::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
 void Exciter::checkForLimits()
 {
     if ((Vrmin > -21) || (Vrmax < 21)) {
+        std::cout << "Exciter::checkForLimits algRoots 1" << std::endl;
         offsets.local().local.algRoots = 1;
     }
 }

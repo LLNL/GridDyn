@@ -36,6 +36,7 @@ namespace genmodels {
         offsets.local().local.algSize = 1;
         offsets.local().local.jacSize = 4;
         offsets.local().local.algRoots = 1;
+        std::cout << "GenModelInverter::dynObjectInitializeA algRoots 1" << std::endl;
     }
     // initial conditions
     void GenModelInverter::dynObjectInitializeB(const IOdata& inputs,

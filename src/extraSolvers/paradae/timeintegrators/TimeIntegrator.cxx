@@ -75,9 +75,9 @@ namespace paradae {
 
     bool TimeIntegrator::CheckRoots(DATA_Struct& val)
     {
-        cout << endl << endl
-             << "TimeIntegrator::CheckRoots -- check if root crossed in "
-             << "[" << val.t << "," << val.t + val.used_dt << "]" << endl;
+        // cout << endl << endl
+        //      << "TimeIntegrator::CheckRoots -- check if root crossed in "
+        //      << "[" << val.t << "," << val.t + val.used_dt << "]" << endl;
         bool root_crossed = false;
         if (equation->HasEvents()) {
             Real tlo = val.t;
@@ -120,7 +120,7 @@ namespace paradae {
                 glo = val.gprev;
                 equation->root_functions(thi, val.xnext, val.dxnext, val.snext, val.gnext);
                 val.groot.CopyData(val.gnext);
-                cout << "gprev = " << val.gprev << " gnext = " << val.gnext << endl;
+                //cout << "gprev = " << val.gprev << " gnext = " << val.gnext << endl;
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
 
@@ -141,7 +141,7 @@ namespace paradae {
                                       roots.iroot);
             }
         }
-        cout << "TimeIntegrator::CheckRoots -- was a root found? " << root_crossed << endl;
+        //cout << "TimeIntegrator::CheckRoots -- was a root found? " << root_crossed << endl;
         return root_crossed;
     }
 

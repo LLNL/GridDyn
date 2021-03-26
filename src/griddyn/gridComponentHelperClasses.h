@@ -12,6 +12,7 @@
 
 #include "solvers/solverMode.hpp"
 #include <bitset>
+#include <iostream>
 
 namespace griddyn {
 constexpr static std::uint64_t flagMask = 0x3FE;  //!< general flag mask for convenience to mask out
@@ -133,7 +134,7 @@ enum operation_flags {
     three_phase_capable = 62,  //!< flag indicating the object can be attached to a 3 phase bus
     three_phase_terminal2 =
         63,  //!< flag indicating the terminal 2 must be attached to a 3 phase bus
-    has_limits = 64,  //!< flag indicating if an object uses limit checking
+    // has_limits = 64,  //!< flag indicating if an object uses limit checking
 
 };
 /** alternate names for some of the flags*/
@@ -292,7 +293,7 @@ class stateSizes {
     /** reset just the sizes related to states to 0*/
     void stateReset();
     /** reset the root counter and  sizes to 0*/
-    void rootReset() { algRoots = diffRoots = 0; }
+    void rootReset() { std::cout << "rootReset()" << std::endl; algRoots = diffRoots = 0; }
 
     /** reset the Jacobian counter and  sizes to 0*/
     void JacobianReset() { jacSize = 0; }

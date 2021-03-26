@@ -270,15 +270,23 @@ count_t gridComponent::diffSize(const solverMode& sMode) const
 count_t gridComponent::rootSize(const solverMode& sMode)
 {
     auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "gridComponent::rootSize 1-pre so.total.algRoots " << so.total.algRoots << std::endl;
+
     if (!(so.rootsLoaded)) {
         loadRootSizes(sMode);
     }
+
+    std::cout << "gridComponent::rootSize 1-post so.total.algRoots " << so.total.algRoots << std::endl;
+
     return so.total.algRoots + so.total.diffRoots;
 }
 
 count_t gridComponent::rootSize(const solverMode& sMode) const
 {
     const auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "gridComponent::rootSize 2 so.total.algRoots " << so.total.algRoots << std::endl;
 
     return so.total.algRoots + so.total.diffRoots;
 }
@@ -492,8 +500,8 @@ static const std::map<std::string, operation_flags> flagmap{
     {"separate_processing", separate_processing},
     {"three_phase_only", three_phase_only},
     {"three_phase_capable", three_phase_capable},
-    {"three_phase_terminal2", three_phase_terminal2},
-    {"limits", has_limits}};
+    {"three_phase_terminal2", three_phase_terminal2}};
+    // {"limits", has_limits}};
 
 bool gridComponent::getFlag(const std::string& flag) const
 {
@@ -971,20 +979,30 @@ void gridComponent::setupPFlowFlags()
 
 void gridComponent::setupDynFlags()
 {
+    std::cout << "setupDynFlags start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+
     auto ss = stateSize(cDaeSolverMode);
 
     opFlags.set(has_dyn_states, (ss > 0));
     const auto& so = offsets.getOffsets(cDaeSolverMode);
+
+    std::cout << "algRoots " << so.total.algRoots << std::endl;
+
     if (so.total.algRoots > 0) {
+        std::cout << "setupDynFlags 1" << std::endl;
         opFlags.set(has_alg_roots);
         opFlags.set(has_roots);
     } else if (so.total.diffRoots > 0) {
+        std::cout << "setupDynFlags 2" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.set(has_roots);
     } else {
+        std::cout << "setupDynFlags 3" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.reset(has_roots);
     }
+
+    std::cout << "setupDynFlags end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }
 
 double gridComponent::getState(index_t offset) const
@@ -1032,6 +1050,7 @@ void gridComponent::loadSizesSub(const solverMode& sMode, sizeCategory category)
         case sizeCategory::root_size_update:
             so.total.algRoots = so.local.algRoots;
             so.total.diffRoots = so.local.diffRoots;
+            std::cout << "gridComponent::loadSizesSub so.total.algRoots " << so.total.algRoots << std::endl;
             for (auto& sub : subObjectList) {
                 if (sub->isEnabled()) {
                     if (!(sub->isRootCountLoaded(sMode))) {
@@ -1061,6 +1080,7 @@ count_t gridComponent::LocalJacobianCount(const solverMode& /*sMode*/) const
 std::pair<count_t, count_t> gridComponent::LocalRootCount(const solverMode& /*sMode*/) const
 {
     const auto& lc = offsets.local().local;
+    std::cout << "gridComponent::LocalRootCount lc.algRoots " << lc.algRoots << std::endl;
     return std::make_pair(lc.algRoots, lc.diffRoots);
 }
 
@@ -1125,6 +1145,9 @@ void gridComponent::loadRootSizes(const solverMode& sMode)
         return;
     }
     auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "gridComponent::loadRootSizes pre so.total.algRoots " << so.total.algRoots << std::endl;
+
     if (!isEnabled()) {
         so.reset();
         so.setLoaded();
@@ -1162,6 +1185,7 @@ void gridComponent::loadRootSizes(const solverMode& sMode)
         opFlags.reset(has_roots);
         opFlags.reset(has_alg_roots);
     }
+    std::cout << "gridComponent::loadRootSizes post so.total.algRoots " << so.total.algRoots << std::endl;
 }
 
 void gridComponent::loadJacobianSizes(const solverMode& sMode)
@@ -1262,13 +1286,19 @@ static const std::map<int, int> alertFlags{
 
 void gridComponent::alert(coreObject* object, int code)
 {
+    std::cout << "alert start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+
     if ((code >= MIN_CHANGE_ALERT) && (code <= MAX_CHANGE_ALERT)) {
         auto res = alertFlags.find(code);
         if (res != alertFlags.end()) {
             if (!opFlags[disable_flag_updates]) {
+                std::cout << "alert pre-updateFlags opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
                 updateFlags();
+                std::cout << "alert post-updateFlags opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             } else {
+                std::cout << "alert pre-opFlags.set opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
                 opFlags.set(flag_update_required);
+                std::cout << "alert post-opFlags.set opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             }
             switch (res->second) {
                 case 3:
@@ -1279,7 +1309,9 @@ void gridComponent::alert(coreObject* object, int code)
                     offsets.rootUnload(true);
                     break;
                 case 4:
+                    std::cout << "alert pre-JacobianUnload opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
                     offsets.JacobianUnload(true);
+                    std::cout << "alert post-JacobianUnload opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
                     break;
                 case 5:
                     offsets.stateUnload();
@@ -1291,7 +1323,11 @@ void gridComponent::alert(coreObject* object, int code)
             }
         }
     }
+    std::cout << std::endl;
+
     coreObject::alert(object, code);
+
+    std::cout << "alert end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }
 
 void gridComponent::getConstraints(double constraints[], const solverMode& sMode)
@@ -1307,6 +1343,9 @@ void gridComponent::setRootOffset(index_t newRootOffset, const solverMode& sMode
 {
     offsets.setRootOffset(newRootOffset, sMode);
     auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "gridComponent::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
+
     auto nR = so.local.algRoots + so.local.diffRoots;
     for (auto& ro : subObjectList) {
         ro->setRootOffset(newRootOffset + nR, sMode);
@@ -1710,17 +1749,17 @@ void gridComponent::rootTest(const IOdata& inputs,
                              double roots[],
                              const solverMode& sMode)
 {
-    std::cout << "gridComponent::rootTest" << std::endl;
+    //std::cout << "gridComponent::rootTest" << std::endl;
     for (auto& subobj : subObjectList) {
         if (!subobj->checkFlag(separate_processing)) {
             // std::cout << "!separate_processing" << std::endl;
             // std::cout << "opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             // std::cout << "subobj->opFlags[has_roots] = " << subobj->opFlags[has_roots] << std::endl;
             if (!(subobj->checkFlag(has_roots))) {
-                std::cout << "!has_roots" << std::endl;
+                //std::cout << "!has_roots" << std::endl;
                 continue;
             }
-            std::cout << "call subobj rooTest" << std::endl;
+            //std::cout << "call subobj rooTest" << std::endl;
             subobj->rootTest(inputs, sD, roots, sMode);
         }
     }
@@ -1759,35 +1798,35 @@ change_code gridComponent::rootCheck(const IOdata& inputs,
     return ret;
 }
 
-void gridComponent::limitTest(const IOdata& inputs,
-                              const stateData& sD,
-                              double limits[],
-                              const solverMode& sMode)
-{
-    for (auto& subobj : subObjectList) {
-        if (!subobj->checkFlag(separate_processing)) {
-            if (!(subobj->checkFlag(has_limits))) {
-                continue;
-            }
-            subobj->limitTest(inputs, sD, limits, sMode);
-        }
-    }
-}
+// void gridComponent::limitTest(const IOdata& inputs,
+//                               const stateData& sD,
+//                               double limits[],
+//                               const solverMode& sMode)
+// {
+//     for (auto& subobj : subObjectList) {
+//         if (!subobj->checkFlag(separate_processing)) {
+//             if (!(subobj->checkFlag(has_limits))) {
+//                 continue;
+//             }
+//             subobj->limitTest(inputs, sD, limits, sMode);
+//         }
+//     }
+// }
 
-void gridComponent::limitTrigger(coreTime time,
-                                 const IOdata& inputs,
-                                 const std::vector<int>& limitMask,
-                                 const solverMode& sMode)
-{
-    for (auto& subobj : subObjectList) {
-        if (!(subobj->checkFlag(has_limits))) {
-            continue;
-        }
-        if (!subobj->checkFlag(separate_processing)) {
-            subobj->limitTrigger(time, inputs, limitMask, sMode);
-        }
-    }
-}
+// void gridComponent::limitTrigger(coreTime time,
+//                                  const IOdata& inputs,
+//                                  const std::vector<int>& limitMask,
+//                                  const solverMode& sMode)
+// {
+//     for (auto& subobj : subObjectList) {
+//         if (!(subobj->checkFlag(has_limits))) {
+//             continue;
+//         }
+//         if (!subobj->checkFlag(separate_processing)) {
+//             subobj->limitTrigger(time, inputs, limitMask, sMode);
+//         }
+//     }
+// }
 
 index_t gridComponent::lookupOutputIndex(const std::string& outputName) const
 {

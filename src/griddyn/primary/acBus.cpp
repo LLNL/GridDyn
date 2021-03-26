@@ -2239,6 +2239,10 @@ void acBus::setRootOffset(index_t Roffset, const solverMode& sMode)
 {
     offsets.setRootOffset(Roffset, sMode);
     auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "acBus::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
+    std::cout << "acBus::setRootOffset so.total.diffRoots " << so.total.diffRoots << std::endl;
+
     auto nR = so.local.algRoots + so.local.diffRoots;
     for (auto& gen : attachedGens) {
         gen->setRootOffset(Roffset + nR, sMode);

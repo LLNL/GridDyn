@@ -30,6 +30,13 @@ static IOdata kNullOutputVec;  //!<  this is a purposely created empty vector wh
 // dynamic solver and initial conditions
 int gridDynSimulation::dynInitialize(coreTime tStart)
 {
+    std::cout << "gridDynSimulation::dynInitialize start" << std::endl;
+
+    const auto& so = offsets.getOffsets(cDaeSolverMode);
+
+    std::cout << "1 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     if (opFlags[dyn_initialized]) {
         offsets.unload(true);
     }
@@ -37,10 +44,21 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
         *defDynDiffMode :
         *defDAEMode;
 
+    std::cout << "2 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
+    std::cout << "gridDynSimulation::dynInitialize pre-makeReady" << std::endl;
+
     int retval = makeReady(gridState_t::POWERFLOW_COMPLETE, tempSm);
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
         return retval;
     }
+
+    std::cout << "gridDynSimulation::dynInitialize post-makeReady" << std::endl;
+
+    std::cout << "3 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     auto dynData = getSolverInterface(tempSm);
     const solverMode& sm = dynData->getSolverMode();
     if (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned) {
@@ -57,39 +75,91 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     // In most cases this should be none but users can manipulate the times if they choose
     EvQ->executeEvents(tStart - 0.001);
 
+    std::cout << "4 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
+    std::cout << "gridDynSimulation::dynInitialize pre-dynInitializeA" << std::endl;
+
     dynInitializeA(tStart, lower_flags(controlFlags));
 
+    std::cout << "gridDynSimulation::dynInitialize post-dynInitializeA" << std::endl;
+
+    std::cout << "5 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
+    std::cout << "gridDynSimulation::dynInitialize pre-stateSize" << std::endl;
     count_t ssize = stateSize(sm);
+    std::cout << "gridDynSimulation::dynInitialize post-stateSize" << std::endl;
     if (ssize == 0) {
         LOG_WARNING("State size==0 stopping computation\n");
         return 0;  // TODO::  add a positive return code when state size is 0
     }
+
+    std::cout << "6 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
+    std::cout << "gridDynSimulation::dynInitialize pre-updateOffsets" << std::endl;
     updateOffsets(sm);
+    std::cout << "gridDynSimulation::dynInitialize post-updateOffsets" << std::endl;
+
+    std::cout << "7 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     // check for objects with roots
     count_t totalRoots = 0;
     // CSW: Need to send in the number of roots to find so that memory
     // can be allocated to for the array indicating indices of roots.
     // do the final Ida initialization
-    std::cout << "gridDynSimulation::dynInitialize" << std::endl;
+    std::cout << "gridDynSimulation::dynInitialize controlFlags" << std::endl;
     if (controlFlags[roots_disabled]) {
+        std::cout << "gridDynSimulation::dynInitialize roots_disabled" << std::endl;
         offsets.local().local.algRoots = 0;
         offsets.local().local.diffRoots = 0;
         opFlags[has_roots] = false;
         opFlags[has_alg_roots] = false;
     } else {
+
+        std::cout << "7a gridDynSimulation::dynInitialize so.total.algRoots = "
+                  << so.total.algRoots << std::endl;
+
         totalRoots = rootSize(sm);
+        loadRootSizes(sm);
+
+        std::cout << "7b gridDynSimulation::dynInitialize so.total.algRoots = "
+                  << so.total.algRoots << std::endl;
+
+        std::cout << "gridDynSimulation::dynInitialize totalRoots = "
+                  << totalRoots << std::endl;
         if (totalRoots > 0) {
+
+            std::cout << "7c gridDynSimulation::dynInitialize so.total.algRoots = "
+                      << so.total.algRoots << std::endl;
+
             setRootOffset(0, sm);
+
+            std::cout << "7d gridDynSimulation::dynInitialize so.total.algRoots = "
+                      << so.total.algRoots << std::endl;
+
             opFlags[has_roots] = true;
             opFlags[has_alg_roots] = (offsets.getOffsets(sm).total.algRoots > 0);
+
+            std::cout << "gridDynSimulation::dynInitialize offsets.getOffsets(sm).total.algRoots = "
+                      << offsets.getOffsets(sm).total.algRoots << std::endl;
+            std::cout << "gridDynSimulation::dynInitialize offsets.local().local.algRoots = "
+                      << offsets.local().local.algRoots << std::endl;
+            std::cout << "gridDynSimulation::dynInitialize offsets.local().local.diffRoots = "
+                      << offsets.local().local.diffRoots << std::endl;
         } else {
             opFlags[has_roots] = false;
             opFlags[has_alg_roots] = false;
         }
     }
 
+    std::cout << "8 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     // check for objects with limits
-    count_t totalLimits = 0;
+    // count_t totalLimits = 0;
     // DJG: NEED TO ADD ALLOCATION HERE
 
     dynData->allocate(ssize, totalRoots);
@@ -98,6 +168,9 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     dynData->set("tolerance", tols.rtol);
     // run the dynamic initialization part B there is no actual output from an area currently
     dynInitializeB(noInputs, noInputs, kNullOutputVec);
+
+    std::cout << "9 gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
 
     // check if any updates need to take place
     // run any 0 time events
@@ -127,6 +200,12 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     opFlags &= RESET_CHANGE_FLAG_MASK;
     pState = gridState_t::DYNAMIC_INITIALIZED;
     currentTime = tStart;
+
+    std::cout << "gridDynSimulation::dynInitialize end" << std::endl;
+
+    std::cout << "gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
@@ -154,6 +233,12 @@ int gridDynSimulation::runDynamicSolverStep(std::shared_ptr<SolverInterface>& dy
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
         std::cout << "call handleEarlySolverReturn at " << timeActual
                   << std::endl;
+
+        const auto& so = offsets.getOffsets(cDaeSolverMode);
+
+        std::cout << "gridDynSimulation::dynInitialize so.total.algRoots = "
+                  << so.total.algRoots << std::endl;
+
         handleEarlySolverReturn(retval, timeActual, dynData);
     }
     return retval;
@@ -225,6 +310,13 @@ int gridDynSimulation::dynamicDAEStartupConditions(std::shared_ptr<SolverInterfa
 // IDA DAE Solver
 int gridDynSimulation::dynamicDAE(coreTime tStop)
 {
+    std::cout << "gridDynSimulation::dynamicDAE" << std::endl;
+
+    const auto& so = offsets.getOffsets(cDaeSolverMode);
+
+    std::cout << "gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
+
     int out = FUNCTION_EXECUTION_SUCCESS;
 
     int tstep = 0;
@@ -256,7 +348,7 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         {  // the most likely cause of this is numerical instability in recorders and events
             timeReturn = nextStop;
         } else {
-            std::cout << "runDynamicSolverStep 1" << std::endl;
+            //std::cout << "runDynamicSolverStep 1" << std::endl;
             runDynamicSolverStep(dynData, nextStop, timeReturn);
         }
 
@@ -311,13 +403,13 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         setState(currentTime, dynData->state_data(), dynData->deriv_data(), sMode);
         updateLocalCache();
 
-        std::cout << "post-updateLocalCache" << std::endl;
-        printhasroots();
+        //std::cout << "post-updateLocalCache" << std::endl;
+        //printhasroots();
 
         auto ret = EvQ->executeEvents(currentTime);
 
-        std::cout << "post-executeEvents" << std::endl;
-        printhasroots();
+        //std::cout << "post-executeEvents" << std::endl;
+        //printhasroots();
 
         if (ret > change_code::non_state_change) {
             std::cout << "In change_code::non_state_change" << std::endl;
@@ -694,10 +786,10 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
     printhasroots();
 }
 
-void gridDynSimulation::handleLimitViolation(int retval,
-                                             coreTime timeActual,
-                                             std::shared_ptr<SolverInterface>& dynData)
-{
+// void gridDynSimulation::handleLimitViolation(int retval,
+//                                              coreTime timeActual,
+//                                              std::shared_ptr<SolverInterface>& dynData)
+// {
     // if (opFlags[has_limits]) {
     //     if (retval == SOLVER_LIMIT_VIOLATED)  // a limit was violated
     //     {
@@ -715,7 +807,7 @@ void gridDynSimulation::handleLimitViolation(int retval,
     //         rootTrigger(timeActual, noInputs, dynData->limitscrossed, dynData->getSolverMode());
     //     }
     // }
-}
+// }
 
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
@@ -1028,6 +1120,7 @@ int gridDynSimulation::reInitDyn(const solverMode& sMode)
     // check for objects with roots
     count_t nRoots = 0;
     if (controlFlags[roots_disabled]) {
+        std::cout << "gridDynSimulation::reInitDyn algRoots 0" << std::endl;
         offsets.local().local.algRoots = 0;
         offsets.local().local.diffRoots = 0;
         opFlags[has_roots] = false;
@@ -1286,7 +1379,7 @@ int gridDynSimulation::rootFindingFunction(coreTime time,
                                            double roots[],
                                            const solverMode& sMode) noexcept
 {
-    std::cout << "gridDynSimulation::rootFindingFunction" << std::endl;
+    //std::cout << "gridDynSimulation::rootFindingFunction" << std::endl;
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     rootTest(noInputs, sD, roots, sMode);
@@ -1301,6 +1394,11 @@ int gridDynSimulation::rootActionFunction(coreTime time,
 {
     std::cout << "start-rootActionFunction" << std::endl;
     printhasroots();
+
+    const auto& so = offsets.getOffsets(cDaeSolverMode);
+
+    std::cout << "gridDynSimulation::dynInitialize so.total.algRoots = "
+              << so.total.algRoots << std::endl;
 
     currentTime = time;
     setState(time, state, dstate_dt, sMode);
@@ -1336,17 +1434,17 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int gridDynSimulation::limitCheckingFunction(coreTime time,
-                                             const double state[],
-                                             const double dstate_dt[],
-                                             double limits[],
-                                             const solverMode& sMode) noexcept
-{
-    stateData sD(time, state, dstate_dt, residCount);
-    fillExtraStateData(sD, sMode);
-    limitTest(noInputs, sD, limits, sMode);
-    return FUNCTION_EXECUTION_SUCCESS;
-}
+// int gridDynSimulation::limitCheckingFunction(coreTime time,
+//                                              const double state[],
+//                                              const double dstate_dt[],
+//                                              double limits[],
+//                                              const solverMode& sMode) noexcept
+// {
+//     stateData sD(time, state, dstate_dt, residCount);
+//     fillExtraStateData(sD, sMode);
+//     limitTest(noInputs, sD, limits, sMode);
+//     return FUNCTION_EXECUTION_SUCCESS;
+// }
 
 int gridDynSimulation::dynAlgebraicSolve(coreTime time,
                                          const double diffState[],

@@ -237,6 +237,7 @@ void offsetTable::localUpdateAll(bool dynamic_only)
                 so.total.jacSize = so.local.jacSize = lc.local.jacSize;
                 so.rootsLoaded = true;
                 so.jacobianLoaded = true;
+                std::cout << "offsetTable::localUpdateAll so.total.algRoots = " << so.total.algRoots << std::endl;
             }
         }
     } else {
