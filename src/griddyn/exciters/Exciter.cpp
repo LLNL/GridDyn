@@ -175,7 +175,7 @@ void Exciter::rootTrigger(coreTime time,
             std::cout << "root trigger back in bounds at t = " << time
                       << std::endl;
             LOG_NORMAL("root trigger back in bounds");
-            alert(this, JAC_COUNT_INCREASE);
+            alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
             opFlags.reset(etrigger_high);
         } else {
@@ -195,7 +195,7 @@ void Exciter::rootTrigger(coreTime time,
                 m_state[limitState] += 0.0001;
             }
             std::cout << "4 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
-            alert(this, JAC_COUNT_DECREASE);
+            alert_braid(this, JAC_COUNT_DECREASE, sMode);
             std::cout << "5 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
         }
         std::cout << "after checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;

@@ -28,6 +28,7 @@ enum class paramStringType { all, localstr, localnum, str, numeric, localflags, 
 typedef void gridPositionInfo;
 
 class helperObject;
+class solverMode; // DJG: Needed for extra alert to make roots work with braid.
 
 /** @brief      base class for a building simulation objects
  Base class for all main simulation objects class includes common properties for all objects such as
@@ -98,6 +99,9 @@ class coreObject {
      * @param[in] code an alert code
      */
     virtual void alert(coreObject* object, int code);
+
+    // Extra alert to make roots work with braid
+    virtual void alert_braid(coreObject* object, int code, const solverMode &sMode);
 
     /**
      * @brief forwards a log message from object *object up the chain or processes it.

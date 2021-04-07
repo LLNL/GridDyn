@@ -1005,6 +1005,35 @@ void gridComponent::setupDynFlags()
     std::cout << "setupDynFlags end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }
 
+// Extra setupDynFlags to make roots work with braid
+void gridComponent::setupDynFlags(const solverMode &sMode)
+{
+    std::cout << "setupDynFlags start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+
+    auto ss = stateSize(sMode);
+
+    opFlags.set(has_dyn_states, (ss > 0));
+    const auto& so = offsets.getOffsets(sMode);
+
+    std::cout << "algRoots " << so.total.algRoots << std::endl;
+
+    if (so.total.algRoots > 0) {
+        std::cout << "setupDynFlags 1" << std::endl;
+        opFlags.set(has_alg_roots);
+        opFlags.set(has_roots);
+    } else if (so.total.diffRoots > 0) {
+        std::cout << "setupDynFlags 2" << std::endl;
+        opFlags.reset(has_alg_roots);
+        opFlags.set(has_roots);
+    } else {
+        std::cout << "setupDynFlags 3" << std::endl;
+        opFlags.reset(has_alg_roots);
+        opFlags.reset(has_roots);
+    }
+
+    std::cout << "setupDynFlags end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+}
+
 double gridComponent::getState(index_t offset) const
 {
     if (isValidIndex(offset, m_state)) {
@@ -1330,6 +1359,54 @@ void gridComponent::alert(coreObject* object, int code)
     std::cout << "alert end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }
 
+// Extra alert to make roots work with braid
+void gridComponent::alert_braid(coreObject* object, int code, const solverMode &sMode)
+{
+    std::cout << "alert_braid start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+
+    if ((code >= MIN_CHANGE_ALERT) && (code <= MAX_CHANGE_ALERT)) {
+        auto res = alertFlags.find(code);
+        if (res != alertFlags.end()) {
+            if (!opFlags[disable_flag_updates]) {
+                std::cout << "alert pre-updateFlags opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+                updateFlags(sMode);
+                std::cout << "alert post-updateFlags opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            } else {
+                std::cout << "alert pre-opFlags.set opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+                opFlags.set(flag_update_required);
+                std::cout << "alert post-opFlags.set opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            }
+            switch (res->second) {
+                case 3:
+                    offsets.stateUnload();
+                    offsets.JacobianUnload(true);
+                    break;
+                case 2:
+                    offsets.rootUnload(true);
+                    break;
+                case 4:
+                    std::cout << "alert pre-JacobianUnload opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+                    offsets.JacobianUnload(true);
+                    std::cout << "alert post-JacobianUnload opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+                    break;
+                case 5:
+                    offsets.stateUnload();
+                    offsets.JacobianUnload(true);
+                    offsets.rootUnload(true);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    coreObject::alert_braid(object, code, sMode);
+
+    std::cout << "alert_braid end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+}
+
+
 void gridComponent::getConstraints(double constraints[], const solverMode& sMode)
 {
     for (auto& subobj : subObjectList) {
@@ -1565,6 +1642,23 @@ void gridComponent::updateFlags(bool dynamicsFlags)
     }
     if ((opFlags[dyn_initialized]) && (dynamicsFlags)) {
         setupDynFlags();
+    } else {
+        setupPFlowFlags();
+    }
+
+    opFlags.reset(flag_update_required);
+}
+
+// Extra updateFlags to make roots work with braid
+void gridComponent::updateFlags(const solverMode &sMode, bool dynamicsFlags)
+{
+    for (auto& subobj : subObjectList) {
+        if (subobj->isEnabled()) {
+            opFlags |= subobj->cascadingFlags();
+        }
+    }
+    if ((opFlags[dyn_initialized]) && (dynamicsFlags)) {
+        setupDynFlags(sMode);
     } else {
         setupPFlowFlags();
     }

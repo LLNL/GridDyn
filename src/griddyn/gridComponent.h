@@ -365,12 +365,19 @@ see gridComponent::dynInitializeA for more details
 
     virtual void alert(coreObject*, int code) override;
 
+    // Extra alert to try and make roots work with braid
+    void alert_braid(coreObject*, int code, const solverMode &sMode);
+
     /** @brief common function to load some flags appropriate to pFlow.
      */
     void setupPFlowFlags();
     /** @brief common function to load some flags appropriate to dynamic simulation.
      */
     void setupDynFlags();
+
+    // Extra setupDynFlags to make roots work with braid
+    void setupDynFlags(const solverMode &sMode);
+
     /** @brief compute the local sizes
     @param sMode the solver mode to use.
     @return a stateSizes object containing the various segment sizes
@@ -469,6 +476,9 @@ see gridComponent::dynInitializeA for more details
     @param[in] dynamics  if true only do so for flags corresponding to dynamic solution
     */
     virtual void updateFlags(bool dynamicsFlags = true);
+
+    // Extra updateflags to try and get roots to work with braid
+    void updateFlags(const solverMode &sMode, bool dynamicsFlags = true);
 
     /** @brief get the names for all the states
     @param[out] stNames -- the output state names

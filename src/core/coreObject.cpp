@@ -385,6 +385,11 @@ void coreObject::alert(coreObject* object, int code)
 {
     parent->alert(object, code);
 }
+// DJG: Extra alert to maek roots work with braid
+void coreObject::alert_braid(coreObject* object, int code, const solverMode &sMode)
+{
+    parent->alert_braid(object, code, sMode);
+}
 void coreObject::log(coreObject* object, print_level level, const std::string& message)
 {
     parent->log(object, level, message);
