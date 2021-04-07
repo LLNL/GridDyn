@@ -192,6 +192,7 @@ class Area: public gridPrimary {
     // solver functions
 
     virtual void alert(coreObject* obj, int code) override;
+    virtual void alert_braid(coreObject* obj, int code, const solverMode &sMode) override;
 
     virtual void getStateName(stringVec& stNames,
                               const solverMode& sMode,

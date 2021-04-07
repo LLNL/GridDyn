@@ -189,6 +189,7 @@ class gridSimulation: public Area {
                        units::unit unitType = units::defunit) const override;
 
     void alert(coreObject* object, int code) override;
+    void alert_braid(coreObject* object, int code, const solverMode &sMode) override;
     virtual void log(coreObject* object, print_level level, const std::string& message) override;
 
     /** @brief save all the recorder data to files

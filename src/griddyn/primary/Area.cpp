@@ -311,6 +311,26 @@ void Area::alert(coreObject* obj, int code)
     }
 }
 
+void Area::alert_braid(coreObject* obj, int code, const solverMode &sMode)
+{
+    switch (code) {
+        case OBJECT_NAME_CHANGE:
+        case OBJECT_ID_CHANGE:
+            obList->updateObject(obj);
+            break;
+        case OBJECT_IS_SEARCHABLE:
+            if (isRoot()) {
+                obList->insert(obj);
+            } else {
+                getParent()->alert(obj, code);
+            }
+            break;
+        default:
+            gridPrimary::alert(obj, code);
+    }
+}
+
+
 gridBus* Area::getBus(index_t x) const
 {
     return (isValidIndex(x, m_Buses)) ? m_Buses[x] : nullptr;

@@ -97,6 +97,7 @@ class acBus: public gridBus {
     virtual void remove(acBus* bus);
     // deal with control alerts
     virtual void alert(coreObject* obj, int code) override;
+    virtual void alert_braid(coreObject* obj, int code, const solverMode &sMode) override;
 
     // dynInitializeB
     virtual void setOffsets(const solverOffsets& newOffsets, const solverMode& sMode) override;

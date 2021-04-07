@@ -170,6 +170,45 @@ void acBus::alert(coreObject* obj, int code)
     }
 }
 
+void acBus::alert_braid(coreObject* obj, int code, const sovlerMode &sMode)
+{
+    switch (code) {
+        case VOLTAGE_CONTROL_UPDATE:
+            if (opFlags[pFlow_initialized]) {
+                busController.updateVoltageControls();
+            }
+            break;
+        case VERY_LOW_VOLTAGE_ALERT:
+            // set an internal flag
+            opFlags.set(prev_low_voltage_alert);
+            // forward the alert
+            getParent()->alert(obj, code);
+            break;
+        case POWER_CONTROL_UDPATE:
+            if (opFlags[pFlow_initialized]) {
+                busController.updatePowerControls();
+            }
+            break;
+        case PV_CONTROL_UDPATE:
+            if (opFlags[pFlow_initialized]) {
+                busController.updateVoltageControls();
+                busController.updatePowerControls();
+            }
+            break;
+        case OBJECT_NAME_CHANGE:
+        case OBJECT_ID_CHANGE:
+            break;
+        case POTENTIAL_FAULT_CHANGE:
+            if (opFlags[disconnected]) {
+                reconnect();
+            }
+            FALLTHROUGH
+        default:
+            gridPrimary::alert(obj, code);  // NOLINT
+    }
+}
+
+
 // dynInitializeB states
 void acBus::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 {

@@ -27,6 +27,8 @@ class nullObject final: public coreObject {
      */
     virtual void alert(coreObject* object, int code) override;
 
+    virtual void alert_braid(coreObject* object, int code, const solverMode &sMode) override;
+
     /**
      * log just absorbs all log messages and does nothing
      */

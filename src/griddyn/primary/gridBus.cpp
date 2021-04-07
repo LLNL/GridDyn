@@ -255,6 +255,23 @@ void gridBus::alert(coreObject* obj, int code)
     }
 }
 
+void gridBus::alert_braid(coreObject* obj, int code, const sovlerMode &sMode)
+{
+    switch (code) {
+        case OBJECT_NAME_CHANGE:
+        case OBJECT_ID_CHANGE:
+            break;
+        case POTENTIAL_FAULT_CHANGE:
+            if (opFlags[disconnected]) {
+                reconnect();
+            }
+            FALLTHROUGH
+            // FALLTHROUGH
+        default:
+            gridPrimary::alert(obj, code);
+    }
+}
+
 void gridBus::followNetwork(int networkID, std::queue<gridBus*>& bstk)
 {
     Network = networkID;

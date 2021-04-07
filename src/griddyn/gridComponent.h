@@ -366,7 +366,7 @@ see gridComponent::dynInitializeA for more details
     virtual void alert(coreObject*, int code) override;
 
     // Extra alert to try and make roots work with braid
-    void alert_braid(coreObject*, int code, const solverMode &sMode);
+    virtual void alert_braid(coreObject*, int code, const solverMode &sMode) override;
 
     /** @brief common function to load some flags appropriate to pFlow.
      */

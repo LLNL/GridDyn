@@ -1042,6 +1042,30 @@ void gridDynSimulation::alert(coreObject* object, int code)
     }
 }
 
+
+void gridDynSimulation::alert_braid(coreObject* object, int code, const solverMode &sMode)
+{
+    if ((code >= MIN_CHANGE_ALERT) && (code < MAX_CHANGE_ALERT)) {
+        auto res = alertFlags.find(code);
+        if (res != alertFlags.end()) {
+            auto flagNum = res->second;
+            opFlags.set(flagNum);
+        } else {
+            gridSimulation::alert(object, code);
+        }
+
+        Area::alert(object, code);
+    } else if (code == SINGLE_STEP_REQUIRED) {
+        controlFlags.set(single_step_mode);
+        if (dynamic_cast<gridComponent*>(object) != nullptr) {
+            singleStepObjects.push_back(static_cast<gridComponent*>(object));
+        }
+    } else {
+        gridSimulation::alert(object, code);
+    }
+}
+
+
 int gridDynSimulation::makeReady(gridState_t desiredState, const solverMode& sMode)
 {
     // check to make sure we at or greater than the desiredState

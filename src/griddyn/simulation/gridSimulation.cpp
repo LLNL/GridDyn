@@ -377,6 +377,40 @@ void gridSimulation::alert(coreObject* object, int code)
     }
 }
 
+void gridSimulation::alert_braid(coreObject* object, int code, const sovlerMode &sMode)
+{
+    if (code > MAX_CHANGE_ALERT) {
+        switch (code) {
+            case UPDATE_TIME_CHANGE:
+                EvQ->recheck();
+                break;
+            case UPDATE_REQUIRED:
+                EvQ->insert(object);
+                break;
+            case UPDATE_NOT_REQUIRED:
+                break;
+            case OBJECT_NAME_CHANGE:
+            case OBJECT_ID_CHANGE:
+            case OBJECT_IS_SEARCHABLE:
+                Area::alert(object, code);
+            default:
+                break;
+        }
+    } else if (code < MIN_CHANGE_ALERT) {
+        alertCount++;
+        std::string astr;
+        auto res = alertStrings.find(code);
+        if (res != alertStrings.end()) {
+            astr = res->second;
+            log(object, print_level::summary, astr);
+        } else {
+            std::string message = "Unrecognized alert code (" + std::to_string(code) + ')';
+            log(object, print_level::summary, message);
+        }
+    }
+}
+
+
 double gridSimulation::get(const std::string& param, units::unit unitType) const
 {
     count_t ival = kInvalidCount;

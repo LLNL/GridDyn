@@ -29,6 +29,7 @@ coreObject* nullObject::clone(coreObject* obj) const
 }
 
 void nullObject::alert(coreObject* /*obj*/, int /*code*/) {}
+void nullObject::alert_braid(coreObject* /*obj*/, int /*code*/, const solverMode& /* sMode */) {}
 void nullObject::log(coreObject* /*obj*/, print_level /*level*/, const std::string& /*message*/) {}
 coreObject* nullObject::find(const std::string& /*object*/) const
 {

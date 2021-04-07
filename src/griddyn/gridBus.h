@@ -127,6 +127,7 @@ class gridBus: public gridPrimary {
     virtual void remove(Link* lnk);
     // deal with control alerts
     virtual void alert(coreObject* obj, int code) override;
+    virtual void alert_braid(coreObject* obj, int code, const solverMode &sMode) override;
 
     // dynInitializeB
   protected:
