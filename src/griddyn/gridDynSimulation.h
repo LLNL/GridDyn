@@ -308,7 +308,7 @@ class gridDynSimulation: public gridSimulation {
                                                    // previously specified start time
     void alert(coreObject* object, int code) override;
 
-    void alert_braid(coreObject* object, int code, const sovlerMode &sMode) override;
+    void alert_braid(coreObject* object, int code, const solverMode &sMode) override;
 
     /** @brief function to count the number of MPI objects required for this simulation
     @param[in] printInfo if set to true the information is printed to the console

@@ -377,7 +377,7 @@ void gridSimulation::alert(coreObject* object, int code)
     }
 }
 
-void gridSimulation::alert_braid(coreObject* object, int code, const sovlerMode &sMode)
+void gridSimulation::alert_braid(coreObject* object, int code, const solverMode &sMode)
 {
     if (code > MAX_CHANGE_ALERT) {
         switch (code) {
