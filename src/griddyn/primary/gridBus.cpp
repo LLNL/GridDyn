@@ -255,7 +255,7 @@ void gridBus::alert(coreObject* obj, int code)
     }
 }
 
-void gridBus::alert_braid(coreObject* obj, int code, const sovlerMode &sMode)
+void gridBus::alert_braid(coreObject* obj, int code, const solverMode &sMode)
 {
     switch (code) {
         case OBJECT_NAME_CHANGE:

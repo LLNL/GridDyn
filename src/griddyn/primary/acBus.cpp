@@ -170,7 +170,7 @@ void acBus::alert(coreObject* obj, int code)
     }
 }
 
-void acBus::alert_braid(coreObject* obj, int code, const sovlerMode &sMode)
+void acBus::alert_braid(coreObject* obj, int code, const solverMode &sMode)
 {
     switch (code) {
         case VOLTAGE_CONTROL_UPDATE:

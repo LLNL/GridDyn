@@ -86,7 +86,7 @@ count_t stateSizes::totalSize() const
 
 void solverOffsets::reset()
 {
-    std::cout << "sovlerOffsets::reset()" << std::endl;
+    std::cout << "solverOffsets::reset()" << std::endl;
     diffOffset = aOffset = vOffset = algOffset = rootOffset = kNullLocation;
     local.reset();
     total.reset();
@@ -104,7 +104,7 @@ void solverOffsets::stateReset()
 
 void solverOffsets::rootCountReset()
 {
-    std::cout << "sovlerOffsets::rootCountReset()" << std::endl;
+    std::cout << "solverOffsets::rootCountReset()" << std::endl;
     rootOffset = kNullLocation;
     local.rootReset();
     total.rootReset();
@@ -216,7 +216,7 @@ void solverOffsets::addJacobianSizes(const solverOffsets& offsets)
 
 void solverOffsets::addRootSizes(const solverOffsets& offsets)
 {
-    std::cout << "sovlerOffsets::addRootSizes()" << std::endl;
+    std::cout << "solverOffsets::addRootSizes()" << std::endl;
     total.addRootSizes(offsets.total);
 }
 
@@ -235,7 +235,7 @@ void solverOffsets::localLoadAll(bool finishedLoading)
     stateLoaded = finishedLoading;
     jacobianLoaded = finishedLoading;
     rootsLoaded = finishedLoading;
-    std::cout << "sovlerOffsets::localLoadAll()" << std::endl;
+    std::cout << "solverOffsets::localLoadAll()" << std::endl;
 }
 
 void solverOffsets::setOffsets(const solverOffsets& newOffsets)
