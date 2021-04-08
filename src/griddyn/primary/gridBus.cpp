@@ -1393,9 +1393,9 @@ change_code gridBus::rootCheck(const IOdata& /*inputs*/,
     return gridComponent::rootCheck(inputs, sD, sMode, level);
 }
 
-void gridBus::printhasroots()
+void gridBus::printflags()
 {
-    gridComponent::printhasroots();
+    gridComponent::printflags();
 }
 
 void gridBus::rootTest(const IOdata& /*inputs*/,

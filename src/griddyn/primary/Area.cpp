@@ -1412,10 +1412,10 @@ void Area::getTols(double tols[], const solverMode& sMode)
 }
 
 //#define DEBUG_PRINT
-void Area::printhasroots()
+void Area::printflags()
 {
     for (auto* ro : rootObjects) {
-        ro->printhasroots();
+        ro->printflags();
     }
 }
 

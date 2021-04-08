@@ -660,7 +660,7 @@ see gridComponent::dynInitializeA for more details
     /******************************************
     Functions related to root finding
     *******************************************/
-    virtual void printhasroots();
+    virtual void printflags();
     /**
     *evaluate the root functions and return the value
     @param[in] inputs the inputs for the secondary object

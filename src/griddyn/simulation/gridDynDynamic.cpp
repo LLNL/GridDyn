@@ -409,12 +409,12 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         updateLocalCache();
 
         //std::cout << "post-updateLocalCache" << std::endl;
-        //printhasroots();
+        //printflags();
 
         auto ret = EvQ->executeEvents(currentTime);
 
         //std::cout << "post-executeEvents" << std::endl;
-        //printhasroots();
+        //printflags();
 
         if (ret > change_code::non_state_change) {
             // std::cout << "In change_code::non_state_change" << std::endl;
@@ -756,7 +756,7 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
             LOG_DEBUG("Root detected");
 
             std::cout << "before-rootTrigger" << std::endl;
-            // printhasroots();
+            // printflags();
 
             // std::cout << "timeActual = " << timeActual << std::endl;
             // std::cout << "rootsfound = " << std::endl;
@@ -768,7 +768,7 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
             rootTrigger(timeActual, noInputs, dynData->rootsfound, dynData->getSolverMode());
 
             std::cout << "after-rootTrigger" << std::endl;
-            // printhasroots();
+            printflags();
 
         } else if (retval == SOLVER_INVALID_STATE_ERROR) {
             // if we get into here the most likely cause is a very low voltage bus
@@ -788,7 +788,7 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
     }
 
     // std::cout << "end-handleEarlySolverReturn" << std::endl;
-    // printhasroots();
+    // printflags();
 }
 
 // void gridDynSimulation::handleLimitViolation(int retval,
@@ -816,10 +816,8 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
 
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
-    // std::cout << "gridDynSimulation::dynamicCheckAndReset" << std::endl;
-
-    // std::cout << "start-dynamicCheckAndReset" << std::endl;
-    printhasroots();
+    std::cout << "start gridDynSimulation::dynamicCheckAndReset" << std::endl;
+    printflags();
 
     auto dynData = getSolverInterface(sMode);
     if (opFlags[connectivity_change_flag]) {
@@ -872,8 +870,8 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
 
     opFlags &= RESET_CHANGE_FLAG_MASK;
 
-    // std::cout << "end-dynamicCheckAndReset" << std::endl;
-    printhasroots();
+    printflags();
+    std::cout << "end gridDynSimulation::dynamicCheckAndReset" << std::endl;
 
     return true;
 }
@@ -978,7 +976,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions(const solverMode& sMo
     }
 
     // std::cout << "end-generateDaeDynamicInitialConditions" << std::endl;
-    // printhasroots();
+    // printflags();
 
     return retval;
 }
@@ -1397,8 +1395,8 @@ int gridDynSimulation::rootActionFunction(coreTime time,
                                           const std::vector<int>& rootMask,
                                           const solverMode& sMode) noexcept
 {
-    // std::cout << "start-rootActionFunction" << std::endl;
-    // printhasroots();
+    std::cout << "start-rootActionFunction" << std::endl;
+    // printflags();
 
     const auto& so = offsets.getOffsets(cDaeSolverMode);
 
@@ -1409,7 +1407,7 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     setState(time, state, dstate_dt, sMode);
 
     std::cout << "before-rootTrigger" << std::endl;
-    // printhasroots();
+    // printflags();
 
     // std::cout << "time     = " << time     << std::endl;
     // std::cout << "rootmask = " << std::endl;
@@ -1421,7 +1419,7 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     rootTrigger(time, noInputs, rootMask, sMode);
 
     std::cout << "after-rootTrigger" << std::endl;
-    printhasroots();
+    printflags();
 
     // THIS WILL ONLY GET DATA INTO GRIDDYN NOT BACK INTO PARADAE (does not help, remove)
     auto dynData  = getSolverInterface(sMode);
@@ -1435,6 +1433,9 @@ int gridDynSimulation::rootActionFunction(coreTime time,
 
     dynamicCheckAndReset(sMode);
     generateDaeDynamicInitialConditions(sMode);
+
+    printflags();
+    std::cout << "end-rootActionFunction" << std::endl;
 
     return FUNCTION_EXECUTION_SUCCESS;
 }

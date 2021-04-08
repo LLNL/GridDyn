@@ -1837,12 +1837,17 @@ void gridComponent::jacobianElements(const IOdata& inputs,
         }
     }
 }
-void gridComponent::printhasroots()
+void gridComponent::printflags()
 {
-    std::cout << "gridComponent::printhasroots" << std::endl;
+    std::cout << "start gridComponent::printflags" << std::endl;
     for (auto& subobj : subObjectList) {
-        std::cout << "subobj->opFlags[has_roots] = " << subobj->opFlags[has_roots] << std::endl;
+        if (subobj->opFlags[has_roots])
+            subobj->printflags();
+        // std::cout << "subobj->opFlags[has_roots] = " << subobj->opFlags[has_roots] << std::endl;
+        // std::cout << " opFlags[etrigger_high] = " << subobj->opFlags[etrigger_high] << std::endl;
+        // std::cout << " opFlags[outside_vlim] = " << subobj->opFlags[outside_vlim] << std::endl;
     }
+    std::cout << "end gridComponent::printflags" << std::endl;
 }
 void gridComponent::rootTest(const IOdata& inputs,
                              const stateData& sD,
