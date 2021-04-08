@@ -112,7 +112,7 @@ namespace paradae {
                         // std::cout << "dir_root(" << i << ") = " << roots.dir_root(i)
                         //           << " glo(" << i << ") = " << glo(i)
                         //           << " ghi(" << i << ") = " << ghi(i) << std::endl;
-                        //zroot = true; // DJG: This seems to create a false positive since dir_root is always 0
+                        zroot = true; // DJG: This seems to create a false positive since dir_root is always 0
                         iroot(i + roots.n_sroots) = (glo(i) > 0) ? -1 : 1;  // TODO check
                     }
                 } else {

@@ -13,7 +13,7 @@ namespace paradae {
     DATA_Struct::DATA_Struct(int nx, int nb, int ng, int ns, int nl):
         tprev(nb, 1), xprev(nb, nx), dxprev(nx), gprev(ng), sprev(ns), xroot(ng > 0 ? nx : 0),
         dxroot(ng > 0 ? nx : 0), groot(ng), sroot(ng > 0 ? ns : 0), xnext(nx), dxnext(nx),
-        gnext(ng), snext(ns), flimit(nl)
+        gnext(ng), snext(ns), flimit(nl), troot(0.0)
     {
     }
 
@@ -123,8 +123,19 @@ namespace paradae {
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
 
-            /* If troot == t: no root!! */
-            if (thi - val.t < equation->GetRoots().tol) root_crossed = false;
+            /* If troot == t: no root!! */ // DJG: NO! previous_troot == troot
+            //if (thi - val.t < equation->GetRoots().tol)
+            if (root_crossed &&
+                abs(thi - val.troot) < equation->GetRoots().tol)
+            {
+                cout << std::setprecision(10);
+                cout << "too close!" << endl;
+                cout << "thi - val.t = "
+                     << thi << " - " << val.t << " = "
+                     << thi - val.t
+                     << " < " << equation->GetRoots().tol << endl;
+                root_crossed = false;
+            }
 
             if (root_crossed) {
                 val.troot = thi;

@@ -339,6 +339,29 @@ namespace braid {
                     refinement = min(refinement, app->ode->GetTI()->GetMaxRFactor());
                 }
             }
+            else
+            {
+                cout << "Root too close to tstart or tstop, distance = " << dist << endl;
+                if (app->root_strat == doublestep) {
+                    cout << "Take Double Step" << endl;
+                    /* Perform a double step: Step to the root, then step from root to tstop. */
+                    app->alloc_data.SetNextAtRoot();
+                    app->alloc_data.Rotate();
+                    app->alloc_data.next_dt = tstop - app->alloc_data.troot;
+                    // Step from troot to tstop
+                    return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
+                    // If second root is found, refine by a minimum of 2
+                    if (return_code == WARN_ROOT) {
+                        dist = min(app->alloc_data.troot - app->alloc_data.t,
+                                   app->alloc_data.t + app->alloc_data.used_dt - app->alloc_data.troot);
+                        if (dist > app->ode->GetEq()->GetRoots().tol) {
+                            // printf("Crossing a second root at %1.12f.\n", app->alloc_data.troot);
+                            refinement = max(refinement, 2.0);
+                        }
+                    }
+                }
+            }
+
         }
 
         /* Set the refinement if needed */
