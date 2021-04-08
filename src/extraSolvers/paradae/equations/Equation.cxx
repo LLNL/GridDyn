@@ -60,6 +60,7 @@ namespace paradae {
             // std::cout << "s root = " << scheduled_roots
             //           << " u root = " << unscheduled_roots << std::endl;
             // this->root_crossings(roots.iroot, state);
+            cout << "Equation::CheckAllRoots -- Root found!" << endl;
             return true;
         }
         return false;
@@ -99,10 +100,12 @@ namespace paradae {
         Real tol = roots.tol;
 
         // cout << "Equation::CheckUnscheduledRoots" << endl;
+        // cout << std::setprecision(10);
+        // cout << " tlo = " << tlo << " thi = " << thi << endl;
 
         for (int i = 0; i < nroots; i++) {
-            // std::cout << " glo(" << i << ") = " << glo(i)
-            //           << " ghi(" << i << ") = " << ghi(i) << std::endl;
+            std::cout << " glo(" << i << ") = " << glo(i) << std::endl;
+            std::cout << " ghi(" << i << ") = " << ghi(i) << std::endl;
             if (roots.is_active(i + roots.n_sroots)) {
                 if (abs(ghi(i)) < tol) {
                     if (roots.dir_root(i) * glo(i) <= 0) {
@@ -132,23 +135,36 @@ namespace paradae {
         Real alpha = 1, tmid, fracint, fracsub;
         int side = 0, side_prev = -1;
         SVector yy(P.GetXSize()), yp(P.GetXSize()), gmid(nroots);
-        while (abs(thi - tlo) >= tol) {
+        while (abs(thi - tlo) >= tol)
+        {
+            // cout << "tlo = " << tlo
+            //      << " thi = " << thi
+            //      << " thi - tlo = " << thi - tlo << endl;
+
             if (side_prev == side)
                 alpha = (side == 2) ? 2.0 * alpha : 0.5 * alpha;
             else
                 alpha = 1;
             tmid = thi - (thi - tlo) * ghi(idx) / (ghi(idx) - alpha * glo(idx));
 
+            // cout << "tmid = " << tmid << endl;
+
             if (abs(tmid - tlo) < 0.5 * tol) {
                 fracint = abs(thi - tlo) / tol;
                 fracsub = (fracint > 5) ? 0.1 : 0.5 / fracint;
                 tmid = tlo + fracsub * (thi - tlo);
             }
+
+            // cout << "tmid = " << tmid << endl;
+
             if (abs(thi - tmid) < 0.5 * tol) {
                 fracint = abs(thi - tlo) / tol;
                 fracsub = (fracint > 5) ? 0.1 : 0.5 / fracint;
                 tmid = thi - fracsub * (thi - tlo);
             }
+
+            // cout << "tmid = " << tmid << endl;
+
             P.GetValueY(tmid, yy);
             P.GetValueDY(tmid, yp);
             this->root_functions(tmid, yy, yp, state, gmid);
@@ -159,6 +175,7 @@ namespace paradae {
             side_prev = side;
             for (int i = 0; i < nroots; i++) {
                 if (roots.is_active(i + roots.n_sroots)) {
+                    //cout << "gmid(" << i << ") = " << gmid(i) << endl;
                     if (abs(gmid(i)) < tol) {
                         if (roots.dir_root(i) * glo(i) <= 0) zroot = true;
                     } else {
@@ -195,6 +212,7 @@ namespace paradae {
             if ((roots.dir_root(i) * glo(i) <= 0) && (abs(ghi(i)) < tol || glo(i) * ghi(i) < 0))
                 iroot(i + roots.n_sroots) = (glo(i) > 0) ? -1 : 1;
         }
+        //cout << "thi = " << thi << endl;
         return true;
     }
 

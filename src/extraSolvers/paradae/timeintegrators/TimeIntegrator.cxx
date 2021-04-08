@@ -75,9 +75,9 @@ namespace paradae {
 
     bool TimeIntegrator::CheckRoots(DATA_Struct& val)
     {
-        // cout << endl << endl
-        //      << "TimeIntegrator::CheckRoots -- check if root crossed in "
-        //      << "[" << val.t << "," << val.t + val.used_dt << "]" << endl;
+        cout << "Looking for roots in [ "
+             << val.t << " , " << val.t + val.used_dt << " ]" << endl;
+
         bool root_crossed = false;
         if (equation->HasEvents()) {
             Real tlo = val.t;
@@ -120,7 +120,6 @@ namespace paradae {
                 glo = val.gprev;
                 equation->root_functions(thi, val.xnext, val.dxnext, val.snext, val.gnext);
                 val.groot.CopyData(val.gnext);
-                //cout << "gprev = " << val.gprev << " gnext = " << val.gnext << endl;
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
 
@@ -132,6 +131,9 @@ namespace paradae {
                 val.snext.CopyData(val.sroot);
                 P.GetValueY(thi, val.xroot);
                 P.GetValueDY(thi, val.dxroot);
+
+                cout << "gprev = " << val.gprev << " gnext = " << val.gnext << endl;
+                cout << "troot = " << std::setprecision(10) << val.troot << endl;
 
                 // DJG comment out root_crossing in Equation::CheckAllRoots and
                 // add this new function to take action if a root is found which
