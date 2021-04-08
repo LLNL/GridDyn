@@ -1473,8 +1473,8 @@ void Area::rootTrigger(coreTime time,
                        const std::vector<int>& rootMask,
                        const solverMode& sMode)
 {
-    std::cout << "area-start-rootTrigger" << std::endl;
-    printhasroots();
+    // std::cout << "area-start-rootTrigger" << std::endl;
+    // printhasroots();
 
     auto RF = vecFindne(rootMask, 0);
     size_t cloc = 0;
@@ -1490,8 +1490,8 @@ void Area::rootTrigger(coreTime time,
     // TODO(PT) ::May be wise at some point to revisit the combination of the flags and root object
     // checking
 
-    std::cout << "area-pre-loop-rootTrigger" << std::endl;
-    printhasroots();
+    // std::cout << "area-pre-loop-rootTrigger" << std::endl;
+    // printhasroots();
 
     for (auto rc : RF) {
         if (rc < rootOffset + cloc) {
@@ -1513,8 +1513,8 @@ void Area::rootTrigger(coreTime time,
         ors = (*currentRootObject)->rootSize(sMode);
     }
 
-    std::cout << "area-pre-flagupdates-rootTrigger" << std::endl;
-    printhasroots();
+    // std::cout << "area-pre-flagupdates-rootTrigger" << std::endl;
+    // printhasroots();
 
     opFlags.reset(disable_flag_updates);
     if (opFlags[flag_update_required]) {
@@ -1763,8 +1763,8 @@ void Area::setRootOffset(index_t Roffset, const solverMode& sMode)
     offsets.setRootOffset(Roffset, sMode);
     const auto& so = offsets.getOffsets(sMode);
 
-    std::cout << "Aread::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
-    std::cout << "Aread::setRootOffset so.total.diffRoots " << so.total.diffRoots << std::endl;
+    // std::cout << "Aread::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
+    // std::cout << "Aread::setRootOffset so.total.diffRoots " << so.total.diffRoots << std::endl;
 
     auto nR = so.local.algRoots + so.local.diffRoots;
     for (auto* ro : rootObjects) {

@@ -63,7 +63,7 @@ void Exciter::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
 void Exciter::checkForLimits()
 {
     if ((Vrmin > -21) || (Vrmax < 21)) {
-        std::cout << "Exciter::checkForLimits algRoots 1" << std::endl;
+        // std::cout << "Exciter::checkForLimits algRoots 1" << std::endl;
         offsets.local().local.algRoots = 1;
     }
 }
@@ -167,7 +167,11 @@ void Exciter::rootTrigger(coreTime time,
                           const std::vector<int>& rootMask,
                           const solverMode& sMode)
 {
-    std::cout << "start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+    // std::cout << "start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+    std::cout << "start Exciter::rootTrigger" << std::endl;
+
+    std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
+              << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
 
     int rootOffset = offsets.getRootOffset(sMode);
     if (rootMask[rootOffset] != 0) {
@@ -179,33 +183,38 @@ void Exciter::rootTrigger(coreTime time,
             opFlags.reset(outside_vlim);
             opFlags.reset(etrigger_high);
         } else {
-            std::cout << "1 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            // std::cout << "1 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             opFlags.set(outside_vlim);
-            std::cout << "2 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            // std::cout << "2 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             if (opFlags[etrigger_high]) {
                 std::cout << "root trigger above bounds at t = " << time
                           << std::endl;
                 LOG_NORMAL("root trigger above bounds");
                 m_state[limitState] -= 0.0001;
-                std::cout << "3 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+                // std::cout << "3 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             } else {
                 std::cout << "root trigger below bounds at t = " << time
                           << std::endl;
                 LOG_NORMAL("root trigger below bounds");
                 m_state[limitState] += 0.0001;
             }
-            std::cout << "4 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            // std::cout << "4 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
-            std::cout << "5 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+            // std::cout << "5 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
         }
-        std::cout << "after checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+        // std::cout << "after checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 
         stateData sD(time, m_state.data());
 
         derivative(inputs, sD, m_dstate_dt.data(), cLocalSolverMode);
     }
 
-    std::cout << "end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+    // std::cout << "end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
+    std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
+              << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
+
+    std::cout << "end Exciter::rootTrigger" << std::endl;
+
 }
 
 change_code Exciter::rootCheck(const IOdata& inputs,
