@@ -1432,9 +1432,13 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     std::memcpy(deriv_data, dstate_dt, ssize * sizeof(double));
 
     dynamicCheckAndReset(sMode);
-    generateDaeDynamicInitialConditions(sMode);
-
+    std::cout << "after-dynamicCheckAndReset" << std::endl;
     printflags();
+
+    //generateDaeDynamicInitialConditions(sMode);
+    std::cout << "after-generateDaeDynamicInitialConditions" << std::endl;
+    printflags();
+
     std::cout << "end-rootActionFunction" << std::endl;
 
     return FUNCTION_EXECUTION_SUCCESS;
