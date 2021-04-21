@@ -980,7 +980,7 @@ void gridComponent::setupPFlowFlags()
 void gridComponent::setupDynFlags()
 {
     //std::cout << "setupDynFlags start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
-    std::cout << "start gridComponent::setupDynFlags()" << std::endl;
+    //std::cout << "start gridComponent::setupDynFlags()" << std::endl;
 
     auto ss = stateSize(cDaeSolverMode);
 
@@ -990,20 +990,20 @@ void gridComponent::setupDynFlags()
     //std::cout << "algRoots " << so.total.algRoots << std::endl;
 
     if (so.total.algRoots > 0) {
-        std::cout << "setupDynFlags 1" << std::endl;
+        //std::cout << "setupDynFlags 1" << std::endl;
         opFlags.set(has_alg_roots);
         opFlags.set(has_roots);
     } else if (so.total.diffRoots > 0) {
-        std::cout << "setupDynFlags 2" << std::endl;
+        //std::cout << "setupDynFlags 2" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.set(has_roots);
     } else {
-        std::cout << "setupDynFlags 3" << std::endl;
+        //std::cout << "setupDynFlags 3" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.reset(has_roots);
     }
 
-    std::cout << "end gridComponent::setupDynFlags()" << std::endl;
+    //std::cout << "end gridComponent::setupDynFlags()" << std::endl;
     //std::cout << "setupDynFlags end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }
 
@@ -1012,7 +1012,7 @@ void gridComponent::setupDynFlags(const solverMode &sMode)
 {
     //std::cout << "setupDynFlags start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 
-    std::cout << "start gridComponent::setupDynFlags(const solverMode &sMode)" << std::endl;
+    //std::cout << "start gridComponent::setupDynFlags(const solverMode &sMode)" << std::endl;
 
     auto ss = stateSize(sMode);
 
@@ -1022,20 +1022,20 @@ void gridComponent::setupDynFlags(const solverMode &sMode)
     //std::cout << "algRoots " << so.total.algRoots << std::endl;
 
     if (so.total.algRoots > 0) {
-        std::cout << "setupDynFlags 1" << std::endl;
+        //std::cout << "setupDynFlags 1" << std::endl;
         opFlags.set(has_alg_roots);
         opFlags.set(has_roots);
     } else if (so.total.diffRoots > 0) {
-        std::cout << "setupDynFlags 2" << std::endl;
+        //std::cout << "setupDynFlags 2" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.set(has_roots);
     } else {
-        std::cout << "setupDynFlags 3" << std::endl;
+        //std::cout << "setupDynFlags 3" << std::endl;
         opFlags.reset(has_alg_roots);
         opFlags.reset(has_roots);
     }
 
-    std::cout << "end gridComponent::setupDynFlags(const solverMode &sMode)" << std::endl;
+    //std::cout << "end gridComponent::setupDynFlags(const solverMode &sMode)" << std::endl;
 
     //std::cout << "setupDynFlags end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
 }

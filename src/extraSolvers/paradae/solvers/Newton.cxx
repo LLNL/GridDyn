@@ -9,13 +9,16 @@
 #include <fstream>
 #include <iomanip>
 
+// #define DEBUG_NEWTON
+// #define STATS_NEWTON
+
 #ifdef DEBUG_NEWTON
-#    include <math/PVector.h>
-#    include <math/SMultiVector.h>
+#    include <extraSolvers/paradae/math/PVector.h>
+#    include <extraSolvers/paradae/math/SMultiVector.h>
 #endif
 
 #ifdef STATS_NEWTON
-#    include "solvers/NewtonStats.h"
+#    include "NewtonStats.h"
 #endif
 
 namespace griddyn {
@@ -88,6 +91,8 @@ namespace paradae {
 
         if (std::isnan(residual_fx) || std::isnan(residual_dx) || std::isinf(residual_fx) ||
             std::isinf(residual_dx)) {
+            cout << "Newton exit on BAD failure : res_fx = " << residual_fx
+                 << ", res_dx = " << residual_dx << endl;
             cerr << "Newton exit on BAD failure : res_fx = " << residual_fx
                  << ", res_dx = " << residual_dx << endl;
 #ifdef DEBUG_NEWTON
@@ -103,10 +108,12 @@ namespace paradae {
             delete[] history_dx;
             delete[] history_fx;
             app->GetCurrentJacobian()->dump("newton_mat.dat");
-            abort();
+            //abort();
 #endif
             throw NEWTON_INF_NAN;
         } else if (it >= max_iter && residual_fx >= 1) {
+            cout << "Newton exit on failure : res_fx = " << residual_fx
+                 << ", res_dx = " << residual_dx << endl;
             cerr << "Newton exit on failure : res_fx = " << residual_fx
                  << ", res_dx = " << residual_dx << endl;
 #ifdef DEBUG_NEWTON
@@ -123,7 +130,7 @@ namespace paradae {
             delete[] history_dx;
             delete[] history_fx;
             app->GetCurrentJacobian()->dump("newton_mat.dat");
-            abort();
+            //abort();
 #endif
             throw NEWTON_NOT_CONVERGED;
         } else {

@@ -88,14 +88,14 @@ namespace exciters {
         double* rv = resid + offset;
         rv[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
         if (opFlags[outside_vlim]) {
-            std::cout << "residual outside_vlim" << std::endl;
+            //std::cout << "residual outside_vlim" << std::endl;
             if (opFlags[etrigger_high]) {
                 rv[1] = esp[1];
             } else {
                 rv[1] = esp[1];
             }
         } else {
-            std::cout << "residual" << std::endl;
+            //std::cout << "residual" << std::endl;
             rv[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf +
                      Ka * (Vref + vBias - inputs[voltageInLocation])) /
                     Ta -
@@ -130,10 +130,10 @@ namespace exciters {
         auto d = Loc.destDiffLoc;
         d[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te;
         if (opFlags[outside_vlim]) {
-            std::cout << "derivative outside_vlim" << std::endl;
+            //std::cout << "derivative outside_vlim" << std::endl;
             d[1] = 0;
         } else {
-            std::cout << "derivative" << std::endl;
+            //std::cout << "derivative" << std::endl;
             d[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf +
                     Ka * (Vref + vBias - inputs[voltageInLocation])) /
                 Ta;
@@ -167,11 +167,11 @@ namespace exciters {
         md.assign(offset, offset, temp1);
         md.assign(offset, offset + 1, 1 / Te);
         if (opFlags[outside_vlim]) {
-            std::cout << "jacobian outside_vlim" << std::endl;
+            //std::cout << "jacobian outside_vlim" << std::endl;
             md.assign(offset + 1, offset + 1, sD.cj);
         } else {
             // Vr
-            std::cout << "jacobian" << std::endl;
+            //std::cout << "jacobian" << std::endl;
             md.assignCheckCol(offset + 1, inputLocs[voltageInLocation], -Ka / Ta);
             md.assign(offset + 1, offset, -Ka * Kf / (Tf * Ta));
             md.assign(offset + 1, offset + 1, -1.0 / Ta - sD.cj);
@@ -197,22 +197,22 @@ namespace exciters {
         // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
 
         if (opFlags[outside_vlim]) {
-            std::cout << "root test outside_vlim:" << std::endl;
+            //std::cout << "root test outside_vlim:" << std::endl;
             roots[rootOffset] = es[2] - es[0] * Kf / Tf +
                 (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
         } else {
             roots[rootOffset] = std::min(Vrmax - es[1], es[1] - Vrmin) + 0.00001;
             if (es[1] >= Vrmax) {
                 opFlags.set(etrigger_high);
-                std::cout << "root test, etrigger_high:";
+                //std::cout << "root test, etrigger_high:";
             }
             else
             {
-                std::cout << "root test: ";
+                //std::cout << "root test: ";
             }
         }
-        std::cout << std::setprecision(10);
-        std::cout << "roots[" << rootOffset << "] = " << roots[rootOffset] << std::endl;
+        //std::cout << std::setprecision(10);
+        //std::cout << "roots[" << rootOffset << "] = " << roots[rootOffset] << std::endl;
     }
 
     change_code ExciterIEEEtype1::rootCheck(const IOdata& inputs,

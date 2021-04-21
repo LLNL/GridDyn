@@ -60,7 +60,7 @@ namespace paradae {
             // std::cout << "s root = " << scheduled_roots
             //           << " u root = " << unscheduled_roots << std::endl;
             // this->root_crossings(roots.iroot, state);
-            cout << "Equation::CheckAllRoots -- Root found!" << endl;
+            //cout << "Equation::CheckAllRoots -- Root found!" << endl;
             return true;
         }
         return false;
@@ -104,8 +104,8 @@ namespace paradae {
         // cout << " tlo = " << tlo << " thi = " << thi << endl;
 
         for (int i = 0; i < nroots; i++) {
-            std::cout << " glo(" << i << ") = " << glo(i) << std::endl;
-            std::cout << " ghi(" << i << ") = " << ghi(i) << std::endl;
+            // std::cout << " glo(" << i << ") = " << glo(i) << std::endl;
+            // std::cout << " ghi(" << i << ") = " << ghi(i) << std::endl;
             if (roots.is_active(i + roots.n_sroots)) {
                 if (abs(ghi(i)) < tol) {
                     if (roots.dir_root(i) * glo(i) <= 0) {
@@ -130,7 +130,7 @@ namespace paradae {
 
         if (!sgnchg) return zroot;
 
-        cout << "Equation::CheckUnscheduledRoots -- Sign change!" << endl;
+        // cout << "Equation::CheckUnscheduledRoots -- Sign change!" << endl;
 
         Real alpha = 1, tmid, fracint, fracsub;
         int side = 0, side_prev = -1;

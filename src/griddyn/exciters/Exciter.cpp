@@ -177,16 +177,16 @@ void Exciter::rootTrigger(coreTime time,
                           const solverMode& sMode)
 {
     // std::cout << "start opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
-    std::cout << "start Exciter::rootTrigger" << std::endl;
+    // std::cout << "start Exciter::rootTrigger" << std::endl;
 
-    std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
-              << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
+    // std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
+    //           << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
 
     int rootOffset = offsets.getRootOffset(sMode);
     if (rootMask[rootOffset] != 0) {
         if (opFlags[outside_vlim]) {
-            std::cout << "root trigger back in bounds at t = " << time
-                      << std::endl;
+            // std::cout << "root trigger back in bounds at t = " << time
+            //           << std::endl;
             LOG_NORMAL("root trigger back in bounds");
             alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
@@ -196,14 +196,14 @@ void Exciter::rootTrigger(coreTime time,
             opFlags.set(outside_vlim);
             // std::cout << "2 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             if (opFlags[etrigger_high]) {
-                std::cout << "root trigger above bounds at t = " << time
-                          << std::endl;
+                // std::cout << "root trigger above bounds at t = " << time
+                //           << std::endl;
                 LOG_NORMAL("root trigger above bounds");
                 m_state[limitState] -= 0.0001;
                 // std::cout << "3 checks opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
             } else {
-                std::cout << "root trigger below bounds at t = " << time
-                          << std::endl;
+                // std::cout << "root trigger below bounds at t = " << time
+                //           << std::endl;
                 LOG_NORMAL("root trigger below bounds");
                 m_state[limitState] += 0.0001;
             }
@@ -219,10 +219,10 @@ void Exciter::rootTrigger(coreTime time,
     }
 
     // std::cout << "end opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
-    std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
-              << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
+    // std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
+    //           << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
 
-    std::cout << "end Exciter::rootTrigger" << std::endl;
+    // std::cout << "end Exciter::rootTrigger" << std::endl;
 
 }
 

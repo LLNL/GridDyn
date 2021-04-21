@@ -232,12 +232,12 @@ int gridDynSimulation::runDynamicSolverStep(std::shared_ptr<SolverInterface>& dy
         retval = dynData->solve(nextStop, timeActual);
     }
 
-    std::cout << std::setprecision(10);
-    std::cout << "timeActual = " << timeActual << std::endl;
+    // std::cout << std::setprecision(10);
+    // std::cout << "timeActual = " << timeActual << std::endl;
 
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
-        std::cout << "call handleEarlySolverReturn at " << timeActual
-                  << std::endl;
+        // std::cout << "call handleEarlySolverReturn at " << timeActual
+        //           << std::endl;
 
         const auto& so = offsets.getOffsets(cDaeSolverMode);
 
@@ -755,7 +755,7 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
                      dynData->getSolverMode());
             LOG_DEBUG("Root detected");
 
-            std::cout << "before-rootTrigger" << std::endl;
+            // std::cout << "before-rootTrigger" << std::endl;
             // printflags();
 
             // std::cout << "timeActual = " << timeActual << std::endl;
@@ -767,8 +767,8 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
 
             rootTrigger(timeActual, noInputs, dynData->rootsfound, dynData->getSolverMode());
 
-            std::cout << "after-rootTrigger" << std::endl;
-            printflags();
+            // std::cout << "after-rootTrigger" << std::endl;
+            // printflags();
 
         } else if (retval == SOLVER_INVALID_STATE_ERROR) {
             // if we get into here the most likely cause is a very low voltage bus
@@ -816,8 +816,8 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
 
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
-    std::cout << "start gridDynSimulation::dynamicCheckAndReset" << std::endl;
-    printflags();
+    // std::cout << "start gridDynSimulation::dynamicCheckAndReset" << std::endl;
+    // printflags();
 
     auto dynData = getSolverInterface(sMode);
     if (opFlags[connectivity_change_flag]) {
@@ -870,8 +870,8 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
 
     opFlags &= RESET_CHANGE_FLAG_MASK;
 
-    printflags();
-    std::cout << "end gridDynSimulation::dynamicCheckAndReset" << std::endl;
+    // printflags();
+    // std::cout << "end gridDynSimulation::dynamicCheckAndReset" << std::endl;
 
     return true;
 }
@@ -1395,7 +1395,7 @@ int gridDynSimulation::rootActionFunction(coreTime time,
                                           const std::vector<int>& rootMask,
                                           const solverMode& sMode) noexcept
 {
-    std::cout << "start-rootActionFunction" << std::endl;
+    // std::cout << "start-rootActionFunction" << std::endl;
     // printflags();
 
     const auto& so = offsets.getOffsets(cDaeSolverMode);
@@ -1406,7 +1406,7 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     currentTime = time;
     setState(time, state, dstate_dt, sMode);
 
-    std::cout << "before-rootTrigger" << std::endl;
+    // std::cout << "before-rootTrigger" << std::endl;
     // printflags();
 
     // std::cout << "time     = " << time     << std::endl;
@@ -1418,8 +1418,8 @@ int gridDynSimulation::rootActionFunction(coreTime time,
 
     rootTrigger(time, noInputs, rootMask, sMode);
 
-    std::cout << "after-rootTrigger" << std::endl;
-    printflags();
+    // std::cout << "after-rootTrigger" << std::endl;
+    // printflags();
 
     // THIS WILL ONLY GET DATA INTO GRIDDYN NOT BACK INTO PARADAE (does not help, remove)
     auto dynData  = getSolverInterface(sMode);
@@ -1432,14 +1432,14 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     std::memcpy(deriv_data, dstate_dt, ssize * sizeof(double));
 
     dynamicCheckAndReset(sMode);
-    std::cout << "after-dynamicCheckAndReset" << std::endl;
-    printflags();
+    // std::cout << "after-dynamicCheckAndReset" << std::endl;
+    // printflags();
 
     //generateDaeDynamicInitialConditions(sMode);
-    std::cout << "after-generateDaeDynamicInitialConditions" << std::endl;
-    printflags();
+    // std::cout << "after-generateDaeDynamicInitialConditions" << std::endl;
+    // printflags();
 
-    std::cout << "end-rootActionFunction" << std::endl;
+    // std::cout << "end-rootActionFunction" << std::endl;
 
     return FUNCTION_EXECUTION_SUCCESS;
 }

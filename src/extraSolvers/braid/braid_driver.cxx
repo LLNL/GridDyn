@@ -201,6 +201,8 @@ namespace braid {
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
 
+        cout << "Step from " << tstart << " to " << tstop << endl;
+
 #ifdef STATS_NEWTON
         int nrefine, iter;
         braid_StepStatusGetNRefine(status, &nrefine);
@@ -298,7 +300,7 @@ namespace braid {
         /* Handle a root, if needed */
         if (level == 0 && return_code == WARN_ROOT) {
 
-            cout << "Root found at " << app->alloc_data.troot << endl;
+            // cout << "Root found at " << app->alloc_data.troot << endl;
 
             /* Handle the root only if it is away from tstart or tstop */
             Real dist = min(app->alloc_data.troot - tstart, tstop - app->alloc_data.troot);
