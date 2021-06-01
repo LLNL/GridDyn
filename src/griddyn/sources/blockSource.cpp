@@ -252,6 +252,7 @@ namespace sources {
             blk->rootTest({srcOut, srcDout}, sD, roots, sMode);
         }
     }
+
     void blockSource::rootTrigger(coreTime time,
                                   const IOdata& inputs,
                                   const std::vector<int>& rootMask,
@@ -288,6 +289,23 @@ namespace sources {
             ret = (std::max)(iret, ret);
         }
         return ret;
+    }
+
+    void blockSource::limitTest(const IOdata& inputs,
+                                const stateData& sD,
+                                double limits[],
+                                const solverMode& sMode)
+    {
+        double srcOut = m_output;
+        double srcDout = 0.0;
+        if (src != nullptr) {
+            src->limitTest(inputs, sD, limits, sMode);
+            srcOut = src->getOutput(inputs, sD, sMode, 0);
+            srcDout = src->getDoutdt(inputs, sD, sMode, 0);
+        }
+        if (blk != nullptr) {
+            blk->limitTest({srcOut, srcDout}, sD, limits, sMode);
+        }
     }
 
     void blockSource::updateLocalCache(const IOdata& inputs,

@@ -266,6 +266,29 @@ change_code Exciter::rootCheck(const IOdata& inputs,
     return ret;
 }
 
+void Exciter::limitTest(const IOdata& inputs,
+                        const stateData& sD,
+                        double limits[],
+                        const solverMode& sMode)
+{
+    auto offset = offsets.getDiffOffset(sMode);
+    int limitOffset = offsets.getRootOffset(sMode); // hijack root offsets
+    double Efield = sD.state[offset];
+
+    std::cout << "gridDyn::Exciter::limitTest" << std::endl;
+    std::cout << "==========" << std::endl;
+    // if (opFlags[outside_vlim]) {
+    //     limits[limitOffset] = Vref + vBias - inputs[voltageInLocation];
+    // } else {
+    //     root[rootOffset] = std::min(Vrmax - Efield, Efield - Vrmin) + 0.0001;
+    //     if (Efield > Vrmax) {
+    //         opFlags.set(etrigger_high);
+    //     }
+    // }
+}
+
+
+
 static const stringVec exciterFields{"ef"};
 
 stringVec Exciter::localStateNames() const

@@ -108,6 +108,13 @@ void controlSystem::rootTrigger(coreTime /*time*/,
 {
 }
 
+void controlSystem::limitTest(const IOdata& /*inputs*/,
+                              const stateData& /*sD*/,
+                              double /*limits*/[],
+                              const solverMode& /*sMode*/)
+{
+}
+
 change_code controlSystem::rootCheck(const IOdata& /*inputs*/,
                                      const stateData& /*sD*/,
                                      const solverMode& /*sMode*/,

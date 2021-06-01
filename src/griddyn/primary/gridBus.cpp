@@ -1476,6 +1476,15 @@ void gridBus::rootTrigger(coreTime time,
     }
 }
 
+void gridBus::limitTest(const IOdata& /*inputs*/,
+                        const stateData& sD,
+                        double limits[],
+                        const solverMode& sMode)
+{
+    auto inputs = getOutputs(noInputs, sD, sMode);
+    gridComponent::limitTest(inputs, sD, limits, sMode);
+}
+
 static const std::vector<stringVec> outputNamesStr{
     {"voltage", "v", "volt"},
     {"angle", "theta", "ang", "a"},

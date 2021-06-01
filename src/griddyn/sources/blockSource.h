@@ -83,6 +83,11 @@ namespace sources {
                                       const solverMode& sMode,
                                       check_level_t level) override;
 
+        virtual void limitTest(const IOdata& inputs,
+                               const stateData& sD,
+                               double limits[],
+                               const solverMode& sMode) override;
+
         virtual void updateLocalCache(const IOdata& inputs,
                                       const stateData& sD,
                                       const solverMode& sMode) override;

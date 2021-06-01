@@ -1523,6 +1523,22 @@ void Area::rootTrigger(coreTime time,
     }
 }
 
+void Area::limitTest(const IOdata& inputs,
+                     const stateData& sD,
+                     double limits[],
+                     const solverMode& sMode)
+{
+    for (auto* ro : rootObjects) {
+        ro->limitTest(inputs, sD, limits, sMode);
+    }
+// #ifdef DEBUG_PRINT
+//     for (size_t kk = 0; kk < rootSize(sMode); ++kk) {
+//         printf("t=%f root[%d]=%e\n", time, kk, roots[kk]);
+//     }
+// #endif
+}
+
+
 // pass the solution
 void Area::setState(coreTime time,
                     const double state[],

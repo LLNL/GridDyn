@@ -320,7 +320,7 @@ namespace braid {
                         }
                     }
                 } else if (app->root_strat == doublestep) {
-                    cout << "Take Double Step" << endl;
+                    cout << "Take Double Step for root at " << app->alloc_data.troot << endl;
                     /* Perform a double step: Step to the root, then step from root to tstop. */
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();

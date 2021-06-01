@@ -866,6 +866,7 @@ change_code DynamicGenerator::rootCheck(const IOdata& inputs,
 
     return ret;
 }
+
 void DynamicGenerator::rootTrigger(coreTime time,
                                    const IOdata& /*inputs*/,
                                    const std::vector<int>& rootMask,
@@ -877,6 +878,23 @@ void DynamicGenerator::rootTrigger(coreTime time,
         }
     }
 }
+
+void DynamicGenerator::limitTest(const IOdata& inputs,
+                                 const stateData& sD,
+                                 double limits[],
+                                 const solverMode& sMode)
+{
+    updateLocalCache(inputs, sD, sMode);
+
+    for (auto* sub : getSubObjects()) {
+        if (sub->checkFlag(has_roots)) {
+            if (sub->checkFlag(has_roots)) {
+                sub->limitTest(subInputs.inputs[sub->locIndex], sD, limits, sMode);
+            }
+        }
+    }
+}
+
 
 index_t DynamicGenerator::findIndex(const std::string& field, const solverMode& sMode) const
 {

@@ -53,11 +53,14 @@ namespace paradae {
 
     bool TimeIntegrator::CheckLimits(Vector& y, Vector& dy, Vector& flimit)
     {
+        cout << "ParaDAE::TimeIntegrator::CheckLimits" << endl;
+
         bool limit_exceeded = false;
 
         Real tol = 1e-10;  // HACK: Should be using the root tolerance?
 
         if (equation->HasLimits()) {
+            cout << "ParaDAE::TimeIntegrator::CheckLimits calling limit_functions" << endl;
             /* Call limit function to check if limits are exceeded*/
             equation->limit_functions(y, dy, flimit);
             for (int i = 0; i < equation->GetNLimits(); i++) {

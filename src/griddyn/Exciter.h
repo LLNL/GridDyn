@@ -80,6 +80,12 @@ class Exciter: public gridSubModel {
                                   const solverMode& sMode,
                                   check_level_t level) override;
 
+    // handle the limit checking functions
+    virtual void limitTest(const IOdata& inputs,
+                           const stateData& sD,
+                           double limits[],
+                           const solverMode& sMode) override;
+
     virtual void printflags();
 
     // virtual void setTime(coreTime time){prevTime=time;};

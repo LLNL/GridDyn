@@ -1444,17 +1444,18 @@ int gridDynSimulation::rootActionFunction(coreTime time,
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-// int gridDynSimulation::limitCheckingFunction(coreTime time,
-//                                              const double state[],
-//                                              const double dstate_dt[],
-//                                              double limits[],
-//                                              const solverMode& sMode) noexcept
-// {
-//     stateData sD(time, state, dstate_dt, residCount);
-//     fillExtraStateData(sD, sMode);
-//     limitTest(noInputs, sD, limits, sMode);
-//     return FUNCTION_EXECUTION_SUCCESS;
-// }
+int gridDynSimulation::limitCheckingFunction(coreTime time,
+                                             const double state[],
+                                             const double dstate_dt[],
+                                             double limits[],
+                                             const solverMode& sMode) noexcept
+{
+    std::cout << "gridDyn::gridDynSimulation::limitCheckingFunction" << std::endl;
+    stateData sD(time, state, dstate_dt, residCount);
+    fillExtraStateData(sD, sMode);
+    limitTest(noInputs, sD, limits, sMode);
+    return FUNCTION_EXECUTION_SUCCESS;
+}
 
 int gridDynSimulation::dynAlgebraicSolve(coreTime time,
                                          const double diffState[],

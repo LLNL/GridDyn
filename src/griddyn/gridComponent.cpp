@@ -1903,20 +1903,20 @@ change_code gridComponent::rootCheck(const IOdata& inputs,
     return ret;
 }
 
-// void gridComponent::limitTest(const IOdata& inputs,
-//                               const stateData& sD,
-//                               double limits[],
-//                               const solverMode& sMode)
-// {
-//     for (auto& subobj : subObjectList) {
-//         if (!subobj->checkFlag(separate_processing)) {
-//             if (!(subobj->checkFlag(has_limits))) {
-//                 continue;
-//             }
-//             subobj->limitTest(inputs, sD, limits, sMode);
-//         }
-//     }
-// }
+void gridComponent::limitTest(const IOdata& inputs,
+                              const stateData& sD,
+                              double limits[],
+                              const solverMode& sMode)
+{
+    for (auto& subobj : subObjectList) {
+        if (!subobj->checkFlag(separate_processing)) {
+            if (!(subobj->checkFlag(has_roots))) {
+                continue;
+            }
+            subobj->limitTest(inputs, sD, limits, sMode);
+        }
+    }
+}
 
 // void gridComponent::limitTrigger(coreTime time,
 //                                  const IOdata& inputs,

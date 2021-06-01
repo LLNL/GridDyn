@@ -153,6 +153,11 @@ class DynamicGenerator: public Generator {
                                   const solverMode& sMode,
                                   check_level_t level) override;
 
+    virtual void limitTest(const IOdata& inputs,
+                           const stateData& sD,
+                           double limits[],
+                           const solverMode& sMode) override;
+
     using Generator::getReactivePower;
     using Generator::getRealPower;
     virtual double getRealPower(const IOdata& inputs,

@@ -701,20 +701,20 @@ see gridComponent::dynInitializeA for more details
                                   const solverMode& sMode,
                                   check_level_t level);
 
-    // /******************************************
-    // Functions related to limiting
-    // *******************************************/
-    // /**
-    // *evaluate the limit functions and return the value
-    // @param[in] inputs the inputs for the secondary object
-    // * @param[in] sD the state of the system
-    // * @param[out] limits the memory to store the limit evaluation
-    // * @param[in] sMode the mode the solver is in
-    // **/
-    // virtual void limitTest(const IOdata& inputs,
-    //                        const stateData& sD,
-    //                        double limits[],
-    //                        const solverMode& sMode);
+    /******************************************
+    Functions related to limiting
+    *******************************************/
+    /**
+    *evaluate the limit functions and return the value
+    @param[in] inputs the inputs for the secondary object
+    * @param[in] sD the state of the system
+    * @param[out] limits the memory to store the limit evaluation
+    * @param[in] sMode the mode the solver is in
+    **/
+    virtual void limitTest(const IOdata& inputs,
+                           const stateData& sD,
+                           double limits[],
+                           const solverMode& sMode);
 
     // /**
     // *a limit has violated now take action

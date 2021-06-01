@@ -415,20 +415,20 @@ class gridDynSimulation: public gridSimulation {
 
 
 
-    // /** @brief compute any limit values
-    //   computes the limits for any limit checking functions used in the system
-    // @param[in] time  the simulation time of the evaluation
-    // @param[in] state  the state information to evaluation
-    // @param[in] dstate_dt  the time derivative of the state
-    // @param[out] roots the storage location for the limits
-    // @param[in] sMode the solverMode to solve for
-    // @return integer indicating success (0) or failure (non-zero)
-    // */
-    // int limitCheckingFunction(coreTime time,
-    //                           const double state[],
-    //                           const double dstate_dt[],
-    //                           double limits[],
-    //                           const solverMode& sMode) noexcept;
+    /** @brief compute any limit values
+      computes the limits for any limit checking functions used in the system
+    @param[in] time  the simulation time of the evaluation
+    @param[in] state  the state information to evaluation
+    @param[in] dstate_dt  the time derivative of the state
+    @param[out] roots the storage location for the limits
+    @param[in] sMode the solverMode to solve for
+    @return integer indicating success (0) or failure (non-zero)
+    */
+    int limitCheckingFunction(coreTime time,
+                              const double state[],
+                              const double dstate_dt[],
+                              double limits[],
+                              const solverMode& sMode) noexcept;
 
     /** @brief find the derivatives of the residual function with respect to the given parameters
     @param[in] time  the simulation time of the evaluation

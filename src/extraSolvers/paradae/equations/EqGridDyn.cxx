@@ -77,6 +77,9 @@ namespace paradae {
         //   cout << stNames[ii] << "\n";
         //}
         // cout << "\n\n";
+
+        limits = LimitManager(rootsfound.size());
+
     }
 
     void EquationGridDyn::function(const Real t,
@@ -153,10 +156,11 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
                                           const Vector& dy,
                                           Vector& flimit)
     {
-        Real t = 0.0;
+        std::cout << "ParaDAE::EquationGridDyn::limit_functions" << std::endl;
         // Need to add time as an input here? for calling stateData sD(time,...) in GridDyn
-        // gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),
-        //                            flimit.GetData(), *mode);
+        Real t = 0.0;
+        gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),
+                                   flimit.GetData(), *mode);
     };
 
     // NEED TO CHANGE THIS FUNCTION?
