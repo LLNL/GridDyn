@@ -201,7 +201,7 @@ namespace braid {
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
 
-        cout << "Step from " << tstart << " to " << tstop << endl;
+        // cout << "Step from " << tstart << " to " << tstop << endl;
 
 #ifdef STATS_NEWTON
         int nrefine, iter;
@@ -400,6 +400,8 @@ namespace braid {
 
         int level;
         braid_StepStatusGetLevel(status, &level);
+
+        // cout << "LEVEL = " << level << endl;
 
 #ifdef DEBUG_STEP
         cout << "###### Debug int = " << debug_int << " ######" << endl;
