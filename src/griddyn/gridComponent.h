@@ -716,6 +716,11 @@ see gridComponent::dynInitializeA for more details
                            double limits[],
                            const solverMode& sMode);
 
+    virtual void limitTrigger(double state[],
+                              double dstate_dt[],
+                              const std::vector<int>& limitMask,
+                              const solverMode& sMode);
+
     /******************************************
     output functions
     *******************************************/

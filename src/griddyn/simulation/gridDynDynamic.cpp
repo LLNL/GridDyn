@@ -1457,6 +1457,16 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
+int gridDynSimulation::limitActionFunction(double state[],
+                                           double dstate_dt[],
+                                           const std::vector<int>& limitMask,
+                                           const solverMode& sMode) noexcept
+{
+    std::cout << "gridDyn::gridDynSimulation::limitActionFunction" << std::endl;
+    limitTrigger(state, dstate_dt, limitMask, sMode);
+    return FUNCTION_EXECUTION_SUCCESS;
+}
+
 int gridDynSimulation::dynAlgebraicSolve(coreTime time,
                                          const double diffState[],
                                          const double deriv[],

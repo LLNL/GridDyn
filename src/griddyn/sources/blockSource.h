@@ -88,6 +88,11 @@ namespace sources {
                                double limits[],
                                const solverMode& sMode) override;
 
+        virtual void limitTrigger(double state[],
+                                  double dstate_dt[],
+                                  const std::vector<int>& limitMask,
+                                  const solverMode& sMode) override;
+
         virtual void updateLocalCache(const IOdata& inputs,
                                       const stateData& sD,
                                       const solverMode& sMode) override;

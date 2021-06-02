@@ -308,6 +308,14 @@ namespace sources {
         }
     }
 
+    void blockSource::limitTrigger(double state[],
+                                   double dstate_dt[],
+                                   const std::vector<int>& limitMask,
+                                   const solverMode& sMode)
+    {
+        std::cout << "gridDyn::blockSource::limitTrigger" << std::endl;
+    }
+
     void blockSource::updateLocalCache(const IOdata& inputs,
                                        const stateData& sD,
                                        const solverMode& sMode)

@@ -444,6 +444,11 @@ class gridBus: public gridPrimary {
                            double limits[],
                            const solverMode& sMode) override;
 
+    virtual void limitTrigger(double state[],
+                              double dstate_dt[],
+                              const std::vector<int>& limitMask,
+                              const solverMode& sMode) override;
+
     friend bool compareBus(gridBus* bus1, gridBus* bus2, bool cmpValues, bool printDiff);
     virtual void updateFlags(bool dynOnly = false) override;
     // for registering and removing power control objects

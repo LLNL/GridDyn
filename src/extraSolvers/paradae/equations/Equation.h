@@ -198,7 +198,7 @@ namespace paradae {
         /* User-defined limit function: acceptable range is rv(x)>=0 componentwise .*/
         virtual void limit_functions(const Vector& y, const Vector& dy, Vector& flimit){};
         /* User defined: Change y and dy depending on what limit has been crossed */
-        virtual void limit_crossings(Vector& y, Vector& dy, Vector& flimit){};
+        virtual void limit_crossings(Vector& y, Vector& dy, const Vector& flimit){};
     };
 }  // namespace paradae
 }  // namespace griddyn

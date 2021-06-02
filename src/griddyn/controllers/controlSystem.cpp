@@ -115,6 +115,13 @@ void controlSystem::limitTest(const IOdata& /*inputs*/,
 {
 }
 
+void controlSystem::limitTrigger(double state[],
+                                 double dstate_dt[],
+                                 const std::vector<int>& limitMask,
+                                 const solverMode& sMode)
+{
+}
+
 change_code controlSystem::rootCheck(const IOdata& /*inputs*/,
                                      const stateData& /*sD*/,
                                      const solverMode& /*sMode*/,

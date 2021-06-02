@@ -287,7 +287,14 @@ void Exciter::limitTest(const IOdata& inputs,
     // }
 }
 
-
+void Exciter::limitTrigger(double state[],
+                           double dstate_dt[],
+                           const std::vector<int>& limitMask,
+                           const solverMode& sMode)
+{
+    std::cout << "gridDyn::Exciter::limitTrigger" << std::endl;
+    std::cout << "==========" << std::endl;
+}
 
 static const stringVec exciterFields{"ef"};
 

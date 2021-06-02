@@ -272,11 +272,11 @@ namespace exciters {
                                      double limits[],
                                      const solverMode& sMode)
     {
+        std::cout << "gridDyn::ExciterIEEEtype1::limitTest" << std::endl;
+
         auto offset = offsets.getDiffOffset(sMode);
         auto limitOffset = offsets.getRootOffset(sMode);
         const double* es = sD.state + offset;
-
-        std::cout << "gridDyn::ExciterIEEEtype1::limitTest" << std::endl;
 
         // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
 
@@ -294,6 +294,32 @@ namespace exciters {
         std::cout << "==========" << std::endl;
     }
 
+
+    void ExciterIEEEtype1::limitTrigger(double state[],
+                                        double dstate_dt[],
+                                        const std::vector<int>& limitMask,
+                                        const solverMode& sMode)
+    {
+        std::cout << "gridDyn::ExciterIEEEtype1::limitTrigger" << std::endl;
+
+        auto offset = offsets.getDiffOffset(sMode);
+        auto limitOffset = offsets.getRootOffset(sMode);
+        double* es = state + offset;
+        double* esp = dstate_dt + offset;
+
+        if (es[1] > Vrmax) {
+            std::cout << "over Vrmax, limitMask = "
+                      << limitMask[limitOffset] << std::endl;
+        } else if (es[1] < Vrmin) {
+            std::cout << "under Vrmin, limitMask = "
+                      << limitMask[limitOffset] << std::endl;
+        } else {
+            std::cout << "in bounds, limitMask = "
+                      << limitMask[limitOffset] << std::endl;
+        }
+
+        std::cout << "==========" << std::endl;
+    }
 
     static const stringVec ieeeType1Fields{"ef", "vr", "rf"};
 

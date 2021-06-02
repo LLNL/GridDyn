@@ -163,6 +163,16 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
                                    flimit.GetData(), *mode);
     };
 
+
+    void EquationGridDyn::limit_crossings(Vector &y,
+                                          Vector &dy,
+                                          const Vector& flimit)
+    {
+        std::vector<int> limitMask(flimit.GetData(),
+                                   flimit.GetData() + limits.n_limits);
+        gds->limitActionFunction(y.GetData(), dy.GetData(), limitMask, *mode);
+    }
+
     // NEED TO CHANGE THIS FUNCTION?
     // Should we pass vectors or gds? Is DynData same as the gds we have stored
     // I dont think so dyndata is the solver interface?

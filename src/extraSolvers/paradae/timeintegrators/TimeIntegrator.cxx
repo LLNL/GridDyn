@@ -73,6 +73,7 @@ namespace paradae {
 
         /* Treat exceeding limits */
         if (limit_exceeded) {
+            cout << "ParaDAE::TimeIntegrator::CheckLimits calling limit_crossings" << endl;
             equation->limit_crossings(y, dy, flimit);
         }
 

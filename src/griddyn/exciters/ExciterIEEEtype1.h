@@ -64,6 +64,11 @@ namespace exciters {
                                const stateData& sD,
                                double limits[],
                                const solverMode& sMode) override;
+
+        virtual void limitTrigger(double state[],
+                                  double dstate_dt[],
+                                  const std::vector<int>& limitMask,
+                                  const solverMode& sMode) override;
     };
 
 }  // namespace exciters

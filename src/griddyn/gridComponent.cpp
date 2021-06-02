@@ -1918,6 +1918,21 @@ void gridComponent::limitTest(const IOdata& inputs,
     }
 }
 
+void gridComponent::limitTrigger(double state[],
+                                 double dstate_dt[],
+                                 const std::vector<int>& limitMask,
+                                 const solverMode& sMode)
+{
+    for (auto& subobj : subObjectList) {
+        if (!subobj->checkFlag(separate_processing)) {
+            if (!(subobj->checkFlag(has_roots))) {
+                continue;
+            }
+            subobj->limitTrigger(state, dstate_dt, limitMask, sMode);
+        }
+    }
+}
+
 index_t gridComponent::lookupOutputIndex(const std::string& outputName) const
 {
     const auto& outputStr = outputNames();

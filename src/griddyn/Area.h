@@ -295,6 +295,11 @@ class Area: public gridPrimary {
                            double limits[],
                            const solverMode& sMode) override;
 
+    virtual void limitTrigger(double state[],
+                              double dstate_dt[],
+                              const std::vector<int>& limitMask,
+                              const solverMode& sMode) override;
+
     // grab information
     /** @brief get a vector of voltage from the attached buses
     @param[out] V the vector to put the bus  voltages

@@ -1485,6 +1485,107 @@ void gridBus::limitTest(const IOdata& /*inputs*/,
     gridComponent::limitTest(inputs, sD, limits, sMode);
 }
 
+void gridBus::limitTrigger(double state[],
+                           double dstate_dt[],
+                           const std::vector<int>& limitMask,
+                           const solverMode& sMode)
+{
+    std::cout << "gridDyn::gridBus::limitTrigger" << std::endl;
+
+    size_t limitCount = 0;
+    int limitOffset = offsets.getRootOffset(sMode);
+
+    auto limitsfound = gmlc::utilities::vecFindne(limitMask,
+                                                  0,
+                                                  limitOffset + limitCount,
+                                                  limitOffset + rootSize(sMode));
+
+    if (!limitsfound.empty()) {
+        size_t limitFoundIndex = 0;
+        auto inputs = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
+        auto nR = limitsfound[limitFoundIndex];
+        for (auto& gen : attachedGens) {
+            if ((gen->checkFlag(has_roots)) && (gen->isEnabled())) {
+                limitCount += gen->rootSize(sMode);
+                if (nR < limitOffset + limitCount) {
+
+                    gen->limitTrigger(state, dstate_dt, limitMask, sMode);
+
+                    do {
+                        ++limitFoundIndex;
+                        if (limitFoundIndex >= limitsfound.size()) {
+                            return;
+                        }
+                        nR = limitsfound[limitFoundIndex];
+                    } while (nR < limitOffset + limitCount);
+                }
+            }
+        }
+        for (auto& load : attachedLoads) {
+            if ((load->checkFlag(has_roots)) && (load->isEnabled())) {
+                limitCount += load->rootSize(sMode);
+                if (nR < limitOffset + limitCount) {
+                    load->limitTrigger(state, dstate_dt, limitMask, sMode);
+                    do {
+                        ++limitFoundIndex;
+                        if (limitFoundIndex >= limitsfound.size()) {
+                            return;
+                        }
+                        nR = limitsfound[limitFoundIndex];
+                    } while (nR < limitOffset + limitCount);
+                }
+            }
+        }
+    }
+
+
+    // size_t rootCount = 0;
+    // int rootOffset = offsets.getRootOffset(sMode);
+
+    // auto rootsfound = gmlc::utilities::vecFindne(rootMask,
+    //                                              0,
+    //                                              rootOffset + rootCount,
+    //                                              rootOffset + rootSize(sMode));
+
+    // if (!rootsfound.empty()) {
+    //     size_t rootFoundIndex = 0;
+    //     auto inputs = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
+    //     auto nR = rootsfound[rootFoundIndex];
+    //     for (auto& gen : attachedGens) {
+    //         if ((gen->checkFlag(has_roots)) && (gen->isEnabled())) {
+    //             rootCount += gen->rootSize(sMode);
+    //             if (nR < rootOffset + rootCount) {
+
+    //                 gen->limitTrigger(state, dsate_dt, limitMask, sMode);
+
+    //                 do {
+    //                     ++rootFoundIndex;
+    //                     if (rootFoundIndex >= rootsfound.size()) {
+    //                         return;
+    //                     }
+    //                     nR = rootsfound[rootFoundIndex];
+    //                 } while (nR < rootOffset + rootCount);
+    //             }
+    //         }
+    //     }
+    //     for (auto& load : attachedLoads) {
+    //         if ((load->checkFlag(has_roots)) && (load->isEnabled())) {
+    //             rootCount += load->rootSize(sMode);
+    //             if (nR < rootOffset + rootCount) {
+    //                 load->rootTrigger(time, inputs, rootMask, sMode);
+    //                 do {
+    //                     ++rootFoundIndex;
+    //                     if (rootFoundIndex >= rootsfound.size()) {
+    //                         return;
+    //                     }
+    //                     nR = rootsfound[rootFoundIndex];
+    //                 } while (nR < rootOffset + rootCount);
+    //             }
+    //         }
+    //     }
+    // }
+}
+
 static const std::vector<stringVec> outputNamesStr{
     {"voltage", "v", "volt"},
     {"angle", "theta", "ang", "a"},

@@ -430,6 +430,11 @@ class gridDynSimulation: public gridSimulation {
                               double limits[],
                               const solverMode& sMode) noexcept;
 
+    int limitActionFunction(double state[],
+                            double dstate_dt[],
+                            const std::vector<int>& limitMask,
+                            const solverMode& sMode) noexcept;
+
     /** @brief find the derivatives of the residual function with respect to the given parameters
     @param[in] time  the simulation time of the evaluation
     @param[in] indices the indices of the parameters
