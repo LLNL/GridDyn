@@ -64,7 +64,10 @@ namespace paradae {
             /* Call limit function to check if limits are exceeded*/
             equation->limit_functions(y, dy, flimit);
             for (int i = 0; i < equation->GetNLimits(); i++) {
-                if (flimit(i) <= tol) limit_exceeded = true;
+                if (flimit(i) <= tol) {
+                    cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
+                    limit_exceeded = true;
+                }
             }
         }
 

@@ -1918,21 +1918,6 @@ void gridComponent::limitTest(const IOdata& inputs,
     }
 }
 
-// void gridComponent::limitTrigger(coreTime time,
-//                                  const IOdata& inputs,
-//                                  const std::vector<int>& limitMask,
-//                                  const solverMode& sMode)
-// {
-//     for (auto& subobj : subObjectList) {
-//         if (!(subobj->checkFlag(has_limits))) {
-//             continue;
-//         }
-//         if (!subobj->checkFlag(separate_processing)) {
-//             subobj->limitTrigger(time, inputs, limitMask, sMode);
-//         }
-//     }
-// }
-
 index_t gridComponent::lookupOutputIndex(const std::string& outputName) const
 {
     const auto& outputStr = outputNames();

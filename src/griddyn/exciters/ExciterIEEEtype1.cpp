@@ -267,6 +267,34 @@ namespace exciters {
         return ret;
     }
 
+    void ExciterIEEEtype1::limitTest(const IOdata& inputs,
+                                     const stateData& sD,
+                                     double limits[],
+                                     const solverMode& sMode)
+    {
+        auto offset = offsets.getDiffOffset(sMode);
+        auto limitOffset = offsets.getRootOffset(sMode);
+        const double* es = sD.state + offset;
+
+        std::cout << "gridDyn::ExciterIEEEtype1::limitTest" << std::endl;
+
+        // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
+
+        if (es[1] > Vrmax) {
+            std::cout << "over Vrmax" << std::endl;
+            limits[limitOffset] = -1;
+        } else if (es[1] < Vrmin) {
+            std::cout << "under Vrmin" << std::endl;
+            limits[limitOffset] = -1;
+        } else {
+            std::cout << "in bounds" << std::endl;
+            limits[limitOffset] = 1;
+        }
+
+        std::cout << "==========" << std::endl;
+    }
+
+
     static const stringVec ieeeType1Fields{"ef", "vr", "rf"};
 
     stringVec ExciterIEEEtype1::localStateNames() const { return ieeeType1Fields; }

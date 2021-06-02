@@ -716,20 +716,6 @@ see gridComponent::dynInitializeA for more details
                            double limits[],
                            const solverMode& sMode);
 
-    // /**
-    // *a limit has violated now take action
-    // * @param[in] time the simulation time the limit evaluation takes place
-    // @param[in] limitMask a vector of integers representing a limitMask  (only object having a value of
-    // 1 in their limit locations should actually trigger
-    // * @param[in] limitMask an integer array the same size as limits where a 1 indicates a root has
-    // been found
-    // * @param[in] sMode the mode the solver is in
-    // **/
-    // virtual void limitTrigger(coreTime time,
-    //                           const IOdata& inputs,
-    //                           const std::vector<int>& limitMask,
-    //                           const solverMode& sMode);
-
     /******************************************
     output functions
     *******************************************/
