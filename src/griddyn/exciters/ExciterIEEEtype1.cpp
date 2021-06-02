@@ -310,9 +310,11 @@ namespace exciters {
         if (es[1] > Vrmax) {
             std::cout << "over Vrmax, limitMask = "
                       << limitMask[limitOffset] << std::endl;
+            es[1] = Vrmax;
         } else if (es[1] < Vrmin) {
             std::cout << "under Vrmin, limitMask = "
                       << limitMask[limitOffset] << std::endl;
+            es[1] = Vrmin;
         } else {
             std::cout << "in bounds, limitMask = "
                       << limitMask[limitOffset] << std::endl;
