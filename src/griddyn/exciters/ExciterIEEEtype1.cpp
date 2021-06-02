@@ -307,18 +307,30 @@ namespace exciters {
         double* es = state + offset;
         double* esp = dstate_dt + offset;
 
+        std::cout << "limitMask = " << limitMask[limitOffset] << std::endl;
+        std::cout << "es[0]  = " << es[0]
+                  << ", es[1]  = " << es[1]
+                  << ", es[2]  = " << es[2]
+                  << ", esp[0] = " << esp[0]
+                  << ", esp[1] = " << esp[1]
+                  << ", esp[2] = " << esp[2] << std::endl;
+
         if (es[1] > Vrmax) {
-            std::cout << "over Vrmax, limitMask = "
-                      << limitMask[limitOffset] << std::endl;
+            std::cout << "over Vrmax" << std::endl;
             es[1] = Vrmax;
         } else if (es[1] < Vrmin) {
-            std::cout << "under Vrmin, limitMask = "
-                      << limitMask[limitOffset] << std::endl;
+            std::cout << "under Vrmin" << std::endl;
             es[1] = Vrmin;
         } else {
-            std::cout << "in bounds, limitMask = "
-                      << limitMask[limitOffset] << std::endl;
+            std::cout << "in bounds" << std::endl;
         }
+
+        std::cout << "es[0]  = " << es[0]
+                  << ", es[1]  = " << es[1]
+                  << ", es[2]  = " << es[2]
+                  << ", esp[0] = " << esp[0]
+                  << ", esp[1] = " << esp[1]
+                  << ", esp[2] = " << esp[2] << std::endl;
 
         std::cout << "==========" << std::endl;
     }
