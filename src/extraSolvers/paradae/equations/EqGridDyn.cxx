@@ -69,14 +69,14 @@ namespace paradae {
         }
 
         // This will print out all of the variable names
-        // stringVec stNames;
-        // gds->getStateName(stNames, cDaeSolverMode);
-        // cout << "\nVariable Names\n";
-        // for(int ii; ii< stNames.size(); ii++)
-        //{
-        //   cout << stNames[ii] << "\n";
-        //}
-        // cout << "\n\n";
+        stringVec stNames;
+        gds_->getStateName(stNames, *mode_);
+        cout << "\nVariable Names\n";
+        for(int ii; ii< stNames.size(); ii++)
+        {
+          cout << stNames[ii] << "\n";
+        }
+        cout << "\n\n";
 
         limits = LimitManager(rootsfound.size());
 
