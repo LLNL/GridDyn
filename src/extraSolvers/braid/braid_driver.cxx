@@ -38,11 +38,18 @@ _braid_App_struct::_braid_App_struct(ODEProblem* ode_):
 {
 }
 
+// Only used at start of my_Step_OnAllPoints
 void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
 {
     PVector x0_u;
+
+    // Get the current state vector (only 1 for for RK)
     u->xprev.GetPVector(0, x0_u);
+
+    // Get the current time (only 1 for RK)
     alloc_data.t = u->tprev(0);
+
+    // Copy vectors of current and prior (if BDF) times, states, and derivatives
     alloc_data.tprev.CopyData(u->tprev);
     alloc_data.xprev.CopyData(u->xprev);
     alloc_data.dxprev.CopyData(u->dxprev);
@@ -51,6 +58,7 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     alloc_data.sprev.CopyData(u->state);
 }
 
+// Only used at start my_Step_OnOnePoint
 void _braid_App_struct::SetLastToDataStruct(braid_Vector u)
 {
     int ns = u->tprev.GetSSize();
@@ -67,6 +75,7 @@ void _braid_App_struct::SetLastToDataStruct(braid_Vector u)
     alloc_data.sprev.CopyData(u->state);
 }
 
+// Only used at end of my_Step_OnAllPoints
 void _braid_App_struct::SetAllFromDataStruct(braid_Vector u)
 {
     u->tprev.CopyData(alloc_data.tprev);
@@ -75,6 +84,7 @@ void _braid_App_struct::SetAllFromDataStruct(braid_Vector u)
     u->state.CopyData(alloc_data.sprev);
 }
 
+// Only used at end of my_Step_OnOnePoint
 void _braid_App_struct::SetLastFromDataStruct(braid_Vector u)
 {
     int ns = u->tprev.GetSSize();
