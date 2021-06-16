@@ -289,15 +289,24 @@ namespace exciters {
 
         // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
 
-        if (es[1] > Vrmax) {
+        if (es[1] >= (Vrmax - 0.0001)) {
             std::cout << "over Vrmax" << std::endl;
             limits[limitOffset] = -1;
-        } else if (es[1] < Vrmin) {
+            alert_braid(this, JAC_COUNT_DECREASE, sMode);
+            opFlags.set(outside_vlim);
+            opFlags.set(etrigger_high);
+        } else if (es[1] <= (Vrmin + 0.0001)) {
             std::cout << "under Vrmin" << std::endl;
             limits[limitOffset] = -1;
+            alert_braid(this, JAC_COUNT_DECREASE, sMode);
+            opFlags.set(outside_vlim);
+            opFlags.reset(etrigger_high);
         } else {
             std::cout << "in bounds" << std::endl;
             limits[limitOffset] = 1;
+            alert_braid(this, JAC_COUNT_INCREASE, sMode);
+            opFlags.reset(outside_vlim);
+            opFlags.reset(etrigger_high);
         }
 
         std::cout << "    es[0]  = " << std::setw(10) << es[0]
@@ -331,12 +340,16 @@ namespace exciters {
                   << ", esp[1] = " << std::setw(10) << esp[1]
                   << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
 
-        if (es[1] > Vrmax) {
+        if (es[1] >= (Vrmax - 0.0001)) {
             std::cout << "    over Vrmax  ";
             es[1] = Vrmax;
-        } else if (es[1] < Vrmin) {
+            esp[1] = 0.0;
+            // es[1] = Vrmax - 0.0001;
+        } else if (es[1] <= (Vrmin + 0.0001)) {
             std::cout << "    under Vrmin ";
             es[1] = Vrmin;
+            esp[1] = 0.0;
+            // es[1] = Vrmin + 0.0001;
         } else {
             std::cout << "    in bounds   ";
         }
