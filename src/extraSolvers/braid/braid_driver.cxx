@@ -54,6 +54,14 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     alloc_data.xprev.CopyData(u->xprev);
     alloc_data.dxprev.CopyData(u->dxprev);
 
+    // Limit xprev (and initial guess in xnext) on all grid levels
+    ode->GetTI()->CheckLimits(alloc_data.xprev,
+                              alloc_data.dxprev,
+                              alloc_data.flimit);
+    ode->GetTI()->CheckLimits(alloc_data.xnext,
+                              alloc_data.dxnext,
+                              alloc_data.flimit);
+
     // Evaluate root function at the current state
     // if (ode->GetEq()->HasEvents())
     //     ode->GetEq()->root_functions(alloc_data.t, x0_u, u->dxprev, u->state, alloc_data.gprev);
@@ -287,12 +295,12 @@ namespace braid {
             cout << "CheckLimits" << endl;
 
             /* Limit xprev (and initial guess in xnext) on all grid levels */
-            app->ode->GetTI()->CheckLimits(app->alloc_data.xprev,
-                                           app->alloc_data.dxprev,
-                                           app->alloc_data.flimit);
-            app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
-                                           app->alloc_data.dxnext,
-                                           app->alloc_data.flimit);
+            // app->ode->GetTI()->CheckLimits(app->alloc_data.xprev,
+            //                                app->alloc_data.dxprev,
+            //                                app->alloc_data.flimit);
+            // app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
+            //                                app->alloc_data.dxnext,
+            //                                app->alloc_data.flimit);
 
             cout << "AdvanceStep" << endl;
 
