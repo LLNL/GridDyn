@@ -55,11 +55,19 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     alloc_data.dxprev.CopyData(u->dxprev);
 
     // Limit xprev (and initial guess in xnext) on all grid levels
-    ode->GetTI()->CheckLimits(alloc_data.xprev,
-                              alloc_data.dxprev,
-                              alloc_data.flimit);
+    // ode->GetTI()->CheckLimits(alloc_data.xprev,
+    //                           alloc_data.dxprev,
+    //                           alloc_data.flimit);
+    // ode->GetTI()->CheckLimits(alloc_data.xnext,
+    //                           alloc_data.dxnext,
+    //                           alloc_data.flimit);
+
+    // Check next first so model flags are set based on current state
     ode->GetTI()->CheckLimits(alloc_data.xnext,
                               alloc_data.dxnext,
+                              alloc_data.flimit);
+    ode->GetTI()->CheckLimits(alloc_data.xprev,
+                              alloc_data.dxprev,
                               alloc_data.flimit);
 
     // Evaluate root function at the current state
