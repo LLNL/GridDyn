@@ -49,11 +49,12 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     //           << so.total.algRoots << std::endl;
 
     // std::cout << "gridDynSimulation::dynInitialize pre-makeReady" << std::endl;
-
+    std::cout << "makeReady" << std::endl;
     int retval = makeReady(gridState_t::POWERFLOW_COMPLETE, tempSm);
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
         return retval;
     }
+    std::cout << "makeReady" << std::endl;
 
     // std::cout << "gridDynSimulation::dynInitialize post-makeReady" << std::endl;
 
@@ -80,7 +81,6 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
     //           << so.total.algRoots << std::endl;
 
     // std::cout << "gridDynSimulation::dynInitialize pre-dynInitializeA" << std::endl;
-
     dynInitializeA(tStart, lower_flags(controlFlags));
 
     // std::cout << "gridDynSimulation::dynInitialize post-dynInitializeA" << std::endl;
@@ -1450,7 +1450,7 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              double limits[],
                                              const solverMode& sMode) noexcept
 {
-    std::cout << "gridDyn::gridDynSimulation::limitCheckingFunction" << std::endl;
+    // std::cout << "gridDyn::gridDynSimulation::limitCheckingFunction" << std::endl;
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     limitTest(noInputs, sD, limits, sMode);
@@ -1462,7 +1462,7 @@ int gridDynSimulation::limitActionFunction(double state[],
                                            const std::vector<int>& limitMask,
                                            const solverMode& sMode) noexcept
 {
-    std::cout << "gridDyn::gridDynSimulation::limitActionFunction" << std::endl;
+    // std::cout << "gridDyn::gridDynSimulation::limitActionFunction" << std::endl;
     limitTrigger(state, dstate_dt, limitMask, sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }

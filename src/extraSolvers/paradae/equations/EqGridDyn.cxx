@@ -156,7 +156,7 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
                                           const Vector& dy,
                                           Vector& flimit)
     {
-        std::cout << "ParaDAE::EquationGridDyn::limit_functions" << std::endl;
+        // std::cout << "ParaDAE::EquationGridDyn::limit_functions" << std::endl;
         // Need to add time as an input here? for calling stateData sD(time,...) in GridDyn
         Real t = 0.0;
         gds->limitCheckingFunction(t, y.GetData(), dy.GetData(),

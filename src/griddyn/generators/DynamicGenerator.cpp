@@ -905,7 +905,7 @@ void DynamicGenerator::limitTrigger(double state[],
             sub->limitTrigger(state, dstate_dt, limitMask, sMode);
         }
     }
-    std::cout << "gridDyn::DynamicGenerator::limitTrigger" << std::endl;
+    // std::cout << "gridDyn::DynamicGenerator::limitTrigger" << std::endl;
 }
 
 index_t DynamicGenerator::findIndex(const std::string& field, const solverMode& sMode) const

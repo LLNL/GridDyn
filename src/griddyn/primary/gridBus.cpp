@@ -1490,7 +1490,7 @@ void gridBus::limitTrigger(double state[],
                            const std::vector<int>& limitMask,
                            const solverMode& sMode)
 {
-    std::cout << "gridDyn::gridBus::limitTrigger" << std::endl;
+    // std::cout << "gridDyn::gridBus::limitTrigger" << std::endl;
 
     size_t limitCount = 0;
     int limitOffset = offsets.getRootOffset(sMode);

@@ -110,6 +110,8 @@ namespace braid {
                             braid_StepStatus status,
                             int level)
     {
+        cout << "my_Step_OnOnePoint" << endl;
+
         Real tstart; /* current time */
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
@@ -201,7 +203,7 @@ namespace braid {
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
 
-        // cout << "Step from " << tstart << " to " << tstop << endl;
+        cout << "LEVEL " << level << " Step from " << tstart << " to " << tstop << endl;
 
 #ifdef STATS_NEWTON
         int nrefine, iter;
@@ -237,7 +239,7 @@ namespace braid {
             if (ustop->xprev.GetM() > 0) have_a_ustop = true;
         }
 
-        /* Set the data structure */
+        /* Set the data structure (evaluates root function at current state) */
         app->SetAllToDataStruct(u);
 
         /* Do the integration (ns == 1 for RK) */
@@ -264,6 +266,8 @@ namespace braid {
                 }
             }
 
+            cout << "CheckLimits" << endl;
+
             /* Limit xprev (and initial guess in xnext) on all grid levels */
             app->ode->GetTI()->CheckLimits(app->alloc_data.xprev,
                                            app->alloc_data.dxprev,
@@ -271,6 +275,8 @@ namespace braid {
             app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
                                            app->alloc_data.dxnext,
                                            app->alloc_data.flimit);
+
+            cout << "AdvanceStep" << endl;
 
             /* Take Step */
             return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
@@ -320,7 +326,7 @@ namespace braid {
                         }
                     }
                 } else if (app->root_strat == doublestep) {
-                    cout << "Take Double Step for root at " << app->alloc_data.troot << endl;
+                    cout << "Take Double Step from " << app->alloc_data.troot << " to " << tstop << endl;
                     /* Perform a double step: Step to the root, then step from root to tstop. */
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();
@@ -345,7 +351,7 @@ namespace braid {
             {
                 cout << "Root too close to tstart or tstop, distance = " << dist << endl;
                 if (app->root_strat == doublestep) {
-                    cout << "Take Double Step" << endl;
+                    cout << "Take Double Step from " << app->alloc_data.troot << " to " << tstop << endl;
                     /* Perform a double step: Step to the root, then step from root to tstop. */
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();
@@ -441,6 +447,8 @@ namespace braid {
                          braid_Vector* fu_ptr,
                          braid_CoarsenRefStatus status)
     {
+        cout << "my_SpatialRefine" << endl;
+
         my_Clone(app, cu, fu_ptr);
 
         int ns = app->nb_multisteps;
@@ -590,6 +598,8 @@ namespace braid {
                           braid_Vector* cu_ptr,
                           braid_CoarsenRefStatus status)
     {
+        cout << "my_SpatialCoarsen" << endl;
+
         my_Clone(app, fu, cu_ptr);
 
         int ns = app->nb_multisteps;
@@ -746,6 +756,8 @@ namespace braid {
 
     int my_Init(braid_App app, Real t, braid_Vector* u_ptr)
     {
+        cout << "my_Init" << endl;
+
 #ifdef TIMER_BRAID
         global_timer.Start("binitv", "Init Vector", "brun");
 #endif
