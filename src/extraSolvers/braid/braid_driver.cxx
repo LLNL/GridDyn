@@ -53,8 +53,16 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     alloc_data.tprev.CopyData(u->tprev);
     alloc_data.xprev.CopyData(u->xprev);
     alloc_data.dxprev.CopyData(u->dxprev);
+
+    // Evaluate root function at the current state
+    // if (ode->GetEq()->HasEvents())
+    //     ode->GetEq()->root_functions(alloc_data.t, x0_u, u->dxprev, u->state, alloc_data.gprev);
+
     if (ode->GetEq()->HasEvents())
-        ode->GetEq()->root_functions(alloc_data.t, x0_u, u->dxprev, u->state, alloc_data.gprev);
+        ode->GetEq()->root_functions(alloc_data.t, alloc_data.xprev, alloc_data.dxprev,
+                                     u->state, alloc_data.gprev);
+
+    // Update the "state" (not really the state) vector
     alloc_data.sprev.CopyData(u->state);
 }
 
