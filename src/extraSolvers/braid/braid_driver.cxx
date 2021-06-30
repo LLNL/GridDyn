@@ -65,12 +65,12 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u, int level)
     //                           alloc_data.flimit);
 
     // Check next first so model flags are set based on current state
-    if (level == 0) {
-        ode->GetTI()->CheckLimits(alloc_data.t,
-                                  alloc_data.xnext,
-                                  alloc_data.dxnext,
-                                  alloc_data.flimit);
-    }
+    // if (level == 0) {
+    //     ode->GetTI()->CheckLimits(alloc_data.t,
+    //                               alloc_data.xnext,
+    //                               alloc_data.dxnext,
+    //                               alloc_data.flimit);
+    // }
     ode->GetTI()->CheckLimits(alloc_data.t,
                               alloc_data.xprev,
                               alloc_data.dxprev,
