@@ -373,6 +373,13 @@ namespace braid {
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();
                     app->alloc_data.next_dt = tstop - app->alloc_data.troot;
+                    // Re-evaluate root function
+                    if (app->ode->GetEq()->HasEvents())
+                        app->ode->GetEq()->root_functions(app->alloc_data.t,
+                                                          app->alloc_data.xprev,
+                                                          app->alloc_data.dxprev,
+                                                          u->state,
+                                                          app->alloc_data.gprev);
                     // Step from troot to tstop
                     return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
                     // If second root is found, refine by a minimum of 2
@@ -398,6 +405,13 @@ namespace braid {
                     app->alloc_data.SetNextAtRoot();
                     app->alloc_data.Rotate();
                     app->alloc_data.next_dt = tstop - app->alloc_data.troot;
+                    // Re-evaluate root function
+                    if (app->ode->GetEq()->HasEvents())
+                        app->ode->GetEq()->root_functions(app->alloc_data.t,
+                                                          app->alloc_data.xprev,
+                                                          app->alloc_data.dxprev,
+                                                          u->state,
+                                                          app->alloc_data.gprev);
                     // Step from troot to tstop
                     return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
                     // If second root is found, refine by a minimum of 2
