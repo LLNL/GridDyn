@@ -353,14 +353,12 @@ namespace exciters {
 
         if (es[1] >= (Vrmax - 0.0001)) {
             std::cout << "    over Vrmax  ";
-            es[1] = Vrmax;
+            es[1] = Vrmax - 0.0001;
             esp[1] = 0.0;
-            // es[1] = Vrmax - 0.0001;
         } else if (es[1] <= (Vrmin + 0.0001)) {
             std::cout << "    under Vrmin ";
-            es[1] = Vrmin;
+            es[1] = Vrmin + 0.0001;
             esp[1] = 0.0;
-            // es[1] = Vrmin + 0.0001;
         } else {
             std::cout << "    in bounds   ";
         }

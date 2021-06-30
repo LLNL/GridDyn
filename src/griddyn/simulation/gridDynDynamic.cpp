@@ -1441,6 +1441,8 @@ int gridDynSimulation::rootActionFunction(coreTime time,
 
     // std::cout << "end-rootActionFunction" << std::endl;
 
+    guessState(time, state, dstate_dt, sMode);
+
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
