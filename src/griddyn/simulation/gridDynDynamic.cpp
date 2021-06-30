@@ -1390,8 +1390,8 @@ int gridDynSimulation::rootFindingFunction(coreTime time,
 }
 
 int gridDynSimulation::rootActionFunction(coreTime time,
-                                          const double state[],
-                                          const double dstate_dt[],
+                                          double state[],
+                                          double dstate_dt[],
                                           const std::vector<int>& rootMask,
                                           const solverMode& sMode) noexcept
 {

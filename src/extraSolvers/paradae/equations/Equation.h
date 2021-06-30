@@ -123,8 +123,8 @@ namespace paradae {
         // Change the state depending on which root is found (should be private?)
         virtual void root_crossings(const Vector& iroot, Vector& state){};
 
-        virtual void root_action(const Real troot, const Vector &xroot,
-                                 const Vector &dxroot, const Vector &iroot){};
+        virtual void root_action(const Real troot, Vector &xroot,
+                                 Vector &dxroot, const Vector &iroot){};
 
         // Initialize the state
         virtual void root_init_state(const Real t, Vector& state){};

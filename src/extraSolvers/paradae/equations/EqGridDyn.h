@@ -54,8 +54,8 @@ namespace paradae {
                                     const Vector& state,
                                     Vector& rv);
         virtual void root_action(const Real troot,
-                                 const Vector &yroot,
-                                 const Vector &dyroot,
+                                 Vector &yroot,
+                                 Vector &dyroot,
                                  const Vector &iroot);
         virtual void limit_functions(const Vector& y,
                                      const Vector& dy,

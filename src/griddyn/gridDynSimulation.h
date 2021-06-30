@@ -408,8 +408,8 @@ class gridDynSimulation: public gridSimulation {
     @return integer indicating success (0) or failure (non-zero)
     */
     int rootActionFunction(coreTime time,
-                           const double state[],
-                           const double dstate_dt[],
+                           double state[],
+                           double dstate_dt[],
                            const std::vector<int>& rootMask,
                            const solverMode& sMode) noexcept;
 

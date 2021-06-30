@@ -138,8 +138,8 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
     };
 
     void EquationGridDyn::root_action(const Real troot,
-                                      const Vector& yroot,
-                                      const Vector& dyroot,
+                                      Vector& yroot,
+                                      Vector& dyroot,
                                       const Vector& iroot)
     {
         //std::cout << "EquationGridDyn::root_action" << std::endl;
