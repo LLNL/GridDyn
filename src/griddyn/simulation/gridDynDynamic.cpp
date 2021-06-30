@@ -1454,7 +1454,7 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     limitTest(noInputs, sD, limits, sMode);
-    dynamicCheckAndReset(sMode);
+    // dynamicCheckAndReset(sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
@@ -1466,6 +1466,19 @@ int gridDynSimulation::limitActionFunction(coreTime time,
 {
     // std::cout << "gridDyn::gridDynSimulation::limitActionFunction" << std::endl;
     limitTrigger(time, state, dstate_dt, limitMask, sMode);
+
+    currentTime = time;
+    setState(time, state, dstate_dt, sMode);
+
+    auto dynData  = getSolverInterface(sMode);
+    count_t ssize = stateSize(sMode);
+
+    double* state_data = dynData->state_data();
+    double* deriv_data = dynData->deriv_data();
+
+    std::memcpy(state_data, state, ssize * sizeof(double));
+    std::memcpy(deriv_data, dstate_dt, ssize * sizeof(double));
+
     dynamicCheckAndReset(sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }

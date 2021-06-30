@@ -196,6 +196,7 @@ namespace exciters {
         const double* esp = sD.dstate_dt + offset;
 
         std::cout << "    gridDyn::ExciterIEEEtype1::rootTest ";
+        std::cout << std::setprecision(16);
 
         // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
 
@@ -215,12 +216,21 @@ namespace exciters {
         }
 
         std::cout << std::endl;
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = " << std::setw(10) << es[1]
-                  << ", es[2]  = " << std::setw(10) << es[2]
-                  << ", esp[0] = " << std::setw(10) << esp[0]
-                  << ", esp[1] = " << std::setw(10) << esp[1]
-                  << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
+        std::cout << "    es[0]  = " << std::setw(23) << es[0]
+                  << ", es[1]  = " << std::setw(23) << es[1]
+                  << ", es[2]  = " << std::setw(23) << es[2]
+                  << ", esp[0] = " << std::setw(23) << esp[0]
+                  << ", esp[1] = " << std::setw(23) << esp[1]
+                  << ", esp[2] = " << std::setw(23) << esp[2] << std::endl;
+        std::cout << "    rootOffset = " << rootOffset
+                  << ", Kf = " << Kf
+                  << ", Tf = " << Tf
+                  << ", Vref = " << Vref
+                  << ", vBias = " << vBias
+                  << ", voltageInLocation = " << voltageInLocation
+                  << ", inputs[voltageInLocation] = " << inputs[voltageInLocation]
+                  << ", Ka = " << Ka
+                  << ", Ta = " << Ta << std::endl;
     }
 
     change_code ExciterIEEEtype1::rootCheck(const IOdata& inputs,
