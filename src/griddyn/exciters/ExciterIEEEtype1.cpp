@@ -362,6 +362,17 @@ namespace exciters {
                   << ", esp[1] = "   << std::setw(10) << esp[1]
                   << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
 
+        stateData sD(time, state);
+
+        derivative(noInputs, sD, dstate_dt, cLocalSolverMode);
+
+        std::cout << "    es[0]  = " << std::setw(10) << es[0]
+                  << ", es[1]  = "   << std::setw(10) << es[1]
+                  << ", es[2]  = "   << std::setw(10) << es[2]
+                  << ", esp[0] = "   << std::setw(10) << esp[0]
+                  << ", esp[1] = "   << std::setw(10) << esp[1]
+                  << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
+
         // std::cout << "==========" << std::endl;
     }
 
