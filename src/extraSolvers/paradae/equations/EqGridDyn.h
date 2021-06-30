@@ -60,7 +60,8 @@ namespace paradae {
         virtual void limit_functions(const Vector& y,
                                      const Vector& dy,
                                      Vector& flimit);
-        virtual void limit_crossings(Vector &y,
+        virtual void limit_crossings(const Real time,
+                                     Vector &y,
                                      Vector &dy,
                                      const Vector& flimit);
         virtual ~EquationGridDyn(){};

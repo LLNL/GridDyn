@@ -1918,7 +1918,8 @@ void gridComponent::limitTest(const IOdata& inputs,
     }
 }
 
-void gridComponent::limitTrigger(double state[],
+void gridComponent::limitTrigger(coreTime time,
+                                 double state[],
                                  double dstate_dt[],
                                  const std::vector<int>& limitMask,
                                  const solverMode& sMode)
@@ -1928,7 +1929,7 @@ void gridComponent::limitTrigger(double state[],
             if (!(subobj->checkFlag(has_roots))) {
                 continue;
             }
-            subobj->limitTrigger(state, dstate_dt, limitMask, sMode);
+            subobj->limitTrigger(time, state, dstate_dt, limitMask, sMode);
         }
     }
 }

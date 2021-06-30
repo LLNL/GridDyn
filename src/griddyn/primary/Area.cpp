@@ -1538,13 +1538,14 @@ void Area::limitTest(const IOdata& inputs,
 // #endif
 }
 
-void Area::limitTrigger(double state[],
+void Area::limitTrigger(coreTime time,
+                        double state[],
                         double dstate_dt[],
                         const std::vector<int>& limitMask,
                         const solverMode& sMode)
 {
     for (auto* ro : rootObjects) {
-        ro->limitTrigger(state, dstate_dt, limitMask, sMode);
+        ro->limitTrigger(time, state, dstate_dt, limitMask, sMode);
     }
 }
 

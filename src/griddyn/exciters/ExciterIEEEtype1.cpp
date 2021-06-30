@@ -320,7 +320,8 @@ namespace exciters {
     }
 
 
-    void ExciterIEEEtype1::limitTrigger(double state[],
+    void ExciterIEEEtype1::limitTrigger(coreTime time,
+                                        double state[],
                                         double dstate_dt[],
                                         const std::vector<int>& limitMask,
                                         const solverMode& sMode)

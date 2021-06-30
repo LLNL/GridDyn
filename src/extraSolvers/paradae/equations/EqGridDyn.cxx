@@ -164,13 +164,14 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
     };
 
 
-    void EquationGridDyn::limit_crossings(Vector &y,
+    void EquationGridDyn::limit_crossings(const Real time,
+                                          Vector &y,
                                           Vector &dy,
                                           const Vector& flimit)
     {
         std::vector<int> limitMask(flimit.GetData(),
                                    flimit.GetData() + limits.n_limits);
-        gds->limitActionFunction(y.GetData(), dy.GetData(), limitMask, *mode);
+        gds->limitActionFunction(time, y.GetData(), dy.GetData(), limitMask, *mode);
     }
 
     // NEED TO CHANGE THIS FUNCTION?
@@ -178,7 +179,7 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
     // I dont think so dyndata is the solver interface?
     // can use setState?
     // If pass vectors should this look more like rootfindingfunction?
-    // void EquationGridDyn::limit_crossing(Vector &y, Vector &dy, Vector& flimit)
+    // void EquationGridDyn::limit_crossing(const Real time, Vector &y, Vector &dy, Vector& flimit)
     // {
     //     Real t = 0.0;
     //     gds->handleLimitViolation(3, t,

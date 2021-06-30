@@ -895,14 +895,15 @@ void DynamicGenerator::limitTest(const IOdata& inputs,
     }
 }
 
-void DynamicGenerator::limitTrigger(double state[],
+void DynamicGenerator::limitTrigger(coreTime time,
+                                    double state[],
                                     double dstate_dt[],
                                     const std::vector<int>& limitMask,
                                     const solverMode& sMode)
 {
     for (auto* sub : getSubObjects()) {
         if (sub->checkFlag(has_roots)) {
-            sub->limitTrigger(state, dstate_dt, limitMask, sMode);
+            sub->limitTrigger(time, state, dstate_dt, limitMask, sMode);
         }
     }
     // std::cout << "gridDyn::DynamicGenerator::limitTrigger" << std::endl;

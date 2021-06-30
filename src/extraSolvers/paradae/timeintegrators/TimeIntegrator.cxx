@@ -51,7 +51,7 @@ namespace paradae {
         snext.CopyData(sroot);
     }
 
-    bool TimeIntegrator::CheckLimits(Vector& y, Vector& dy, Vector& flimit)
+    bool TimeIntegrator::CheckLimits(const Real time, Vector& y, Vector& dy, Vector& flimit)
     {
         // cout << "ParaDAE::TimeIntegrator::CheckLimits" << endl;
 
@@ -74,7 +74,7 @@ namespace paradae {
         /* Treat exceeding limits */
         if (limit_exceeded) {
             // cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
-            equation->limit_crossings(y, dy, flimit);
+            equation->limit_crossings(time, y, dy, flimit);
         } else {
             // cout << "ParaDAE::TimeIntegrator::CheckLimits with limits" << endl;
         }

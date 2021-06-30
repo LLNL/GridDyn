@@ -107,7 +107,7 @@ namespace paradae {
         bool CheckRoots(DATA_Struct& val);
         RCODE PostStep(DATA_Struct& val, bool success_solver, bool found_root, bool success_error_test);
 
-        bool CheckLimits(Vector& y, Vector& dy, Vector& flimit);
+        bool CheckLimits(const Real time, Vector& y, Vector& dy, Vector& flimit);
 
         inline bool DoBraid() const { return do_braid; };
         inline bool& DoBraid() { return do_braid; };

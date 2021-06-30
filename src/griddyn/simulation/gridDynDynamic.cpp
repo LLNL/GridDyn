@@ -1458,13 +1458,14 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int gridDynSimulation::limitActionFunction(double state[],
+int gridDynSimulation::limitActionFunction(coreTime time,
+                                           double state[],
                                            double dstate_dt[],
                                            const std::vector<int>& limitMask,
                                            const solverMode& sMode) noexcept
 {
     // std::cout << "gridDyn::gridDynSimulation::limitActionFunction" << std::endl;
-    limitTrigger(state, dstate_dt, limitMask, sMode);
+    limitTrigger(time, state, dstate_dt, limitMask, sMode);
     dynamicCheckAndReset(sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }

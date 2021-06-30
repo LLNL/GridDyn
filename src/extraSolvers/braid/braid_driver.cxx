@@ -55,18 +55,22 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     alloc_data.dxprev.CopyData(u->dxprev);
 
     // Limit xprev (and initial guess in xnext) on all grid levels
-    // ode->GetTI()->CheckLimits(alloc_data.xprev,
+    // ode->GetTI()->CheckLimits(alloc_data.t,
+    //                           alloc_data.xprev,
     //                           alloc_data.dxprev,
     //                           alloc_data.flimit);
-    // ode->GetTI()->CheckLimits(alloc_data.xnext,
+    // ode->GetTI()->CheckLimits(alloc_data.t,
+    //                           alloc_data.xnext,
     //                           alloc_data.dxnext,
     //                           alloc_data.flimit);
 
     // Check next first so model flags are set based on current state
-    ode->GetTI()->CheckLimits(alloc_data.xnext,
+    ode->GetTI()->CheckLimits(alloc_data.t,
+                              alloc_data.xnext,
                               alloc_data.dxnext,
                               alloc_data.flimit);
-    ode->GetTI()->CheckLimits(alloc_data.xprev,
+    ode->GetTI()->CheckLimits(alloc_data.t,
+                              alloc_data.xprev,
                               alloc_data.dxprev,
                               alloc_data.flimit);
 
@@ -303,10 +307,12 @@ namespace braid {
             cout << "CheckLimits" << endl;
 
             /* Limit xprev (and initial guess in xnext) on all grid levels */
-            // app->ode->GetTI()->CheckLimits(app->alloc_data.xprev,
+            // app->ode->GetTI()->CheckLimits(tstart,
+            //                                app->alloc_data.xprev,
             //                                app->alloc_data.dxprev,
             //                                app->alloc_data.flimit);
-            // app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
+            // app->ode->GetTI()->CheckLimits(tstart,
+            //                                app->alloc_data.xnext,
             //                                app->alloc_data.dxnext,
             //                                app->alloc_data.flimit);
 
@@ -414,7 +420,8 @@ namespace braid {
 
         /* Limit ustop on the finest grid */
         if (level == 0) {
-            app->ode->GetTI()->CheckLimits(app->alloc_data.xnext,
+            app->ode->GetTI()->CheckLimits(tstop,
+                                           app->alloc_data.xnext,
                                            app->alloc_data.dxnext,
                                            app->alloc_data.flimit);
         }

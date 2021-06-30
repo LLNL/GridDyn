@@ -308,7 +308,8 @@ namespace sources {
         }
     }
 
-    void blockSource::limitTrigger(double state[],
+    void blockSource::limitTrigger(coreTime time,
+                                   double state[],
                                    double dstate_dt[],
                                    const std::vector<int>& limitMask,
                                    const solverMode& sMode)

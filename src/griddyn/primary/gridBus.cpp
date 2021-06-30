@@ -1485,7 +1485,8 @@ void gridBus::limitTest(const IOdata& /*inputs*/,
     gridComponent::limitTest(inputs, sD, limits, sMode);
 }
 
-void gridBus::limitTrigger(double state[],
+void gridBus::limitTrigger(coreTime time,
+                           double state[],
                            double dstate_dt[],
                            const std::vector<int>& limitMask,
                            const solverMode& sMode)
@@ -1509,7 +1510,7 @@ void gridBus::limitTrigger(double state[],
                 limitCount += gen->rootSize(sMode);
                 if (nR < limitOffset + limitCount) {
 
-                    gen->limitTrigger(state, dstate_dt, limitMask, sMode);
+                    gen->limitTrigger(time, state, dstate_dt, limitMask, sMode);
 
                     do {
                         ++limitFoundIndex;
@@ -1525,7 +1526,7 @@ void gridBus::limitTrigger(double state[],
             if ((load->checkFlag(has_roots)) && (load->isEnabled())) {
                 limitCount += load->rootSize(sMode);
                 if (nR < limitOffset + limitCount) {
-                    load->limitTrigger(state, dstate_dt, limitMask, sMode);
+                    load->limitTrigger(time, state, dstate_dt, limitMask, sMode);
                     do {
                         ++limitFoundIndex;
                         if (limitFoundIndex >= limitsfound.size()) {
@@ -1556,7 +1557,7 @@ void gridBus::limitTrigger(double state[],
     //             rootCount += gen->rootSize(sMode);
     //             if (nR < rootOffset + rootCount) {
 
-    //                 gen->limitTrigger(state, dsate_dt, limitMask, sMode);
+    //                 gen->limitTrigger(time, state, dsate_dt, limitMask, sMode);
 
     //                 do {
     //                     ++rootFoundIndex;

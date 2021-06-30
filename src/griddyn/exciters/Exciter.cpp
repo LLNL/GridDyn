@@ -276,7 +276,8 @@ void Exciter::limitTest(const IOdata& inputs,
     // }
 }
 
-void Exciter::limitTrigger(double state[],
+void Exciter::limitTrigger(coreTime time,
+                           double state[],
                            double dstate_dt[],
                            const std::vector<int>& limitMask,
                            const solverMode& sMode)
