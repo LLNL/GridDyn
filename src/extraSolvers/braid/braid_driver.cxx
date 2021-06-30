@@ -39,7 +39,7 @@ _braid_App_struct::_braid_App_struct(ODEProblem* ode_):
 }
 
 // Only used at start of my_Step_OnAllPoints
-void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
+void _braid_App_struct::SetAllToDataStruct(braid_Vector u, int level)
 {
     PVector x0_u;
 
@@ -65,10 +65,12 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u)
     //                           alloc_data.flimit);
 
     // Check next first so model flags are set based on current state
-    ode->GetTI()->CheckLimits(alloc_data.t,
-                              alloc_data.xnext,
-                              alloc_data.dxnext,
-                              alloc_data.flimit);
+    if (level == 0) {
+        ode->GetTI()->CheckLimits(alloc_data.t,
+                                  alloc_data.xnext,
+                                  alloc_data.dxnext,
+                                  alloc_data.flimit);
+    }
     ode->GetTI()->CheckLimits(alloc_data.t,
                               alloc_data.xprev,
                               alloc_data.dxprev,
@@ -278,7 +280,7 @@ namespace braid {
         }
 
         /* Set the data structure (evaluates root function at current state) */
-        app->SetAllToDataStruct(u);
+        app->SetAllToDataStruct(u, level);
 
         /* Do the integration (ns == 1 for RK) */
         Real t;

@@ -78,7 +78,7 @@ typedef struct _braid_App_struct {
     my_Vector* solution_tfinal;
 
     _braid_App_struct(griddyn::paradae::ODEProblem* ode_);
-    void SetAllToDataStruct(braid_Vector u);
+    void SetAllToDataStruct(braid_Vector u, int level);
     void SetLastToDataStruct(braid_Vector u);
     void SetAllFromDataStruct(braid_Vector u);
     void SetLastFromDataStruct(braid_Vector u);
