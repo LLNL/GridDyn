@@ -198,8 +198,6 @@ namespace exciters {
         std::cout << "    gridDyn::ExciterIEEEtype1::rootTest ";
         std::cout << std::setprecision(16);
 
-        // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
-
         if (opFlags[outside_vlim]) {
             std::cout << " outside vlim ";
             roots[rootOffset] = es[2] - es[0] * Kf / Tf +
