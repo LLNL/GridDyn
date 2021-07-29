@@ -132,6 +132,12 @@ namespace paradae {
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
 
+            if (root_crossed)
+            {
+                cout << "TimeIntegrator::CheckRoots root found at "
+                     << thi << endl;
+            }
+
             /* If troot == t: no root!! */ // DJG: NO! previous_troot == troot
             //if (thi - val.t < equation->GetRoots().tol)
             if (root_crossed &&
@@ -144,6 +150,8 @@ namespace paradae {
                 //      << thi - val.t
                 //      << " < " << equation->GetRoots().tol << endl;
                 root_crossed = false;
+                cout << "TimeIntegrator::CheckRoots ignoring root at "
+                     << thi << endl;
             }
 
             if (root_crossed) {
@@ -163,7 +171,6 @@ namespace paradae {
                                       roots.iroot);
             }
         }
-        //cout << "TimeIntegrator::CheckRoots -- was a root found? " << root_crossed << endl;
         return root_crossed;
     }
 

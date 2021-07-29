@@ -88,14 +88,14 @@ namespace exciters {
         double* rv = resid + offset;
         rv[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
         if (opFlags[outside_vlim]) {
-            std::cout << "    ExciterIEEEtype1::residual outside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::residual outside_vlim" << std::endl;
             if (opFlags[etrigger_high]) {
                 rv[1] = esp[1];
             } else {
                 rv[1] = esp[1];
             }
         } else {
-            std::cout << "    ExciterIEEEtype1::residual inside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::residual inside_vlim" << std::endl;
             rv[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf +
                      Ka * (Vref + vBias - inputs[voltageInLocation])) /
                     Ta -
@@ -130,10 +130,10 @@ namespace exciters {
         auto d = Loc.destDiffLoc;
         d[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te;
         if (opFlags[outside_vlim]) {
-            std::cout << "    ExciterIEEEtype1::derivative derivative outside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::derivative derivative outside_vlim" << std::endl;
             d[1] = 0;
         } else {
-            std::cout << "    ExciterIEEEtype1::derivative derivative inside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::derivative derivative inside_vlim" << std::endl;
             d[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf +
                     Ka * (Vref + vBias - inputs[voltageInLocation])) /
                 Ta;
@@ -167,11 +167,11 @@ namespace exciters {
         md.assign(offset, offset, temp1);
         md.assign(offset, offset + 1, 1 / Te);
         if (opFlags[outside_vlim]) {
-            std::cout << "    ExciterIEEEtype1::jacobian outside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::jacobian outside_vlim" << std::endl;
             md.assign(offset + 1, offset + 1, sD.cj);
         } else {
             // Vr
-            std::cout << "    ExciterIEEEtype1::jacobian inside_vlim" << std::endl;
+            // std::cout << "    ExciterIEEEtype1::jacobian inside_vlim" << std::endl;
             md.assignCheckCol(offset + 1, inputLocs[voltageInLocation], -Ka / Ta);
             md.assign(offset + 1, offset, -Ka * Kf / (Tf * Ta));
             md.assign(offset + 1, offset + 1, -1.0 / Ta - sD.cj);
@@ -195,40 +195,40 @@ namespace exciters {
         const double* es = sD.state + offset;
         const double* esp = sD.dstate_dt + offset;
 
-        std::cout << "    gridDyn::ExciterIEEEtype1::rootTest ";
-        std::cout << std::setprecision(16);
+        // std::cout << "    gridDyn::ExciterIEEEtype1::rootTest ";
+        // std::cout << std::setprecision(16);
 
         if (opFlags[outside_vlim]) {
-            std::cout << " outside vlim ";
+            // std::cout << " outside vlim ";
             roots[rootOffset] = es[2] - es[0] * Kf / Tf +
                 (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
-            std::cout << " roots = " << std::setw(10) << roots[rootOffset];
+            // std::cout << " roots = " << std::setw(10) << roots[rootOffset];
         } else {
-            std::cout << " inside vlim ";
+            // std::cout << " inside vlim ";
             roots[rootOffset] = std::min(Vrmax - es[1], es[1] - Vrmin) + 0.00001;
-            std::cout << " roots = " << std::setw(10) << roots[rootOffset];
+            // std::cout << " roots = " << std::setw(10) << roots[rootOffset];
             if (es[1] >= Vrmax) {
                 opFlags.set(etrigger_high);
-                std::cout << " etrigger_high";
+                // std::cout << " etrigger_high";
             }
         }
 
-        std::cout << std::endl;
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = " << std::setw(10) << es[1]
-                  << ", es[2]  = " << std::setw(10) << es[2]
-                  << ", esp[0] = " << std::setw(10) << esp[0]
-                  << ", esp[1] = " << std::setw(10) << esp[1]
-                  << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
-        std::cout << "    rootOffset = " << rootOffset
-                  << ", Kf = " << Kf
-                  << ", Tf = " << Tf
-                  << ", Vref = " << Vref
-                  << ", vBias = " << vBias
-                  << ", voltageInLocation = " << voltageInLocation
-                  << ", inputs[voltageInLocation] = " << inputs[voltageInLocation]
-                  << ", Ka = " << Ka
-                  << ", Ta = " << Ta << std::endl;
+        // std::cout << std::endl;
+        // std::cout << "    es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = " << std::setw(10) << es[1]
+        //           << ", es[2]  = " << std::setw(10) << es[2]
+        //           << ", esp[0] = " << std::setw(10) << esp[0]
+        //           << ", esp[1] = " << std::setw(10) << esp[1]
+        //           << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    rootOffset = " << rootOffset
+        //           << ", Kf = " << Kf
+        //           << ", Tf = " << Tf
+        //           << ", Vref = " << Vref
+        //           << ", vBias = " << vBias
+        //           << ", voltageInLocation = " << voltageInLocation
+        //           << ", inputs[voltageInLocation] = " << inputs[voltageInLocation]
+        //           << ", Ka = " << Ka
+        //           << ", Ta = " << Ta << std::endl;
     }
 
     change_code ExciterIEEEtype1::rootCheck(const IOdata& inputs,
@@ -288,7 +288,7 @@ namespace exciters {
                                      double limits[],
                                      const solverMode& sMode)
     {
-        std::cout << "    gridDyn::ExciterIEEEtype1::limitTest ";
+        // std::cout << "    gridDyn::ExciterIEEEtype1::limitTest ";
 
         auto offset = offsets.getDiffOffset(sMode);
         auto limitOffset = offsets.getRootOffset(sMode);
@@ -298,31 +298,31 @@ namespace exciters {
         // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
 
         if (es[1] >= (Vrmax - 0.0001)) {
-            std::cout << "over Vrmax" << std::endl;
+            // std::cout << "over Vrmax" << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.set(etrigger_high);
         } else if (es[1] <= (Vrmin + 0.0001)) {
-            std::cout << "under Vrmin" << std::endl;
+            // std::cout << "under Vrmin" << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.reset(etrigger_high);
         } else {
-            std::cout << "in bounds" << std::endl;
+            // std::cout << "in bounds" << std::endl;
             limits[limitOffset] = 1;
             alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
             opFlags.reset(etrigger_high);
         }
 
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = " << std::setw(10) << es[1]
-                  << ", es[2]  = " << std::setw(10) << es[2]
-                  << ", esp[0] = " << std::setw(10) << esp[0]
-                  << ", esp[1] = " << std::setw(10) << esp[1]
-                  << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = " << std::setw(10) << es[1]
+        //           << ", es[2]  = " << std::setw(10) << es[2]
+        //           << ", esp[0] = " << std::setw(10) << esp[0]
+        //           << ", esp[1] = " << std::setw(10) << esp[1]
+        //           << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
 
         // std::cout << "==========" << std::endl;
     }
@@ -334,50 +334,50 @@ namespace exciters {
                                         const std::vector<int>& limitMask,
                                         const solverMode& sMode)
     {
-        std::cout << "    gridDyn::ExciterIEEEtype1::limitTrigger" << std::endl;
+        // std::cout << "    gridDyn::ExciterIEEEtype1::limitTrigger" << std::endl;
 
         auto offset = offsets.getDiffOffset(sMode);
         auto limitOffset = offsets.getRootOffset(sMode);
         double* es = state + offset;
         double* esp = dstate_dt + offset;
 
-        std::cout << "    limitMask = " << limitMask[limitOffset]
-                  << "  es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = " << std::setw(10) << es[1]
-                  << ", es[2]  = " << std::setw(10) << es[2]
-                  << ", esp[0] = " << std::setw(10) << esp[0]
-                  << ", esp[1] = " << std::setw(10) << esp[1]
-                  << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    limitMask = " << limitMask[limitOffset]
+        //           << "  es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = " << std::setw(10) << es[1]
+        //           << ", es[2]  = " << std::setw(10) << es[2]
+        //           << ", esp[0] = " << std::setw(10) << esp[0]
+        //           << ", esp[1] = " << std::setw(10) << esp[1]
+        //           << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
 
         if (es[1] >= (Vrmax - 0.0001)) {
-            std::cout << "    over Vrmax  ";
+            // std::cout << "    over Vrmax  ";
             es[1] = Vrmax - 0.0001;
             esp[1] = 0.0;
         } else if (es[1] <= (Vrmin + 0.0001)) {
-            std::cout << "    under Vrmin ";
+            // std::cout << "    under Vrmin ";
             es[1] = Vrmin + 0.0001;
             esp[1] = 0.0;
         } else {
-            std::cout << "    in bounds   ";
+            // std::cout << "    in bounds   ";
         }
 
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = "   << std::setw(10) << es[1]
-                  << ", es[2]  = "   << std::setw(10) << es[2]
-                  << ", esp[0] = "   << std::setw(10) << esp[0]
-                  << ", esp[1] = "   << std::setw(10) << esp[1]
-                  << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = "   << std::setw(10) << es[1]
+        //           << ", es[2]  = "   << std::setw(10) << es[2]
+        //           << ", esp[0] = "   << std::setw(10) << esp[0]
+        //           << ", esp[1] = "   << std::setw(10) << esp[1]
+        //           << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
 
         stateData sD(time, state);
 
         derivative(noInputs, sD, dstate_dt, cLocalSolverMode);
 
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = "   << std::setw(10) << es[1]
-                  << ", es[2]  = "   << std::setw(10) << es[2]
-                  << ", esp[0] = "   << std::setw(10) << esp[0]
-                  << ", esp[1] = "   << std::setw(10) << esp[1]
-                  << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = "   << std::setw(10) << es[1]
+        //           << ", es[2]  = "   << std::setw(10) << es[2]
+        //           << ", esp[0] = "   << std::setw(10) << esp[0]
+        //           << ", esp[1] = "   << std::setw(10) << esp[1]
+        //           << ", esp[2] = "   << std::setw(10) << esp[2] << std::endl;
 
         // std::cout << "==========" << std::endl;
     }

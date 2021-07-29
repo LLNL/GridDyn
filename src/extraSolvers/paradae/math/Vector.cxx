@@ -131,9 +131,11 @@ namespace paradae {
             abort();
         }
 #endif
-        output << data[0];
+        output << std::setprecision(16);
+        output << std::scientific;
+        output << std::right << std::setw(24) << data[0];
         for (int i = 1; i < m; i++)
-            output << " " << data[i];
+            output << " " << std::right << std::setw(24) << data[i];
     }
 
     void Vector::dump(string filename) const

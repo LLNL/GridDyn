@@ -71,10 +71,19 @@ void _braid_App_struct::SetAllToDataStruct(braid_Vector u, int level)
     //                               alloc_data.dxnext,
     //                               alloc_data.flimit);
     // }
+
+    cout << "Pre CheckLimits 1" << endl;
+    cout << "x:  " << alloc_data.xprev << endl;
+    cout << "xd: " << alloc_data.dxprev << endl;
+
     ode->GetTI()->CheckLimits(alloc_data.t,
                               alloc_data.xprev,
                               alloc_data.dxprev,
                               alloc_data.flimit);
+
+    cout << "Post CheckLimits 1" << endl;
+    cout << "x:  " << alloc_data.xprev << endl;
+    cout << "xd: " << alloc_data.dxprev << endl;
 
     // Evaluate root function at the current state
     // if (ode->GetEq()->HasEvents())
@@ -243,6 +252,9 @@ namespace braid {
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
 
+        for (int i = 0; i < 8; i++)
+            cout << "==========";
+        cout << endl;
         cout << "LEVEL " << level << " Step from " << tstart << " to " << tstop << endl;
 
 #ifdef STATS_NEWTON
@@ -306,7 +318,7 @@ namespace braid {
                 }
             }
 
-            cout << "CheckLimits" << endl;
+            // cout << "CheckLimits" << endl;
 
             /* Limit xprev (and initial guess in xnext) on all grid levels */
             // app->ode->GetTI()->CheckLimits(tstart,
@@ -318,10 +330,16 @@ namespace braid {
             //                                app->alloc_data.dxnext,
             //                                app->alloc_data.flimit);
 
-            cout << "AdvanceStep" << endl;
+            cout << "Pre AdvanceStep" << endl;
+            cout << "x:  " << app->alloc_data.xprev << endl;
+            cout << "xd: " << app->alloc_data.dxprev << endl;
 
             /* Take Step */
             return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
+
+            cout << "Post AdvanceStep" << endl;
+            cout << "x:  " << app->alloc_data.xnext << endl;
+            cout << "xd: " << app->alloc_data.dxnext << endl;
 
             /* Get refinement from local error measure */
             if (t <= app->ode->GetEq()->GetTmax()) {
@@ -381,7 +399,17 @@ namespace braid {
                                                           u->state,
                                                           app->alloc_data.gprev);
                     // Step from troot to tstop
+
+                    cout << "Pre AdvanceStep" << endl;
+                    cout << "x:  " << app->alloc_data.xprev << endl;
+                    cout << "xd: " << app->alloc_data.dxprev << endl;
+
                     return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
+
+                    cout << "Post AdvanceStep" << endl;
+                    cout << "x:  " << app->alloc_data.xnext << endl;
+                    cout << "xd: " << app->alloc_data.dxnext << endl;
+
                     // If second root is found, refine by a minimum of 2
                     if (return_code == WARN_ROOT) {
                         dist = min(app->alloc_data.troot - app->alloc_data.t,
@@ -413,7 +441,16 @@ namespace braid {
                                                           u->state,
                                                           app->alloc_data.gprev);
                     // Step from troot to tstop
+                    cout << "Pre AdvanceStep" << endl;
+                    cout << "x:  " << app->alloc_data.xprev << endl;
+                    cout << "xd: " << app->alloc_data.dxprev << endl;
+
                     return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
+
+                    cout << "Post AdvanceStep" << endl;
+                    cout << "x:  " << app->alloc_data.xnext << endl;
+                    cout << "xd: " << app->alloc_data.dxnext << endl;
+
                     // If second root is found, refine by a minimum of 2
                     if (return_code == WARN_ROOT) {
                         dist = min(app->alloc_data.troot - app->alloc_data.t,
@@ -436,10 +473,19 @@ namespace braid {
 
         /* Limit ustop on the finest grid */
         if (level == 0) {
+
+            cout << "Pre CheckLimits 2" << endl;
+            cout << "x:  " << app->alloc_data.xnext << endl;
+            cout << "xd: " << app->alloc_data.dxnext << endl;
+
             app->ode->GetTI()->CheckLimits(tstop,
                                            app->alloc_data.xnext,
                                            app->alloc_data.dxnext,
                                            app->alloc_data.flimit);
+
+            cout << "Post CheckLimits 2" << endl;
+            cout << "x:  " << app->alloc_data.xnext << endl;
+            cout << "xd: " << app->alloc_data.dxnext << endl;
         }
 
         /* Rotate data and pass back to braid (Save new values in u) */
