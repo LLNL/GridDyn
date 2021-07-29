@@ -140,19 +140,19 @@ namespace paradae {
 
             /* If troot == t: no root!! */ // DJG: NO! previous_troot == troot
             //if (thi - val.t < equation->GetRoots().tol)
-            if (root_crossed &&
-                abs(thi - val.troot) < equation->GetRoots().tol)
-            {
-                // cout << std::setprecision(10);
-                // cout << "too close!" << endl;
-                // cout << "thi - val.t = "
-                //      << thi << " - " << val.t << " = "
-                //      << thi - val.t
-                //      << " < " << equation->GetRoots().tol << endl;
-                root_crossed = false;
-                cout << "TimeIntegrator::CheckRoots ignoring root at "
-                     << thi << endl;
-            }
+            // if (root_crossed &&
+            //     abs(thi - val.troot) < equation->GetRoots().tol)
+            // {
+            //     // cout << std::setprecision(10);
+            //     // cout << "too close!" << endl;
+            //     // cout << "thi - val.t = "
+            //     //      << thi << " - " << val.t << " = "
+            //     //      << thi - val.t
+            //     //      << " < " << equation->GetRoots().tol << endl;
+            //     root_crossed = false;
+            //     cout << "TimeIntegrator::CheckRoots ignoring root at "
+            //          << thi << endl;
+            // }
 
             if (root_crossed) {
                 val.troot = thi;
