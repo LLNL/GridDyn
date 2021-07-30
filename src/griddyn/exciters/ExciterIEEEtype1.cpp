@@ -74,7 +74,7 @@ namespace exciters {
                                     double resid[],
                                     const solverMode& sMode)
     {
-        // std::cout << "start ExciterIEEEtype1::residual" << std::endl;
+        std::cout << "start ExciterIEEEtype1::residual" << std::endl;
 
         // std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
         //           << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
@@ -88,14 +88,14 @@ namespace exciters {
         double* rv = resid + offset;
         rv[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
         if (opFlags[outside_vlim]) {
-            // std::cout << "    ExciterIEEEtype1::residual outside_vlim" << std::endl;
+            std::cout << "    ExciterIEEEtype1::residual outside_vlim" << std::endl;
             if (opFlags[etrigger_high]) {
                 rv[1] = esp[1];
             } else {
                 rv[1] = esp[1];
             }
         } else {
-            // std::cout << "    ExciterIEEEtype1::residual inside_vlim" << std::endl;
+            std::cout << "    ExciterIEEEtype1::residual inside_vlim" << std::endl;
             rv[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf +
                      Ka * (Vref + vBias - inputs[voltageInLocation])) /
                     Ta -
