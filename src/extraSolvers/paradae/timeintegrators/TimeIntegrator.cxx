@@ -73,8 +73,8 @@ namespace paradae {
 
         /* Treat exceeding limits */
         if (limit_exceeded) {
-            // cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
-            equation->limit_crossings(time, y, dy, flimit);
+            cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
+            //equation->limit_crossings(time, y, dy, flimit);
         } else {
             // cout << "ParaDAE::TimeIntegrator::CheckLimits with limits" << endl;
         }
