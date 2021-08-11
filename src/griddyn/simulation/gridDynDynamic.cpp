@@ -1453,6 +1453,8 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              const solverMode& sMode) noexcept
 {
     // std::cout << "gridDyn::gridDynSimulation::limitCheckingFunction" << std::endl;
+    currentTime = time;
+    setState(time, state, dstate_dt, sMode);
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     limitTest(noInputs, sD, limits, sMode);
