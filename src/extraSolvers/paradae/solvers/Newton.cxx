@@ -91,8 +91,6 @@ namespace paradae {
 
         if (std::isnan(residual_fx) || std::isnan(residual_dx) || std::isinf(residual_fx) ||
             std::isinf(residual_dx)) {
-            cout << "Newton exit on BAD failure : res_fx = " << residual_fx
-                 << ", res_dx = " << residual_dx << endl;
             cerr << "Newton exit on BAD failure : res_fx = " << residual_fx
                  << ", res_dx = " << residual_dx << endl;
 #ifdef DEBUG_NEWTON
@@ -102,18 +100,17 @@ namespace paradae {
             PVector hi;
             for (int i = 0; i < it; i++) {
                 history_x.GetPVector(i, hi);
+                cerr << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
                 file << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
             }
             file.close();
             delete[] history_dx;
             delete[] history_fx;
-            app->GetCurrentJacobian()->dump("newton_mat.dat");
+            //app->GetCurrentJacobian()->dump("newton_mat.dat");
             //abort();
 #endif
             throw NEWTON_INF_NAN;
         } else if (it >= max_iter && residual_fx >= 1) {
-            cout << "Newton exit on failure : res_fx = " << residual_fx
-                 << ", res_dx = " << residual_dx << endl;
             cerr << "Newton exit on failure : res_fx = " << residual_fx
                  << ", res_dx = " << residual_dx << endl;
 #ifdef DEBUG_NEWTON
@@ -123,8 +120,8 @@ namespace paradae {
             PVector hi;
             for (int i = 0; i < it; i++) {
                 history_x.GetPVector(i, hi);
+                cerr << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
                 file << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
-                cout << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
             }
             file.close();
             delete[] history_dx;
@@ -135,6 +132,16 @@ namespace paradae {
             throw NEWTON_NOT_CONVERGED;
         } else {
 #ifdef DEBUG_NEWTON
+            ofstream file;
+            file.open("newton_hist");
+            file << setprecision(20);
+            PVector hi;
+            for (int i = 0; i < it; i++) {
+                history_x.GetPVector(i, hi);
+                cerr << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
+                file << i << " " << history_dx[i] << " " << history_fx[i] << " " << hi << endl;
+            }
+            file.close();
             delete[] history_dx;
             delete[] history_fx;
 #endif

@@ -118,6 +118,7 @@ void listMaintainer::residual(const IOdata& inputs,
                               double resid[],
                               const solverMode& sMode)
 {
+    std::cout << "listMaintainer::residual" << std::endl;
     if (!isListValid(sMode)) {
         return;
     }

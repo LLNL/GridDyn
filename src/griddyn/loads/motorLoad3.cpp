@@ -187,6 +187,8 @@ namespace loads {
                               double resid[],
                               const solverMode& sMode)
     {
+        std::cout << "motorLoad3::residual" << std::endl;
+
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, resid, sMode, this);
 

@@ -690,6 +690,8 @@ void sensor::residual(const IOdata& inputs,
                       double resid[],
                       const solverMode& sMode)
 {
+    std::cout << "sensor::residual" << std::endl;
+
     if (stateSize(sMode) > 0) {
         auto blks = static_cast<index_t>(filterBlocks.size());
         for (index_t kk = 0; kk < blks; ++kk) {

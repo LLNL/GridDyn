@@ -265,6 +265,8 @@ namespace loads {
                                  double resid[],
                                  const solverMode& sMode)
     {
+        std::cout << "aggregateLoad::residual" << std::endl;
+
         for (auto& ld : subLoads) {
             if (ld->stateSize(sMode) > 0) {
                 ld->residual(inputs, sD, resid, sMode);

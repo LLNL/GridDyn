@@ -325,6 +325,8 @@ void dcBus::residual(const IOdata& inputs,
                      double resid[],
                      const solverMode& sMode)
 {
+    std::cout << "dcBus::residual" << std::endl;
+
     gridBus::residual(inputs, sD, resid, sMode);
     auto Voffset = offsets.getVOffset(sMode);
     // output

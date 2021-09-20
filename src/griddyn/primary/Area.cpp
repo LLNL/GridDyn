@@ -1654,6 +1654,8 @@ void Area::residual(const IOdata& inputs,
                     double resid[],
                     const solverMode& sMode)
 {
+    std::cout << "Area::residual" << std::endl;
+
     opObjectLists->residual(inputs, sD, resid, sMode);
 
     // next do any internal states

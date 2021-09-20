@@ -1785,6 +1785,8 @@ void gridComponent::residual(const IOdata& inputs,
                              double resid[],
                              const solverMode& sMode)
 {
+    std::cout << "gridComponent::residual" << std::endl;
+
     for (auto& sub : subObjectList) {
         if (!sub->checkFlag(separate_processing)) {
             if (sub->stateSize(sMode) > 0) {

@@ -74,7 +74,7 @@ namespace exciters {
                                     double resid[],
                                     const solverMode& sMode)
     {
-        // std::cout << "start ExciterIEEEtype1::residual" << std::endl;
+        std::cout << "start ExciterIEEEtype1::residual" << std::endl;
 
         // std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high]
         //           << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
@@ -86,6 +86,7 @@ namespace exciters {
         const double* es = sD.state + offset;
         const double* esp = sD.dstate_dt + offset;
         double* rv = resid + offset;
+
         rv[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
         if (opFlags[outside_vlim]) {
             std::cout << "    ExciterIEEEtype1::residual outside_vlim" << std::endl;
@@ -102,6 +103,26 @@ namespace exciters {
                 esp[1];
         }
         rv[2] = (-es[2] + es[0] * Kf / Tf) / Tf - esp[2];
+
+        std::cout << "inputs[voltageInLocation]:  " << inputs[voltageInLocation] << std::endl;
+        std::cout << "Ke:     " << Ke     << std::endl;
+        std::cout << "Ka:     " << Ka     << std::endl;
+        std::cout << "Kf:     " << Kf     << std::endl;
+        std::cout << "Aex:    " << Aex    << std::endl;
+        std::cout << "Bex:    " << Bex    << std::endl;
+        std::cout << "Te:     " << Te     << std::endl;
+        std::cout << "Tf:     " << Tf     << std::endl;
+        std::cout << "Vref:   " << Vref   << std::endl;
+        std::cout << "vBias:  " << vBias  << std::endl;
+        std::cout << "es[0]:  " << es[0]  << std::endl;
+        std::cout << "es[1]:  " << es[1]  << std::endl;
+        std::cout << "es[1]:  " << es[2]  << std::endl;
+        std::cout << "esp[0]: " << esp[0] << std::endl;
+        std::cout << "esp[1]: " << esp[1] << std::endl;
+        std::cout << "esp[2]: " << esp[2] << std::endl;
+        std::cout << "rv[0]:  " << rv[0]  << std::endl;
+        std::cout << "rv[1]:  " << rv[1]  << std::endl;
+        std::cout << "rv[2]:  " << rv[2]  << std::endl;
     }
 
     void
@@ -198,37 +219,37 @@ namespace exciters {
         // std::cout << "    gridDyn::ExciterIEEEtype1::rootTest ";
         // std::cout << std::setprecision(16);
 
-        std::cout << "    es[0]  = " << std::setw(10) << es[0]
-                  << ", es[1]  = " << std::setw(10) << es[1]
-                  << ", es[2]  = " << std::setw(10) << es[2]
-                  << ", esp[0] = " << std::setw(10) << esp[0]
-                  << ", esp[1] = " << std::setw(10) << esp[1]
-                  << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
-        std::cout << "    rootOffset = " << rootOffset
-                  << ", Kf = " << Kf
-                  << ", Tf = " << Tf
-                  << ", Vref = " << Vref
-                  << ", vBias = " << vBias
-                  << ", voltageInLocation = " << voltageInLocation
-                  << ", inputs[voltageInLocation] = " << inputs[voltageInLocation]
-                  << ", Ka = " << Ka
-                  << ", Ta = " << Ta << std::endl;
+        // std::cout << "    es[0]  = " << std::setw(10) << es[0]
+        //           << ", es[1]  = " << std::setw(10) << es[1]
+        //           << ", es[2]  = " << std::setw(10) << es[2]
+        //           << ", esp[0] = " << std::setw(10) << esp[0]
+        //           << ", esp[1] = " << std::setw(10) << esp[1]
+        //           << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
+        // std::cout << "    rootOffset = " << rootOffset
+        //           << ", Kf = " << Kf
+        //           << ", Tf = " << Tf
+        //           << ", Vref = " << Vref
+        //           << ", vBias = " << vBias
+        //           << ", voltageInLocation = " << voltageInLocation
+        //           << ", inputs[voltageInLocation] = " << inputs[voltageInLocation]
+        //           << ", Ka = " << Ka
+        //           << ", Ta = " << Ta << std::endl;
 
         if (opFlags[outside_vlim]) {
             roots[rootOffset] = es[2] - es[0] * Kf / Tf +
                 (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
-            std::cout << "    gridDyn::ExciterIEEEtype1::rootTest outside vlim"
-                      << " roots = " << std::setw(10) << roots[rootOffset];
+            // std::cout << "    gridDyn::ExciterIEEEtype1::rootTest outside vlim"
+            //           << " roots = " << std::setw(10) << roots[rootOffset];
         } else {
             roots[rootOffset] = std::min(Vrmax - es[1], es[1] - Vrmin) + 0.00001;
-            std::cout << "    gridDyn::ExciterIEEEtype1::rootTest inside vlim"
-                      << " roots = " << std::setw(10) << roots[rootOffset];
+            // std::cout << "    gridDyn::ExciterIEEEtype1::rootTest inside vlim"
+            //           << " roots = " << std::setw(10) << roots[rootOffset];
             if (es[1] >= Vrmax) {
                 opFlags.set(etrigger_high);
-                std::cout << " etrigger_high";
+                // std::cout << " etrigger_high";
             }
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
 
     change_code ExciterIEEEtype1::rootCheck(const IOdata& inputs,

@@ -426,6 +426,7 @@ void Block::residual(const IOdata& inputs,
                      double resid[],
                      const solverMode& sMode)
 {
+    std::cout << "Block::residual" << std::endl;
     blockResidual(inputs[0], getRateInput(inputs), sD, resid, sMode);
 }
 

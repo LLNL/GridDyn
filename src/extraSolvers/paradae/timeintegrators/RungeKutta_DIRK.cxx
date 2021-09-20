@@ -30,6 +30,8 @@ namespace paradae {
 
     Solver_App_RK* RungeKutta_DIRK::BuildSolverApp(Real t, Real dt, const Vector& x0)
     {
+        std::cout << "RungeKutta_DIRK::BuildSolverApp" << std::endl;
+        std::cout << "x0: " << x0 << std::endl;
         return new Solver_App_DIRK(rtol, atol, t + dt, dt, x0, this);
     }
 

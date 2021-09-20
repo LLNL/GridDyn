@@ -92,6 +92,7 @@ void Exciter::residual(const IOdata& inputs,
                        double resid[],
                        const solverMode& sMode)
 {
+    std::cout << "Exciter::residual" << std::endl;
     if (isAlgebraicOnly(sMode)) {
         return;
     }

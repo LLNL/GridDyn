@@ -61,6 +61,8 @@ namespace governors {
                                  double resid[],
                                  const solverMode& sMode)
     {
+        std::cout << "GovernorTgov1::residual" << std::endl;
+
         // double omega = getControlFrequency (inputs);
         double omega = inputs[govOmegaInLocation];
         auto Loc = offsets.getLocations(sD, resid, sMode, this);

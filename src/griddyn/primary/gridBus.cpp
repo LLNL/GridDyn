@@ -887,6 +887,8 @@ void gridBus::residual(const IOdata& inputs,
                        double resid[],
                        const solverMode& sMode)
 {
+    std::cout << "gridBus::residual" << std::endl;
+
     updateLocalCache(inputs, sD, sMode);
     if ((opFlags[low_voltage_check_flag]) && (outputs[voltageInLocation] < Vtol / 2.0) &&
         (isConnected())) {
@@ -1044,11 +1046,15 @@ void gridBus::updateLocalCache(const IOdata& /*inputs*/,
                                const stateData& sD,
                                const solverMode& sMode)
 {
+    std::cout << "gridBus::updateLocalCache" << std::endl;
+
     if (!S.needsUpdate(sD)) {
+        std::cout << "no update needed" << std::endl;
         return;
     }
     S.reset();
     if (!isConnected()) {
+        std::cout << "not connected" << std::endl;
         return;
     }
     outputs[voltageInLocation] = getVoltage(sD, sMode);

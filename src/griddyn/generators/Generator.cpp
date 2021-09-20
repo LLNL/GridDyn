@@ -660,6 +660,7 @@ void Generator::residual(const IOdata& /*inputs*/,
                          double resid[],
                          const solverMode& sMode)
 {
+    std::cout << "Generator::residual" << std::endl;
     if ((!isDynamic(sMode)) &&
         (opFlags[indirect_voltage_control])) {  // the bus is managing a remote bus voltage
         double voltage = remoteBus->getVoltage(sD, sMode);

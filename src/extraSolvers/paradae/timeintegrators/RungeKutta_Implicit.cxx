@@ -85,6 +85,8 @@ namespace paradae {
                                    RungeKutta_Implicit* rk_):
         Solver_App_RK(rtol_, atol_, x0_, rk_)
     {
+        std::cout << "RungeKutta_App_IRK::Solver_App_IRK" << std::endl;
+        std::cout << "x0_: " << x0_ << std::endl;
         tn = tn_;
         dt = dt_;
         x0 = x0_;

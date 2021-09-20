@@ -762,6 +762,7 @@ void DynamicGenerator::residual(const IOdata& inputs,
                                 double resid[],
                                 const solverMode& sMode)
 {
+    std::cout << "DynamicGenerator::residual" << std::endl;
     if (!isDynamic(sMode)) {  // the bus is managing a remote bus voltage
         Generator::residual(inputs, sD, resid, sMode);
         if (!opFlags[has_subobject_pflow_states]) {

@@ -259,6 +259,8 @@ namespace loads {
                              double resid[],
                              const solverMode& sMode)
     {
+        std::cout << "motorLoad::residual" << std::endl;
+
         if (isDynamic(sMode)) {
             if (hasDifferential(sMode)) {
                 derivative(inputs, sD, resid, sMode);

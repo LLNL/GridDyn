@@ -73,6 +73,8 @@ namespace governors {
                                       double resid[],
                                       const solverMode& sMode)
     {
+        std::cout << "GovernorIeeeSimple::residual" << std::endl;
+
         if (isAlgebraicOnly(sMode)) {
             return;
         }
@@ -81,6 +83,9 @@ namespace governors {
 
         Loc.destDiffLoc[0] -= Loc.dstateLoc[0];
         Loc.destDiffLoc[1] -= Loc.dstateLoc[1];
+
+        std::cout << "Loc.destDiffLoc[0]: " << Loc.destDiffLoc[0] << std::endl;
+        std::cout << "Loc.destDiffLoc[1]: " << Loc.destDiffLoc[1] << std::endl;
     }
 
     void GovernorIeeeSimple::derivative(const IOdata& inputs,

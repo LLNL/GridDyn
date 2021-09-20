@@ -118,6 +118,8 @@ namespace genmodels {
                                     double resid[],
                                     const solverMode& sMode)
     {
+        std::cout << "GenModelInverter::residual" << std::endl;
+
         if (!hasAlgebraic(sMode)) {
             return;
         }

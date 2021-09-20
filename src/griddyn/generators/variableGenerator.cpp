@@ -122,6 +122,7 @@ void variableGenerator::residual(const IOdata& inputs,
                                  double resid[],
                                  const solverMode& sMode)
 {
+    std::cout << "variableGenerator::residual" << std::endl;
     DynamicGenerator::residual(inputs, sD, resid, sMode);
     if ((m_source != nullptr) && (m_source->isEnabled())) {
         m_source->residual(inputs, sD, resid, sMode);

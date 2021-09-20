@@ -62,17 +62,35 @@ namespace genmodels {
                              double resid[],
                              const solverMode& sMode)
     {
+        std::cout << "GenModel4::residual" << std::endl;
+
         auto Loc = offsets.getLocations(sD, resid, sMode, this);
         const double* gm = Loc.algStateLoc;
         const double* gmd = Loc.diffStateLoc;
 
         updateLocalCache(inputs, sD, sMode);
 
+        // std::cout << "gm[0]:  " << gm[0]  << std::endl;
+        // std::cout << "gm[1]:  " << gm[1]  << std::endl;
+
+        // std::cout << "gmd[0]:  " << gm[0]  << std::endl;
+        // std::cout << "gmd[1]:  " << gm[1]  << std::endl;
+        // std::cout << "gmd[2]:  " << gm[2]  << std::endl;
+        // std::cout << "gmd[3]:  " << gm[3]  << std::endl;
+
         // Id and Iq
         if (hasAlgebraic(sMode)) {
             double* rva = Loc.destLoc;
             rva[0] = Vd + Rs * gm[0] + (Xqp)*gm[1] - gmd[2];
             rva[1] = Vq + Rs * gm[1] - (Xdp)*gm[0] - gmd[3];
+
+            // std::cout << "Vd:     " << Vd << std::endl;
+            // std::cout << "Vq:     " << Vq << std::endl;
+            // std::cout << "Rs:     " << Vd << std::endl;
+            // std::cout << "Xqp:    " << Xqp  << std::endl;
+            // std::cout << "Xdp:    " << Xdp  << std::endl;
+            std::cout << "rva[0]: " << rva[0] << std::endl;
+            std::cout << "rva[1]: " << rva[1] << std::endl;
         }
 
         if (hasDifferential(sMode)) {
@@ -90,7 +108,27 @@ namespace genmodels {
             // omega
             double Pe = gmd[2] * gm[0] + gmd[3] * gm[1] + (Xdp - Xqp) * gm[0] * gm[1];
             rvd[1] = 0.5 * (Pmt - Pe - D * (gmd[1] - 1.0)) / H - gmp[1];
+
+            // std::cout << "systemBaseFrequency: " << systemBaseFrequency << std::endl;
+            // std::cout << "Xq:   " << Xq   << std::endl;
+            // std::cout << "Eft:  " << Eft  << std::endl;
+            // std::cout << "Tqop: " << Tqop << std::endl;
+            // std::cout << "Pmt:  " << Pmt  << std::endl;
+            // std::cout << "Pe:   " << Pe   << std::endl;
+            // std::cout << "D:    " << D    << std::endl;
+            // std::cout << "H:    " << H    << std::endl;
+
+            // std::cout << "gmp[0]: " << gmp[0] << std::endl;
+            // std::cout << "gmp[1]: " << gmp[1] << std::endl;
+            // std::cout << "gmp[2]: " << gmp[2] << std::endl;
+            // std::cout << "gmp[3]: " << gmp[3] << std::endl;
+
+            std::cout << "rvd[0]: " << rvd[0] << std::endl;
+            std::cout << "rvd[1]: " << rvd[1] << std::endl;
+            std::cout << "rvd[2]: " << rvd[2] << std::endl;
+            std::cout << "rvd[3]: " << rvd[3] << std::endl;
         }
+
         // if (parent->parent->name == "BUS_31")
         //   {
         //   printf("[%d]t=%f gmp[1]=%f Vq=%f, Vd=%f,Pdiff=%f A=%f, B=%f, C=%f Id=%f,

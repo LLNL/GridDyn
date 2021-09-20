@@ -79,6 +79,8 @@ namespace governors {
                                   double resid[],
                                   const solverMode& sMode)
     {
+        std::cout << "GovernorReheat::residual" << std::endl;
+
         auto offset = offsets.getAlgOffset(sMode);
         const double* gsp = sD.dstate_dt + offset;
         if (isAlgebraicOnly(sMode)) {

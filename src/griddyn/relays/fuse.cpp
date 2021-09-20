@@ -316,6 +316,8 @@ namespace relays {
                         double resid[],
                         const solverMode& sMode)
     {
+        std::cout << "fuse::residual" << std::endl;
+
         if (useI2T) {
             auto offset = offsets.getDiffOffset(sMode);
             const double* dst = sD.dstate_dt + offset;

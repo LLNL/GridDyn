@@ -156,6 +156,8 @@ namespace sources {
                                double resid[],
                                const solverMode& sMode)
     {
+        std::cout << "blockSource::residual" << std::endl;
+
         double srcOut = m_output;
         double srcDout = 0.0;
         if (src != nullptr) {

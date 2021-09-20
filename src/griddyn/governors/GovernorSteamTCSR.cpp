@@ -71,6 +71,8 @@ namespace governors {
                                      double resid[],
                                      const solverMode& sMode)
     {
+        std::cout << "GovernorSteamTCSR::residual" << std::endl;
+
         auto offset = offsets.getAlgOffset(sMode);
         resid[offset] = 0;
         resid[offset + 1] = 0;

@@ -870,6 +870,8 @@ namespace links {
                                          double resid[],
                                          const solverMode& sMode)
     {
+        std::cout << "adjustableTransformer::residual" << std::endl;
+
         double v1;
 
         auto offset = offsets.getAlgOffset(sMode);

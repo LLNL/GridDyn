@@ -89,8 +89,13 @@ namespace paradae {
                                    Vector& Fydy)
     {
         nb_calls++;
+        std::cout << "EquationGridDyn::function" << std::endl;
+        std::cout << "  t:    " << t << std::endl;
+        std::cout << "  y:    " << y << std::endl;
+        std::cout << "  dy:   " << dy << std::endl;
         // gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(),cDaeSolverMode);
         gds->residualFunction(t, y.GetData(), dy.GetData(), Fydy.GetData(), *mode);
+        std::cout << "  Fydy: " << Fydy << std::endl;
     }
 
     void EquationGridDyn::jacobian_ypcdy(const Real t,
@@ -105,6 +110,10 @@ namespace paradae {
         SparseMatrix& pJ = dynamic_cast<SparseMatrix&>(J);
         paradaeArrayData a1(&pJ);
         // gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
+        std::cout << "EquationGridDyn::jacobian_ypcdy" << std::endl;
+        std::cout << "  t:    " << t  << std::endl;
+        std::cout << "  y:    " << y  << std::endl;
+        std::cout << "  dy:   " << dy << std::endl;
         gds->jacobianFunction(t, y.GetData(), dy.GetData(), a1, cj, *mode);
         // static int switcheroo = 0;
         // if(switcheroo == 0)
@@ -113,6 +122,7 @@ namespace paradae {
         //   J.dump("new_jac.txt");
         //   switcheroo = 1;
         //}
+        std::cout << "  J:    " << J << std::endl;
     }
 
     void EquationGridDyn::init(const Real t, Vector& y) { y.CopyData(y0); }

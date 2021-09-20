@@ -51,6 +51,7 @@ namespace exciters {
                                double resid[],
                                const solverMode& sMode)
     {
+        std::cout << "ExciterDC2A::residual" << std::endl;
         if (isAlgebraicOnly(sMode)) {
             return;
         }

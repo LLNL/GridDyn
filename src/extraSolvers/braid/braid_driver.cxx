@@ -19,8 +19,9 @@
 #include <iomanip>
 #include <sstream>
 
+//#define STATS_NEWTON
 #ifdef STATS_NEWTON
-#    include "solvers/NewtonStats.h"
+#    include "../paradae/solvers/NewtonStats.h"
 #endif
 
 using namespace std;
@@ -159,7 +160,7 @@ namespace braid {
                             braid_StepStatus status,
                             int level)
     {
-        cout << "my_Step_OnOnePoint" << endl;
+        // cout << "my_Step_OnOnePoint" << endl;
 
         Real tstart; /* current time */
         Real tstop; /* evolve to this time*/
@@ -283,12 +284,18 @@ namespace braid {
         bool have_a_ustop = false;
         SMultiVector ustop_tprev(ns, 1);
         if (ustop == u || ustop->tprev.GetM() == 0) {
+            std::cout << "Case 1" << std::endl;
             ustop_tprev.CopyData(u->tprev);
             for (int i = 0; i < ns; i++)
                 ustop_tprev(i) += tstop - tstart;
         } else {
+            std::cout << "Case 2" << std::endl;
             ustop_tprev.CopyData(ustop->tprev);
-            if (ustop->xprev.GetM() > 0) have_a_ustop = true;
+            if (ustop->xprev.GetM() > 0)
+            {
+                std::cout << "Case 2 Have Ustop" << std::endl;
+                have_a_ustop = true;
+            }
         }
 
         /* Set the data structure (evaluates root function at current state) */
@@ -331,8 +338,12 @@ namespace braid {
             //                                app->alloc_data.flimit);
 
             cout << "Pre AdvanceStep" << endl;
-            cout << "x:  " << app->alloc_data.xprev << endl;
-            cout << "xd: " << app->alloc_data.dxprev << endl;
+            cout << "t:       " << t << endl;
+            cout << "dt:      " << app->alloc_data.next_dt << endl;
+            cout << "x prev:  " << app->alloc_data.xprev << endl;
+            cout << "xd prev: " << app->alloc_data.dxprev << endl;
+            cout << "x next:  " << app->alloc_data.xnext << endl;
+            cout << "xd next: " << app->alloc_data.dxnext << endl;
 
             /* Take Step */
             return_code = app->ode->GetTI()->AdvanceStep(app->alloc_data);
@@ -340,6 +351,10 @@ namespace braid {
             cout << "Post AdvanceStep" << endl;
             cout << "x:  " << app->alloc_data.xnext << endl;
             cout << "xd: " << app->alloc_data.dxnext << endl;
+
+#ifdef STATS_NEWTON
+            newton_stats.ShowStats();
+#endif
 
             /* Get refinement from local error measure */
             if (t <= app->ode->GetEq()->GetTmax()) {
@@ -550,7 +565,7 @@ namespace braid {
                          braid_Vector* fu_ptr,
                          braid_CoarsenRefStatus status)
     {
-        cout << "my_SpatialRefine" << endl;
+        // cout << "my_SpatialRefine" << endl;
 
         my_Clone(app, cu, fu_ptr);
 
@@ -701,7 +716,7 @@ namespace braid {
                           braid_Vector* cu_ptr,
                           braid_CoarsenRefStatus status)
     {
-        cout << "my_SpatialCoarsen" << endl;
+        // cout << "my_SpatialCoarsen" << endl;
 
         my_Clone(app, fu, cu_ptr);
 
@@ -859,7 +874,7 @@ namespace braid {
 
     int my_Init(braid_App app, Real t, braid_Vector* u_ptr)
     {
-        cout << "my_Init" << endl;
+        // cout << "my_Init" << endl;
 
 #ifdef TIMER_BRAID
         global_timer.Start("binitv", "Init Vector", "brun");
