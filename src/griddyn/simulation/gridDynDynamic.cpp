@@ -40,12 +40,10 @@ int gridDynSimulation::dynInitialize(coreTime tStart)
         *defDynDiffMode :
         *defDAEMode;
 
-    std::cout << "makeReady" << std::endl;
     int retval = makeReady(gridState_t::POWERFLOW_COMPLETE, tempSm);
     if (retval != FUNCTION_EXECUTION_SUCCESS) {
         return retval;
     }
-    std::cout << "makeReady" << std::endl;
 
     auto dynData = getSolverInterface(tempSm);
     const solverMode& sm = dynData->getSolverMode();
@@ -265,7 +263,6 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         {  // the most likely cause of this is numerical instability in recorders and events
             timeReturn = nextStop;
         } else {
-            //std::cout << "runDynamicSolverStep 1" << std::endl;
             runDynamicSolverStep(dynData, nextStop, timeReturn);
         }
 
@@ -318,14 +315,7 @@ int gridDynSimulation::dynamicDAE(coreTime tStop)
         // transmit the current state to the various objects for updates and recorders
         setState(currentTime, dynData->state_data(), dynData->deriv_data(), sMode);
         updateLocalCache();
-
-        //std::cout << "post-updateLocalCache" << std::endl;
-        //printflags();
-
         auto ret = EvQ->executeEvents(currentTime);
-
-        //std::cout << "post-executeEvents" << std::endl;
-        //printflags();
 
         if (ret > change_code::non_state_change) {
             dynamicCheckAndReset(sMode);
@@ -1208,7 +1198,6 @@ int gridDynSimulation::rootFindingFunction(coreTime time,
                                            double roots[],
                                            const solverMode& sMode) noexcept
 {
-    //std::cout << "gridDynSimulation::rootFindingFunction" << std::endl;
     stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     rootTest(noInputs, sD, roots, sMode);
@@ -1250,12 +1239,12 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              double limits[],
                                              const solverMode& sMode) noexcept
 {
+    stateData sD(time, state, dstate_dt, residCount);
+
     currentTime = time;
     setState(time, state, dstate_dt, sMode);
-    stateData sD(time, state, dstate_dt, residCount);
     fillExtraStateData(sD, sMode);
     limitTest(noInputs, sD, limits, sMode);
-    // dynamicCheckAndReset(sMode);
     return FUNCTION_EXECUTION_SUCCESS;
 }
 

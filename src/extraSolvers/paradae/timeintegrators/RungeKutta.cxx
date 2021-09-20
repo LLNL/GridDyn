@@ -40,14 +40,6 @@ namespace paradae {
 
     RCODE RungeKutta::AdvanceStep(DATA_Struct& val, int iter_ref)
     {
-        cout << "RungeKutta::AdvanceStep Start" << endl;
-        cout << "t:       " << val.t        << endl;
-        cout << "dt:      " << val.next_dt  << endl;
-        cout << "x prev:  " << val.xprev    << endl;
-        cout << "xd prev: " << val.dxprev   << endl;
-        cout << "x next:  " << val.xnext    << endl;
-        cout << "xd next: " << val.dxnext   << endl;
-
         nb_steps_done++;
         PVector x0;
         val.xprev.GetPVector(0, x0);
@@ -62,7 +54,6 @@ namespace paradae {
         for (int i = 0; i < nb_steps; i++) {
             allK.GetPVector(i, Ki);
             Ki.CopyData(val.dxprev);
-            cout << "Ki[" << i << "]: " << Ki << endl;
         }
 
         app = this->BuildSolverApp(val.t, val.used_dt, x0);
@@ -85,14 +76,6 @@ namespace paradae {
                 this->EstimateNextStepSize(x0, val.xnext, allK, val.used_dt, refinement);
             val.next_dt = val.used_dt / refinement;
         }
-
-        cout << "RungeKutta::AdvanceStep End" << endl;
-        cout << "t:       " << val.t        << endl;
-        cout << "dt:      " << val.next_dt  << endl;
-        cout << "x prev:  " << val.xprev    << endl;
-        cout << "xd prev: " << val.dxprev   << endl;
-        cout << "x next:  " << val.xnext    << endl;
-        cout << "xd next: " << val.dxnext   << endl;
 
         delete app;
         return this->PostStep(val, success_solver, root_crossed, success_error_test);
