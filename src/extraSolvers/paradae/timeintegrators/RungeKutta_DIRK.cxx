@@ -15,7 +15,7 @@ namespace paradae {
 
     void RungeKutta_DIRK::InitArray()
     {
-        allK_previous.Resize(nb_steps, size_x);
+        // allK_previous.Resize(nb_steps, size_x);
         CurrentJacobian = new DBlockTriMatrix(nb_steps, size_x, dense_mat);
     }
 

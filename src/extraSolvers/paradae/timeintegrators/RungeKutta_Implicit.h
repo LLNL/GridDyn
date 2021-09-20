@@ -40,7 +40,7 @@ namespace paradae {
         virtual void InitArray();
 
       public:
-        SMultiVector allK_previous;
+        // SMultiVector allK_previous; // creates dependence on prior time step
         RungeKutta_Implicit(Equation* eq, bool varstep);
         virtual ~RungeKutta_Implicit();
         virtual bool SolveInnerSteps(Real t, Real used_dt, const Vector& x0, SMultiVector& allK);

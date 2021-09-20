@@ -18,7 +18,7 @@ namespace paradae {
 
     void RungeKutta_SDIRK::InitArray()
     {
-        allK_previous.Resize(nb_steps, size_x);
+        // allK_previous.Resize(nb_steps, size_x);
         if (this->UseDenseMatrix())
             CurrentJacobian = new DenseMatrix(size_x);
         else
@@ -63,7 +63,7 @@ namespace paradae {
             }
             catch (...) {
                 if (do_braid) {
-                    allK.CopyData(allK_previous);
+                    // allK.CopyData(allK_previous);
                     success = false;
                     return false;
                 } else {

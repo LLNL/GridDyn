@@ -22,7 +22,7 @@ namespace paradae {
 
     void RungeKutta_Implicit::InitArray()
     {
-        allK_previous.Resize(nb_steps, size_x);
+        // allK_previous.Resize(nb_steps, size_x);
         if (CurrentJacobian == NULL) {
             if (this->UseDenseMatrix())
                 CurrentJacobian = new DenseMatrix(nb_steps * size_x);
@@ -59,12 +59,19 @@ namespace paradae {
         bool success = true;
 
         try {
-            allK.CopyData(allK_previous);
+            // allK.CopyData(allK_previous);
+            cout << "RungeKutta_Implicit::SolveInnerStep" << endl;
+            cout << "x0: "<< x0 << endl;
+            PVector Ki;
+            for (int i = 0; i < nb_steps; i++) {
+                allK.GetPVector(i, Ki);
+                cout << "Ki[" << i << "]: " << Ki << endl;
+            }
             // Newton newton(100);
             newton.Solve(app, allK);
         }
         catch (...) {
-            allK.CopyData(allK_previous);
+            // allK.CopyData(allK_previous);
             if (!do_braid) {
                 LinearSearch solver2(1000);
                 solver2.Solve(app, allK);
@@ -73,7 +80,7 @@ namespace paradae {
                 return false;
             }
         }
-        allK_previous.CopyData(allK);
+        // allK_previous.CopyData(allK);
         return success;
     }
 
