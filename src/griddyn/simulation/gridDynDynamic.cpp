@@ -1239,7 +1239,7 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              double limits[],
                                              const solverMode& sMode) noexcept
 {
-    stateData sD(time, state, dstate_dt, residCount);
+    stateData sD(time, state, dstate_dt);
 
     currentTime = time;
     setState(time, state, dstate_dt, sMode);
