@@ -676,6 +676,8 @@ void gridDynSimulation::handleEarlySolverReturn(int retval,
 
 bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_code change)
 {
+    std::cout << "gridDynSimulation::dynamicCheckAndReset probeStepTime = " << probeStepTime << std::endl;
+
     auto dynData = getSolverInterface(sMode);
     if (opFlags[connectivity_change_flag]) {
         checkNetwork(network_check_type::simplified);
@@ -683,8 +685,10 @@ bool gridDynSimulation::dynamicCheckAndReset(const solverMode& sMode, change_cod
     if ((opFlags[state_change_flag]) || (change == change_code::state_count_change)) {
         // we changed object states so we have to do a full reset
         if (checkEventsForDynamicReset(currentTime + probeStepTime, sMode)) {
+            std::cout << "gridDynSimulation::dynamicCheckAndReset return after checkEventsForDynamicReset" << std::endl;
             return true;
         }
+        std::cout << "gridDynSimulation::dynamicCheckAndReset reInitDyn" << std::endl;
         reInitDyn(sMode);
     } else if ((opFlags[object_change_flag]) || (change == change_code::object_change)) {
         // the object count changed

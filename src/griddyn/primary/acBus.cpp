@@ -1615,6 +1615,9 @@ void acBus::residual(const IOdata& inputs,
                 assert(!std::isnan(S.linkQ));
 
                 resid[Voffset] = S.sumQ();
+                std::cout << "S.linkQ  = " << S.linkQ  << std::endl;
+                std::cout << "S.loadQ  = " << S.loadQ  << std::endl;
+                std::cout << "S.genQ   = " << S.genQ   << std::endl;
                 std::cout << "S.sumQ() = " << S.sumQ() << std::endl;
 #ifdef TRACE_LOG_ENABLE
                 if (std::abs(resid[Voffset]) > 0.5) {
@@ -1627,7 +1630,7 @@ void acBus::residual(const IOdata& inputs,
                 std::cout << "sD.state[Voffset] = " << sD.state[Voffset] << std::endl;
                 std::cout << "voltage           = " << voltage           << std::endl;
             }
-            std::cout << "resid[Voffset] = " << resid[Voffset] << std::endl;
+            std::cout << "resid[Voffset] = resid[" << Voffset << "] = " << resid[Voffset] << std::endl;
         }
         if (Aoffset != kNullLocation) {
             if (useAngle(sMode)) {
