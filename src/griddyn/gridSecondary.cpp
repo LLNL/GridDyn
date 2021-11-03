@@ -119,6 +119,7 @@ double gridSecondary::getReactivePower(const IOdata& /*inputs*/,
                                        const stateData& /*sD*/,
                                        const solverMode& /*sMode*/) const
 {
+    std::cout << "gridSecondary::getReactivePower(...)" << std::endl;
     return 0.0;
 }
 
@@ -128,6 +129,7 @@ double gridSecondary::getRealPower() const
 }
 double gridSecondary::getReactivePower() const
 {
+    std::cout << "gridSecondary::getReactivePower()" << std::endl;
     return 0.0;
 }
 double gridSecondary::getAdjustableCapacityUp(coreTime /*time*/) const

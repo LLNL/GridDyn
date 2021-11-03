@@ -1090,7 +1090,11 @@ void gridBus::updateLocalCache(const IOdata& /*inputs*/,
     if (isExtended(sMode)) {
         auto offset = offsets.getAlgOffset(sMode);
         S.loadP = sD.state[offset];
+        std::cout << "gridBus::updateLocalCache isExtended" << std::endl;
+        std::cout << "S.loadQ " << S.loadQ << std::endl;
+        std::cout << "voltage " << voltage << std::endl;
         S.loadQ = sD.state[offset + 1];
+        std::cout << "S.loadQ " << S.loadQ << std::endl;
         return;
     }
 
@@ -1098,7 +1102,11 @@ void gridBus::updateLocalCache(const IOdata& /*inputs*/,
         if (ld->isConnected()) {
             ld->updateLocalCache(outputs, sD, sMode);
             S.loadP += ld->getRealPower(outputs, sD, sMode);
+            std::cout << "gridBus::updateLocalCache attachedLoads" << std::endl;
+            std::cout << "S.loadQ " << S.loadQ << std::endl;
+            std::cout << "voltage " << voltage << std::endl;
             S.loadQ += ld->getReactivePower(outputs, sD, sMode);
+            std::cout << "S.loadQ += ld->getReactivePower(outputs, sD, sMode) " << S.loadQ << std::endl;
         }
     }
 
@@ -1147,7 +1155,11 @@ void gridBus::updateLocalCache()
     for (auto& load : attachedLoads) {
         if (load->isConnected()) {
             S.loadP += load->getRealPower(voltage);
+            std::cout << "gridBus::upadteLocalCache" << std::endl;
+            std::cout << "S.loadQ " << S.loadQ << std::endl;
+            std::cout << "voltage " << voltage << std::endl;
             S.loadQ += load->getReactivePower(voltage);
+            std::cout << "S.loadQ += load->getReactivePower(voltage) " << S.loadQ << std::endl;
         }
     }
     for (auto& gen : attachedGens) {

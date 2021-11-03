@@ -747,6 +747,8 @@ double DynamicGenerator::getReactivePower(const IOdata& inputs,
                                           const stateData& sD,
                                           const solverMode& sMode) const
 {
+    std::cout << "DynamicGenerator::getReactivePower(...)" << std::endl;
+
     if (isDynamic(sMode))  // use as a proxy for dynamic state
     {
         double scale = machineBasePower / systemBasePower;

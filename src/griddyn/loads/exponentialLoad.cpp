@@ -96,6 +96,8 @@ namespace loads {
 
     double exponentialLoad::getReactivePower(double V) const
     {
+        std::cout << "exponentialLoad::getReactivePower" << std::endl;
+
         if (isConnected()) {
             double val = getQ();
             val *= pow(V, alphaQ);

@@ -241,6 +241,7 @@ double Load::getRealPower() const
 }
 double Load::getReactivePower() const
 {
+    std::cout << "Load::getReactivePower()" << std::endl;
     return Q;
 }
 double Load::getRealPower(const IOdata& /*inputs*/,
@@ -254,6 +255,7 @@ double Load::getReactivePower(const IOdata& /*inputs*/,
                               const stateData& /*sD*/,
                               const solverMode& /*sMode*/) const
 {
+    std::cout << "Load::getReactivePower(...)" << std::endl;
     return getReactivePower();
 }
 
@@ -263,6 +265,7 @@ double Load::getRealPower(const double /*V*/) const
 }
 double Load::getReactivePower(double /*V*/) const
 {
+    std::cout << "Load::getReactivePower(V)" << std::endl;
     return getReactivePower();
 }
 count_t Load::outputDependencyCount(index_t /*num*/, const solverMode& /*sMode*/) const

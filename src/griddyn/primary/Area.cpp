@@ -1324,11 +1324,17 @@ double Area::getLoadReactive() const
 {
     double loadQ = 0.0;
     for (auto* area : m_Areas) {
+        std::cout << "Area::getLoadReactive m_Areas" << std::endl;
+        std::cout << "loadQ " << loadQ << std::endl;
         loadQ += area->getLoadReactive();
+        std::cout << "loadQ += area->getLoadReactive(); " << loadQ << std::endl;
     }
     for (auto* bus : m_Buses) {
         if (bus->isConnected()) {
+            std::cout << "Area::getLoadReactive m_Buses" << std::endl;
+            std::cout << "loadQ " << loadQ << std::endl;
             loadQ += bus->getLoadReactive();
+            std::cout << "loadQ += area->getLoadReactive(); " << loadQ << std::endl;
         }
     }
     return loadQ;

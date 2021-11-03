@@ -457,23 +457,40 @@ void zipLoad::setState(coreTime time,
 
 double zipLoad::voltageAdjustment(double val, double voltage) const
 {
+    std::cout << "zipLoad::voltageAdjustment Start" << std::endl;
+    std::cout << "val     " << val     << std::endl;
+    std::cout << "voltage " << voltage << std::endl;
+
     if (voltage < Vpqmin) {
+        std::cout << "voltage < Vpqmin" << std::endl;
+        std::cout << "trigVVlow" << trigVVlow << std::endl;
         val = voltage * voltage * val * trigVVlow;
     } else if (voltage > Vpqmax) {
+        std::cout << "voltage >= Vpqmin" << std::endl;
+        std::cout << "trigVVhigh" << trigVVhigh << std::endl;
         val = voltage * voltage * val * trigVVhigh;
     }
+
+    std::cout << "zipLoad::voltageAdjustment End" << std::endl;
     return val;
 }
 
 double zipLoad::getQval() const
 {
+    std::cout << "zipLoad::getQval start" << std::endl;
     double val = Q;
+    std::cout << "val " << val << std::endl;
 
     if (opFlags[use_power_factor_flag]) {
+        std::cout << "use_power_factor_flag" << std::endl;
         if (pfq < 1000.0) {
+            std::cout << "pfq < 1000.0" << std::endl;
             val = P * pfq;
         }
     }
+
+    std::cout << "val " << val << std::endl;
+    std::cout << "zipLoad::getQval end" << std::endl;
     return val;
 }
 
@@ -484,6 +501,7 @@ double zipLoad::getRealPower() const
 
 double zipLoad::getReactivePower() const
 {
+    std::cout << "zipLoad::getReactivePower()" << std::endl;
     return getReactivePower(bus->getVoltage());
 }
 
@@ -498,7 +516,13 @@ double zipLoad::getReactivePower(const IOdata& inputs,
                                  const stateData& sD,
                                  const solverMode& sMode) const
 {
+    std::cout << "zipLoad::getReactivePower(inputs, sD, sMode)" << std::endl;
+    std::cout << "inputs.empty() " << inputs.empty() << std::endl;
+
     double voltage = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
+
+    std::cout << "voltage " << voltage << std::endl;
+
     return getReactivePower(voltage);
 }
 
@@ -515,12 +539,21 @@ double zipLoad::getRealPower(const double voltage) const
 
 double zipLoad::getReactivePower(double voltage) const
 {
+    std::cout << "zipLoad::getReactivePower(voltage)" << std::endl;
     if (!isConnected()) {
         return 0.0;
     }
     double val = voltageAdjustment(getQval(), voltage);
 
+    std::cout << "voltage: " << voltage << std::endl;
+    std::cout << "val:     " << val     << std::endl;
+    std::cout << "Yq:      " << Yq      << std::endl;
+    std::cout << "Iq:      " << Iq      << std::endl;
+
     val += voltage * (voltage * Yq + Iq);
+
+    std::cout << "val:     " << val     << std::endl;
+
     return val;
 }
 

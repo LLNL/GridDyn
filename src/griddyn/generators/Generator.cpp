@@ -610,6 +610,8 @@ double Generator::getReactivePower(const IOdata& inputs,
                                    const stateData& sD,
                                    const solverMode& sMode) const
 {
+    std::cout << "Generator::getReactivePower(...)" << std::endl;
+
     double output = -Q;
     if (!isDynamic(sMode))  // use as a proxy for dynamic state
     {
@@ -633,6 +635,7 @@ double Generator::getRealPower() const
 }
 double Generator::getReactivePower() const
 {
+    std::cout << "Generator::getReactivePower()" << std::endl;
     return -Q;
 }
 

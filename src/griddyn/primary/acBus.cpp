@@ -2552,7 +2552,10 @@ void acBus::computePowerAdjustments()
     }
     for (auto& load : attachedLoads) {
         if ((load->isConnected()) && (!busController.hasVoltageAdjustments(load->getID()))) {
+            std::cout << "acBus::computePowerAdjustments" << std::endl;
+            std::cout << "S.loadQ " << S.loadQ << std::endl;
             S.loadQ += load->getReactivePower(voltage);
+            std::cout << "S.loadQ += load->getReactivePower(voltage); " << S.loadQ << std::endl;
         }
         if ((load->isConnected()) && (!busController.hasPowerAdjustments(load->getID()))) {
             S.loadP += load->getRealPower(voltage);

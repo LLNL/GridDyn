@@ -141,7 +141,9 @@ namespace loads {
 
     double frequencySensitiveLoad::getRealPower() const { return Pout; }
 
-    double frequencySensitiveLoad::getReactivePower() const { return Qout; }
+    double frequencySensitiveLoad::getReactivePower() const {
+        std::cout << "frequencySensitiveLoad::getReactivePower()" << std::endl;
+        return Qout; }
 
     double frequencySensitiveLoad::getRealPower(const IOdata& inputs,
                                                 const stateData& sD,
@@ -157,6 +159,8 @@ namespace loads {
                                                     const stateData& sD,
                                                     const solverMode& sMode) const
     {
+        std::cout << "frequencySensitiveLoad::getReactivePower(...)" << std::endl;
+
         double Qr = subLoad->getReactivePower(inputs, sD, sMode);
         double freq = (inputs.size() >= frequencyInLocation) ? inputs[frequencyInLocation] :
                                                                bus->getFreq(sD, sMode);
@@ -172,6 +176,8 @@ namespace loads {
 
     double frequencySensitiveLoad::getReactivePower(double voltage) const
     {
+        std::cout << "frequencySensitiveLoad::getReactivePower(voltage)" << std::endl;
+
         double Qr = subLoad->getReactivePower(voltage);
         double freq = bus->getFreq();
         return Qr + Qr * (freq - 1.0) * M;

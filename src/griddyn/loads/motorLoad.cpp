@@ -498,6 +498,8 @@ namespace loads {
 
     double motorLoad::getReactivePower() const
     {
+        std::cout << "motorLoad::getReactivePower()" << std::endl;
+
         const double voltage = bus->getVoltage();
 
         double slip = m_state[0];
@@ -533,6 +535,8 @@ namespace loads {
                                        const stateData& sD,
                                        const solverMode& sMode) const
     {
+        std::cout << "motorLoad::getReactivePower(...)" << std::endl;
+
         double voltage = inputs[voltageInLocation];
         double Qtemp;
         if (isDynamic(sMode)) {
@@ -560,6 +564,8 @@ namespace loads {
 
     double motorLoad::getReactivePower(double voltage) const
     {
+        std::cout << "motorLoad::getReactivePower(voltage)" << std::endl;
+
         double slip = m_state[0];
         return qPower(voltage * Vcontrol, slip) * scale;
     }
