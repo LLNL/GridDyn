@@ -1247,12 +1247,45 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              double limits[],
                                              const solverMode& sMode) noexcept
 {
-    stateData sD(time, state, dstate_dt);
+    std::cout << "\n\ngridDynSimulation::limitCheckingFunction Start" << std::endl;
+    std::cout << time << std::endl;
+
+    auto dynData  = getSolverInterface(sMode);
+    count_t ssize = stateSize(sMode);
+
+    double* state_data = dynData->state_data();
+    double* deriv_data = dynData->deriv_data();
+
+    std::memcpy(state_data, state, ssize * sizeof(double));
+    std::memcpy(deriv_data, dstate_dt, ssize * sizeof(double));
 
     currentTime = time;
+
+    std::cout << "gridDynSimulation::limitCheckingFunction stateData" << std::endl;
+    stateData sD(time, state, dstate_dt);
+
+    std::cout << "gridDynSimulation::limitCheckingFunction setState start 1 " << std::endl;
     setState(time, state, dstate_dt, sMode);
-    fillExtraStateData(sD, sMode);
+    std::cout << "gridDynSimulation::limitCheckingFunction setState end 1" << std::endl;
+
+    std::cout << "gridDynSimulation::limitCheckingFunction limitTest start" << std::endl;
     limitTest(noInputs, sD, limits, sMode);
+    std::cout << "gridDynSimulation::limitCheckingFunction limitTest end" << std::endl;
+
+    // std::cout << "gridDynSimulation::limitCheckingFunction setState start 2 " << std::endl;
+    // setState(time, state, dstate_dt, sMode);
+    // std::cout << "gridDynSimulation::limitCheckingFunction setState end 2" << std::endl;
+
+    // std::cout << "gridDynSimulation::limitCheckingFunction fillExtasStateData" << std::endl;
+    // fillExtraStateData(sD, sMode);
+
+    // // std::cout << "gridDynSimulation::limitCheckingFunction dynamicCheckAndReset" << std::endl;
+    // dynamicCheckAndReset(sMode, change_code::state_count_change);
+
+    // // std::cout << "gridDynSimulation::limitCheckingFunction updateLocalCache" << std::endl;
+    // updateLocalCache(noInputs, sD, sMode);
+
+    std::cout << "gridDynSimulation::limitCheckingFunction End\n" << std::endl;
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
