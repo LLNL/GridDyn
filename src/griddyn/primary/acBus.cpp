@@ -1554,10 +1554,12 @@ void acBus::setState(coreTime time,
                      const double dstate_dt[],
                      const solverMode& sMode)
 {
+    std::cout << "acBus::setState start" << std::endl;
     auto Aoffset = offsets.getAOffset(sMode);
     auto Voffset = offsets.getVOffset(sMode);
 
     if (isDAE(sMode)) {
+        std::cout << "acBus::setState isDAE(sMode)" << std::endl;
         if (Voffset != kNullLocation) {
             voltage = state[Voffset];
             m_dstate_dt[voltageInLocation] = dstate_dt[Voffset];
@@ -1567,15 +1569,20 @@ void acBus::setState(coreTime time,
             m_dstate_dt[angleInLocation] = dstate_dt[Aoffset];
         }
     } else if (hasAlgebraic(sMode)) {
+        std::cout << "acBus::setState hasAlgebraic(sMode)" << std::endl;
         if (Voffset != kNullLocation) {
+            std::cout << "acBus::setState Voffset != kNullLocation" << std::endl;
             if (time > prevTime) {
+                std::cout << "acBus::setState time > prevTime" << std::endl;
                 m_dstate_dt[voltageInLocation] =
                     (state[Voffset] - m_state[voltageInLocation]) / (time - lastSetTime);
             }
             voltage = state[Voffset];
         }
         if (Aoffset != kNullLocation) {
+            std::cout << "acBus::setState Aoffset != kNullLocation" << std::endl;
             if (time > prevTime) {
+                std::cout << "acBus::setState time > prevTime" << std::endl;
                 m_dstate_dt[angleInLocation] =
                     (state[Aoffset] - -m_state[angleInLocation]) / (time - lastSetTime);
             }
@@ -1586,11 +1593,14 @@ void acBus::setState(coreTime time,
     gridBus::setState(time, state, dstate_dt, sMode);
 
     if (opFlags[compute_frequency]) {
+        std::cout << "acBus::setState opFlags[compure_frequency]" << std::endl;
         // fblock->setState(time, state, dstate_dt, sMode);
     } else if ((isDynamic(sMode)) && (keyGen != nullptr)) {
+        std::cout << "acBus::setState isDynamic(sMode) && keyGen" << std::endl;
         freq = keyGen->getFreq(emptyStateData, sMode);
     }
     //    assert(voltage > 0.0);
+    std::cout << "acBus::setState end" << std::endl;
 }
 
 // residual

@@ -997,7 +997,7 @@ int gridDynSimulation::residualFunction(coreTime time,
                                         double resid[],
                                         const solverMode& sMode) noexcept
 {
-    std::cout << "gridDynSimulation::residualFunction" << std::endl;
+    std::cout << "\n\ngridDynSimulation::residualFunction start" << std::endl;
 
     ++residCount;
     stateData sD(time, state, dstate_dt, residCount);
@@ -1008,6 +1008,7 @@ int gridDynSimulation::residualFunction(coreTime time,
         if (!std::isfinite(state[kk])) {
             LOG_ERROR("state[" + std::to_string(kk) + "] is not finite");
             printStateNames(this, sMode);
+            std::cout << "\n\ngridDynSimulation::residualFunction end" << std::endl;
             return FUNCTION_EXECUTION_FAILURE;
         }
     }
@@ -1143,8 +1144,11 @@ int gridDynSimulation::residualFunction(coreTime time,
 #endif
     if (opFlags[invalid_state_flag]) {
         opFlags.reset(invalid_state_flag);
+        std::cout << "\n\ngridDynSimulation::residualFunction end" << std::endl;
         return 1;
     }
+
+    std::cout << "gridDynSimulation::residualFunction end\n" << std::endl;
     return 0;
 }
 

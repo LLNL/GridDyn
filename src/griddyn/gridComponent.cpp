@@ -872,6 +872,8 @@ void gridComponent::setState(coreTime time,
                              const double dstate_dt[],
                              const solverMode& sMode)
 {
+    std::cout << "gridComponent::setState start" << std::endl;
+
     prevTime = time;
     if (!hasStates(sMode))  // use the const version of stateSize
     {
@@ -908,6 +910,7 @@ void gridComponent::setState(coreTime time,
     for (auto& sub : subObjectList) {
         sub->setState(time, state, dstate_dt, sMode);
     }
+    std::cout << "gridComponent::setState end" << std::endl;
 }
 // for saving the state
 void gridComponent::guessState(coreTime time,

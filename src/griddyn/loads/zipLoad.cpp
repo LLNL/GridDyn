@@ -228,7 +228,9 @@ double zipLoad::get(const std::string& param, unit unitType) const
 
 void zipLoad::set(const std::string& param, double val, unit unitType)
 {
+    std::cout << "zipLoad::set start" << std::endl;
     if (param.empty()) {
+        std::cout << "zipLoad::set end" << std::endl;
         return;
     }
     if (param.length() == 1) {
@@ -237,6 +239,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
                 setP(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'q':
+                std::cout << "zipLoad::set case q setQ()" << std::endl;
                 setQ(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'r':
@@ -255,6 +258,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
                 throw(unrecognizedParameter(param));
         }
         checkFaultChange();
+        std::cout << "zipLoad::set end" << std::endl;
         return;
     }
     if (param.back() == '+')  // load increments
@@ -264,7 +268,9 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             P += convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkpfq();
         } else if (param == "q+") {
+            std::cout << "zipLoad::set q+" << std::endl;
             Q += convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
+            std::cout << "Q = " << Q << std::endl;
             updatepfq();
         } else if ((param == "yp+") || (param == "zr+")) {
             Yp += convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
@@ -287,7 +293,9 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
             P *= val;
             checkpfq();
         } else if (param == "q*") {
+            std::cout << "zipLoad::set q*" << std::endl;
             Q *= val;
+            std::cout << "Q = " << Q << std::endl;
             updatepfq();
         } else if ((param == "yp*") || (param == "zr*")) {
             Yp *= val;
@@ -307,6 +315,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
     } else if (param == "load p") {
         setP(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
     } else if (param == "load q") {
+        std::cout << "zipLoad::set load q setQ()" << std::endl;
         setQ(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
     } else if ((param == "yp") || (param == "shunt g") || (param == "zr")) {
         setYp(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
@@ -328,8 +337,10 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
         }
         opFlags.set(use_power_factor_flag);
     } else if (param == "scale") {
+        std::cout << "zipLoad::set scale" << std::endl;
         P *= val;
         Q *= val;
+        std::cout << "Q = " << Q << std::endl;
         Ip *= val;
         Iq *= val;
         Yp *= val;
@@ -366,6 +377,7 @@ void zipLoad::set(const std::string& param, double val, unit unitType)
     } else {
         Load::set(param, val, unitType);
     }
+    std::cout << "zipLoad::set end" << std::endl;
 }
 
 void zipLoad::setYp(double newYp)
@@ -501,8 +513,10 @@ double zipLoad::getRealPower() const
 
 double zipLoad::getReactivePower() const
 {
-    std::cout << "zipLoad::getReactivePower()" << std::endl;
-    return getReactivePower(bus->getVoltage());
+    std::cout << "zipLoad::getReactivePower() start" << std::endl;
+    double tmp = getReactivePower(bus->getVoltage());
+    std::cout << "zipLoad::getReactivePower() end" << std::endl;
+    return tmp;
 }
 
 double
@@ -516,14 +530,16 @@ double zipLoad::getReactivePower(const IOdata& inputs,
                                  const stateData& sD,
                                  const solverMode& sMode) const
 {
-    std::cout << "zipLoad::getReactivePower(inputs, sD, sMode)" << std::endl;
+    std::cout << "zipLoad::getReactivePower(inputs, sD, sMode) start" << std::endl;
     std::cout << "inputs.empty() " << inputs.empty() << std::endl;
 
     double voltage = (inputs.empty()) ? (bus->getVoltage(sD, sMode)) : inputs[voltageInLocation];
 
     std::cout << "voltage " << voltage << std::endl;
 
-    return getReactivePower(voltage);
+    double tmp = getReactivePower(voltage);
+    std::cout << "zipLoad::getReactivePower(inputs, sD, sMode) end" << std::endl;
+    return tmp;
 }
 
 double zipLoad::getRealPower(const double voltage) const
@@ -539,7 +555,7 @@ double zipLoad::getRealPower(const double voltage) const
 
 double zipLoad::getReactivePower(double voltage) const
 {
-    std::cout << "zipLoad::getReactivePower(voltage)" << std::endl;
+    std::cout << "zipLoad::getReactivePower(voltage) start" << std::endl;
     if (!isConnected()) {
         return 0.0;
     }
@@ -554,6 +570,7 @@ double zipLoad::getReactivePower(double voltage) const
 
     std::cout << "val:     " << val     << std::endl;
 
+    std::cout << "zipLoad::getReactivePower(voltage) end" << std::endl;
     return val;
 }
 
