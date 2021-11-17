@@ -32,11 +32,13 @@ namespace sources {
                                      const solverMode& /*sMode*/,
                                      index_t outputNum) const
     {
+        std::cout << "functionSource::getOutput 1" << std::endl;
         return (outputNum == 0) ? sourceFunc(sD.time) : kNullVal;
     }
 
     double functionSource::getOutput(index_t outputNum) const
     {
+        std::cout << "functionSource::getOutput 2" << std::endl;
         return (outputNum == 0) ? sourceFunc(prevTime) : kNullVal;
     }
     double functionSource::getDoutdt(const IOdata& /*inputs*/,

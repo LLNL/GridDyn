@@ -313,7 +313,12 @@ namespace loads {
             setP(sources[sourceLink[p_source]]->getOutput());
         }
         if (sourceLink[q_source] >= 0) {
-            setQ(sources[sourceLink[q_source]]->getOutput());
+            std::cout << "sourceLoad::getSourceLoads" << std::endl;
+            std::cout << "  q_source   = " << q_source << std::endl;
+            std::cout << "  sourceLink = " << sourceLink[q_source] << std::endl;
+            auto tmp = sources[sourceLink[q_source]]->getOutput();
+            std::cout << "  tmp        = " << tmp << std::endl;
+            setQ(tmp);
         }
         if (sourceLink[yp_source] >= 0) {
             setYp(sources[sourceLink[yp_source]]->getOutput());

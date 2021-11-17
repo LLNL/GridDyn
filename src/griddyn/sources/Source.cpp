@@ -60,7 +60,9 @@ void Source::set(const std::string& param, const std::string& val)
 
 void Source::setLevel(double newLevel)
 {
+    std::cout << "Source::setLevel" << std::endl;
     m_tempOut = m_output = newLevel;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
 }
 void Source::set(const std::string& param, double val, units::unit unitType)
 {
@@ -77,18 +79,22 @@ void Source::setState(coreTime time,
                       const double dstate_dt[],
                       const solverMode& sMode)
 {
+    std::cout << "Source::setState" << std::endl;
     updateOutput(time);
     gridComponent::setState(time, state, dstate_dt, sMode);
     m_tempOut = m_output;
     lastTime = time;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
 }
 
 void Source::updateOutput(coreTime time)
 {
+    std::cout << "Source::updateOutput" << std::endl;
     m_tempOut = computeOutput(time);
     m_output = m_tempOut;
     prevTime = time;
     lastTime = time;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
 }
 
 void Source::timestep(coreTime time, const IOdata& /*inputs*/, const solverMode& /*sMode*/)
@@ -116,11 +122,13 @@ double Source::getOutput(const IOdata& /*inputs*/,
                          const solverMode& /*sMode*/,
                          index_t outputNum) const
 {
+    std::cout << "Source::getOutput 1" << std::endl;
     return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
 double Source::getOutput(index_t outputNum) const
 {
+    std::cout << "Source::getOutput 2" << std::endl;
     return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
@@ -137,9 +145,12 @@ void Source::updateLocalCache(const IOdata& /*inputs*/,
                               const stateData& sD,
                               const solverMode& /*sMode*/)
 {
+    std::cout << "Source::updateLocalCache" << std::endl;
     if ((prevTime != sD.time) && (sD.time > timeZero)) {
         m_tempOut = computeOutput(sD.time);
         lastTime = sD.time;
+        std::cout << "  m_tempOut = " << m_tempOut << std::endl;
+        std::cout << "  lastTime  = " << sD.time << std::endl;
     }
 }
 

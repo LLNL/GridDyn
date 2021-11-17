@@ -363,6 +363,7 @@ namespace sources {
                                   const solverMode& sMode,
                                   index_t outputNum) const
     {
+        std::cout << "blockSource::getOutput 1" << std::endl;
         if (blk != nullptr) {
             return blk->getOutput(noInputs, sD, sMode, outputNum);
         }
@@ -374,6 +375,7 @@ namespace sources {
 
     double blockSource::getOutput(index_t outputNum) const
     {
+        std::cout << "blockSource::getOutput 2" << std::endl;
         if (blk != nullptr) {
             return blk->getOutput(outputNum);
         }

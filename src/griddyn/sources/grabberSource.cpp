@@ -101,6 +101,7 @@ namespace sources {
                                     const solverMode& sMode,
                                     index_t outputNum) const
     {
+        std::cout << "grabberSource::getOutput 1" << std::endl;
         if (outputNum == 0) {
             return gset->grabData(sD, sMode);
         }
@@ -109,6 +110,7 @@ namespace sources {
 
     double grabberSource::getOutput(index_t outputNum) const
     {
+        std::cout << "grabberSource::getOutput 2" << std::endl;
         if (outputNum == 0) {
             return gset->grabData();
         }
