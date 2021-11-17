@@ -226,11 +226,21 @@ namespace loads {
                               const double dstate_dt[],
                               const solverMode& sMode)
     {
+        std::cout << "--------------------------" << std::endl;
+        std::cout << "sourceLoad::setState start" << std::endl;
+        std::cout << "  sourceLoad::setState subobject loop before" << std::endl;
         for (auto& src : getSubObjects()) {
+            std::cout << "  sourceLoad::setState subobject setState before" << std::endl;
             src->setState(time, state, dstate_dt, sMode);
+            std::cout << "  sourceLoad::setState subobject setState after" << std::endl;
         }
+        std::cout << "sourceLoad::setState subobject loop after" << std::endl;
+        std::cout << "sourceLoad::setState getSourceLoads before" << std::endl;
         getSourceLoads();
+        std::cout << "sourceLoad::setState getSourceLoads after" << std::endl;
         prevTime = time;
+        std::cout << "sourceLoad::setState end" << std::endl;
+        std::cout << "------------------------" << std::endl;
     }
 
     void sourceLoad::set(const std::string& param, double val, units::unit unitType)
