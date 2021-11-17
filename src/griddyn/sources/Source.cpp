@@ -79,12 +79,36 @@ void Source::setState(coreTime time,
                       const double dstate_dt[],
                       const solverMode& sMode)
 {
-    std::cout << "Source::setState" << std::endl;
+    std::cout << "----------------------" << std::endl;
+    std::cout << "Source::setState start" << std::endl;
+    std::cout << "  time      = " << time      << std::endl;
+    std::cout << "  lastTime  = " << lastTime  << std::endl;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
+    std::cout << "  m_output  = " << m_output  << std::endl;
+    std::cout << "  updateOutput(time) before" << std::endl;
     updateOutput(time);
+    std::cout << "  updateOutput(time) after" << std::endl;
+    std::cout << "  time      = " << time      << std::endl;
+    std::cout << "  lastTime  = " << lastTime  << std::endl;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
+    std::cout << "  m_output  = " << m_output  << std::endl;
+    std::cout << "  setState(time, state, dstate_dt, sMode) before" << std::endl;
     gridComponent::setState(time, state, dstate_dt, sMode);
+    std::cout << "  setState(time, state, dstate_dt, sMode) after" << std::endl;
+    std::cout << "  time      = " << time      << std::endl;
+    std::cout << "  lastTime  = " << lastTime  << std::endl;
+    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
+    std::cout << "  m_output  = " << m_output  << std::endl;
+    std::cout << "  update values before" << std::endl;
     m_tempOut = m_output;
     lastTime = time;
+    std::cout << "  update values after" << std::endl;
+    std::cout << "  time      = " << time      << std::endl;
+    std::cout << "  lastTime  = " << lastTime  << std::endl;
     std::cout << "  m_tempOut = " << m_tempOut << std::endl;
+    std::cout << "  m_output  = " << m_output  << std::endl;
+    std::cout << "Source::setState end" << std::endl;
+    std::cout << "--------------------" << std::endl;
 }
 
 void Source::updateOutput(coreTime time)

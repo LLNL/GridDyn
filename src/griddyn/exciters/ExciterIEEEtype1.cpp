@@ -309,29 +309,29 @@ namespace exciters {
                                      double limits[],
                                      const solverMode& sMode)
     {
-        // std::cout << "    gridDyn::ExciterIEEEtype1::limitTest ";
+        std::cout << "    gridDyn::ExciterIEEEtype1::limitTest start\n";
 
         auto offset = offsets.getDiffOffset(sMode);
         auto limitOffset = offsets.getRootOffset(sMode);
         const double* es = sD.state + offset;
         const double* esp = sD.dstate_dt + offset;
 
-        // printf("t=%f V=%f\n", time, inputs[voltageInLocation]);
+        printf("    t=%f V=%f", time, inputs[voltageInLocation]);
 
         if (es[1] >= (Vrmax - 0.0001)) {
-            // std::cout << "over Vrmax" << std::endl;
+            std::cout << "    over Vrmax" << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.set(etrigger_high);
         } else if (es[1] <= (Vrmin + 0.0001)) {
-            // std::cout << "under Vrmin" << std::endl;
+            std::cout << "    under Vrmin" << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.reset(etrigger_high);
         } else {
-            // std::cout << "in bounds" << std::endl;
+            std::cout << "    in bounds" << std::endl;
             limits[limitOffset] = 1;
             alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
@@ -345,6 +345,7 @@ namespace exciters {
         //           << ", esp[1] = " << std::setw(10) << esp[1]
         //           << ", esp[2] = " << std::setw(10) << esp[2] << std::endl;
 
+        std::cout << "    gridDyn::ExciterIEEEtype1::limitTest end\n";
         // std::cout << "==========" << std::endl;
     }
 

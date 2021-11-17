@@ -1286,9 +1286,10 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
     limitTest(noInputs, sD, limits, sMode);
     std::cout << "  gridDynSimulation::limitCheckingFunction limitTest end\n" << std::endl;
 
-    // std::cout << "gridDynSimulation::limitCheckingFunction setState start 2 " << std::endl;
+    // A second setState call after limitTest does not make any difference (same values)
+    // std::cout << "\n  gridDynSimulation::limitCheckingFunction setState start 2 " << std::endl;
     // setState(time, state, dstate_dt, sMode);
-    // std::cout << "gridDynSimulation::limitCheckingFunction setState end 2" << std::endl;
+    // std::cout << "  gridDynSimulation::limitCheckingFunction setState end 2\n" << std::endl;
 
     // std::cout << "gridDynSimulation::limitCheckingFunction fillExtasStateData" << std::endl;
     // fillExtraStateData(sD, sMode);

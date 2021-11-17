@@ -872,25 +872,42 @@ void gridComponent::setState(coreTime time,
                              const double dstate_dt[],
                              const solverMode& sMode)
 {
+    std::cout << "-----------------------------" << std::endl;
     std::cout << "gridComponent::setState start" << std::endl;
 
     prevTime = time;
     if (!hasStates(sMode))  // use the const version of stateSize
     {
+        std::cout << "gridComponent::setState end -- !hasStates(sMode)" << std::endl;
+        std::cout << "------------------------------------------------" << std::endl;
         return;
     }
     const auto& so = offsets.getOffsets(sMode);
     const auto& localStates = (subObjectList.empty()) ? (so.total) : (so.local);
 
+    std::cout << "    prevTime = " << time << std::endl;
+
     if (hasAlgebraic(sMode)) {
+
+        std::cout << "    hasAlgebraic(sMode)" << std::endl;
+
         if (localStates.algSize > 0) {
+
+            std::cout << "    localStates.algSize > 0" << std::endl;
+
             std::copy(state + so.algOffset,
                       state + so.algOffset + localStates.algSize,
                       m_state.data());
         }
     }
     if (localStates.diffSize > 0) {
+
+        std::cout << "    localStates.diffSize > 0" << std::endl;
+
         if (isDifferentialOnly(sMode)) {
+
+            std::cout << "    isDifferentialOnly(sMode) -- true" << std::endl;
+
             std::copy(state + so.diffOffset,
                       state + so.diffOffset + localStates.diffSize,
                       m_state.data() + algSize(cLocalSolverMode));
@@ -898,6 +915,9 @@ void gridComponent::setState(coreTime time,
                       dstate_dt + so.diffOffset + localStates.diffSize,
                       m_dstate_dt.data() + algSize(cLocalSolverMode));
         } else {
+
+            std::cout << "    isDifferentialOnly(sMode) -- false" << std::endl;
+
             std::copy(state + so.diffOffset,
                       state + so.diffOffset + localStates.diffSize,
                       m_state.data() + localStates.algSize);
@@ -908,9 +928,11 @@ void gridComponent::setState(coreTime time,
     }
 
     for (auto& sub : subObjectList) {
+        std::cout << "    subObjectList" << std::endl;
         sub->setState(time, state, dstate_dt, sMode);
     }
     std::cout << "gridComponent::setState end" << std::endl;
+    std::cout << "---------------------------" << std::endl;
 }
 // for saving the state
 void gridComponent::guessState(coreTime time,
