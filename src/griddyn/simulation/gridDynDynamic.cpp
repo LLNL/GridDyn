@@ -997,7 +997,9 @@ int gridDynSimulation::residualFunction(coreTime time,
                                         double resid[],
                                         const solverMode& sMode) noexcept
 {
-    std::cout << "\n\ngridDynSimulation::residualFunction start" << std::endl;
+    std::cout << "\n----------------------------------------" << std::endl;
+    std::cout << "gridDynSimulation::residualFunction start" << std::endl;
+    std::cout << "  time= " << time  << std::endl;
 
     ++residCount;
     stateData sD(time, state, dstate_dt, residCount);
@@ -1008,17 +1010,25 @@ int gridDynSimulation::residualFunction(coreTime time,
         if (!std::isfinite(state[kk])) {
             LOG_ERROR("state[" + std::to_string(kk) + "] is not finite");
             printStateNames(this, sMode);
-            std::cout << "\n\ngridDynSimulation::residualFunction end" << std::endl;
+            std::cout << "gridDynSimulation::residualFunction end -- not finite" << std::endl;
             return FUNCTION_EXECUTION_FAILURE;
         }
     }
 #endif
 
+    std::cout << "\n  gridDynSimulation::residualFunction fillExtraStateData start" << std::endl;
     fillExtraStateData(sD, sMode);
+    std::cout << "  gridDynSimulation::residualFunction fillExtraStateData end\n" << std::endl;
     // call the area based function to handle the looping
+    std::cout << "\n  gridDynSimulation::residualFunction preEx start" << std::endl;
     preEx(noInputs, sD, sMode);
+    std::cout << "  gridDynSimulation::residualFunction preEx end\n" << std::endl;
+    std::cout << "\n  gridDynSimulation::residualFunction resiudal start" << std::endl;
     residual(noInputs, sD, resid, sMode);
+    std::cout << "  gridDynSimulation::residualFunction resiudal end\n" << std::endl;
+    std::cout << "\n  gridDynSimulation::residualFunction delayedResiudal start" << std::endl;
     delayedResidual(noInputs, sD, resid, sMode);
+    std::cout << "  gridDynSimulation::residualFunction delayedResiudal end\n" << std::endl;
 
 #if (CHECK_RESID > 0)
     auto dynDatab = getSolverInterface(sMode);
@@ -1144,11 +1154,13 @@ int gridDynSimulation::residualFunction(coreTime time,
 #endif
     if (opFlags[invalid_state_flag]) {
         opFlags.reset(invalid_state_flag);
-        std::cout << "\n\ngridDynSimulation::residualFunction end" << std::endl;
+        std::cout << "gridDynSimulation::residualFunction end -- invalid state" << std::endl;
         return 1;
     }
 
-    std::cout << "gridDynSimulation::residualFunction end\n" << std::endl;
+
+    std::cout << "gridDynSimulation::residualFunction end" << std::endl;
+    std::cout << "---------------------------------------\n" << std::endl;
     return 0;
 }
 
@@ -1247,8 +1259,9 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
                                              double limits[],
                                              const solverMode& sMode) noexcept
 {
-    std::cout << "\n\ngridDynSimulation::limitCheckingFunction Start" << std::endl;
-    std::cout << time << std::endl;
+    std::cout << "\n---------------------------------------------" << std::endl;
+    std::cout << "gridDynSimulation::limitCheckingFunction Start" << std::endl;
+    std::cout << "  time= " << time  << std::endl;
 
     auto dynData  = getSolverInterface(sMode);
     count_t ssize = stateSize(sMode);
@@ -1261,16 +1274,17 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
 
     currentTime = time;
 
-    std::cout << "gridDynSimulation::limitCheckingFunction stateData" << std::endl;
+    std::cout << "\n  gridDynSimulation::limitCheckingFunction stateData before" << std::endl;
     stateData sD(time, state, dstate_dt);
+    std::cout << "  gridDynSimulation::limitCheckingFunction stateData after\n" << std::endl;
 
-    std::cout << "gridDynSimulation::limitCheckingFunction setState start 1 " << std::endl;
+    std::cout << "\n  gridDynSimulation::limitCheckingFunction setState start 1" << std::endl;
     setState(time, state, dstate_dt, sMode);
-    std::cout << "gridDynSimulation::limitCheckingFunction setState end 1" << std::endl;
+    std::cout << "  gridDynSimulation::limitCheckingFunction setState end 1\n" << std::endl;
 
-    std::cout << "gridDynSimulation::limitCheckingFunction limitTest start" << std::endl;
+    std::cout << "\n  gridDynSimulation::limitCheckingFunction limitTest start" << std::endl;
     limitTest(noInputs, sD, limits, sMode);
-    std::cout << "gridDynSimulation::limitCheckingFunction limitTest end" << std::endl;
+    std::cout << "  gridDynSimulation::limitCheckingFunction limitTest end\n" << std::endl;
 
     // std::cout << "gridDynSimulation::limitCheckingFunction setState start 2 " << std::endl;
     // setState(time, state, dstate_dt, sMode);
@@ -1285,7 +1299,8 @@ int gridDynSimulation::limitCheckingFunction(coreTime time,
     // // std::cout << "gridDynSimulation::limitCheckingFunction updateLocalCache" << std::endl;
     // updateLocalCache(noInputs, sD, sMode);
 
-    std::cout << "gridDynSimulation::limitCheckingFunction End\n" << std::endl;
+    std::cout << "\ngridDynSimulation::limitCheckingFunction End" << std::endl;
+    std::cout << "--------------------------------------------\n" << std::endl;
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
