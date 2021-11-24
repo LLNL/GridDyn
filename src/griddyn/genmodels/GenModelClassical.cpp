@@ -125,8 +125,6 @@ namespace genmodels {
                                      double resid[],
                                      const solverMode& sMode)
     {
-        std::cout << "GenModelClassical::residual" << std::endl;
-
         auto Loc = offsets.getLocations(sD, resid, sMode, this);
 
         updateLocalCache(inputs, sD, sMode);

@@ -87,8 +87,6 @@ namespace genmodels {
                              double resid[],
                              const solverMode& sMode)
     {
-        std::cout << "GenModel5::residual" << std::endl;
-
         auto Loc = offsets.getLocations(sD, resid, sMode, this);
         const double* gm = Loc.algStateLoc;
         const double* gmd = Loc.diffStateLoc;
