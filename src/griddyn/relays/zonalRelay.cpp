@@ -232,12 +232,9 @@ std::string commType;
                 return;
             }
             auto P = std::make_shared<commMessage>();
-            // std::cout << "GridDyn conditionTriggered(), conditionNum = " << conditionNum << '\n';
             if (conditionNum == 0) {
-                // std::cout << "GridDyn setting relay message type to LOCAL_FAULT_EVENT" << '\n';
                 P->setMessageType(commMessage::LOCAL_FAULT_EVENT);
             } else {
-                // std::cout << "GridDyn setting relay message type to REMOTE_FAULT_EVENT" << '\n';
                 P->setMessageType(commMessage::REMOTE_FAULT_EVENT);
             }
             cManager.send(P);

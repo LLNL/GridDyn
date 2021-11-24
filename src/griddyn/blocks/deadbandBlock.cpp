@@ -45,7 +45,6 @@ namespace blocks {
         Block::dynObjectInitializeA(time0, flags);
         if (deadbandLow < deadbandHigh)  // this means it was set to some value
         {
-            std::cout << "deadbandBlock::dynObjectInitializeA algRoots" << std::endl;
             opFlags[has_roots] = true;
             offsets.local().local.algRoots++;
             opFlags.set(has_alg_roots);

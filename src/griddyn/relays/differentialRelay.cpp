@@ -179,7 +179,6 @@ namespace relays {
     {
         LOG_NORMAL("differential condition met");
         if (opFlags.test(use_commLink)) {
-            // std::cout << "GridDyn conditionTriggered(), conditionNum = " << conditionNum << '\n';
             auto P = std::make_shared<relayMessage>(relayMessage::LOCAL_FAULT_EVENT);
             cManager.send(P);
         }

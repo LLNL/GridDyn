@@ -99,7 +99,6 @@ void Block::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
             ++(lcinfo.local.diffSize);
             limiter_diff = 1;
         } else {
-            std::cout << "Block::dynObjectInitializeA algRoots" << std::endl;
             ++(lcinfo.local.algRoots);
             ++(lcinfo.local.algSize);
             limiter_alg = 1;
@@ -426,7 +425,6 @@ void Block::residual(const IOdata& inputs,
                      double resid[],
                      const solverMode& sMode)
 {
-    std::cout << "Block::residual" << std::endl;
     blockResidual(inputs[0], getRateInput(inputs), sD, resid, sMode);
 }
 

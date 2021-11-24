@@ -161,8 +161,6 @@ namespace exciters {
         // Rf
         md.assign(offset + 2, offset, Kf / (Tf * Tf));
         md.assign(offset + 2, offset + 2, -1.0 / Tf - sD.cj);
-
-        // printf("%f\n",sD.cj);
     }
 
     void ExciterIEEEtype1::rootTest(const IOdata& inputs,
@@ -247,8 +245,6 @@ namespace exciters {
         auto limitOffset = offsets.getRootOffset(sMode);
         const double* es = sD.state + offset;
         const double* esp = sD.dstate_dt + offset;
-
-        printf("    t=%f V=%f", time, inputs[voltageInLocation]);
 
         if (es[1] >= (Vrmax - 0.0001)) {
             limits[limitOffset] = -1;

@@ -78,7 +78,6 @@ void controlSystem::residual(const IOdata& /*inputs*/,
                              double /*resid*/[],
                              const solverMode& /*sMode*/)
 {
-    std::cout << "controlSystem::residual" << std::endl;
 }
 
 void controlSystem::jacobianElements(const IOdata& /*inputs*/,

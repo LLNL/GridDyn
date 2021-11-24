@@ -132,11 +132,11 @@ namespace paradae {
             }
             root_crossed = equation->CheckAllRoots(P, tlo, glo, thi, val.groot, val.sroot);
 
-            if (root_crossed)
-            {
-                cout << "TimeIntegrator::CheckRoots root found at "
-                     << thi << endl;
-            }
+            // if (root_crossed)
+            // {
+            //     cout << "TimeIntegrator::CheckRoots root found at "
+            //          << thi << endl;
+            // }
 
             /* If troot == t: no root!! */ // DJG: NO! previous_troot == troot
             //if (thi - val.t < equation->GetRoots().tol)
