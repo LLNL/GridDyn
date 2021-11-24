@@ -528,8 +528,6 @@ double subsystem::getRealPower(id_type_t busId) const
 }  // function to return the real flow in
 double subsystem::getReactivePower(id_type_t busId) const
 {
-    std::cout << "subsystem::getReactivePower(busId)" << std::endl;
-
     if (busId == invalid_id_value) {
         busId = 1;
     }
