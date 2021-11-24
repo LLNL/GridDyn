@@ -747,8 +747,6 @@ double DynamicGenerator::getReactivePower(const IOdata& inputs,
                                           const stateData& sD,
                                           const solverMode& sMode) const
 {
-    std::cout << "DynamicGenerator::getReactivePower(...)" << std::endl;
-
     if (isDynamic(sMode))  // use as a proxy for dynamic state
     {
         double scale = machineBasePower / systemBasePower;
@@ -764,7 +762,6 @@ void DynamicGenerator::residual(const IOdata& inputs,
                                 double resid[],
                                 const solverMode& sMode)
 {
-    std::cout << "DynamicGenerator::residual" << std::endl;
     if (!isDynamic(sMode)) {  // the bus is managing a remote bus voltage
         Generator::residual(inputs, sD, resid, sMode);
         if (!opFlags[has_subobject_pflow_states]) {
@@ -909,7 +906,6 @@ void DynamicGenerator::limitTrigger(coreTime time,
             sub->limitTrigger(time, state, dstate_dt, limitMask, sMode);
         }
     }
-    // std::cout << "gridDyn::DynamicGenerator::limitTrigger" << std::endl;
 }
 
 index_t DynamicGenerator::findIndex(const std::string& field, const solverMode& sMode) const
