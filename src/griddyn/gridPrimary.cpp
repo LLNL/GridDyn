@@ -83,11 +83,9 @@ void gridPrimary::setState(coreTime time,
                            const double dstate_dt[],
                            const solverMode& sMode)
 {
-    std::cout << "gridPrimary::setState start" << std::endl;
     gridComponent::setState(time, state, dstate_dt, sMode);
     // update local computations
     updateLocalCache();
-    std::cout << "gridPrimary::setState end" << std::endl;
 }
 
 void gridPrimary::delayedResidual(const IOdata& inputs,
