@@ -1554,12 +1554,10 @@ void acBus::setState(coreTime time,
                      const double dstate_dt[],
                      const solverMode& sMode)
 {
-    std::cout << "acBus::setState start" << std::endl;
     auto Aoffset = offsets.getAOffset(sMode);
     auto Voffset = offsets.getVOffset(sMode);
 
     if (isDAE(sMode)) {
-        std::cout << "acBus::setState isDAE(sMode)" << std::endl;
         if (Voffset != kNullLocation) {
             voltage = state[Voffset];
             m_dstate_dt[voltageInLocation] = dstate_dt[Voffset];
@@ -1569,20 +1567,15 @@ void acBus::setState(coreTime time,
             m_dstate_dt[angleInLocation] = dstate_dt[Aoffset];
         }
     } else if (hasAlgebraic(sMode)) {
-        std::cout << "acBus::setState hasAlgebraic(sMode)" << std::endl;
         if (Voffset != kNullLocation) {
-            std::cout << "acBus::setState Voffset != kNullLocation" << std::endl;
             if (time > prevTime) {
-                std::cout << "acBus::setState time > prevTime" << std::endl;
                 m_dstate_dt[voltageInLocation] =
                     (state[Voffset] - m_state[voltageInLocation]) / (time - lastSetTime);
             }
             voltage = state[Voffset];
         }
         if (Aoffset != kNullLocation) {
-            std::cout << "acBus::setState Aoffset != kNullLocation" << std::endl;
             if (time > prevTime) {
-                std::cout << "acBus::setState time > prevTime" << std::endl;
                 m_dstate_dt[angleInLocation] =
                     (state[Aoffset] - -m_state[angleInLocation]) / (time - lastSetTime);
             }
@@ -1593,14 +1586,11 @@ void acBus::setState(coreTime time,
     gridBus::setState(time, state, dstate_dt, sMode);
 
     if (opFlags[compute_frequency]) {
-        std::cout << "acBus::setState opFlags[compure_frequency]" << std::endl;
         // fblock->setState(time, state, dstate_dt, sMode);
     } else if ((isDynamic(sMode)) && (keyGen != nullptr)) {
-        std::cout << "acBus::setState isDynamic(sMode) && keyGen" << std::endl;
         freq = keyGen->getFreq(emptyStateData, sMode);
     }
     //    assert(voltage > 0.0);
-    std::cout << "acBus::setState end" << std::endl;
 }
 
 // residual
@@ -1609,14 +1599,10 @@ void acBus::residual(const IOdata& inputs,
                      double resid[],
                      const solverMode& sMode)
 {
-    std::cout << "acBus::residual call gridBus" << std::endl;
-
     gridBus::residual(inputs, sD, resid, sMode);
 
     auto Aoffset = offsets.getAOffset(sMode);
     auto Voffset = offsets.getVOffset(sMode);
-
-    std::cout << "acBus::residual" << std::endl;
 
     // output
     if (hasAlgebraic(sMode)) {
@@ -1625,10 +1611,6 @@ void acBus::residual(const IOdata& inputs,
                 assert(!std::isnan(S.linkQ));
 
                 resid[Voffset] = S.sumQ();
-                std::cout << "S.linkQ  = " << S.linkQ  << std::endl;
-                std::cout << "S.loadQ  = " << S.loadQ  << std::endl;
-                std::cout << "S.genQ   = " << S.genQ   << std::endl;
-                std::cout << "S.sumQ() = " << S.sumQ() << std::endl;
 #ifdef TRACE_LOG_ENABLE
                 if (std::abs(resid[Voffset]) > 0.5) {
                     LOG_TRACE("sid=" + std::to_string(sD.seqID) +
@@ -1637,10 +1619,7 @@ void acBus::residual(const IOdata& inputs,
 #endif
             } else {
                 resid[Voffset] = sD.state[Voffset] - voltage;
-                std::cout << "sD.state[Voffset] = " << sD.state[Voffset] << std::endl;
-                std::cout << "voltage           = " << voltage           << std::endl;
             }
-            std::cout << "resid[Voffset] = resid[" << Voffset << "] = " << resid[Voffset] << std::endl;
         }
         if (Aoffset != kNullLocation) {
             if (useAngle(sMode)) {
@@ -1656,7 +1635,6 @@ void acBus::residual(const IOdata& inputs,
             } else {
                 resid[Aoffset] = sD.state[Aoffset] - angle;
             }
-            std::cout << "resid[Aoffset] = " << resid[Aoffset] << std::endl;
         }
         if (isExtended(sMode)) {
             auto offset = offsets.getAlgOffset(sMode);
@@ -2301,9 +2279,6 @@ void acBus::setRootOffset(index_t Roffset, const solverMode& sMode)
     offsets.setRootOffset(Roffset, sMode);
     auto& so = offsets.getOffsets(sMode);
 
-    // std::cout << "acBus::setRootOffset so.total.algRoots " << so.total.algRoots << std::endl;
-    // std::cout << "acBus::setRootOffset so.total.diffRoots " << so.total.diffRoots << std::endl;
-
     auto nR = so.local.algRoots + so.local.diffRoots;
     for (auto& gen : attachedGens) {
         gen->setRootOffset(Roffset + nR, sMode);
@@ -2562,10 +2537,7 @@ void acBus::computePowerAdjustments()
     }
     for (auto& load : attachedLoads) {
         if ((load->isConnected()) && (!busController.hasVoltageAdjustments(load->getID()))) {
-            std::cout << "acBus::computePowerAdjustments" << std::endl;
-            std::cout << "S.loadQ " << S.loadQ << std::endl;
             S.loadQ += load->getReactivePower(voltage);
-            std::cout << "S.loadQ += load->getReactivePower(voltage); " << S.loadQ << std::endl;
         }
         if ((load->isConnected()) && (!busController.hasPowerAdjustments(load->getID()))) {
             S.loadP += load->getRealPower(voltage);
