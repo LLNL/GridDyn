@@ -187,8 +187,6 @@ namespace loads {
                               double resid[],
                               const solverMode& sMode)
     {
-        std::cout << "motorLoad3::residual" << std::endl;
-
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, resid, sMode, this);
 
@@ -620,8 +618,6 @@ namespace loads {
 
     double motorLoad3::getReactivePower() const
     {
-        std::cout << "motorLoad3::getReactivePower()" << std::endl;
-
         double v = bus->getVoltage();
         double ang = bus->getAngle();
         double vr = -v * Vcontrol * sin(ang);
@@ -653,8 +649,6 @@ namespace loads {
                                         const stateData& sD,
                                         const solverMode& sMode) const
     {
-        std::cout << "motorLoad3::getReactivePower(...)" << std::endl;
-
         const double voltage = inputs[voltageInLocation];
         double angle = inputs[angleInLocation];
 
@@ -681,8 +675,6 @@ namespace loads {
 
     double motorLoad3::getReactivePower(double voltage) const
     {
-        std::cout << "motorLoad3::getReactivePower(voltage)" << std::endl;
-
         double ang = bus->getAngle();
 
         double vr = -voltage * Vcontrol * sin(ang);
