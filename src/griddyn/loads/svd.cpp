@@ -317,7 +317,6 @@ namespace loads {
                        double /*resid*/[],
                        const solverMode& /*sMode*/)
     {
-        std::cout << "svd::residual" << std::endl;
     }
 
     void svd::derivative(const IOdata& /*inputs*/,
