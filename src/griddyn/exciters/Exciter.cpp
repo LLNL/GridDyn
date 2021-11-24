@@ -64,7 +64,6 @@ void Exciter::dynObjectInitializeA(coreTime /*time0*/, std::uint32_t /*flags*/)
 void Exciter::checkForLimits()
 {
     if ((Vrmin > -21) || (Vrmax < 21)) {
-        // std::cout << "Exciter::checkForLimits algRoots 1" << std::endl;
         offsets.local().local.algRoots = 1;
     }
 }
@@ -92,7 +91,6 @@ void Exciter::residual(const IOdata& inputs,
                        double resid[],
                        const solverMode& sMode)
 {
-    std::cout << "Exciter::residual" << std::endl;
     if (isAlgebraicOnly(sMode)) {
         return;
     }
@@ -178,12 +176,9 @@ void Exciter::rootTrigger(coreTime time,
                           const std::vector<int>& rootMask,
                           const solverMode& sMode)
 {
-    // std::cout << "    gridDyn::Exciter::rootTrigger ";
-
     int rootOffset = offsets.getRootOffset(sMode);
     if (rootMask[rootOffset] != 0) {
         if (opFlags[outside_vlim]) {
-            // std::cout << "back in bounds at t = " << time << std::endl;
             LOG_NORMAL("root trigger back in bounds");
             alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
@@ -191,11 +186,9 @@ void Exciter::rootTrigger(coreTime time,
         } else {
             opFlags.set(outside_vlim);
             if (opFlags[etrigger_high]) {
-                // std::cout << "above bounds at t = " << time << std::endl;
                 LOG_NORMAL("root trigger above bounds");
                 m_state[limitState] -= 0.0001;
             } else {
-                // std::cout << "below bounds at t = " << time << std::endl;
                 LOG_NORMAL("root trigger below bounds");
                 m_state[limitState] += 0.0001;
             }
@@ -205,14 +198,6 @@ void Exciter::rootTrigger(coreTime time,
         stateData sD(time, m_state.data());
 
         derivative(inputs, sD, m_dstate_dt.data(), cLocalSolverMode);
-
-        // std::cout << "    es[0]  = " << std::setw(10) << m_state[0]
-        //           << ", es[1]  = "   << std::setw(10) << m_state[1]
-        //           << ", es[2]  = "   << std::setw(10) << m_state[2]
-        //           << ", esp[0] = "   << std::setw(10) << m_dstate_dt[0]
-        //           << ", esp[1] = "   << std::setw(10) << m_dstate_dt[1]
-        //           << ", esp[2] = "   << std::setw(10) << m_dstate_dt[2] << std::endl;
-
     }
 }
 
@@ -264,17 +249,6 @@ void Exciter::limitTest(const IOdata& inputs,
     auto offset = offsets.getDiffOffset(sMode);
     int limitOffset = offsets.getRootOffset(sMode); // hijack root offsets
     double Efield = sD.state[offset];
-
-    // std::cout << "gridDyn::Exciter::limitTest" << std::endl;
-    // std::cout << "==========" << std::endl;
-    // if (opFlags[outside_vlim]) {
-    //     limits[limitOffset] = Vref + vBias - inputs[voltageInLocation];
-    // } else {
-    //     root[rootOffset] = std::min(Vrmax - Efield, Efield - Vrmin) + 0.0001;
-    //     if (Efield > Vrmax) {
-    //         opFlags.set(etrigger_high);
-    //     }
-    // }
 }
 
 void Exciter::limitTrigger(coreTime time,
@@ -282,10 +256,7 @@ void Exciter::limitTrigger(coreTime time,
                            double dstate_dt[],
                            const std::vector<int>& limitMask,
                            const solverMode& sMode)
-{
-    // std::cout << "gridDyn::Exciter::limitTrigger" << std::endl;
-    // std::cout << "==========" << std::endl;
-}
+{ }
 
 static const stringVec exciterFields{"ef"};
 
