@@ -60,9 +60,7 @@ void Source::set(const std::string& param, const std::string& val)
 
 void Source::setLevel(double newLevel)
 {
-    std::cout << "Source::setLevel" << std::endl;
     m_tempOut = m_output = newLevel;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
 }
 void Source::set(const std::string& param, double val, units::unit unitType)
 {
@@ -79,46 +77,18 @@ void Source::setState(coreTime time,
                       const double dstate_dt[],
                       const solverMode& sMode)
 {
-    std::cout << "----------------------" << std::endl;
-    std::cout << "Source::setState start" << std::endl;
-    std::cout << "  time      = " << time      << std::endl;
-    std::cout << "  lastTime  = " << lastTime  << std::endl;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
-    std::cout << "  m_output  = " << m_output  << std::endl;
-    std::cout << "  updateOutput(time) before" << std::endl;
     updateOutput(time);
-    std::cout << "  updateOutput(time) after" << std::endl;
-    std::cout << "  time      = " << time      << std::endl;
-    std::cout << "  lastTime  = " << lastTime  << std::endl;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
-    std::cout << "  m_output  = " << m_output  << std::endl;
-    std::cout << "  setState(time, state, dstate_dt, sMode) before" << std::endl;
     gridComponent::setState(time, state, dstate_dt, sMode);
-    std::cout << "  setState(time, state, dstate_dt, sMode) after" << std::endl;
-    std::cout << "  time      = " << time      << std::endl;
-    std::cout << "  lastTime  = " << lastTime  << std::endl;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
-    std::cout << "  m_output  = " << m_output  << std::endl;
-    std::cout << "  update values before" << std::endl;
     m_tempOut = m_output;
     lastTime = time;
-    std::cout << "  update values after" << std::endl;
-    std::cout << "  time      = " << time      << std::endl;
-    std::cout << "  lastTime  = " << lastTime  << std::endl;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
-    std::cout << "  m_output  = " << m_output  << std::endl;
-    std::cout << "Source::setState end" << std::endl;
-    std::cout << "--------------------" << std::endl;
 }
 
 void Source::updateOutput(coreTime time)
 {
-    std::cout << "Source::updateOutput" << std::endl;
     m_tempOut = computeOutput(time);
     m_output = m_tempOut;
     prevTime = time;
     lastTime = time;
-    std::cout << "  m_tempOut = " << m_tempOut << std::endl;
 }
 
 void Source::timestep(coreTime time, const IOdata& /*inputs*/, const solverMode& /*sMode*/)
@@ -146,13 +116,11 @@ double Source::getOutput(const IOdata& /*inputs*/,
                          const solverMode& /*sMode*/,
                          index_t outputNum) const
 {
-    std::cout << "Source::getOutput 1" << std::endl;
     return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
 double Source::getOutput(index_t outputNum) const
 {
-    std::cout << "Source::getOutput 2" << std::endl;
     return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
@@ -169,12 +137,9 @@ void Source::updateLocalCache(const IOdata& /*inputs*/,
                               const stateData& sD,
                               const solverMode& /*sMode*/)
 {
-    std::cout << "Source::updateLocalCache" << std::endl;
     if ((prevTime != sD.time) && (sD.time > timeZero)) {
         m_tempOut = computeOutput(sD.time);
         lastTime = sD.time;
-        std::cout << "  m_tempOut = " << m_tempOut << std::endl;
-        std::cout << "  lastTime  = " << sD.time << std::endl;
     }
 }
 
