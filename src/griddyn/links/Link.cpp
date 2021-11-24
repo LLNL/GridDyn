@@ -641,7 +641,6 @@ double Link::getRealPower(id_type_t busId) const
 }
 double Link::getReactivePower(id_type_t busId) const
 {
-    std::cout << "Link::getReactivePower(busId)" << std::endl;
     return (isBus2(busId, B2)) ? linkFlows.Q2 : linkFlows.Q1;
 }
 
