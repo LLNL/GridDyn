@@ -543,8 +543,6 @@ namespace links {
                                  double resid[],
                                  const solverMode& sMode)
     {
-        std::cout << "acdcConverter::residual" << std::endl;
-
         updateLocalCache(inputs, sD, sMode);
         if (isDynamic(sMode)) {
             auto Loc = offsets.getLocations(sD, resid, sMode, this);
