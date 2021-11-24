@@ -382,7 +382,7 @@ namespace braid {
         }
 
         // Run Braid simulation
-        std::cout << "braid_Drive(core)" << std::endl;
+        // std::cout << "braid_Drive(core)" << std::endl;
         braid_Drive(core);
 
         // Last processor owns the solution at t-final. Extract the t-final solution
