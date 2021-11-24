@@ -322,8 +322,6 @@ std::string commType;
                            double resid[],
                            const solverMode& sMode)
     {
-        std::cout << "breaker::residual" << std::endl;
-
         if (useCTI) {
             auto offset = offsets.getDiffOffset(sMode);
             const double* dst = sD.dstate_dt + offset;
