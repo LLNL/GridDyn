@@ -53,7 +53,9 @@ double nextCycleTime;*/
 
     double sineSource::computeOutput(coreTime time) const
     {
+        std::cout << "sineSource::computeOutput start" << std::endl;
         auto dt = time - prevTime;
+        std::cout << "dt = " << dt << std::endl;
         if (dt == timeZero) {
             return m_output;
         }
@@ -65,24 +67,49 @@ double nextCycleTime;*/
         double addComponent = NAmp * sin(2.0 * kPI * (Nfrequency * tdiff) + phase);
         double mult = 1.0;
 
+        std::cout << "  Nfrequency   = " << Nfrequency   << std::endl;
+        std::cout << "  NAmp         = " << NAmp         << std::endl;
+        std::cout << "  time         = " << time         << std::endl;
+        std::cout << "  lastCycle    = " << lastCycle    << std::endl;
+        std::cout << "  tdiff        = " << tdiff        << std::endl;
+        std::cout << "  addComponent = " << addComponent << std::endl;
+        std::cout << "  mult         = " << mult         << std::endl;
+
         if (opFlags[pulsed_flag]) {
             auto tdiff2 = time - cycleTime;
+            std::cout << "  tdiff2         = " << tdiff2         << std::endl;
             if (tdiff2 > period) {
                 tdiff2 = tdiff2 % period;
             }
+            std::cout << "  tdiff2         = " << tdiff2         << std::endl;
             mult = pulseCalc(tdiff2);
+            std::cout << "  mult           = " << mult           << std::endl;
         }
 
-        return baseValue + (mult * addComponent);
+        auto tmp = baseValue + (mult * addComponent);
+        std::cout << "  return = " << tmp << std::endl;
+        std::cout << "sineSource::computeOutput end" << std::endl;
+        return tmp;
     }
 
     void sineSource::updateOutput(coreTime time)
     {
+        std::cout << "sineSource::updateOutput start" << std::endl;
         auto dt = time - prevTime;
         if (dt == timeZero) {
+            std::cout << "sineSource::updateOutput end -- dt timeZero" << std::endl;
             return;
         }
+
+        std::cout << "  time         = " << time      << std::endl;
+        std::cout << "  prevTime     = " << prevTime  << std::endl;
+        std::cout << "  dt           = " << dt        << std::endl;
+
         auto tdiff = time - lastCycle;
+
+        std::cout << "  lastCycle    = " << lastCycle << std::endl;
+        std::cout << "  tdiff        = " << tdiff     << std::endl;
+
         // account for the frequency shift
         frequency += dfdt * (time - prevTime);
         Amp += dAdt * (time - prevTime);
@@ -102,9 +129,22 @@ double nextCycleTime;*/
             mult = pulseCalc(tdiff2);
         }
 
+        std::cout << "  frequency    = " << frequency    << std::endl;
+        std::cout << "  Amp          = " << Amp          << std::endl;
+        std::cout << "  addComponent = " << addComponent << std::endl;
+        std::cout << "  mult         = " << mult         << std::endl;
+        std::cout << "  tdiff        = " << tdiff        << std::endl;
+        std::cout << "  lastCycle    = " << lastCycle    << std::endl;
+
         m_output = baseValue + (mult * addComponent);
         m_tempOut = m_output;
         prevTime = time;
+
+        std::cout << "  m_output    = " << m_output << std::endl;
+        std::cout << "  m_tempOut   = " << m_output << std::endl;
+        std::cout << "  prevTime    = " << prevTime << std::endl;
+
+        std::cout << "sineSource::updateOutput end -- dt not timeZero" << std::endl;
     }
 
     void sineSource::set(const std::string& param, const std::string& val)
