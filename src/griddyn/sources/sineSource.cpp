@@ -101,6 +101,9 @@ double nextCycleTime;*/
             return;
         }
 
+        // HACK to skip update
+        return;
+
         std::cout << "  time         = " << time      << std::endl;
         std::cout << "  prevTime     = " << prevTime  << std::endl;
         std::cout << "  dt           = " << dt        << std::endl;
