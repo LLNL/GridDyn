@@ -260,8 +260,6 @@ namespace links {
                           double resid[],
                           const solverMode& sMode)
     {
-        std::cout << "dcLink::residual" << std::endl;
-
         if (stateSize(sMode) > 0) {
             updateLocalCache(inputs, sD, sMode);
             if (isDynamic(sMode)) {
