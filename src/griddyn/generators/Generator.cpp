@@ -610,8 +610,6 @@ double Generator::getReactivePower(const IOdata& inputs,
                                    const stateData& sD,
                                    const solverMode& sMode) const
 {
-    std::cout << "Generator::getReactivePower(...)" << std::endl;
-
     double output = -Q;
     if (!isDynamic(sMode))  // use as a proxy for dynamic state
     {
@@ -635,7 +633,6 @@ double Generator::getRealPower() const
 }
 double Generator::getReactivePower() const
 {
-    std::cout << "Generator::getReactivePower()" << std::endl;
     return -Q;
 }
 
@@ -663,7 +660,6 @@ void Generator::residual(const IOdata& /*inputs*/,
                          double resid[],
                          const solverMode& sMode)
 {
-    std::cout << "Generator::residual" << std::endl;
     if ((!isDynamic(sMode)) &&
         (opFlags[indirect_voltage_control])) {  // the bus is managing a remote bus voltage
         double voltage = remoteBus->getVoltage(sD, sMode);
