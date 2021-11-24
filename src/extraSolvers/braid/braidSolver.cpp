@@ -373,8 +373,8 @@ namespace braid {
         int nrelax = 1;
         int nrelax0 = -1;
         braid_SetStorage(core, -1);
-        //braid_SetPrintLevel(core, 2);
-        braid_SetPrintLevel(core, 3);
+        braid_SetPrintLevel(core, 2);
+        //braid_SetPrintLevel(core, 3);
         braid_SetRefine(core, 0);
         braid_SetNRelax(core, -1, nrelax);
         if (nrelax0 > -1) {
