@@ -156,8 +156,6 @@ namespace sources {
                                double resid[],
                                const solverMode& sMode)
     {
-        std::cout << "blockSource::residual" << std::endl;
-
         double srcOut = m_output;
         double srcDout = 0.0;
         if (src != nullptr) {
@@ -316,7 +314,6 @@ namespace sources {
                                    const std::vector<int>& limitMask,
                                    const solverMode& sMode)
     {
-        std::cout << "gridDyn::blockSource::limitTrigger" << std::endl;
     }
 
     void blockSource::updateLocalCache(const IOdata& inputs,
@@ -363,7 +360,6 @@ namespace sources {
                                   const solverMode& sMode,
                                   index_t outputNum) const
     {
-        std::cout << "blockSource::getOutput 1" << std::endl;
         if (blk != nullptr) {
             return blk->getOutput(noInputs, sD, sMode, outputNum);
         }
@@ -375,7 +371,6 @@ namespace sources {
 
     double blockSource::getOutput(index_t outputNum) const
     {
-        std::cout << "blockSource::getOutput 2" << std::endl;
         if (blk != nullptr) {
             return blk->getOutput(outputNum);
         }
