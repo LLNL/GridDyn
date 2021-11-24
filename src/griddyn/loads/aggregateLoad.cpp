@@ -265,8 +265,6 @@ namespace loads {
                                  double resid[],
                                  const solverMode& sMode)
     {
-        std::cout << "aggregateLoad::residual" << std::endl;
-
         for (auto& ld : subLoads) {
             if (ld->stateSize(sMode) > 0) {
                 ld->residual(inputs, sD, resid, sMode);
@@ -346,8 +344,6 @@ namespace loads {
                                            const stateData& sD,
                                            const solverMode& sMode) const
     {
-        std::cout << "faggregateLoad::getReactivePower(...)" << std::endl;
-
         double rp = 0;
         for (auto& ld : subLoads) {
             if (ld->isConnected()) {
@@ -370,8 +366,6 @@ namespace loads {
 
     double aggregateLoad::getReactivePower(double V) const
     {
-        std::cout << "faggregateLoad::getReactivePower(V)" << std::endl;
-
         double rp = 0;
         for (auto& ld : subLoads) {
             if (ld->isConnected()) {
@@ -394,8 +388,6 @@ namespace loads {
 
     double aggregateLoad::getReactivePower() const
     {
-        std::cout << "faggregateLoad::getReactivePower()" << std::endl;
-
         double rp = 0;
         for (auto& ld : subLoads) {
             if (ld->isConnected()) {
