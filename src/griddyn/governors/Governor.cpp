@@ -129,8 +129,6 @@ void Governor::residual(const IOdata& inputs,
                         double resid[],
                         const solverMode& sMode)
 {
-    std::cout << "Governor::residual" << std::endl;
-
     cb.blockResidual(inputs[govOmegaInLocation], 0, sD, resid, sMode);
     dbb.blockResidual(cb.getBlockOutput(sD, sMode), 0, sD, resid, sMode);
     delay.blockResidual(
