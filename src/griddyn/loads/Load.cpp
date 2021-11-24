@@ -55,10 +55,8 @@ void Load::setLoad(double level, unit unitType)
 
 void Load::setLoad(double Plevel, double Qlevel, unit unitType)
 {
-    std::cout << "Load::setLoad start" << std::endl;
     setP(convert(Plevel, unitType, puMW, systemBasePower));
     setQ(convert(Qlevel, unitType, puMW, systemBasePower));
-    std::cout << "Load::setLoad end" << std::endl;
 }
 
 static const stringVec locNumStrings{"p", "q", "pf"};
@@ -131,9 +129,7 @@ double Load::get(const std::string& param, unit unitType) const
 
 void Load::set(const std::string& param, double val, unit unitType)
 {
-    std::cout << "Load::set start" << std::endl;
     if (param.empty()) {
-        std::cout << "Load::set end" << std::endl;
         return;
     }
     if (param.length() == 1) {
@@ -142,19 +138,15 @@ void Load::set(const std::string& param, double val, unit unitType)
                 setP(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'q':
-                std::cout << "Load::set case q setQ()" << std::endl;
                 setQ(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             default:
-                std::cout << "Load::set throw" << std::endl;
                 throw(unrecognizedParameter(param));
         }
         checkFaultChange();
-        std::cout << "Load::set end" << std::endl;
         return;
     }
     if (param.empty()) {
-        std::cout << "Load::set end" << std::endl;
         return;
     }
     if (param.back() == '+')  // load increments
@@ -164,9 +156,7 @@ void Load::set(const std::string& param, double val, unit unitType)
             P += convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkpfq();
         } else if (param == "q+") {
-            std::cout << "Load::set q+" << std::endl;
             Q += convert(val, unitType, puMW, systemBasePower, localBaseVoltage);
-            std::cout << "Q = " << Q << std::endl;
             updatepfq();
         } else {
             gridSecondary::set(param, val, unitType);
@@ -177,9 +167,7 @@ void Load::set(const std::string& param, double val, unit unitType)
             P *= val;
             checkpfq();
         } else if (param == "q*") {
-            std::cout << "Load::set q*" << std::endl;
             Q *= val;
-            std::cout << "Q = " << Q << std::endl;
             updatepfq();
         } else {
             gridSecondary::set(param, val, unitType);
@@ -187,7 +175,6 @@ void Load::set(const std::string& param, double val, unit unitType)
     } else if (param == "load p") {
         setP(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
     } else if (param == "load q") {
-        std::cout << "Load::set load q setQ()" << std::endl;
         setQ(convert(val, unitType, puMW, systemBasePower, localBaseVoltage));
     } else if ((param == "pf") || (param == "powerfactor")) {
         if (val != 0.0) {
@@ -206,7 +193,6 @@ void Load::set(const std::string& param, double val, unit unitType)
     } else {
         gridSecondary::set(param, val, unitType);
     }
-    std::cout << "Load::set end" << std::endl;
 }
 
 void Load::setP(double newP)
@@ -218,27 +204,20 @@ void Load::setP(double newP)
 
 void Load::setQ(double newQ)
 {
-    std::cout << "Load::setQ start" << std::endl;
     Q = newQ;
-    std::cout << "Q = " << Q << std::endl;
     updatepfq();
     checkFaultChange();
-    std::cout << "Load::setQ end" << std::endl;
 }
 
 void Load::updatepfq()
 {
-    std::cout << "Load::updatepfq start" << std::endl;
     if (opFlags[use_power_factor_flag]) {
         pfq = (P == 0.0) ? kBigNum : Q / P;
     }
-    std::cout << "pfq = " << pfq << std::endl;
-    std::cout << "Load::updatepfq end" << std::endl;
 }
 
 void Load::checkpfq()
 {
-    std::cout << "Load::checkpfq start" << std::endl;
     if (opFlags[use_power_factor_flag]) {
         if (pfq > 1000.0)  // if the pfq is screwy, recalculate, otherwise leave it the same.
         {
@@ -247,8 +226,6 @@ void Load::checkpfq()
             }
         }
     }
-    std::cout << "pfq = " << pfq << std::endl;
-    std::cout << "Load::checkpfq end" << std::endl;
 }
 
 void Load::checkFaultChange()
@@ -264,9 +241,7 @@ double Load::getRealPower() const
 }
 double Load::getReactivePower() const
 {
-    std::cout << "Load::getReactivePower() start" << std::endl;
     double tmp = Q;
-    std::cout << "Load::getReactivePower() end" << std::endl;
     return tmp;
 }
 double Load::getRealPower(const IOdata& /*inputs*/,
@@ -280,9 +255,7 @@ double Load::getReactivePower(const IOdata& /*inputs*/,
                               const stateData& /*sD*/,
                               const solverMode& /*sMode*/) const
 {
-    std::cout << "Load::getReactivePower(...) start" << std::endl;
     double tmp = getReactivePower();
-    std::cout << "Load::getReactivePower(...) end" << std::endl;
     return tmp;
 }
 
@@ -292,9 +265,7 @@ double Load::getRealPower(const double /*V*/) const
 }
 double Load::getReactivePower(double /*V*/) const
 {
-    std::cout << "Load::getReactivePower(V) start" << std::endl;
     double tmp = getReactivePower();
-    std::cout << "Load::getReactivePower(V) end" << std::endl;
     return tmp;
 }
 count_t Load::outputDependencyCount(index_t /*num*/, const solverMode& /*sMode*/) const
