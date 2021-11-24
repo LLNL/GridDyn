@@ -41,7 +41,6 @@ void Stabilizer::residual(const IOdata& /*inputs*/,
                           double /*resid*/[],
                           const solverMode& /*sMode*/)
 {
-    std::cout << "Stabilizer::residual" << std::endl;
 }
 
 index_t Stabilizer::findIndex(const std::string& /*field*/, const solverMode& /*sMode*/) const
