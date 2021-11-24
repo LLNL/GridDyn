@@ -117,11 +117,9 @@ namespace loads {
 
     std::pair<count_t, count_t> motorLoad::LocalRootCount(const solverMode& /*sMode*/) const
     {
-        std::cout << "motorLoad::LocalRootCount" << std::endl;
         count_t algRoots = 0;
         count_t diffRoots = 0;
         if ((opFlags[stalled]) && (opFlags[resettable])) {
-            std::cout << "motorLoad::LocalRootCount algRoots 1" << std::endl;
             algRoots = 1;
         } else {
             diffRoots = 1;
@@ -259,8 +257,6 @@ namespace loads {
                              double resid[],
                              const solverMode& sMode)
     {
-        std::cout << "motorLoad::residual" << std::endl;
-
         if (isDynamic(sMode)) {
             if (hasDifferential(sMode)) {
                 derivative(inputs, sD, resid, sMode);
@@ -498,8 +494,6 @@ namespace loads {
 
     double motorLoad::getReactivePower() const
     {
-        std::cout << "motorLoad::getReactivePower()" << std::endl;
-
         const double voltage = bus->getVoltage();
 
         double slip = m_state[0];
@@ -535,8 +529,6 @@ namespace loads {
                                        const stateData& sD,
                                        const solverMode& sMode) const
     {
-        std::cout << "motorLoad::getReactivePower(...)" << std::endl;
-
         double voltage = inputs[voltageInLocation];
         double Qtemp;
         if (isDynamic(sMode)) {
@@ -564,8 +556,6 @@ namespace loads {
 
     double motorLoad::getReactivePower(double voltage) const
     {
-        std::cout << "motorLoad::getReactivePower(voltage)" << std::endl;
-
         double slip = m_state[0];
         return qPower(voltage * Vcontrol, slip) * scale;
     }
