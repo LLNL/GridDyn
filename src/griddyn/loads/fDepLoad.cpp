@@ -168,8 +168,6 @@ namespace loads {
 
     double fDepLoad::getReactivePower(double V, double f) const
     {
-        std::cout << "fDepLoad::getReactivePower" << std::endl;
-
         if (isConnected()) {
             double val = getQ();
             val *= pow(V, alphaQ) * pow(f, betaQ);
