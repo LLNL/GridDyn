@@ -1506,10 +1506,7 @@ void gridDynSimulation::addInitOperation(std::function<int()> fptr)
 }
 void gridDynSimulation::fillExtraStateData(stateData& sD, const solverMode& sMode) const
 {
-    std::cout << "gridDynSimulation::fillExtraStateData" << std::endl;
-
     if ((!isDAE(sMode)) && (isDynamic(sMode))) {
-        std::cout << "!isDAE and isDynamic" << std::endl;
         if (sMode.pairedOffsetIndex != kNullLocation) {
             const solverMode& pSMode = getSolverMode(sMode.pairedOffsetIndex);
             if (isDifferentialOnly(pSMode)) {
