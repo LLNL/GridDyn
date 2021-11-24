@@ -92,8 +92,6 @@ class Exciter: public gridSubModel {
                               const std::vector<int>& limitMask,
                               const solverMode& sMode) override;
 
-    virtual void printflags();
-
     // virtual void setTime(coreTime time){prevTime=time;};
     virtual const std::vector<stringVec>& inputNames() const override;
     virtual const std::vector<stringVec>& outputNames() const override;

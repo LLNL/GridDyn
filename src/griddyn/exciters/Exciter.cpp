@@ -162,15 +162,6 @@ void Exciter::rootTest(const IOdata& inputs,
     }
 }
 
-void Exciter::printflags()
-{
-    std::cout << "start Exciter::printflags" << std::endl;
-    std::cout << " opFlags[has_roots] = " << opFlags[has_roots] << std::endl;
-    std::cout << " opFlags[etrigger_high] = " << opFlags[etrigger_high] << std::endl;
-    std::cout << " opFlags[outside_vlim] = " << opFlags[outside_vlim] << std::endl;
-    std::cout << "end Exciter::printflags" << std::endl;
-}
-
 void Exciter::rootTrigger(coreTime time,
                           const IOdata& inputs,
                           const std::vector<int>& rootMask,
