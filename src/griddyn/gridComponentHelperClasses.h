@@ -293,8 +293,7 @@ class stateSizes {
     /** reset just the sizes related to states to 0*/
     void stateReset();
     /** reset the root counter and  sizes to 0*/
-    void rootReset() { //std::cout << "rootReset()" << std::endl;
-        algRoots = diffRoots = 0; }
+    void rootReset() { algRoots = diffRoots = 0; }
 
     /** reset the Jacobian counter and  sizes to 0*/
     void JacobianReset() { jacSize = 0; }

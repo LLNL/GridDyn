@@ -39,12 +39,10 @@ solverMode::solverMode(index_t index): offsetIndex(index)
 
 void stateSizes::reset()
 {
-    //std::cout << "stateSizes::rest()" << std::endl;
     std::memset(this, 0, sizeof(stateSizes));
 }
 void stateSizes::stateReset()
 {
-    //std::cout << "stateSizes::stateReset()" << std::endl;
     vSize = aSize = algSize = diffSize = 0;
 }
 void stateSizes::add(const stateSizes& arg)
@@ -56,7 +54,6 @@ void stateSizes::add(const stateSizes& arg)
     algRoots += arg.algRoots;
     diffRoots += arg.diffRoots;
     jacSize += arg.jacSize;
-    //std::cout << "stateSizes::add algRoots = " << algRoots << std::endl;
 }
 
 void stateSizes::addStateSizes(const stateSizes& arg)
@@ -71,7 +68,6 @@ void stateSizes::addRootSizes(const stateSizes& arg)
 {
     algRoots += arg.algRoots;
     diffRoots += arg.diffRoots;
-    //std::cout << "stateSizes::addRootSizes algRoots = " << algRoots << std::endl;
 }
 
 void stateSizes::addJacobianSizes(const stateSizes& arg)
@@ -86,7 +82,6 @@ count_t stateSizes::totalSize() const
 
 void solverOffsets::reset()
 {
-    //std::cout << "solverOffsets::reset()" << std::endl;
     diffOffset = aOffset = vOffset = algOffset = rootOffset = kNullLocation;
     local.reset();
     total.reset();
@@ -104,7 +99,6 @@ void solverOffsets::stateReset()
 
 void solverOffsets::rootCountReset()
 {
-    //std::cout << "solverOffsets::rootCountReset()" << std::endl;
     rootOffset = kNullLocation;
     local.rootReset();
     total.rootReset();
@@ -142,7 +136,6 @@ void solverOffsets::increment()
         algOffset += total.diffSize;
     }
     if (rootOffset != kNullLocation) {
-        //std::cout << "solverOffsets::increment 1 total.algRoots = " << total.algRoots << std::endl;
         rootOffset += total.algRoots + total.diffRoots;
     }
 }
@@ -169,7 +162,6 @@ void solverOffsets::increment(const solverOffsets& offsets)
         algOffset += offsets.total.diffSize;
     }
     if (rootOffset != kNullLocation) {
-        //std::cout << "solverOffsets::increment 2 total.algRoots = " << total.algRoots << std::endl;
         rootOffset += offsets.total.algRoots + offsets.total.diffRoots;
     }
 }
@@ -196,7 +188,6 @@ void solverOffsets::localIncrement(const solverOffsets& offsets)
         algOffset += offsets.local.diffSize;
     }
     if (rootOffset != kNullLocation) {
-        //std::cout << "solverOffsets::localincrement total.algRoots = " << total.algRoots << std::endl;
         rootOffset += offsets.local.algRoots + local.diffRoots;
     }
 }
@@ -216,7 +207,6 @@ void solverOffsets::addJacobianSizes(const solverOffsets& offsets)
 
 void solverOffsets::addRootSizes(const solverOffsets& offsets)
 {
-    //std::cout << "solverOffsets::addRootSizes()" << std::endl;
     total.addRootSizes(offsets.total);
 }
 
@@ -235,7 +225,6 @@ void solverOffsets::localLoadAll(bool finishedLoading)
     stateLoaded = finishedLoading;
     jacobianLoaded = finishedLoading;
     rootsLoaded = finishedLoading;
-    //std::cout << "solverOffsets::localLoadAll()" << std::endl;
 }
 
 void solverOffsets::setOffsets(const solverOffsets& newOffsets)
