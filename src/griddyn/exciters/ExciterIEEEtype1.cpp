@@ -247,11 +247,13 @@ namespace exciters {
         const double* esp = sD.dstate_dt + offset;
 
         if (es[1] >= Vrmax) {
+            std::cout << "ExciterIEEEtype1::limitTest " << es[1] << " >= " << Vrmax << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.set(etrigger_high);
         } else if (es[1] <= Vrmin) {
+            std::cout << "ExciterIEEEtype1::limitTest " << es[1] << " <= " << Vrmin << std::endl;
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
