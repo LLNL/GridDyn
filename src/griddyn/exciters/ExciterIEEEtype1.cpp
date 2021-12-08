@@ -246,12 +246,12 @@ namespace exciters {
         const double* es = sD.state + offset;
         const double* esp = sD.dstate_dt + offset;
 
-        if (es[1] >= (Vrmax - 0.0001)) {
+        if (es[1] >= Vrmax) {
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
             opFlags.set(etrigger_high);
-        } else if (es[1] <= (Vrmin + 0.0001)) {
+        } else if (es[1] <= Vrmin) {
             limits[limitOffset] = -1;
             alert_braid(this, JAC_COUNT_DECREASE, sMode);
             opFlags.set(outside_vlim);
@@ -276,11 +276,11 @@ namespace exciters {
         double* es = state + offset;
         double* esp = dstate_dt + offset;
 
-        if (es[1] >= (Vrmax - 0.0001)) {
-            es[1] = Vrmax - 0.0001;
+        if (es[1] >= Vrmax) {
+            es[1] = Vrmax;
             esp[1] = 0.0;
-        } else if (es[1] <= (Vrmin + 0.0001)) {
-            es[1] = Vrmin + 0.0001;
+        } else if (es[1] <= Vrmin) {
+            es[1] = Vrmin;
             esp[1] = 0.0;
         }
 
