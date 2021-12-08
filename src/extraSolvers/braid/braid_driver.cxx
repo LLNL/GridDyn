@@ -23,6 +23,7 @@
 #ifdef STATS_NEWTON
 #    include "../paradae/solvers/NewtonStats.h"
 #endif
+#define DEBUG_DJG
 
 using namespace std;
 using namespace griddyn::paradae;
@@ -253,10 +254,13 @@ namespace braid {
         Real tstop; /* evolve to this time*/
         braid_StepStatusGetTstartTstop(status, &tstart, &tstop);
 
-        // for (int i = 0; i < 8; i++)
-        //     cout << "==========";
-        // cout << endl;
-        // cout << "LEVEL " << level << " Step from " << tstart << " to " << tstop << endl;
+#ifdef DEBUG_DJG
+        for (int i = 0; i < 5; i++)
+            cout << "==========";
+        cout << endl
+             << "Start LEVEL " << level
+             << " Step from " << tstart << " to " << tstop << endl;
+#endif
 
 #ifdef STATS_NEWTON
         int nrefine, iter;
@@ -506,6 +510,14 @@ namespace braid {
         /* Rotate data and pass back to braid (Save new values in u) */
         app->alloc_data.Rotate();
         app->SetAllFromDataStruct(u);
+
+#ifdef DEBUG_DJG
+        cout << "End LEVEL " << level
+             << " Step from " << tstart << " to " << tstop << endl;
+        for (int i = 0; i < 5; i++)
+            cout << "==========";
+        cout << endl << endl;
+#endif
     }
 
     int my_Step(braid_App app,

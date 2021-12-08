@@ -53,7 +53,7 @@ namespace paradae {
 
     bool TimeIntegrator::CheckLimits(const Real time, Vector& y, Vector& dy, Vector& flimit)
     {
-        // cout << "ParaDAE::TimeIntegrator::CheckLimits" << endl;
+        // cout << "ParaDAE::TimeIntegrator::CheckLimits Start" << endl;
 
         bool limit_exceeded = false;
 
@@ -65,7 +65,6 @@ namespace paradae {
             equation->limit_functions(y, dy, flimit);
             for (int i = 0; i < equation->GetNLimits(); i++) {
                 if (flimit(i) <= tol) {
-                    // cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
                     limit_exceeded = true;
                 }
             }
@@ -73,11 +72,11 @@ namespace paradae {
 
         /* Treat exceeding limits */
         if (limit_exceeded) {
-            // cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
-            // equation->limit_crossings(time, y, dy, flimit);
-        } else {
-            // cout << "ParaDAE::TimeIntegrator::CheckLimits with limits" << endl;
+            cout << "ParaDAE::TimeIntegrator::CheckLimits limit violated" << endl;
+            equation->limit_crossings(time, y, dy, flimit);
         }
+
+        // cout << "ParaDAE::TimeIntegrator::CheckLimits End" << endl;
 
         return limit_exceeded;
     }
