@@ -60,3 +60,6 @@ fmus
 /test/test_files/zip_tests/rectifier/sources
 /test/test_files/fmi_export_tests/griddyn
 /Default/
+
+# Mac files
+**/.DS_Store
