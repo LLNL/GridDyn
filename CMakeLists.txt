@@ -24,7 +24,7 @@ project(GRIDDYN VERSION 0.9.3)
 
 # version number
 set(GRIDDYN_VERSION_BUILD)
-set(GRIDDYN_DATE "05-28-2020")
+set(GRIDDYN_DATE "06-16-2020")
 
 set(GRIDDYN_VERSION_UNDERSCORE
     "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}"
@@ -213,7 +213,7 @@ option(GRIDDYN_ENABLE_CLANG_TOOLS
        "if clang is found enable some custom targets for clang formatting and tidy" OFF
 )
 
-option(GRIDDYN_ENABLE_PACKAGE_BUILD "Add projects for making packages and installers for HELICS"
+option(GRIDDYN_ENABLE_PACKAGE_BUILD "Add projects for making packages and installers for GridDyn"
        OFF
 )
 

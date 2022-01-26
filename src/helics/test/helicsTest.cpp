@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 BOOST_FIXTURE_TEST_SUITE(helics_tests, gridDynSimulationTestFixture)
 using namespace griddyn;
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(time_conversion_test)
 BOOST_AUTO_TEST_CASE(test_pub_sub_str)
 {
     helics::FederateInfo fi;
-    fi.coreType = helics::core_type::TEST;
+    fi.coreType = helics::core_type::INPROC;
     fi.coreInitString = "--autobroker";
 
     auto vFed = std::make_shared<helics::ValueFederate>("string_test", fi);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_pub_sub_str)
 BOOST_AUTO_TEST_CASE(test_pub_sub_double)
 {
     helics::FederateInfo fi;
-    fi.coreType = helics::core_type::TEST;
+    fi.coreType = helics::core_type::INPROC;
     fi.coreInitString = "--autobroker";
 
     auto vFed = std::make_shared<helics::ValueFederate>("double_test", fi);
@@ -149,8 +149,8 @@ BOOST_AUTO_TEST_CASE(helics_coordinator_tests1)
     auto ind2 = coord.addSubscription("pub1");
     BOOST_CHECK_GE(ind1, 0);
     BOOST_CHECK_GE(ind2, 0);
-    coord.set("coretype", "test");
-    coord.set("init", "1");
+    coord.set("coretype", "inproc");
+    coord.set("init", "-f 1 --autobroker");
     coord.set("name", "coordtest");
 
     auto fed = coord.RegisterAsFederate();
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(helics_coordinator_tests1)
 
 BOOST_AUTO_TEST_CASE(load_helics_xml)
 {
-    helics::FederateInfo fi(helics::core_type::TEST);
+    helics::FederateInfo fi(helics::core_type::INPROC);
     fi.coreInitString = "-f 2 --autobroker";
 
     auto vFed = std::make_shared<helics::ValueFederate>("source_test", fi);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(load_helics_xml)
     auto pubid = vFed->registerGlobalPublication<double>("sourceValue");
 
     auto hR = new helicsRunner();
-    hR->InitializeFromString(helics_test_directory + "helics_test1.xml --core_type=test");
+    hR->InitializeFromString(helics_test_directory + "helics_test1.xml --core_type=inproc");
 
     coreObject* obj =
         coreObjectFactory::instance()->createObject("source", "helics", "helicsSource");
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(load_helics_xml)
 
 BOOST_AUTO_TEST_CASE(helics_xml_with_load)
 {
-    helics::FederateInfo fi(helics::core_type::TEST);
+    helics::FederateInfo fi(helics::core_type::INPROC);
     fi.coreName = "test2";
     fi.coreInitString = "-f 2 --autobroker";
     auto vFed = std::make_shared<helics::ValueFederate>("helics_load_test", fi);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(helics_xml_with_load)
 
     auto hR = new helicsRunner();
     hR->InitializeFromString(helics_test_directory +
-                             "helics_test2.xml --core_type=test --core_name=test2");
+                             "helics_test2.xml --core_type=inproc --core_name=test2");
 
     auto sim = hR->getSim();
 

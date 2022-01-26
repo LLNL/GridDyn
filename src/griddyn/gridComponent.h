@@ -182,8 +182,9 @@ see gridComponent::dynInitializeA for more details
     @return boolean indicator of the flag
     */
     bool checkFlag(index_t flagID) const;
-    /** @brief get the set of cascaing flags
-    @return an unsigned long long with all non-cascading flags masked out
+
+    /** @brief get the set of cascading flags
+    @return an uint64_t with all non-cascading flags masked out
     */
     inline std::uint64_t cascadingFlags() const { return (opFlags.to_ullong() & flagMask); }
 
