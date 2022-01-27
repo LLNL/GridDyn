@@ -170,6 +170,7 @@ void Exciter::rootTrigger(coreTime time,
     int rootOffset = offsets.getRootOffset(sMode);
     if (rootMask[rootOffset] != 0) {
         if (opFlags[outside_vlim]) {
+            std::cout << "Exciter::rootTrigger back in bounds" << std::endl;
             LOG_NORMAL("root trigger back in bounds");
             alert_braid(this, JAC_COUNT_INCREASE, sMode);
             opFlags.reset(outside_vlim);
@@ -177,9 +178,11 @@ void Exciter::rootTrigger(coreTime time,
         } else {
             opFlags.set(outside_vlim);
             if (opFlags[etrigger_high]) {
+                std::cout << "Exciter::rootTrigger above bounds" << std::endl;
                 LOG_NORMAL("root trigger above bounds");
                 m_state[limitState] -= 0.0001;
             } else {
+                std::cout << "Exciter::rootTrigger below bounds" << std::endl;
                 LOG_NORMAL("root trigger below bounds");
                 m_state[limitState] += 0.0001;
             }

@@ -82,6 +82,11 @@ namespace exciters {
         const double* esp = sD.dstate_dt + offset;
         double* rv = resid + offset;
 
+        if (opFlags[outside_vlim])
+            std::cout << "ExciterIEEEtype1::residual outside_vlim" << std::endl;
+        else
+            std::cout << "ExciterIEEEtype1::residual inside_vlim" << std::endl;
+
         rv[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
         if (opFlags[outside_vlim]) {
             if (opFlags[etrigger_high]) {
@@ -279,9 +284,11 @@ namespace exciters {
         double* esp = dstate_dt + offset;
 
         if (es[1] >= Vrmax) {
+            std::cout << "ExciterIEEEtype1::limitTrigger " << es[1] << " >= " << Vrmax << std::endl;
             es[1] = Vrmax;
             esp[1] = 0.0;
         } else if (es[1] <= Vrmin) {
+            std::cout << "ExciterIEEEtype1::limitTrigger " << es[1] << " >= " << Vrmax << std::endl;
             es[1] = Vrmin;
             esp[1] = 0.0;
         }

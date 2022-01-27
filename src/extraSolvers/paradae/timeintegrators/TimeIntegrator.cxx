@@ -159,8 +159,12 @@ namespace paradae {
                 P.GetValueY(thi, val.xroot);
                 P.GetValueDY(thi, val.dxroot);
 
-                // cout << "gprev = " << val.gprev << " gnext = " << val.gnext << endl;
-                // cout << "troot = " << std::setprecision(10) << val.troot << endl;
+                cout << "TimeIntegrator::CheckRoots root found at " << thi << endl;
+                cout << "Before root_action" << endl;
+                cout << "gprev  = " << val.gprev << " gnext = " << val.gnext << endl;
+                cout << "troot  = " << std::setprecision(10) << val.troot << endl;
+                cout << "xroot  = " << val.xroot << endl;
+                cout << "dxroot = " << val.dxroot << endl;
 
                 // DJG comment out root_crossing in Equation::CheckAllRoots and
                 // add this new function to take action if a root is found which
@@ -168,6 +172,12 @@ namespace paradae {
                 auto roots = equation->GetRoots();
                 equation->root_action(val.troot, val.xroot, val.dxroot,
                                       roots.iroot);
+
+                cout << "After root_action" << endl;
+                cout << "gprev  = " << val.gprev << " gnext = " << val.gnext << endl;
+                cout << "troot  = " << std::setprecision(10) << val.troot << endl;
+                cout << "xroot  = " << val.xroot << endl;
+                cout << "dxroot = " << val.dxroot << endl;
             }
         }
         return root_crossed;
