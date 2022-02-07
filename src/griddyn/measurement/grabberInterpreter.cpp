@@ -25,6 +25,10 @@ void allGrabbers(const std::string& mode,
                  coreObject* obj,
                  std::vector<std::unique_ptr<gridGrabber>>& v);
 
+void perObjectGrabbers(const std::string& cmd,
+                 coreObject* obj,
+                 std::vector<std::unique_ptr<gridGrabber>>& v);
+
 static grabberInterpreter<gridGrabber, opGrabber, functionGrabber>
     gInterpret([](const std::string& fld, coreObject* obj) { return createGrabber(fld, obj); });
 
@@ -82,6 +86,8 @@ std::vector<std::unique_ptr<gridGrabber>> makeGrabbers(const std::string& comman
                 allGrabbers(cmd, obj, v);
             } else if (cmdlc == "auto") {
                 autoGrabbers(obj, v);
+            } else if (cmdlc.compare(0, 4, "per_")==0) {
+                perObjectGrabbers(cmd, obj, v);
             } else {  // create a single grabber
                 auto ggb = createGrabber(cmdlc, obj);
                 if (ggb) {
@@ -174,6 +180,35 @@ void autoGrabbers(coreObject* obj, std::vector<std::unique_ptr<gridGrabber>>& v)
 
         v.push_back(std::make_unique<objectGrabber<Area>>("tieflowreal", area));
         return;
+    }
+}
+void perObjectGrabbers(const std::string& cmd,
+                       coreObject* obj,
+                       std::vector<std::unique_ptr<gridGrabber>>& v)
+{
+    if (cmd.compare(0, 4, "per_") != 0) {
+        return;
+    }
+    auto bstart = cmd.find_first_of('[');
+    if (bstart == std::string::npos) {
+        return;
+    }
+    auto fieldlist = cmd.substr(bstart + 1);
+    while (fieldlist.back() !=']') {
+        fieldlist.pop_back();
+    }
+    fieldlist.pop_back();
+
+    auto objType = cmd.substr(4, bstart - 4);
+    index_t index = 0;
+    auto* sub_obj = obj->getSubObject(objType, index);
+    while (sub_obj!=nullptr) {
+        auto gbrs = makeGrabbers(fieldlist, sub_obj);
+        for (auto &gb:gbrs) {
+            v.push_back(std::move(gb));
+        }
+        ++index;
+        sub_obj = obj->getSubObject(objType, index);
     }
 }
 

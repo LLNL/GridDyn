@@ -7,6 +7,8 @@
 #include "offsetTable.h"
 
 #include "gridComponent.h"
+#include <stdexcept>
+
 
 namespace griddyn {
 static const solverOffsets nullOffsets{};

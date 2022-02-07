@@ -7,6 +7,7 @@
 #include "reversibleEvent.h"
 
 #include "../measurement/gridGrabbers.h"
+#include <stdexcept>
 
 namespace griddyn {
 namespace events {

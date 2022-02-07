@@ -376,11 +376,14 @@ void collector::add(const gridGrabberInfo& gdRI, coreObject* obj)
                  print_level::warning,
                  "unable to create collector no field or offset specified");
         addWarning("unable to create collector no field or offset specified");
-    } else {
-        if (gdRI.field.find_first_of(",;") !=
-            std::string::npos) {  // now go into a loop of the comma variables
-            // if multiple fields were specified by comma or semicolon separation
-            auto v = stringOps::splitlineBracket(gdRI.field, ",;");
+        return;
+    }
+
+    if (gdRI.field.find_first_of(",;") !=
+        std::string::npos) {  // now go into a loop of the comma variables
+        // if multiple fields were specified by comma or semicolon separation
+        auto v = stringOps::splitlineBracket(gdRI.field, ",;");
+        if (v.size() > 1) {
             int ccol = gdRI.column;
             auto tempInfo = gdRI;
             for (const auto& fld : v) {
@@ -392,36 +395,37 @@ void collector::add(const gridGrabberInfo& gdRI, coreObject* obj)
                 }
                 add(tempInfo, obj);
             }
-        } else {
-            // now we get to the interesting bit
-            auto fldGrabbers = makeGrabbers(gdRI.field, obj);
-            auto stGrabbers = makeStateGrabbers(gdRI.field, obj);
-            if (fldGrabbers.size() == 1) {
-                // merge the gain and bias
-                fldGrabbers[0]->gain *= gdRI.gain;
-                fldGrabbers[0]->bias *= gdRI.gain;
-                fldGrabbers[0]->bias += gdRI.bias;
-                if (gdRI.outputUnits != units::defunit) {
-                    fldGrabbers[0]->outputUnits = gdRI.outputUnits;
-                }
-                // TODO(PT) incorporate state grabbers properly
-                add(std::shared_ptr<gridGrabber>(std::move(fldGrabbers[0])), gdRI.column);
+            return;
+        }
+    }
+
+    // now we get to the interesting bit
+    auto fldGrabbers = makeGrabbers(gdRI.field, obj);
+    auto stGrabbers = makeStateGrabbers(gdRI.field, obj);
+    if (fldGrabbers.size() == 1) {
+        // merge the gain and bias
+        fldGrabbers[0]->gain *= gdRI.gain;
+        fldGrabbers[0]->bias *= gdRI.gain;
+        fldGrabbers[0]->bias += gdRI.bias;
+        if (gdRI.outputUnits != units::defunit) {
+            fldGrabbers[0]->outputUnits = gdRI.outputUnits;
+        }
+        // TODO(PT) incorporate state grabbers properly
+        add(std::shared_ptr<gridGrabber>(std::move(fldGrabbers[0])), gdRI.column);
+    } else {
+        int ccol = gdRI.column;
+        for (auto& ggb : fldGrabbers) {
+            if (ccol > 0) {
+                add(std::shared_ptr<gridGrabber>(std::move(ggb)), ccol++);
             } else {
-                int ccol = gdRI.column;
-                for (auto& ggb : fldGrabbers) {
-                    if (ccol > 0) {
-                        add(std::shared_ptr<gridGrabber>(std::move(ggb)), ccol++);
-                    } else {
-                        add(std::shared_ptr<gridGrabber>(std::move(ggb)));
-                    }
-                }
-            }
-            if (fldGrabbers.empty()) {
-                obj->log(obj, print_level::warning, "no grabbers created from " + gdRI.field);
-                addWarning("no grabbers created from " + gdRI.field);
-                throw(addFailureException());
+                add(std::shared_ptr<gridGrabber>(std::move(ggb)));
             }
         }
+    }
+    if (fldGrabbers.empty()) {
+        obj->log(obj, print_level::warning, "no grabbers created from " + gdRI.field);
+        addWarning("no grabbers created from " + gdRI.field);
+        throw(addFailureException());
     }
 }
 
