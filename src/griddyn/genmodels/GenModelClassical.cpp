@@ -202,10 +202,12 @@ namespace genmodels {
                                       const solverMode& sMode,
                                       index_t* freqOffset) const
     {
-        double omega = 1.0;
+        double omega{1.0};
 
         if (isLocal(sMode)) {
-            omega = m_state[3];
+            if (m_state.size()>3) {
+                omega = m_state[3];
+            }
             if (freqOffset != nullptr) {
                 *freqOffset = kNullLocation;
             }
@@ -236,7 +238,9 @@ namespace genmodels {
         double angle = kNullVal;
 
         if (isLocal(sMode)) {
-            angle = m_state[2];
+            if (m_state.size() > 2) {
+                angle = m_state[2];
+            }
             if (angleOffset != nullptr) {
                 *angleOffset = kNullLocation;
             }
