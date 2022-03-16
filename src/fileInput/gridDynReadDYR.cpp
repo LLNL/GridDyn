@@ -25,6 +25,7 @@ void loadGENROU(coreObject* parentObject, stringVec& tokens);
 void loadESDC1A(coreObject* parentObject, stringVec& tokens);
 void loadTGOV1(coreObject* parentObject, stringVec& tokens);
 void loadEXDC2(coreObject* parentObject, stringVec& tokens);
+void loadSEXS(coreObject* parentObject, stringVec& tokens);
 
 void loadDYR(coreObject* parentObject, const std::string& fileName, const basicReaderInfo& /*bri*/)
 {
@@ -68,6 +69,8 @@ void loadDYR(coreObject* parentObject, const std::string& fileName, const basicR
             loadESDC1A(parentObject, lineTokens);
         } else if (type == "'TGOV1'") {
             loadTGOV1(parentObject, lineTokens);
+        } else if (type == "'SEXS'") {
+            loadSEXS(parentObject, lineTokens);
         } else {
             std::cout << "unknown object type " << type << '\n';
         }
@@ -164,6 +167,35 @@ void loadEXDC2(coreObject* parentObject, stringVec& tokens)
     gen->add(sm);
 }
 
+
+void loadSEXS(coreObject* parentObject, stringVec& tokens)
+{
+    int id = std::stoi(tokens[0]);
+    gridBus* bus = static_cast<gridBus*>(parentObject->findByUserID("bus", id));
+    id = std::stoi(tokens[2]);
+    Generator* gen = bus->getGen(id - 1);
+
+    auto params = str2vector(tokens, kNullVal);
+    Exciter* sm;
+
+    sm = static_cast<Exciter*>(cof->createObject("exciter", "dc1a"));
+
+    // sm->set("tr", params[3]);
+    sm->set("ka", params[5]);
+    sm->set("ta", params[6]);
+    //if (params[6] > 0) {
+    sm->set("tb", params[4]);
+    sm->set("tc", params[3]*params[4]);
+    //}
+    sm->set("vrmax", params[8]);
+    sm->set("vrmin", params[7]);
+    sm->set("ke", 1.0);
+    sm->set("te", 0.0001);
+    sm->set("kf", 0.0);
+    sm->set("tf", 1.0);
+
+    gen->add(sm);
+}
 void loadTGOV1(coreObject* parentObject, stringVec& tokens)
 {
     int id = std::stoi(tokens[0]);
