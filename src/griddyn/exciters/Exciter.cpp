@@ -243,7 +243,7 @@ void Exciter::set(const std::string& param, double val, units::unit unitType)
 {
     if (param == "vref") {
         Vref = val;
-    } else if (param == "ka") {
+    } else if (param == "ka" || param == "k") {
         Ka = val;
     } else if (param == "ta") {
         Ta = val;
