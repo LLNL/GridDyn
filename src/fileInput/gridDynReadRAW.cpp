@@ -542,6 +542,11 @@ void rawReadBus(gridBus* bus, const std::string& line, basicReaderInfo& opt)
 
 void rawReadLoad(Load* ld, const std::string& line, basicReaderInfo& /*bri*/)
 {
+
+    // version 32:
+    //  0,  1,      2,    3,    4,    5,    6,      7,   8,  9, 10,   11
+    // Bus, Id, Status, Area, Zone, PL(MW), QL (MW), IP, IQ, YP, YQ, OWNER
+
     auto strvec = splitline(line);
 
     // get the load index and name
@@ -589,6 +594,8 @@ void rawReadLoad(Load* ld, const std::string& line, basicReaderInfo& /*bri*/)
 
 void rawReadFixedShunt(Load* ld, const std::string& line, basicReaderInfo& /*bri*/)
 {
+    // 0,    1,      2,      3,      4
+    // Bus, name, Status, g (MW), b (Mvar)
     auto strvec = splitline(line);
 
     // get the load index and name
@@ -616,6 +623,8 @@ void rawReadFixedShunt(Load* ld, const std::string& line, basicReaderInfo& /*bri
 
 void rawReadGen(Generator* gen, const std::string& line, basicReaderInfo& opt)
 {
+    // 0, 1, 2, 3, 4, 5, 6, 7,    8,   9,10,11, 12, 13, 14,   15, 16,17,18,19
+    //  I,ID,PG,QG,QT,QB,VS,IREG,MBASE,ZR,ZX,RT,XT,GTAP,STAT,RMPCT,PT,PB,O1,F1
     auto strvec = splitline(line);
 
     // get the load index and name
@@ -628,6 +637,9 @@ void rawReadGen(Generator* gen, const std::string& line, basicReaderInfo& opt)
     if (status == 0) {
         gen->disable();
     }
+
+    auto mb = numeric_conversion<double>(strvec[8], 0.0);
+    gen->set("mbase", mb);
 
     // get the power generation
     auto p = numeric_conversion<double>(strvec[2], 0.0);
@@ -669,9 +681,6 @@ void rawReadGen(Generator* gen, const std::string& line, basicReaderInfo& opt)
             static_cast<gridBus*>(gen->getParent()->getParent()->findByUserID("bus", rbus));
         gen->add(remoteBus);
     }
-
-    auto mb = numeric_conversion<double>(strvec[8], 0.0);
-    gen->set("mbase", mb);
 
     auto r = numeric_conversion<double>(strvec[9], 0.0);
     gen->set("rs", r);
@@ -776,6 +785,9 @@ void rawReadBranch(coreObject* parentObject,
                    std::vector<gridBus*>& busList,
                    basicReaderInfo& opt)
 {
+//
+    // I,J,CKT,R,X,B,RATEA,RATEB,RATEC,GI,BI,GJ,BJ,ST,LEN,O1,F1,...,O4,F4
+//
     auto strvec = splitline(line);
 
     std::string name;
@@ -1091,11 +1103,26 @@ int rawReadTX_v33(coreObject* parentObject,
 
     // get the branch impedance
 
+    auto Itype=numeric_conversion<int>(strvec[5],1);
+    
     auto R = numeric_conversion<double>(strvec2[0], 0.0);
     auto X = numeric_conversion<double>(strvec2[1], 0.0);
 
-    lnk->set("r", R);
-    lnk->set("x", X);
+    if (Itype == 1)
+    {
+        lnk->set("r", R);
+        lnk->set("x", X);
+    }
+    else if (Itype==2)
+    {
+        auto base=numeric_conversion<double>(strvec2[2], 0.0);
+        lnk->set("r", R*opt.base/base);
+        lnk->set("x", X*opt.base/base);
+    }
+    else
+    {
+
+    }
     // get line capacitance
 
     auto status = std::stoi(strvec[11]);
@@ -1112,23 +1139,25 @@ int rawReadTX_v33(coreObject* parentObject,
     auto vn1=numeric_conversion<double>(strvec3[1], 0.0);
     auto vn2=numeric_conversion<double>(strvec4[1], 0.0);
 
+    auto bv1=bus1->get("basevoltage");
+    auto bv2=bus2->get("basevoltage");
     int tapcode=std::stoi(strvec[4]);
     if (tapcode == 2)
     {
         auto wv2=numeric_conversion<double>(strvec4[0],0.0);
-        tap = (tap / bus1->get("basevoltage") / (wv2 / bus2->get("basevoltage")));
+        tap = (tap / bv1 / (wv2 / bv2));
     }
     else if (tapcode == 3)
     {
         if (vn1 == 0.0)
         {
-            vn1=bus1->get("basevoltage");
+            vn1=bv1;
         }
         if (vn2 == 0.0)
         {
-            vn2=bus2->get("basevoltage");
+            vn2=bv2;
         }
-        tap = tap * (vn1 / bus1->get("basevoltage")) / (vn2 / bus2->get("basevoltage"));
+        tap = tap * (vn1 / bv1) / (vn2 / bv2);
     }
         
         if (tap != 0) {
