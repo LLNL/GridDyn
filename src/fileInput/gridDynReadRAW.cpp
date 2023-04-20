@@ -763,8 +763,11 @@ auto generateBranchName(const stringVector& strvec,
     }
     // create the bus name
     std::string name;
-    if (prefix.empty() || prefix.back()=='_') {
+    if (prefix.empty()) {
         name = busList[ind1]->getName() + "_to_" + busList[ind2]->getName();
+    }
+    else if (prefix.back()=='_'){
+        name = prefix + busList[ind1]->getName() + "_to_" + busList[ind2]->getName();
     } else {
         name = prefix + '_' + busList[ind1]->getName() + "_to_" + busList[ind2]->getName();
     }
@@ -1084,14 +1087,26 @@ int rawReadTX_v33(coreObject* parentObject,
         lnk = linkfactory->makeDirectObject(name);
         break;
     case 1:
+        if (opt.prefix.empty())
+        {
+            name.insert(0,"vadj");
+        }
         lnk = new links::adjustableTransformer(name);
         lnk->set("mode", "voltage");
         break;
     case 2:
+        if (opt.prefix.empty())
+        {
+            name.insert(0,"qadj");
+        }
         lnk = new links::adjustableTransformer(name);
         lnk->set("mode", "mvar");
         break;
     case 3:
+        if (opt.prefix.empty())
+        {
+            name.insert(0,"padj");
+        }
         lnk = new links::adjustableTransformer(name);
         lnk->set("mode", "mw");
         break;
