@@ -44,10 +44,11 @@ int gridDynSimulation::powerflow()
     auto pFlowData = getSolverInterface(sm);
     // Create the error recovery object to use if necessary
     powerFlowErrorRecovery pfer(this, pFlowData);
-
+    
     if (pFlowData->size() >
-        0)  // handle the condition when all buses are swing buses hence nothing to solve
+        0)  
     {
+        // handle the condition when all buses are swing buses hence nothing to solve
         power_iteration_count = 0;
         do  // outer power distribution loop
         {
@@ -322,9 +323,9 @@ bool gridDynSimulation::loadBalance(double prevPower, const std::vector<double>&
     auto pv = prevSlkGen.begin();
     for (auto& bus : slkBusses) {
         cPower -= (bus->getLinkReal() + bus->getLoadReal());
+        // reset the slk generators to previous levels so the adjustments work properly
         bus->set("p",
-                 -(*pv));  // reset the slk generators to previous levels so the adjustments work
-                           // properly
+                 -(*pv));  
         ++pv;
     }
 

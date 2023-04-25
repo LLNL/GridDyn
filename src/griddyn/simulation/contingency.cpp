@@ -123,6 +123,8 @@ void Contingency::execute()
         std::unique_ptr<gridDynSimulation>(static_cast<gridDynSimulation*>(gds->clone()));
     contSim->set("printlevel", 0);
     int res = FUNCTION_EXECUTION_SUCCESS;
+    preEventLoad=contSim->getLoadReal();
+    preEventGen=contSim->getGenerationReal();
     int stage=0;
     for (auto& evList : eventList) {
         for (auto& ev : evList) {
@@ -139,6 +141,7 @@ void Contingency::execute()
         if (stage == 0)
         {
             preContingencyLoad=contSim->getLoadReal();
+            preContingencyGen=contSim->getGenerationReal();
         }
         res = contSim->powerflow();
         ++stage;
@@ -146,6 +149,8 @@ void Contingency::execute()
 
     if (res == FUNCTION_EXECUTION_SUCCESS) {
         contingencyLoad=contSim->getLoadReal();
+        contingencyGen = contSim->getGenerationReal();
+        islands=contSim->get("islands");
         contSim->pFlowCheck(Violations);
         contSim->getVoltage(busVoltages);
         contSim->getAngle(busAngles);
@@ -183,14 +188,14 @@ void Contingency::setContingencyRoot(gridDynSimulation* gdSim)
 
 void Contingency::add(std::shared_ptr<Event> ge, index_t stage)
 {
-    gmlc::utilities::ensureSizeAtLeast(eventList, stage + 1);
+    gmlc::utilities::ensureSizeAtLeast(eventList, static_cast<std::size_t>(stage) + 1);
     eventList[stage].push_back(std::move(ge));
 }
 
 
 void Contingency::merge(const Contingency &c2,index_t stage)
 {
-    gmlc::utilities::ensureSizeAtLeast(eventList, stage + 1);
+    gmlc::utilities::ensureSizeAtLeast(eventList, static_cast<std::size_t>(stage) + 1);
     for (const auto& evlist : c2.eventList)
     {
         for (const auto& ev : evlist)
@@ -202,7 +207,7 @@ void Contingency::merge(const Contingency &c2,index_t stage)
 
 bool Contingency::mergeIfUnique(const Contingency& c2, index_t stage)
 {
-    gmlc::utilities::ensureSizeAtLeast(eventList, stage + 1);
+    gmlc::utilities::ensureSizeAtLeast(eventList, static_cast<std::size_t>(stage) + 1);
     bool newEvent=false;
     for (const auto& evlist : c2.eventList)
     {
@@ -253,7 +258,7 @@ std::string Contingency::generateHeader() const
             ss << ", " << ln << ":flow";
         }
     }
-    ss << ", min Voltage, loadLoss, violations";
+    ss << ", min Voltage, islands, loadLossEvent, loadLoss, genLossEvent, genLoss, violations";
     return ss.str();
 }
 
@@ -284,7 +289,11 @@ std::string Contingency::generateFullOutputLine() const
         ss << ", " << ln;
     }
     ss<<", "<<lowV;
+    ss<<", "<<islands;
+    ss<<", "<<preEventLoad-contingencyLoad;
     ss<<", "<<preContingencyLoad-contingencyLoad;
+    ss<<", "<<preEventGen-contingencyGen;
+    ss<<", "<<preContingencyGen-contingencyGen;
     ss << commaQuote;
     for (auto& viol : Violations) {
         ss << viol.to_string() << ';';
@@ -305,7 +314,11 @@ std::string Contingency::generateViolationsOutputLine() const
         
     }
     ss<<", "<<lowV;
+    ss<<", "<<islands;
+    ss<<", "<<preEventLoad-contingencyLoad;
     ss<<", "<<preContingencyLoad-contingencyLoad;
+    ss<<", "<<preEventGen-contingencyGen;
+    ss<<", "<<preContingencyGen-contingencyGen;
     ss << commaQuote;
     for (auto& viol : Violations) {
         ss << viol.to_string() << ';';
