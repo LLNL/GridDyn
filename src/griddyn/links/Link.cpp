@@ -263,6 +263,12 @@ void Link::switchChange(int /*switchNum*/)
 {
     computePowers();
 }
+
+bool Link::testAndTrip(int tripLevel)
+{
+    return false;
+}
+
 void Link::disconnect()
 {
     if (isConnected()) {
