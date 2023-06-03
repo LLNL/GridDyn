@@ -174,6 +174,12 @@ void Contingency::wait() const
 {
     future_ret.wait();
 }
+
+std::future_status Contingency::wait_for(std::chrono::milliseconds waitTime) const
+{
+    return future_ret.wait_for(waitTime);
+}
+
 bool Contingency::isFinished() const
 {
     return completed.load(std::memory_order_acquire);
@@ -267,6 +273,21 @@ std::string Contingency::generateHeader() const
 }
 
 static const std::string commaQuote = R"(, ")";
+
+std::string Contingency::generateContingencyString() const
+{
+    std::stringstream ss;
+    ss << id << ", " << name << commaQuote;
+    for (auto& ev : eventList[0]) {
+        if (ev)
+        {
+            ss << ev->to_string() << ';';
+        }
+    }
+    ss << '"';
+    return ss.str();
+}
+
 std::string Contingency::generateFullOutputLine() const
 {
     std::stringstream ss;
