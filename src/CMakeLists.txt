@@ -11,7 +11,7 @@ add_subdirectory(utilities)
 # Enable support for Plugins
 # ------------------------------------------------------------
 if(GRIDDYN_ENABLE_PLUGINS)
-    if(BOOST_VERSION_LEVEL==0)
+    if(BOOST_VERSION_LEVEL EQUAL 0)
         set(ENABLE_PLUGINS OFF)
         message(WARNING "Plugin support requires BOOST 1.83 or higher")
     else()
@@ -42,14 +42,9 @@ endif(GRIDDYN_ENABLE_EXTRA_SOLVERS)
 # Enable compilation of FMI?
 # ------------------------------------------------------------
 if(GRIDDYN_ENABLE_FMI)
-    if(BOOST_VERSION_LEVEL==0)
-        set(ENABLE_FMI OFF CACHE BOOL "Enable FMI Support" FORCE)
-        message(WARNING "FMI support requires BOOST 1.83 or higher, disabling it")
-    else()
-        add_subdirectory(fmi)
-        target_link_libraries(griddyn_optional INTERFACE fmiGDLibrary)
-        set(DL_REQUIRED ON)
-    endif()
+    add_subdirectory(fmi)
+    target_link_libraries(griddyn_optional INTERFACE fmiGDLibrary)
+    set(DL_REQUIRED ON)
 endif(GRIDDYN_ENABLE_FMI)
 
 # ------------------------------------------------------------

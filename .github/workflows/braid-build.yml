@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: circleci-braid-${{ github.workflow }}-${{ github.ref }}
+  group: braid-build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

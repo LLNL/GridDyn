@@ -47,7 +47,6 @@ set_target_properties(gridDynLoader PROPERTIES FOLDER libraries)
 # depend on the gridDyn Libraries and the external libraries
 target_link_libraries(gridDynLoader griddyn_optional)
 
-# TODO ENABLE_FMI should mark DL_REQUIRED
-if(DL_REQUIRED OR ENABLE_FMI)
+if(DL_REQUIRED)
     target_link_libraries(gridDynLoader ${CMAKE_DL_LIBS})
-endif(DL_REQUIRED OR ENABLE_FMI)
+endif()
