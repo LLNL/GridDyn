@@ -54,7 +54,7 @@ message(STATUS "SYSTEM INFO -> ${GRIDDYN_COMPILER_VERSION}")
 # set the module path and include some common macros
 # ------------------------------------------------------------
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
                           "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/"
@@ -88,7 +88,7 @@ include(ucm)
 include(GNUInstallDirs)
 
 # Set the build output paths
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Archive output dir.")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Library output dir.")
     set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -101,7 +101,7 @@ endif()
 # ------------------------------------------------------------
 # set the install path to a local directory
 # ------------------------------------------------------------
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND PROJECT_IS_TOP_LEVEL)
     if(WIN32)
         if(MSVC)
             set(CMAKE_INSTALL_PREFIX "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
@@ -146,18 +146,16 @@ endif()
 # -------
 
 cmake_dependent_option(
-    GRIDDYN_BUILD_TESTS "Enable the test executables to be built" ON
-    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+    GRIDDYN_BUILD_TESTS "Enable the test executables to be built" ON "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_option(
-    GRIDDYN_BUILD_BENCHMARKS "Build GridDyn benchmarks" OFF
-    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+    GRIDDYN_BUILD_BENCHMARKS "Build GridDyn benchmarks" OFF "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_advanced_option(
-    GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON
-    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+    GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON "PROJECT_IS_TOP_LEVEL"
+    OFF
 )
 
 # Install instructions for this target
@@ -288,7 +286,7 @@ if(NOT TARGET build_flags_target)
     add_library(build_flags_target INTERFACE)
 endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     mark_as_advanced(BUILD_TESTING)
     include(compiler_flags)
 
@@ -302,7 +300,7 @@ set(GRIDDYN_BUILD_FLAGS_OUTPUT
     "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_STATIC_LINKER_FLAGS} ${EXTRA_BUILD_FLAGS} "
 )
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     if(NOT USE_LIBCXX)
         show_variable(STATIC_STANDARD_LIB STRING "Link against a static standard lib" default)
         set_property(CACHE STATIC_STANDARD_LIB PROPERTY STRINGS default static dynamic)
@@ -907,7 +905,7 @@ if(GRIDDYN_ENABLE_PACKAGE_BUILD)
     include(CPack)
 endif(GRIDDYN_ENABLE_PACKAGE_BUILD)
 
-if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(NOT PROJECT_IS_TOP_LEVEL)
     # restore the original module path
     set(CMAKE_MODULE_PATH ${ORIGINAL_MODULE_PATH})
     if(old_build_shared)

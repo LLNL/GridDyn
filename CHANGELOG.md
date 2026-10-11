@@ -11,9 +11,56 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Exported `gridDynMain` (and `griddynServer` when built) as installed CMake
-  executable targets.
-- Expanded and streamlined the Python interface, including in-memory recorder results.
+- Added native renewable and wind-generation models, including renewable plant
+  controllers, grid-forming and distributed converters, and WT3/WT4 model
+  families.
+- Added and expanded generator, governor, exciter, stabilizer, voltage-limiter,
+  and voltage-compensator models, plus bus/COI measurement sensors and
+  protection relays.
+- Added composite, CIM, electronic, and motor-load models, with improved load
+  templates and DYR/DYD mappings.
+- Added PSLF SQLite `.sav` input support and expanded PSS/E RAW and DYR, PSLF
+  DYD, and EPC import coverage.
+- Added in-memory Python recorder results through `as_dicts()` and
+  `as_dataframe()`.
+- Added installed CMake package config files that export the `Griddyn::gridDynMain`
+  executable target and `Griddyn::griddynServer` when that executable is built.
+
+### Changed
+
+- Consolidated Python output into `sim.write_file(path, type=...)`; the output
+  extension selects the writer unless `type` is provided.
+- Organized Python solving and time-domain execution on their domain objects:
+  use `sim.power_flow.run()` for power flow, `sim.optimization.opf()` for OPF,
+  and `sim.time_domain.initialize()`, `sim.time_domain.run()`,
+  `sim.time_domain.run_until()`, and `sim.time_domain.step()` for dynamic
+  simulation. General actions remain available through `sim.execute(action)`.
+- Standardized Python network collections on lowercase plural names such as
+  `sim.buses` and `sim.generators`. Callers upgrading from 0.12 should replace
+  `sim.powerflow()`/`sim.PFlow.run()` with `sim.power_flow.run()`, move
+  `sim.initialize()`, `sim.run()`, `sim.run_until()`, and `sim.step()` to
+  `sim.time_domain`, and use `sim.optimization.opf()` instead of
+  `solve_opf()`. Replace `sim.TDS`, capitalized singular collection aliases,
+  and format-specific output methods with `sim.time_domain`, lowercase plural
+  collections, and `sim.write_file()`.
+- Clarified that `.sav` denotes the PSLF SQLite reader; legacy binary PSS/E
+  saved cases are not supported by that reader.
+
+### Improved
+
+- Expanded model-import diagnostics and validation for unsupported or malformed
+  input, including checks that reject invalid PSLF `.sav` files before creating
+  model objects.
+- Expanded area AGC, reserve dispatch, scheduling, and controller signal-routing
+  support.
+- Added Ruff naming-convention checks to the Python library CI workflow.
+- Expanded initialization, solver, and regression coverage for renewable,
+  composite-load, protection, partitioned, DAE, and larger-network workflows.
+
+### Removed
+
+- Retired the FSKIT federation integration and its associated build and source
+  files.
 
 ## [0.12.0] - 2026-09-25
 
@@ -39,7 +86,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Improved CVODE/SUNDIALS integration and expanded transient simulation
   validation for larger networks and dynamic model behavior.
 
-Major changes in cmake and build system
-addition of Braid solvers
-upgrade to sundials 3.1
-inclusion of HELICS
+## Earlier project notes (release version and date unspecified)
+
+- Made major CMake and build-system changes.
+- Added Braid solvers.
+- Upgraded SUNDIALS to 3.1.
+- Added HELICS integration.

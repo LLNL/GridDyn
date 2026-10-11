@@ -10,6 +10,8 @@ then follow the [quick start](quickStart.md) or the detailed
 [Python interface guide](python-interface.md). Source-build instructions and
 the C++ documentation workflow are in [Building GridDyn](building.md).
 For GridDyn-specific network files, see [GridDyn XML inputs](xml-input.md).
+Release history is available in the
+[GridDyn changelog](https://github.com/LLNL/GridDyn/blob/main/CHANGELOG.md).
 
 ```{toctree}
 :maxdepth: 2

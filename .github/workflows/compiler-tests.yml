@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: circleci-migrated-${{ github.workflow }}-${{ github.ref }}
+  group: compiler-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -56,9 +56,9 @@ jobs:
         shell: bash
         run: cmake --build build --parallel 4
 
-      - name: Run migrated CircleCI tests
+      - name: Run continuous test suite
         shell: bash
-        run: ./scripts/run-circleci-tests.sh
+        run: ./scripts/run-continuous-tests.sh
 
   build-and-test-arm64:
     name: Ubuntu 24.04 ARM64

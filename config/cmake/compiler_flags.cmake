@@ -30,17 +30,15 @@ endif()
 
 cmake_dependent_option(
     ${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS
-    "disable compiler warning for ${CMAKE_PROJECT_NAME} build" ON
-    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+    "disable compiler warning for ${CMAKE_PROJECT_NAME} build" ON "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_option(
     ${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS
-    "generate a compiler error for any warning encountered" OFF
-    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+    "generate a compiler error for any warning encountered" OFF "PROJECT_IS_TOP_LEVEL" OFF
 )
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     mark_as_advanced(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     mark_as_advanced(${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS)
 endif()
@@ -48,7 +46,7 @@ endif()
 # -------------------------------------------------------------
 # Setup compiler options and configurations
 # -------------------------------------------------------------
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
     message(STATUS "setting up for ${CMAKE_CXX_COMPILER_ID} on ${CMAKE_SYSTEM}")
 endif()
 
