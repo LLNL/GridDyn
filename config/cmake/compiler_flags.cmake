@@ -30,14 +30,12 @@ endif()
 
 cmake_dependent_option(
     ${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS
-    "disable compiler warning for ${CMAKE_PROJECT_NAME} build" ON
-    "PROJECT_IS_TOP_LEVEL" OFF
+    "disable compiler warning for ${CMAKE_PROJECT_NAME} build" ON "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_option(
     ${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS
-    "generate a compiler error for any warning encountered" OFF
-    "PROJECT_IS_TOP_LEVEL" OFF
+    "generate a compiler error for any warning encountered" OFF "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 if(PROJECT_IS_TOP_LEVEL)

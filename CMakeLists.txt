@@ -146,18 +146,16 @@ endif()
 # -------
 
 cmake_dependent_option(
-    GRIDDYN_BUILD_TESTS "Enable the test executables to be built" ON
-    "PROJECT_IS_TOP_LEVEL" OFF
+    GRIDDYN_BUILD_TESTS "Enable the test executables to be built" ON "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_option(
-    GRIDDYN_BUILD_BENCHMARKS "Build GridDyn benchmarks" OFF
-    "PROJECT_IS_TOP_LEVEL" OFF
+    GRIDDYN_BUILD_BENCHMARKS "Build GridDyn benchmarks" OFF "PROJECT_IS_TOP_LEVEL" OFF
 )
 
 cmake_dependent_advanced_option(
-    GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON
-    "PROJECT_IS_TOP_LEVEL" OFF
+    GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON "PROJECT_IS_TOP_LEVEL"
+    OFF
 )
 
 # Install instructions for this target
