@@ -1595,8 +1595,7 @@ TEST(GovernorModelTests, Tgov1InitializedUpperLimitIsQuietUnderSmallFrequencyNoi
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    const double expectedRoot =
-        (10.0 * 1e-5 * governor.get("k") / governor.get("t1")) + 1e-5;
+    const double expectedRoot = (10.0 * 1e-5 * governor.get("k") / governor.get("t1")) + 1e-5;
     EXPECT_NEAR(root, expectedRoot, 1e-12);
     for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
         governor.rootTest({speed, 1.05}, emptyStateData, &root, cLocalSolverMode);
