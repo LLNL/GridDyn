@@ -175,7 +175,8 @@ enum InitControlFlags {
     STRICT_GOVERNOR_LIMITS = 14,  //!< reject governor initial outputs above upper limits
     LOW_VOLTAGE_CHECKING = 15,  //!< enable low voltage checking on buses
     STRICT_EXCITER_LIMITS = 16,  //!< reject exciter initial outputs above upper limits
-    DISABLE_SHUNT_ADJUSTMENTS = 17,  //!< keep switched shunts at their imported settings during power flow
+    DISABLE_SHUNT_ADJUSTMENTS =
+        17,  //!< keep switched shunts at their imported settings during power flow
     DISABLE_TAP_CHANGER_ADJUSTMENTS = 18,  //!< disable discrete tap and phase-shift adjustments
 };
 

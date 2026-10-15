@@ -361,7 +361,7 @@ void ExciterIEEET3::rootTest(const IOdata& inputs,
     const index_t root = offsets.getRootOffset(sMode);
     if (opFlags[REGULATOR_LIMITED]) {
         roots[root] = (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
-                                                        evaluation.regulatorDrive) +
+                                                       evaluation.regulatorDrive) +
             limiterRootTolerance;
     } else {
         const double upper = upperRegulatorLimit(Vrmax);

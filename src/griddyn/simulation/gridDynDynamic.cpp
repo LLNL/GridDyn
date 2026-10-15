@@ -284,8 +284,8 @@ int GridDynSimulation::dynamicDAEStartupConditions(std::shared_ptr<SolverInterfa
         // differential states.  The masked IDA_Y_INIT system can be singular
         // for a valid stationary model: an inactive integral controller has
         // residual -yp and no state derivative when yp is held fixed.
-        retval = dynData->calcIC(
-            currentTime, probeStepTime, SolverInterface::IcModes::FIXED_DIFF, true);
+        retval =
+            dynData->calcIC(currentTime, probeStepTime, SolverInterface::IcModes::FIXED_DIFF, true);
         if (retval == FUNCTION_EXECUTION_SUCCESS) {
             retval = checkAlgebraicRoots(dynData);
         }
@@ -855,8 +855,10 @@ void GridDynSimulation::handleEarlySolverReturn(int retval,
             // controllers classify entry versus release from cached inputs.
             // Refresh those inputs from the solver's event state first; the
             // last RHS cache can correspond to a different CVODE trial point.
-            StateData rootStateData(
-                timeActual, dynData->stateData(), dynData->derivData(), ++residCount);
+            StateData rootStateData(timeActual,
+                                    dynData->stateData(),
+                                    dynData->derivData(),
+                                    ++residCount);
             fillExtraStateData(rootStateData, dynData->getSolverMode());
             updateLocalCache(noInputs, rootStateData, dynData->getSolverMode());
             logging::debug(this, "Root detected");

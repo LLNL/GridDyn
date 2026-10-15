@@ -387,9 +387,8 @@ void ExciterESST2A::rootTest(const IOdata& inputs,
     const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
     const index_t root = offsets.getRootOffset(sMode);
     if (opFlags[REGULATOR_LIMITED]) {
-        roots[root] =
-            (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
-                                              evaluation.regulatorDrive) +
+        roots[root] = (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
+                                                       evaluation.regulatorDrive) +
             limiterRootTolerance;
     } else {
         roots[root] = std::min(Vrmax - loc.diffStateLoc[regulatorState],

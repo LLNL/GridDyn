@@ -573,8 +573,8 @@ void ExciterAC7B::rootTest(const IOdata& inputs,
             std::max(evaluation.piDrive - Vamin, evaluation.piIntegratorDrive);
         roots[root + 1] += limiterRootTolerance;
     } else {
-        roots[root + 1] = std::min(Vamax - evaluation.piDrive, evaluation.piDrive - Vamin) +
-            limiterRootTolerance;
+        roots[root + 1] =
+            std::min(Vamax - evaluation.piDrive, evaluation.piDrive - Vamin) + limiterRootTolerance;
         opFlags.set(PI_LIMIT_HIGH, evaluation.piDrive >= Vamax);
     }
     if (opFlags[EXCITER_LIMITED]) {

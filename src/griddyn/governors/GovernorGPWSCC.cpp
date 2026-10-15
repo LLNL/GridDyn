@@ -276,16 +276,14 @@ void GovernorGPWSCC::dynObjectInitializeB(const IOdata& inputs,
         state[filterState] = signedMargin;
         state[derivativeState] = signedMargin;
         state[integratorState] += (1.0 + std::abs(Kp)) * signedMargin;
-        const double controllerOverdrive =
-            (1.0 + std::abs(Kp) + Kp) * signedMargin;
+        const double controllerOverdrive = (1.0 + std::abs(Kp) + Kp) * signedMargin;
         state[valveState] = Kg * controllerOverdrive;
         const double speedError =
             evaluateDeadband(1.0 - inputs[govOmegaInLocation], db1 + eps).value;
         const double initialFeedback = (Tt > 0.0) ? electricalPower : initialGate;
         const double baselineError = speedError + Paux - R * initialFeedback;
         initialSetpointOverdrive =
-            scale * (signedMargin - baselineError +
-                     ((Tt > 0.0) ? 0.0 : R * controllerOverdrive));
+            scale * (signedMargin - baselineError + ((Tt > 0.0) ? 0.0 : R * controllerOverdrive));
     }
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = desiredPower;
@@ -300,7 +298,8 @@ GovernorGPWSCC::Signals GovernorGPWSCC::evaluate(const IOdata& inputs, const dou
     const double controllerOutput = (Kp * state[filterState]) + state[integratorState] +
         (Kd * (state[filterState] - state[derivativeState]) / Tf);
     const double feedback = (Tt > 0.0) ? state[electricalPowerState] : controllerOutput;
-    const double setpointChange = (effectivePowerSetpoint(inputs) / scale) - initializedInputReference;
+    const double setpointChange =
+        (effectivePowerSetpoint(inputs) / scale) - initializedInputReference;
     const double error = speed.value + Paux + setpointChange - (R * feedback);
     const double rawRate = state[valveState];
     const double limitedRate =

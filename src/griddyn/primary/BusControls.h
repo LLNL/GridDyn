@@ -44,12 +44,12 @@ class BusControls {
         vControlLinks;  //!< set of Link which themselves act as controllable objects;
     std::vector<double>
         vcfrac;  //!< the fraction of control power which should be allocated to a specific object
-    std::vector<double>
-        vcfracInput;  //!< the original voltage-control weights before normalization
+    std::vector<double> vcfracInput;  //!< the original voltage-control weights before normalization
 
     std::vector<double> vclinkFrac;  //!< the fraction of control power which should be allocated to
                                      //!< a specific controllable link
-    std::vector<double> vclinkFracInput;  //!< the original link-control weights before normalization
+    std::vector<double>
+        vclinkFracInput;  //!< the original link-control weights before normalization
 
     // for managing p control objects
     std::vector<GridSecondary*> pControlObjects;  //!< object which control the angle of a bus

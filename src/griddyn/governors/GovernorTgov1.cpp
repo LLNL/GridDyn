@@ -255,11 +255,10 @@ void GovernorTgov1::rootTest(const IOdata& inputs,
             const double omega = inputs[govOmegaInLocation];
             const double releaseRate =
                 (-pmech + effectivePowerSetpoint(inputs) + (K * (omega - 1.0))) / T1;
-            roots[rootOffset] = (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) +
-                powerLimitRootTolerance;
-        } else {
             roots[rootOffset] =
-                std::min(Pmax - pmech, pmech - Pmin) + powerLimitRootTolerance;
+                (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) + powerLimitRootTolerance;
+        } else {
+            roots[rootOffset] = std::min(Pmax - pmech, pmech - Pmin) + powerLimitRootTolerance;
             if (pmech >= Pmax) {
                 opFlags.set(POWER_LIMIT_HIGH);
             } else if (pmech <= Pmin) {

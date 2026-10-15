@@ -140,15 +140,12 @@ void ExciterESST3A::dynObjectInitializeB(const IOdata& inputs,
         dynamicVoltageRegulator ? state[dynamicVoltageRegulatorState] : m_state[1];
     double inputVoltage = initialRegulatorVoltage / Ka;
     const double fieldMargin =
-        std::max(0.2 * std::max(0.0, Vmmax - originalFieldUpperLimit),
-                 10.0 * limiterRootTolerance);
+        std::max(0.2 * std::max(0.0, Vmmax - originalFieldUpperLimit), 10.0 * limiterRootTolerance);
     const double regulatorIncrement = fieldMargin / Km;
     const double inputIncrement = regulatorIncrement / Ka;
-    if (((fieldRegulator >= Vmmax) &&
-         (initialRegulatorVoltage + regulatorIncrement < Vrmax) &&
+    if (((fieldRegulator >= Vmmax) && (initialRegulatorVoltage + regulatorIncrement < Vrmax) &&
          (inputVoltage + inputIncrement < Vimax)) ||
-        ((fieldRegulator <= Vmmin) &&
-         (initialRegulatorVoltage - regulatorIncrement > Vrmin) &&
+        ((fieldRegulator <= Vmmin) && (initialRegulatorVoltage - regulatorIncrement > Vrmin) &&
          (inputVoltage - inputIncrement > Vimin))) {
         const double direction = (fieldRegulator >= Vmmax) ? 1.0 : -1.0;
         initialRegulatorVoltage += direction * regulatorIncrement;
@@ -165,10 +162,8 @@ void ExciterESST3A::dynObjectInitializeB(const IOdata& inputs,
         std::max(0.2 * std::max(0.0, Vrmax - originalRegulatorUpperLimit),
                  10.0 * limiterRootTolerance);
     const double regulatorInputMargin = regulatorMargin / Ka;
-    if (((regulatorVoltage >= Vrmax) &&
-         (inputVoltage + regulatorInputMargin < Vimax)) ||
-        ((regulatorVoltage <= Vrmin) &&
-         (inputVoltage - regulatorInputMargin > Vimin))) {
+    if (((regulatorVoltage >= Vrmax) && (inputVoltage + regulatorInputMargin < Vimax)) ||
+        ((regulatorVoltage <= Vrmin) && (inputVoltage - regulatorInputMargin > Vimin))) {
         const double direction = (regulatorVoltage >= Vrmax) ? 1.0 : -1.0;
         inputVoltage += direction * regulatorInputMargin;
         if (dynamicVoltageRegulator) {
@@ -439,8 +434,7 @@ void ExciterESST3A::rootTest(const IOdata& /*inputs*/,
         if (opFlags[VR_LIMITED]) {
             const double drive =
                 vrDrive(state[voltageMeasurementState], state[leadLagState], regulatorVoltage);
-            roots[rootOffset] = (opFlags[VR_LIMIT_HIGH] ? -drive : drive) +
-                limiterRootTolerance;
+            roots[rootOffset] = (opFlags[VR_LIMIT_HIGH] ? -drive : drive) + limiterRootTolerance;
         } else {
             roots[rootOffset] = std::min(Vrmax - regulatorVoltage, regulatorVoltage - Vrmin);
             roots[rootOffset] += limiterRootTolerance;
@@ -452,8 +446,7 @@ void ExciterESST3A::rootTest(const IOdata& /*inputs*/,
     if (opFlags[VM_LIMITED]) {
         const double drive =
             vmDrive(locations.algStateLoc[0], regulatorVoltage, state[fieldRegulatorState]);
-        roots[fieldRootOffset] = (opFlags[VM_LIMIT_HIGH] ? -drive : drive) +
-            limiterRootTolerance;
+        roots[fieldRootOffset] = (opFlags[VM_LIMIT_HIGH] ? -drive : drive) + limiterRootTolerance;
     } else {
         roots[fieldRootOffset] =
             std::min(Vmmax - state[fieldRegulatorState], state[fieldRegulatorState] - Vmmin) +

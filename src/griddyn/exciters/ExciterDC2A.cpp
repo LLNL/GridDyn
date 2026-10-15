@@ -21,7 +21,7 @@ namespace griddyn::exciters {
 namespace {
     // Keep this distinct from Exciter::limiterRootTolerance, the generic 2e-6 threshold.
     constexpr double dc2aLimiterRootTolerance = 0.0001;
-}
+}  // namespace
 
 ExciterDC2A::ExciterDC2A(const std::string& objName): ExciterDC1A(objName)
 {
@@ -77,12 +77,12 @@ double ExciterDC2A::initialRegulatorLowerBound(double terminalVoltage) const
 }
 
 double ExciterDC2A::initialRegulatorOverdrive(double originalUpperLimit,
-                                               double terminalVoltage) const
+                                              double terminalVoltage) const
 {
     const double correction = std::max(0.0, Vrmax - originalUpperLimit) * terminalVoltage;
     const double leadLagGain = std::max(1.0, std::abs(Tc / Tb));
-    const double guard = 10.0 * dc2aLimiterRootTolerance +
-        (std::abs(Ka) * leadLagGain + std::abs(Vrmax)) * 1e-5;
+    const double guard =
+        10.0 * dc2aLimiterRootTolerance + (std::abs(Ka) * leadLagGain + std::abs(Vrmax)) * 1e-5;
     return std::max(0.2 * correction, guard);
 }
 
@@ -112,12 +112,11 @@ void ExciterDC2A::derivative(const IOdata& inputs,
                             sMode);  // use DC1A but overwrite if we are at a limiter
     if (opFlags[OUTSIDE_VOLTAGE_LIMITS]) {
         const auto offset = offsets.getDiffOffset(sMode);
-    const double* state = stateDataValue.state ? stateDataValue.state + offset : m_state.data();
+        const double* state = stateDataValue.state ? stateDataValue.state + offset : m_state.data();
         const double limit = opFlags[TRIGGER_HIGH] ? regulatorUpperLimit() : Vrmin;
         // The antiwindup regulator state is held, but the limited output
         // follows the terminal-voltage-dependent bound in the field equation.
-        deriv[offset] =
-            (-saturationFeedback(state[0]) + limit * inputs[VOLTAGE_IN_LOCATION]) / Te;
+        deriv[offset] = (-saturationFeedback(state[0]) + limit * inputs[VOLTAGE_IN_LOCATION]) / Te;
     }
 }
 
@@ -130,8 +129,7 @@ void ExciterDC2A::fieldRegulatorJacobian(MatrixData<double>& matrixDataValue,
         const double limit = opFlags[TRIGGER_HIGH] ? regulatorUpperLimit() : Vrmin;
         matrixDataValue.assignCheckCol(fieldRow, voltageCol, limit / Te);
     } else {
-        ExciterDC1A::fieldRegulatorJacobian(
-            matrixDataValue, fieldRow, regulatorCol, voltageCol);
+        ExciterDC1A::fieldRegulatorJacobian(matrixDataValue, fieldRow, regulatorCol, voltageCol);
     }
 }
 
@@ -167,9 +165,8 @@ void ExciterDC2A::rootTest(const IOdata& inputs,
         // rootCheck() releases a high limiter when the drive is negative and
         // a low limiter when it is positive. Keep a zero drive inside the
         // held branch so it is not reported repeatedly as a root.
-        roots[rootOffset] =
-            opFlags[TRIGGER_HIGH] ? drive + dc2aLimiterRootTolerance :
-                                    drive - dc2aLimiterRootTolerance;
+        roots[rootOffset] = opFlags[TRIGGER_HIGH] ? drive + dc2aLimiterRootTolerance :
+                                                    drive - dc2aLimiterRootTolerance;
     } else {
         roots[rootOffset] = std::min((regulatorUpperLimit() * terminalVoltage) - exciterState[1],
                                      exciterState[1] - (Vrmin * terminalVoltage)) +

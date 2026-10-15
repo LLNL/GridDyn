@@ -6,8 +6,8 @@
 
 #include "BusControls.h"
 
-#include "../GridSecondary.h"
 #include "../Generator.h"
+#include "../GridSecondary.h"
 #include "../Link.h"
 #include "AcBus.h"
 #include "gmlc/utilities/vectorOps.hpp"
@@ -205,8 +205,7 @@ void BusControls::updateVoltageControls()
             auto* controllerBus = static_cast<AcBus*>(vco->find("bus"));
             const bool isDirect = controllerBus->directPath(controlledBus, vco);
             if (isDirect) {
-                auto opath =
-                    controllerBus->getDirectPath(controlledBus, vco);
+                auto opath = controllerBus->getDirectPath(controlledBus, vco);
                 opath.pop_back();
                 if (dynamic_cast<Link*>(opath.back()) != nullptr) {
                     proxyVControlObject.push_back(static_cast<Link*>(opath.back()));
@@ -231,8 +230,8 @@ void BusControls::updateVoltageControls()
 
     if (nonDirectRemote) {
         for (auto& vcobj : vControlObjects) {
-            if (auto* gen = dynamic_cast<Generator*>(vcobj); gen != nullptr &&
-                !gen->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
+            if (auto* gen = dynamic_cast<Generator*>(vcobj);
+                gen != nullptr && !gen->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
                 gen->configureIndirectVoltageControl(controlledBus);
             } else {
                 vcobj->setFlag("indirect_voltage_control", true);

@@ -433,11 +433,9 @@ void ExciterSCRX::rootTest(const IOdata& inputs,
     const index_t rootOffset = offsets.getRootOffset(sMode);
     if (opFlags[AMPLIFIER_LIMITED]) {
         const double drive = evaluateModel(inputs, locations.diffStateLoc).amplifierLimitDrive;
-        roots[rootOffset] = (opFlags[AMPLIFIER_LIMIT_HIGH] ? drive : -drive) +
-            limiterRootTolerance;
+        roots[rootOffset] = (opFlags[AMPLIFIER_LIMIT_HIGH] ? drive : -drive) + limiterRootTolerance;
     } else {
-        roots[rootOffset] = std::min(Vrmax - amplifier, amplifier - Vrmin) +
-            limiterRootTolerance;
+        roots[rootOffset] = std::min(Vrmax - amplifier, amplifier - Vrmin) + limiterRootTolerance;
     }
 }
 

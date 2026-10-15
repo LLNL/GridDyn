@@ -223,8 +223,7 @@ void GovernorIeeeSimple::rootTest(const IOdata& inputs,
         double Pmech = Loc.diffStateLoc[0];
 
         if (!opFlags[POWER_LIMITED]) {
-            roots[rootOffset] =
-                std::min(Pmax - Pmech, Pmech - Pmin) + powerLimitRootTolerance;
+            roots[rootOffset] = std::min(Pmax - Pmech, Pmech - Pmin) + powerLimitRootTolerance;
             if (Pmech >= Pmax) {
                 opFlags.set(POWER_LIMIT_HIGH);
             } else if (Pmech <= Pmin) {
@@ -232,12 +231,11 @@ void GovernorIeeeSimple::rootTest(const IOdata& inputs,
             }
         } else {
             const double omega = inputs[govOmegaInLocation];
-            const double releaseRate =
-                (effectivePowerSetpoint(inputs) - Pmech - K * Loc.diffStateLoc[1] -
-                 K * T2 * (omega - 1.0) / T1) /
+            const double releaseRate = (effectivePowerSetpoint(inputs) - Pmech -
+                                        K * Loc.diffStateLoc[1] - K * T2 * (omega - 1.0) / T1) /
                 T3;
-            roots[rootOffset] = (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) +
-                powerLimitRootTolerance;
+            roots[rootOffset] =
+                (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) + powerLimitRootTolerance;
         }
         ++rootOffset;
     }

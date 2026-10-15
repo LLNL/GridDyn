@@ -85,8 +85,7 @@ void ExciterDC1A::dynObjectInitializeB(const IOdata& inputs,
     const double upperBound = initialRegulatorUpperBound(terminalVoltage);
     const double lowerBound = initialRegulatorLowerBound(terminalVoltage);
     double overdrive = 0.0;
-    if ((Vrmax != 0.0) &&
-        (stateValues[1] >= upperBound - initialLimitContactTolerance)) {
+    if ((Vrmax != 0.0) && (stateValues[1] >= upperBound - initialLimitContactTolerance)) {
         overdrive = initialRegulatorOverdrive(originalUpperLimit, terminalVoltage);
         opFlags.set(TRIGGER_HIGH);
         opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
@@ -122,7 +121,7 @@ double ExciterDC1A::initialRegulatorLowerBound(double /*terminalVoltage*/) const
 }
 
 double ExciterDC1A::initialRegulatorOverdrive(double originalUpperLimit,
-                                               double /*terminalVoltage*/) const
+                                              double /*terminalVoltage*/) const
 {
     const double correction = std::max(0.0, Vrmax - originalUpperLimit);
     const double guard = 1e-4 + std::abs(Ka) * std::max(1.0, std::abs(Tc / Tb)) * 1e-5;
@@ -259,9 +258,9 @@ void ExciterDC1A::limitJacobian(double /*V*/,
 }
 
 void ExciterDC1A::fieldRegulatorJacobian(MatrixData<double>& matrixDataValue,
-                                        index_t fieldRow,
-                                        index_t regulatorCol,
-                                        index_t /*voltageCol*/) const
+                                         index_t fieldRow,
+                                         index_t regulatorCol,
+                                         index_t /*voltageCol*/) const
 {
     matrixDataValue.assign(fieldRow, regulatorCol, 1.0 / Te);
 }

@@ -124,7 +124,7 @@ void configureStab3(stabilizers::StabilizerStab3& stabilizer)
     stabilizer.set("vlim", 2.0);
 }
 
-template <class StabilizerType>
+template<class StabilizerType>
 void expectOutputLimitsStableUnderFrequencyNoise(std::string_view modelName,
                                                  StabilizerType& stabilizer,
                                                  std::string_view upperLimit,
@@ -149,8 +149,7 @@ void expectOutputLimitsStableUnderFrequencyNoise(std::string_view modelName,
     std::array<double, 4> roots{};
 
     stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
-    const double unlimitedOutput =
-        stabilizer.get(upperLimit) + rootMargin - roots[upperRoot];
+    const double unlimitedOutput = stabilizer.get(upperLimit) + rootMargin - roots[upperRoot];
     const double upperTestLimit = unlimitedOutput;
     const double lowerTestLimit = unlimitedOutput - 0.1;
     if (upperTestLimit < stabilizer.get(lowerLimit)) {
@@ -168,8 +167,7 @@ void expectOutputLimitsStableUnderFrequencyNoise(std::string_view modelName,
 
     inputs[pssOmegaInLocation] = 1.0;
     stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
-    const double lowerBoundaryOutput =
-        roots[lowerRoot] + stabilizer.get(lowerLimit) - rootMargin;
+    const double lowerBoundaryOutput = roots[lowerRoot] + stabilizer.get(lowerLimit) - rootMargin;
     const double lowerTestBoundary = lowerBoundaryOutput;
     const double upperTestBoundary = lowerBoundaryOutput + 0.1;
     if (lowerTestBoundary > stabilizer.get(upperLimit)) {

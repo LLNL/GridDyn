@@ -20,7 +20,7 @@ namespace {
     // Keep this distinct from Exciter::limiterRootTolerance, the generic 2e-6 threshold.
     constexpr double ieeeType1LimiterRootTolerance = 0.00001;
     constexpr double initialLimitContactTolerance = 1e-7;
-}
+}  // namespace
 
 ExciterIEEEtype1::ExciterIEEEtype1(const std::string& objName): Exciter(objName)
 {
@@ -82,8 +82,7 @@ void ExciterIEEEtype1::dynObjectInitializeB(const IOdata& inputs,
         stateValues[3] = inputs[VOLTAGE_IN_LOCATION];
     }
     vBias = inputs[VOLTAGE_IN_LOCATION] + (stateValues[1] / Ka) - Vref;
-    if ((Vrmax != 0.0) &&
-        (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
+    if ((Vrmax != 0.0) && (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
         // A regulator parked at its upper bound needs an unconstrained
         // request beyond the bound; otherwise a tiny voltage change releases
         // the limiter.  The field and regulator states remain at equilibrium.
@@ -102,8 +101,7 @@ void ExciterIEEEtype1::dynObjectInitializeB(const IOdata& inputs,
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
 }
 
-bool ExciterIEEEtype1::adjustInitialRegulatorLimit(double initialValue,
-                                                  double /*terminalVoltage*/)
+bool ExciterIEEEtype1::adjustInitialRegulatorLimit(double initialValue, double /*terminalVoltage*/)
 {
     if (initialValue < Vrmin - 1e-7) {
         return false;

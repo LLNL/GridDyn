@@ -22,7 +22,7 @@ namespace {
     // including the cascade gain from frequency to stabilizer output.
     constexpr double limitRootTolerance = 1e-4;
     constexpr double inputValidityLimit = 1e20;
-}
+}  // namespace
 
 StabilizerPss2a::StabilizerPss2a(const std::string& objName): Stabilizer(objName)
 {

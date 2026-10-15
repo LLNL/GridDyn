@@ -514,25 +514,25 @@ ChangeCode Generator::powerFlowAdjust(const IOdata& /*inputs*/,
             if (voltage > m_Vtarget + remoteVoltageTolerance) {
                 opFlags.reset(AT_LIMIT);
                 return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
-                                                          ChangeCode::PARAMETER_CHANGE;
+                                                           ChangeCode::PARAMETER_CHANGE;
             }
         } else if (voltage < m_Vtarget - remoteVoltageTolerance) {
             opFlags.reset(AT_LIMIT);
             return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
-                                                      ChangeCode::PARAMETER_CHANGE;
+                                                       ChangeCode::PARAMETER_CHANGE;
         }
     } else {
         if (Q > getQmax()) {
             opFlags.set(AT_LIMIT);
             Q = getQmax();
             return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
-                                                      ChangeCode::PARAMETER_CHANGE;
+                                                       ChangeCode::PARAMETER_CHANGE;
         }
         if (Q < getQmin()) {
             opFlags.set(AT_LIMIT);
             Q = getQmin();
             return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
-                                                      ChangeCode::PARAMETER_CHANGE;
+                                                       ChangeCode::PARAMETER_CHANGE;
         }
     }
     return ChangeCode::NO_CHANGE;
@@ -828,8 +828,7 @@ void Generator::algebraicUpdate(const IOdata& /*inputs*/,
         } else if (!opFlags[AT_LIMIT]) {
             const double voltage = remoteBus->getVoltage(stateDataValue, sMode);
             constexpr double remoteVoltageGain = 10000.0;
-            update[offset] =
-                -Qbias + ((voltage - m_Vtarget) * vRegFraction * remoteVoltageGain);
+            update[offset] = -Qbias + ((voltage - m_Vtarget) * vRegFraction * remoteVoltageGain);
         } else {
             update[offset] = -Q;
         }
@@ -853,8 +852,7 @@ void Generator::residual(const IOdata& /*inputs*/,
                 resid[offset] = voltage - m_Vtarget;
             } else if (vRegFraction > 1e-12) {
                 const auto referenceOffset = reference->offsets.getAlgOffset(sMode);
-                resid[offset] =
-                    ((stateDataValue.state[offset] + Qbias) / vRegFraction) -
+                resid[offset] = ((stateDataValue.state[offset] + Qbias) / vRegFraction) -
                     ((stateDataValue.state[referenceOffset] + reference->Qbias) /
                      reference->vRegFraction);
             } else {

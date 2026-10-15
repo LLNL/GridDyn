@@ -655,8 +655,8 @@ ChangeCode AdjustableTransformer::powerFlowAdjust(const IOdata& /*inputs*/,
                                                   CheckLevel /*level*/)
 {
     if (CHECK_CONTROLFLAG(flags, DISABLE_LINK_ADJUSTMENTS) ||
-        (CHECK_CONTROLFLAG(flags, DISABLE_TAP_CHANGER_ADJUSTMENTS) &&
-         (!opFlags[CONTINUOUS_FLAG]) && (cMode != ControlMode::MANUAL_CONTROL))) {
+        (CHECK_CONTROLFLAG(flags, DISABLE_TAP_CHANGER_ADJUSTMENTS) && (!opFlags[CONTINUOUS_FLAG]) &&
+         (cMode != ControlMode::MANUAL_CONTROL))) {
         return ChangeCode::NO_CHANGE;
     }
     auto ret = ChangeCode::NO_CHANGE;

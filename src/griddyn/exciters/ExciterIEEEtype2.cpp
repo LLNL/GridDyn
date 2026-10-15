@@ -63,8 +63,7 @@ void ExciterIEEEtype2::dynObjectInitializeB(const IOdata& inputs,
     vBias = inputs[VOLTAGE_IN_LOCATION] + (stateValues[1] / Ka) - Vref;
     const double correction = std::max(0.0, Vrmax - originalUpperLimit);
     const double guard = 1e-3 + std::abs(Ka) * 1e-5;
-    if ((Vrmax != 0.0) &&
-        (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
+    if ((Vrmax != 0.0) && (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
         vBias += std::max(0.2 * correction, guard) / Ka;
         opFlags.set(TRIGGER_HIGH);
         opFlags.set(OUTSIDE_VOLTAGE_LIMITS);

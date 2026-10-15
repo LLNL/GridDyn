@@ -228,7 +228,6 @@ void GenModelGENROU::derivative(const IOdata& inputs,
         Tdop;
     dstate[4] = (-state[4] + state[2] - (Xqp - Xl) * alg[1]) / Tqopp;
     dstate[5] = (-state[5] + state[3] + (Xdp - Xl) * alg[0]) / Tdopp;
-
 }
 
 void GenModelGENROU::residual(const IOdata& inputs,

@@ -529,9 +529,8 @@ void ExciterAC8B::rootTest(const IOdata& inputs,
         opFlags.set(PID_LIMIT_HIGH, evaluation.pidDrive >= Vpmax);
     }
     if (opFlags[REGULATOR_LIMITED]) {
-        roots[root + 1] =
-            (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
-                                              evaluation.regulatorDrive) +
+        roots[root + 1] = (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
+                                                           evaluation.regulatorDrive) +
             limiterRootTolerance;
     } else {
         roots[root + 1] = std::min(Vrmax - loc.diffStateLoc[regulatorState],

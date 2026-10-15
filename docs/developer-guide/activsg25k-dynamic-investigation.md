@@ -435,11 +435,11 @@ that should always be imposed when the group is Q-limited.
 Representative points show why a MATPOWER solve is not an equivalent
 remote-control check:
 
-| IREG target | RAW target type / Vm | Remote `VS` | RAW terminal-bus Vm | MATPOWER terminal `Vg` |
-| --- | --- | ---: | --- | --- |
-| Bellingham 57931 | PQ / 1.04402 | 1.044 | 57934-57936: 1.02984, 1.02510, 1.02495 | 1.0296, 1.0247, 1.0246 |
-| Bangor 62267 | PQ / 1.04700 | 1.047 | 62270-62272: 1.05012, 1.04950, 1.05069 | 1.0503, 1.0497, 1.0509 |
-| Saluda 16025 | PQ / 1.01880 | 1.019 | 16026, 16027, 16029: 1.06127, 1.06070, 1.05998 | 1.0609, 1.0603, 1.0596 |
+| IREG target      | RAW target type / Vm | Remote `VS` | RAW terminal-bus Vm                            | MATPOWER terminal `Vg` |
+| ---------------- | -------------------- | ----------: | ---------------------------------------------- | ---------------------- |
+| Bellingham 57931 | PQ / 1.04402         |       1.044 | 57934-57936: 1.02984, 1.02510, 1.02495         | 1.0296, 1.0247, 1.0246 |
+| Bangor 62267     | PQ / 1.04700         |       1.047 | 62270-62272: 1.05012, 1.04950, 1.05069         | 1.0503, 1.0497, 1.0509 |
+| Saluda 16025     | PQ / 1.01880         |       1.019 | 16026, 16027, 16029: 1.06127, 1.06070, 1.05998 | 1.0609, 1.0603, 1.0596 |
 
 In these examples MATPOWER retains the PQ target and its starting voltage, but
 uses terminal-bus `Vg` values close to the local terminal voltages rather than
@@ -490,7 +490,7 @@ zero Q bound is not the 25k failure path. Every active remote record has
 
 The AUX file specifies `MvarSharingAllocation="RegPerc"`. PowerWorld's
 [Mvar sharing description](https://www.powerworld.com/WebHelp/Content/MainDocumentation_HTML/PowerFlow%20Mvar%20Sharing%20between%20Generators.htm)
-defines this as allocation across regulating *terminal buses* in proportion
+defines this as allocation across regulating _terminal buses_ in proportion
 to each bus's average RegFactor, then division among its generators. This is
 different from summing each generator's factor across the whole group.
 The saved RAW dispatch confirms that interpretation: among 152 multi-plant
@@ -505,7 +505,7 @@ plant: 31 adjustable remote groups have a type-2 target, 27 of those have
 active local generators, and 12 local plants have multiple machines. The
 importer divides those local machine weights by their plant machine count as
 well. This corrects the unconstrained plant share. The existing Q-bias
-equation shares *changes* from RAW QG, preserving an initially correct plant
+equation shares _changes_ from RAW QG, preserving an initially correct plant
 share while every unit remains free. It does not fully model PowerWorld's
 within-plant limit reallocation when only some machines saturate.
 
@@ -554,16 +554,16 @@ selected bus voltages and log each changed object's bus ID, change code, and
 pass number from `GridArea::powerFlowAdjust`. The unmodified RAW input runs
 three successful inner solves before the next KINSOL `-6`:
 
-| Adjustment pass | Bristol 35365 VM | Bangor 62267 VM | Lempster 35397 VM | Changes |
-| --- | ---: | ---: | ---: | --- |
-| 1 | 1.0180448 | 1.0470000 | 1.0590536 | 70 bus/controller changes |
-| 2 | 1.0180447 | 1.0472282 | 1.0590528 | 49 changes, including 28 discrete shunt steps |
-| 3 | 1.0084547 | 1.0472282 | 0.9438246 | next control set; following inner solve fails |
+| Adjustment pass | Bristol 35365 VM | Bangor 62267 VM | Lempster 35397 VM | Changes                                       |
+| --------------- | ---------------: | --------------: | ----------------: | --------------------------------------------- |
+| 1               |        1.0180448 |       1.0470000 |         1.0590536 | 70 bus/controller changes                     |
+| 2               |        1.0180447 |       1.0472282 |         1.0590528 | 49 changes, including 28 discrete shunt steps |
+| 3               |        1.0084547 |       1.0472282 |         0.9438246 | next control set; following inner solve fails |
 
 Lempster's RAW switched shunt has `MODSW=1`, `BINIT=38` MVAr, and a
 1.0200-1.0435 pu control band. Its saved bus voltage is 1.05906 pu. GridDyn
 steps the 38 MVAr bank down on pass 2; the next solved Lempster voltage falls
-to 0.94382 pu, crossing the *other* side of the band. Freezing only that
+to 0.94382 pu, crossing the _other_ side of the band. Freezing only that
 shunt removes most of the local collapse (pass-3 Lempster becomes 1.04881 pu)
 but KINSOL still fails. This demonstrates a discrete-control overshoot and
 also shows there are other interacting shunts.
@@ -850,12 +850,12 @@ With switched-shunt adjustment enabled, the case fails in KINSOL `-6` after
 nine forward bank steps and four reversals. The log shows the step sizes can
 be much larger than the violation:
 
-| Bus | Solved V before step | Band | Step | Solved V after step | Outcome |
-| --- | ---: | ---: | --- | ---: | --- |
-| 11233 | 1.050217 | 1.0200–1.0435 | 46 MVAr off | 0.980467 | Reverted; original setting was closer |
-| 15124 | 1.070620 | 1.0200–1.0525 | 22 MVAr off | 1.018457 | Crossed the full band; later interacted with bus 15133 |
-| 15758 | 0.996997 | 1.0200–1.0475 | 34 MVAr on | 1.075011 | Reverted; original setting was closer |
-| 17034 | 1.050684 | 1.0200–1.0505 | 46 MVAr off | 0.998982 | A 0.000184 pu high-side violation triggered a large step and reversal |
+| Bus   | Solved V before step |          Band | Step        | Solved V after step | Outcome                                                               |
+| ----- | -------------------: | ------------: | ----------- | ------------------: | --------------------------------------------------------------------- |
+| 11233 |             1.050217 | 1.0200–1.0435 | 46 MVAr off |            0.980467 | Reverted; original setting was closer                                 |
+| 15124 |             1.070620 | 1.0200–1.0525 | 22 MVAr off |            1.018457 | Crossed the full band; later interacted with bus 15133                |
+| 15758 |             0.996997 | 1.0200–1.0475 | 34 MVAr on  |            1.075011 | Reverted; original setting was closer                                 |
+| 17034 |             1.050684 | 1.0200–1.0505 | 46 MVAr off |            0.998982 | A 0.000184 pu high-side violation triggered a large step and reversal |
 
 At bus 35397, the no-shunt solution is 1.059053 pu against a 1.0200–1.0435
 band. Its initial 38 MVAr is one full available step; the next state is zero.
@@ -1662,16 +1662,16 @@ therefore cannot warn. For `ESDC2A`, all 202 DYR records are represented by
 population comprises 942 `IEEET1` records plus 123 `ESDC1A` records with zero
 `Tb` that the reader maps to `ieeet1`; 745 of those generators are in service.
 
-| Source model | Imported `VRMAX` | In-service warning | In-service no warning |
-| --- | ---: | ---: | ---: |
-| `ESDC2A` | 0.4 | 58 | 9 |
-| `ESDC2A` | 1.17 | 42 | 14 |
-| `ESDC2A` | 7.21 | 0 | 34 |
-| `IEEET1` | 1.0 | 35 | 365 |
-| `IEEET1` | 1.211 | 0 | 193 |
-| `IEEET1` | 7.0 | 0 | 58 |
-| `ESDC1A` mapped to Type 1 | 1.0 | 2 | 47 |
-| `ESDC1A` mapped to Type 1 | 10.0 | 0 | 45 |
+| Source model              | Imported `VRMAX` | In-service warning | In-service no warning |
+| ------------------------- | ---------------: | -----------------: | --------------------: |
+| `ESDC2A`                  |              0.4 |                 58 |                     9 |
+| `ESDC2A`                  |             1.17 |                 42 |                    14 |
+| `ESDC2A`                  |             7.21 |                  0 |                    34 |
+| `IEEET1`                  |              1.0 |                 35 |                   365 |
+| `IEEET1`                  |            1.211 |                  0 |                   193 |
+| `IEEET1`                  |              7.0 |                  0 |                    58 |
+| `ESDC1A` mapped to Type 1 |              1.0 |                  2 |                    47 |
+| `ESDC1A` mapped to Type 1 |             10.0 |                  0 |                    45 |
 
 The 37 Type 1 warnings consist of 35 `IEEET1` and two zero-`Tb` `ESDC1A`
 records. The full unwarned Type 1 group includes 616 `IEEET1` and 92 such

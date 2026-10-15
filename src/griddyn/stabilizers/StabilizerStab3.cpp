@@ -22,7 +22,7 @@ namespace {
     // including the gain from electrical power to stabilizer output.
     constexpr double limitRootTolerance = 1e-4;
     constexpr double inputValidityLimit = 1e20;
-}
+}  // namespace
 
 StabilizerStab3::StabilizerStab3(const std::string& objName): Stabilizer(objName)
 {

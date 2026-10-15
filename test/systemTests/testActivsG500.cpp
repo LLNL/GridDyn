@@ -352,8 +352,7 @@ TEST_F(ActivsG500Tests, EpcDydDaeIdaPreservesInitialOperatingPoint)
 
 TEST_F(ActivsG500Tests, DaeIncrementalStepUsesConsistentStartup)
 {
-    gds = readSimXMLFile(std::string(ACTIVSG500_TEST_DIRECTORY) +
-                         "activsg500_dae_stability.xml");
+    gds = readSimXMLFile(std::string(ACTIVSG500_TEST_DIRECTORY) + "activsg500_dae_stability.xml");
     gds->consolePrintLevel = PrintLevel::NO_PRINT;
     ASSERT_EQ(gds->powerflow(), 0);
     ASSERT_EQ(gds->dynInitialize(), 0);

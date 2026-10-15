@@ -426,8 +426,7 @@ void ExciterESAC6A::dynObjectInitializeB(const IOdata& inputs,
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation] -
         inputs[exciterVuelInLocation];
     const double regulatorMargin =
-        std::max(0.2 * std::max(0.0, Vamax - originalUpperLimit),
-                 10.0 * limiterRootTolerance);
+        std::max(0.2 * std::max(0.0, Vamax - originalUpperLimit), 10.0 * limiterRootTolerance);
     if (leadLagOutput >= Vamax) {
         state[layout.regulator] += regulatorMargin;
         vBias += regulatorMargin / Ka;

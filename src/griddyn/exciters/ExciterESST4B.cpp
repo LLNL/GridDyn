@@ -117,13 +117,13 @@ void ExciterESST4B::dynObjectInitializeB(const IOdata& inputs,
     if ((innerOutput < Vmmin - initializationTolerance) ||
         (regulatorOutput < Vrmin - initializationTolerance)) {
         const std::string objectPath = fullObjectName(this);
-        throw InvalidParameterValue(
-            "ESST4B initial output below lower limit for " + objectPath + ": Efd=" +
-            std::to_string(fieldVoltage) + ", rectifier voltage=" +
-            std::to_string(rectifierVoltageValue) + ", inner output=" +
-            std::to_string(innerOutput) + " (Vmmin=" + std::to_string(Vmmin) +
-            "), regulator output=" + std::to_string(regulatorOutput) + " (Vrmin=" +
-            std::to_string(Vrmin) + ")");
+        throw InvalidParameterValue("ESST4B initial output below lower limit for " + objectPath +
+                                    ": Efd=" + std::to_string(fieldVoltage) +
+                                    ", rectifier voltage=" + std::to_string(rectifierVoltageValue) +
+                                    ", inner output=" + std::to_string(innerOutput) +
+                                    " (Vmmin=" + std::to_string(Vmmin) +
+                                    "), regulator output=" + std::to_string(regulatorOutput) +
+                                    " (Vrmin=" + std::to_string(Vrmin) + ")");
     }
     if (!adjustInitialUpperLimit(innerOutput, Vmmax, "ESST4B initial inner output") ||
         !adjustInitialUpperLimit(regulatorOutput, Vrmax, "ESST4B initial regulator output")) {
@@ -145,8 +145,7 @@ void ExciterESST4B::dynObjectInitializeB(const IOdata& inputs,
     }
     state[innerIndex] = innerOutput;
     vBias = inputs[exciterVoltageInLocation] - Vref;
-    const double innerMargin =
-        std::max(0.2 * std::max(0.0, Vmmax - originalInnerUpperLimit), 1e-4);
+    const double innerMargin = std::max(0.2 * std::max(0.0, Vmmax - originalInnerUpperLimit), 1e-4);
     if (innerOutput >= Vmmax) {
         state[innerIndex] += innerMargin;
     } else if (innerOutput <= Vmmin) {
@@ -154,8 +153,7 @@ void ExciterESST4B::dynObjectInitializeB(const IOdata& inputs,
     }
     // A nonzero stabilizer signal can leave the outer integrator moving at
     // initialization. Only add overdrive when the initial PI error is zero.
-    if ((std::abs(inputs[exciterVssInLocation]) <= 1e-10) && (Kpr > 0.0) &&
-        (Kir > 0.0)) {
+    if ((std::abs(inputs[exciterVssInLocation]) <= 1e-10) && (Kpr > 0.0) && (Kir > 0.0)) {
         const double regulatorMargin =
             std::max(0.2 * std::max(0.0, Vrmax - originalRegulatorUpperLimit), 1e-4);
         const double inputMargin = std::max(regulatorMargin / Kpr, regulatorMargin / Kir);

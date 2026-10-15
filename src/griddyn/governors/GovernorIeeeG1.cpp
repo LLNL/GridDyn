@@ -107,8 +107,7 @@ void GovernorIeeeG1::dynObjectInitializeB(const IOdata& inputs,
 
     const double valve = m_state[offsets.getDiffOffset(cLocalSolverMode) + valveState];
     const double correction = std::max(0.0, Pmax - originalUpperLimit);
-    const double margin =
-        std::max(0.2 * correction, 10.0 * positionLimitInputDeadband * T3);
+    const double margin = std::max(0.2 * correction, 10.0 * positionLimitInputDeadband * T3);
     if (valve >= Pmax) {
         Pset += margin;
         opFlags.set(POWER_LIMITED);
@@ -222,10 +221,10 @@ double GovernorIeeeG1::limitedValveRate(const IOdata& inputs, const double diffS
                                    static_cast<double>(Uc),
                                    static_cast<double>(Uo));
     if (!opFlags[POWER_LIMITED] &&
-        (((diffState[valveState] >= (Pmax - positionLimitTolerance)) &&
-          (rate > 0.0) && (rate <= positionLimitInputDeadband)) ||
-         ((diffState[valveState] <= (Pmin + positionLimitTolerance)) &&
-          (rate < 0.0) && (rate >= -positionLimitInputDeadband)))) {
+        (((diffState[valveState] >= (Pmax - positionLimitTolerance)) && (rate > 0.0) &&
+          (rate <= positionLimitInputDeadband)) ||
+         ((diffState[valveState] <= (Pmin + positionLimitTolerance)) && (rate < 0.0) &&
+          (rate >= -positionLimitInputDeadband)))) {
         return 0.0;
     }
     return rate;
@@ -489,8 +488,7 @@ void GovernorIeeeG1::rootTest(const IOdata& inputs,
         // exact zero root to IDA.
         roots[rootOffset + 1] = positionLimitRootTolerance;
     } else {
-        roots[rootOffset + 1] =
-            std::min(Pmax - state[valveState], state[valveState] - Pmin) +
+        roots[rootOffset + 1] = std::min(Pmax - state[valveState], state[valveState] - Pmin) +
             positionLimitRootTolerance;
     }
 }

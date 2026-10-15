@@ -389,11 +389,9 @@ bool ExciterEXAC1::regulatorDerivativeBlocked(const double state[],
                                               double regulatorDerivative) const
 {
     const int status = regulatorLimitStatus(state, regulatorValue);
-    const bool heldHighContact = opFlags[REGULATOR_LIMITED] &&
-        opFlags[REGULATOR_LIMIT_HIGH] &&
+    const bool heldHighContact = opFlags[REGULATOR_LIMITED] && opFlags[REGULATOR_LIMIT_HIGH] &&
         (regulatorValue >= regulatorUpperLimit() - limitTolerance);
-    const bool heldLowContact = opFlags[REGULATOR_LIMITED] &&
-        !opFlags[REGULATOR_LIMIT_HIGH] &&
+    const bool heldLowContact = opFlags[REGULATOR_LIMITED] && !opFlags[REGULATOR_LIMIT_HIGH] &&
         (regulatorValue <= regulatorLowerLimit() + limitTolerance);
     return (((status > 0) || heldHighContact) && (regulatorDerivative > 0.0)) ||
         (((status < 0) || heldLowContact) && (regulatorDerivative < 0.0));
@@ -529,8 +527,7 @@ void ExciterEXAC1::derivative(const IOdata& inputs,
         dynamicRegulator ? state[regulatorIndex] : locations.algStateLoc[1];
     const double regulatorDerivative =
         dynamicRegulator ? (Ka * leadOutput - regulatorValue) / Ta : 0.0;
-    const bool frozen =
-        regulatorDerivativeBlocked(state, regulatorValue, regulatorDerivative);
+    const bool frozen = regulatorDerivativeBlocked(state, regulatorValue, regulatorDerivative);
     if (hasVoltageTransducer) {
         derivativeValues[voltageMeasurementState] =
             (inputs[exciterVoltageInLocation] - state[voltageMeasurementState]) / Tr;
@@ -648,8 +645,7 @@ void ExciterEXAC1::jacobianElements(const IOdata& inputs,
         dynamicRegulator ? state[regulatorIndex] : locations.algStateLoc[1];
     const double regulatorDerivative =
         dynamicRegulator ? (Ka * leadOutput - regulatorValue) / Ta : 0.0;
-    const bool frozen =
-        regulatorDerivativeBlocked(state, regulatorValue, regulatorDerivative);
+    const bool frozen = regulatorDerivativeBlocked(state, regulatorValue, regulatorDerivative);
 
     if (hasVoltageTransducer) {
         matrixData.assign(diffOffset + voltageMeasurementState,
@@ -808,8 +804,7 @@ void ExciterEXAC1::rootTest(const IOdata& inputs,
         // the held region so a zero drive at the limit is not rediscovered on
         // every solver restart.
         roots[rootOffset] =
-            opFlags[REGULATOR_LIMIT_HIGH] ? drive + limitRootTolerance :
-                                            drive - limitRootTolerance;
+            opFlags[REGULATOR_LIMIT_HIGH] ? drive + limitRootTolerance : drive - limitRootTolerance;
         return;
     }
     // An initialized regulator exactly at a limit is a valid equilibrium. Keep

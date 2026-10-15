@@ -981,7 +981,8 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
                     auto* gen = localGeneratorControls[index];
                     qMins[index] = gen->getQmin();
                     qMaxs[index] = gen->getQmax();
-                    qValues[index] = std::clamp(-gen->getReactivePower(), qMins[index], qMaxs[index]);
+                    qValues[index] =
+                        std::clamp(-gen->getReactivePower(), qMins[index], qMaxs[index]);
                     currentQTotal += qValues[index];
                 }
 
@@ -1024,9 +1025,10 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
                     localGeneratorControls[index]->set("q", qValues[index]);
                 }
                 if (std::abs(remainingQ) > 1e-5) {
-                    logging::warning(this,
-                                     "Local generator Q limits leave a reactive initialization residual of {} pu",
-                                     remainingQ);
+                    logging::warning(
+                        this,
+                        "Local generator Q limits leave a reactive initialization residual of {} pu",
+                        remainingQ);
                 }
             } else {
                 for (auto& vco : busController.vControlObjects) {

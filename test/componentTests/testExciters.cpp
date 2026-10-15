@@ -299,8 +299,7 @@ void expectExciterDaeJacobian(Exciter& exciter,
     }
 }
 
-void expectExciterRootMarginsStableUnderInputNoise(Exciter& exciter,
-                                                    std::string_view modelName)
+void expectExciterRootMarginsStableUnderInputNoise(Exciter& exciter, std::string_view modelName)
 {
     // GridDyn's default relative tolerance is 1e-6; exercise both sides at
     // ten times that scale so this catches more than solver-level jitter.
@@ -1714,7 +1713,7 @@ TEST(ExciterModelTests, Ieeet1AdjustsInitialRegulatorUpperLimitByDefault)
 
 TEST(ExciterModelTests, Ieeet1InitialLimitUsesOverdriveInsteadOfExpandedHeadroom)
 {
-    class InspectableIEEEtype1 final : public exciters::ExciterIEEEtype1 {
+    class InspectableIEEEtype1 final: public exciters::ExciterIEEEtype1 {
       public:
         double rawUpperLimit() const { return Vrmax; }
     };
@@ -1735,7 +1734,7 @@ TEST(ExciterModelTests, Ieeet1InitialLimitUsesOverdriveInsteadOfExpandedHeadroom
 
 TEST(ExciterModelTests, Ieeet1SaturatedInitialStatePrototypeHasZeroResidualAndStableRoot)
 {
-    class SaturatedIEEEtype1 final : public exciters::ExciterIEEEtype1 {
+    class SaturatedIEEEtype1 final: public exciters::ExciterIEEEtype1 {
       public:
         double activateInitialUpperLimit(double importedLimit)
         {
@@ -1807,9 +1806,10 @@ TEST(ExciterModelTests, Ieeet1SaturatedInitialStatePrototypeHasZeroResidualAndSt
         }
         exciter.rootTest(inputs, stateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << voltage;
-        EXPECT_EQ(exciter.rootCheck(inputs, stateData, cLocalSolverMode,
-                                    CheckLevel::REVERSABLE_ONLY),
-                  ChangeCode::NO_CHANGE) << voltage;
+        EXPECT_EQ(
+            exciter.rootCheck(inputs, stateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
+            ChangeCode::NO_CHANGE)
+            << voltage;
     }
     inputs[exciterVoltageInLocation] = 1.0;
     expectExciterDaeJacobian(exciter, inputs, state, 1.0);
@@ -1817,12 +1817,12 @@ TEST(ExciterModelTests, Ieeet1SaturatedInitialStatePrototypeHasZeroResidualAndSt
 
 TEST(ExciterModelTests, Ieeet1ActiveLimiterHasConsistentDaeJacobian)
 {
-    class InspectableIEEEtype1 final : public exciters::ExciterIEEEtype1 {
+    class InspectableIEEEtype1 final: public exciters::ExciterIEEEtype1 {
       public:
         double heldBranchReleaseRoot(const std::vector<double>& state, double voltage) const
         {
-            return state[2] - ((state[0] * Kf) / Tf) + (Vref + vBias - voltage) -
-                (state[1] / Ka) + ((0.001 * state[1]) / (Ka * Ta));
+            return state[2] - ((state[0] * Kf) / Tf) + (Vref + vBias - voltage) - (state[1] / Ka) +
+                ((0.001 * state[1]) / (Ka * Ta));
         }
     };
 
@@ -1855,7 +1855,8 @@ TEST(ExciterModelTests, Ieeet1ActiveLimiterHasConsistentDaeJacobian)
     const StateData stateData(0.0, state.data(), stateDerivative.data());
     double root = 0.0;
     exciter.rootTest(inputs, stateData, &root, cLocalSolverMode);
-    EXPECT_NEAR(root, exciter.heldBranchReleaseRoot(state, inputs[exciterVoltageInLocation]) + 1e-5,
+    EXPECT_NEAR(root,
+                exciter.heldBranchReleaseRoot(state, inputs[exciterVoltageInLocation]) + 1e-5,
                 1e-12);
 
     expectExciterDaeJacobian(exciter, inputs, exciter.getStates(), 1.0);
@@ -1962,8 +1963,8 @@ TEST(ExciterModelTests, Ieeet1NearLimitContactHoldsAndReinitializationClearsIt)
         inputs[exciterVoltageInLocation] = voltage;
         exciter.rootTest(inputs, stateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << voltage;
-        EXPECT_EQ(exciter.rootCheck(inputs, emptyStateData, cLocalSolverMode,
-                                    CheckLevel::REVERSABLE_ONLY),
+        EXPECT_EQ(exciter.rootCheck(
+                      inputs, emptyStateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
                   ChangeCode::NO_CHANGE);
     }
 
@@ -1979,11 +1980,11 @@ TEST(ExciterModelTests, Ieeet1NearLimitContactHoldsAndReinitializationClearsIt)
 
 TEST(ExciterModelTests, InitializedLimitRootsStayClearAcrossExciterFamilies)
 {
-    const std::vector<std::string_view> models{
-        "ac7b",   "ac8b",   "dc1a",   "dc2a",   "esac1a", "esac5a", "esac6a",
-        "esst1a", "esst2a", "esst3a", "esst4b", "exac1",  "exac2",  "exac4",
-        "expic1", "exst1",  "ieeet1", "ieeet2", "ieeet3", "ieeex1", "scrx",
-        "sexs"};
+    const std::vector<std::string_view> models{"ac7b",   "ac8b",   "dc1a",   "dc2a",   "esac1a",
+                                               "esac5a", "esac6a", "esst1a", "esst2a", "esst3a",
+                                               "esst4b", "exac1",  "exac2",  "exac4",  "expic1",
+                                               "exst1",  "ieeet1", "ieeet2", "ieeet3", "ieeex1",
+                                               "scrx",   "sexs"};
     const auto factory = CoreObjectFactory::instance();
     for (const auto modelName : models) {
         SCOPED_TRACE(modelName);
@@ -2431,7 +2432,7 @@ TEST(ExciterModelTests, Dc2aInitialRegulatorLimitUsesDefaultAndStrictPolicies)
 
 TEST(ExciterModelTests, Dc2aInitialLimitUsesOverdriveInsteadOfExpandedHeadroom)
 {
-    class InspectableDC2A final : public exciters::ExciterDC2A {
+    class InspectableDC2A final: public exciters::ExciterDC2A {
       public:
         double rawUpperLimit() const { return Vrmax; }
     };
@@ -2453,7 +2454,7 @@ TEST(ExciterModelTests, Dc2aInitialLimitUsesOverdriveInsteadOfExpandedHeadroom)
 
 TEST(ExciterModelTests, Dc2aSaturatedInitialStatePrototypeHasZeroResidualAndStableRoot)
 {
-    class SaturatedDC2A final : public exciters::ExciterDC2A {
+    class SaturatedDC2A final: public exciters::ExciterDC2A {
       public:
         double activateInitialUpperLimit(double importedLimit, double voltage)
         {
@@ -2533,9 +2534,10 @@ TEST(ExciterModelTests, Dc2aSaturatedInitialStatePrototypeHasZeroResidualAndStab
         }
         exciter.rootTest(inputs, stateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << voltage;
-        EXPECT_EQ(exciter.rootCheck(inputs, stateData, cLocalSolverMode,
-                                    CheckLevel::REVERSABLE_ONLY),
-                  ChangeCode::NO_CHANGE) << voltage;
+        EXPECT_EQ(
+            exciter.rootCheck(inputs, stateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
+            ChangeCode::NO_CHANGE)
+            << voltage;
     }
     inputs[exciterVoltageInLocation] = initialVoltage;
     expectExciterDaeJacobian(exciter, inputs, state, 1.0);
@@ -2543,7 +2545,7 @@ TEST(ExciterModelTests, Dc2aSaturatedInitialStatePrototypeHasZeroResidualAndStab
 
 TEST(ExciterModelTests, Dc2aInitializedUpperLimitIsQuietUnderSmallVoltageNoise)
 {
-    class InspectableDC2A final : public exciters::ExciterDC2A {
+    class InspectableDC2A final: public exciters::ExciterDC2A {
       public:
         double rawUpperLimit() const { return Vrmax; }
         double heldBranchDrive(const std::vector<double>& state, double voltage) const
@@ -2647,8 +2649,8 @@ TEST(ExciterModelTests, Dc2aNearLimitContactHoldsUnderVoltageNoise)
         inputs[exciterVoltageInLocation] = voltage;
         exciter.rootTest(inputs, stateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << voltage;
-        EXPECT_EQ(exciter.rootCheck(inputs, emptyStateData, cLocalSolverMode,
-                                    CheckLevel::REVERSABLE_ONLY),
+        EXPECT_EQ(exciter.rootCheck(
+                      inputs, emptyStateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
                   ChangeCode::NO_CHANGE);
     }
 }
@@ -2889,8 +2891,8 @@ TEST(ExciterModelTests, Exac1NearLimitContactHoldsAndReinitializationClearsIt)
         exciter.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
         EXPECT_NEAR(derivative[1], 0.0, 1e-12) << voltage;
         EXPECT_GT(root, 0.0) << voltage;
-        EXPECT_EQ(exciter.rootCheck(inputs, emptyStateData, cLocalSolverMode,
-                                    CheckLevel::REVERSABLE_ONLY),
+        EXPECT_EQ(exciter.rootCheck(
+                      inputs, emptyStateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
                   ChangeCode::NO_CHANGE);
     }
 

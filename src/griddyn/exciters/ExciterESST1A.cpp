@@ -175,8 +175,7 @@ void ExciterESST1A::dynObjectInitializeB(const IOdata& inputs,
     } else if (amplifierVoltage <= Vamin) {
         inputOverdrive = -guard / Ka;
     }
-    if ((inputOverdrive != 0.0) &&
-        (initialInput + inputOverdrive <= Vimax) &&
+    if ((inputOverdrive != 0.0) && (initialInput + inputOverdrive <= Vimax) &&
         (initialInput + inputOverdrive >= Vimin)) {
         // Both lead-lag states must follow the changed reference to keep
         // their initial derivatives zero while the amplifier stays limited.

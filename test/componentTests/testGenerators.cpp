@@ -834,11 +834,9 @@ TEST(ExcitationLimiterTests, Oel4cInitializationIsQuietOnBothSidesOfReactiveLimi
     }
 
     inputs[limiterIqInLocation] = -2e-4;
-    EXPECT_EQ(limiter.rootCheck(inputs,
-                                StateData(0.0),
-                                cLocalSolverMode,
-                                CheckLevel::REVERSABLE_ONLY),
-              ChangeCode::JACOBIAN_CHANGE);
+    EXPECT_EQ(
+        limiter.rootCheck(inputs, StateData(0.0), cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
+        ChangeCode::JACOBIAN_CHANGE);
     inputs[limiterIqInLocation] = 0.0;
     limiter.rootTest(inputs, StateData(0.0), roots.data(), cLocalSolverMode);
     EXPECT_NEAR(roots[0], 1e-4, 1e-12);

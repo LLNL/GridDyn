@@ -982,7 +982,7 @@ TEST(GovernorModelTests, IeeeG1AdjustsInitialUpperLimitByDefault)
         EXPECT_LT(roots[1], 0.0);
         for (std::size_t index = 0; index < derivative.size(); ++index) {
             EXPECT_TRUE(std::isfinite(derivative[index])) << index;
-        EXPECT_LT(std::abs(derivative[index]), 1e-3) << index;
+            EXPECT_LT(std::abs(derivative[index]), 1e-3) << index;
         }
     }
 }

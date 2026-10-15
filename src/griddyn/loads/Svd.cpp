@@ -388,7 +388,8 @@ ChangeCode Svd::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Check
     }
 
     const int powerFlowIteration = (inputs.size() > PFLOW_ITERATION_LOCATION) ?
-        static_cast<int>(inputs[PFLOW_ITERATION_LOCATION]) : -1;
+        static_cast<int>(inputs[PFLOW_ITERATION_LOCATION]) :
+        -1;
     const auto claimShuntAdjustment = [this]() {
         auto* area = (bus != nullptr) ? dynamic_cast<GridArea*>(bus->getParent()) : nullptr;
         return (area == nullptr) || area->claimSwitchedShuntAdjustment(this);
@@ -464,10 +465,8 @@ ChangeCode Svd::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Check
         hasOvershootHold = false;
     }
 
-    const bool crossedFromHighToLow =
-        (lastAdjustmentVoltage > Vmax) && (voltage < Vmin);
-    const bool crossedFromLowToHigh =
-        (lastAdjustmentVoltage < Vmin) && (voltage > Vmax);
+    const bool crossedFromHighToLow = (lastAdjustmentVoltage > Vmax) && (voltage < Vmin);
+    const bool crossedFromLowToHigh = (lastAdjustmentVoltage < Vmin) && (voltage > Vmax);
     if (hasLastDiscreteAdjustment && (currentBlockSteps == lastAdjustmentToSteps) &&
         (nextBlockSteps == lastAdjustmentFromSteps) &&
         (crossedFromHighToLow || crossedFromLowToHigh)) {
@@ -758,9 +757,8 @@ std::vector<int> Svd::blockStepsForLevel(double level) const
             continue;
         }
         const double rawSteps = std::abs(remaining / stepSize);
-        const int selected = (std::clamp)(static_cast<int>(std::floor(rawSteps + 1.0e-9)),
-                                           0,
-                                           blockCount);
+        const int selected =
+            (std::clamp)(static_cast<int>(std::floor(rawSteps + 1.0e-9)), 0, blockCount);
         blockSteps[kk] = selected;
         remaining -= selected * stepSize;
     }
@@ -823,8 +821,9 @@ std::vector<int> Svd::voltageControlSteps(double voltage) const
     if (stepCount <= 0) {
         return currentBlockSteps;
     }
-    const auto activeSteps = (currentBlockSteps.size() == Cblocks.size()) ? currentBlockSteps :
-                                                                           blockStepsForLevel(getYq());
+    const auto activeSteps = (currentBlockSteps.size() == Cblocks.size()) ?
+        currentBlockSteps :
+        blockStepsForLevel(getYq());
     const double currentLevel = levelForBlockSteps(activeSteps);
     const bool needMoreInjection = voltage < Vmin;
     const bool needLessInjection = voltage > Vmax;
@@ -846,8 +845,7 @@ std::vector<int> Svd::voltageControlSteps(double voltage) const
     const double desiredStepSign = needMoreInjection ? -1.0 : 1.0;
     const auto hasOppositeTypeActive = [&]() {
         for (size_t kk = 0; kk < Cblocks.size(); ++kk) {
-            if ((activeSteps[kk] > 0) &&
-                (Cblocks[kk].second * desiredStepSign < 0.0)) {
+            if ((activeSteps[kk] > 0) && (Cblocks[kk].second * desiredStepSign < 0.0)) {
                 return true;
             }
         }
@@ -858,8 +856,7 @@ std::vector<int> Svd::voltageControlSteps(double voltage) const
         // Reverse input order when de-energizing, as required by ADJM=0.
         for (size_t kk = Cblocks.size(); kk > 0; --kk) {
             const auto block = kk - 1;
-            if ((activeSteps[block] > 0) &&
-                (Cblocks[block].second * desiredStepSign < 0.0)) {
+            if ((activeSteps[block] > 0) && (Cblocks[block].second * desiredStepSign < 0.0)) {
                 auto candidateSteps = activeSteps;
                 --candidateSteps[block];
                 if (isBetter(levelForBlockSteps(candidateSteps), currentLevel)) {
@@ -874,8 +871,7 @@ std::vector<int> Svd::voltageControlSteps(double voltage) const
     // order. ADJM=1's next-total-admittance search remains a separate
     // compatibility gap.
     for (size_t kk = 0; kk < Cblocks.size(); ++kk) {
-        if ((Cblocks[kk].second * desiredStepSign > 0.0) &&
-            (activeSteps[kk] < Cblocks[kk].first)) {
+        if ((Cblocks[kk].second * desiredStepSign > 0.0) && (activeSteps[kk] < Cblocks[kk].first)) {
             auto candidateSteps = activeSteps;
             ++candidateSteps[kk];
             if (isBetter(levelForBlockSteps(candidateSteps), currentLevel)) {

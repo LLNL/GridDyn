@@ -718,12 +718,13 @@ void REECA1::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("REECA1 must initialize outside voltage-dip range");
     }
     if (initialP < PMIN || initialP > PMAX || initialQ < QMin || initialQ > QMax) {
-        const auto hostName = (getParent() != nullptr) ? getParent()->getName() : std::string{"unknown"};
-        throw InvalidParameterValue(
-            "REECA1 initial power outside reference limits for " + hostName + ": P=" +
-            std::to_string(initialP) + " pu (" + std::to_string(PMIN) + " to " +
-            std::to_string(PMAX) + "), Q=" + std::to_string(initialQ) + " pu (" +
-            std::to_string(QMin) + " to " + std::to_string(QMax) + ")");
+        const auto hostName =
+            (getParent() != nullptr) ? getParent()->getName() : std::string{"unknown"};
+        throw InvalidParameterValue("REECA1 initial power outside reference limits for " +
+                                    hostName + ": P=" + std::to_string(initialP) + " pu (" +
+                                    std::to_string(PMIN) + " to " + std::to_string(PMAX) +
+                                    "), Q=" + std::to_string(initialQ) + " pu (" +
+                                    std::to_string(QMin) + " to " + std::to_string(QMax) + ")");
     }
     m_state[2 + voltageFilter] = inputs[0];
     m_state[2 + powerFilter] = initialP / generatorSpeed(inputs);

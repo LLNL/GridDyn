@@ -124,16 +124,15 @@ void GovernorHygov::dynObjectInitializeB(const IOdata& inputs,
     // gate request beyond an active position bound.  This preserves all
     // differential initial conditions, including the filter equation.
     const double correction = std::max(0.0, Pmax - originalUpperLimit);
-    const double gateMargin = std::max(0.2 * correction,
-                                       10.0 * positionLimitRootTolerance *
-                                           std::abs(K * temporaryDroop * Tr));
+    const double gateMargin =
+        std::max(0.2 * correction,
+                 10.0 * positionLimitRootTolerance * std::abs(K * temporaryDroop * Tr));
     if (initialGate >= Pmax) {
         Pset += gateMargin / K;
     } else if (initialGate <= Pmin) {
         Pset -= gateMargin / K;
     }
-    m_state[diffOffset + filterState] =
-        governorError(inputs, m_state.data() + diffOffset);
+    m_state[diffOffset + filterState] = governorError(inputs, m_state.data() + diffOffset);
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = Pset;
     // Select the active branch before the first root evaluation.
@@ -407,8 +406,7 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // from the event state after rootTrigger(); without this small
         // hysteresis it can immediately rediscover the same zero repeatedly.
         roots[rootOffset] =
-            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) -
-            rateLimitRootTolerance;
+            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) - rateLimitRootTolerance;
     } else {
         roots[rootOffset] = std::min(VELM - rate, rate + VELM) + rateLimitRootTolerance;
     }

@@ -339,8 +339,7 @@ void ExciterEXST1::rootTest(const IOdata& inputs,
     const double lowerBound = Vrmin - Kc * fieldCurrent;
     const double regulatorOutput = state[regulatorState];
     roots[rootOffset + 1] =
-        std::min(upperBound - regulatorOutput, regulatorOutput - lowerBound) +
-        limiterRootTolerance;
+        std::min(upperBound - regulatorOutput, regulatorOutput - lowerBound) + limiterRootTolerance;
 }
 
 void ExciterEXST1::rootTrigger(CoreTime /*time*/,

@@ -431,9 +431,8 @@ TEST_F(InputTests, PssERawSingleRemoteVoltageControl)
 TEST_F(InputTests, PssERawRemoteSwingTerminalKeepsDynamicAngleReference)
 {
     gds = std::make_unique<GridDynSimulation>();
-    ASSERT_NO_THROW(loadFile(gds,
-                             std::string(INPUT_TEST_DIRECTORY) +
-                                 "raw_remote_voltage_swing_terminal.raw"));
+    ASSERT_NO_THROW(
+        loadFile(gds, std::string(INPUT_TEST_DIRECTORY) + "raw_remote_voltage_swing_terminal.raw"));
 
     auto* terminalBus = dynamic_cast<AcBus*>(gds->findByUserID("bus", 1));
     ASSERT_NE(terminalBus, nullptr);
@@ -481,18 +480,19 @@ TEST_F(InputTests, PssERawRemoteVoltageGroupSharesRegulation)
     EXPECT_NEAR(firstPlantSecondGenerator->get("vcontrolfrac"), 0.25, 1e-12);
     EXPECT_NEAR(secondGenerator->get("vcontrolfrac"), 0.5, 1e-12);
     EXPECT_NEAR(remoteBus->getVoltage(), 1.04, 2e-4);
-    EXPECT_NEAR(firstGenerator->getReactivePower(), firstPlantSecondGenerator->getReactivePower(),
+    EXPECT_NEAR(firstGenerator->getReactivePower(),
+                firstPlantSecondGenerator->getReactivePower(),
                 1e-7);
-    EXPECT_NEAR(firstGenerator->getReactivePower() +
-                    firstPlantSecondGenerator->getReactivePower(),
-                secondGenerator->getReactivePower(), 1e-7);
+    EXPECT_NEAR(firstGenerator->getReactivePower() + firstPlantSecondGenerator->getReactivePower(),
+                secondGenerator->getReactivePower(),
+                1e-7);
 }
 
 TEST_F(InputTests, PssERawRemoteVoltageGroupIncludesLocalPlant)
 {
     gds = std::make_unique<GridDynSimulation>();
-    ASSERT_NO_THROW(loadFile(gds, std::string(INPUT_TEST_DIRECTORY) +
-                                  "raw_remote_voltage_local_group.raw"));
+    ASSERT_NO_THROW(
+        loadFile(gds, std::string(INPUT_TEST_DIRECTORY) + "raw_remote_voltage_local_group.raw"));
 
     auto* target = dynamic_cast<AcBus*>(gds->findByUserID("bus", 2));
     auto* remotePlant = dynamic_cast<GridBus*>(gds->findByUserID("bus", 3));
@@ -529,9 +529,11 @@ TEST_F(InputTests, PssERawRemoteVoltageGroupIncludesLocalPlant)
     EXPECT_NEAR(remote2->get("vcontrolfrac"), 1.0 / 6.0, 1e-12);
     EXPECT_NEAR(single->get("vcontrolfrac"), 1.0 / 3.0, 1e-12);
     EXPECT_NEAR(local1->getReactivePower() + local2->getReactivePower(),
-                remote1->getReactivePower() + remote2->getReactivePower(), 1e-7);
+                remote1->getReactivePower() + remote2->getReactivePower(),
+                1e-7);
     EXPECT_NEAR(local1->getReactivePower() + local2->getReactivePower(),
-                single->getReactivePower(), 1e-7);
+                single->getReactivePower(),
+                1e-7);
 }
 
 TEST_F(InputTests, PssERawRemoteSwitchedShuntGroupsAreUnsupported)

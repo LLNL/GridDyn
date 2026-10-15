@@ -844,7 +844,8 @@ void loadRaw(CoreObject* parentObject,
                         if (bus != nullptr) {
                             gen = gGenfactory->makeTypeObject();
                             bus->add(gen);
-                            generatorsByTerminalBus[static_cast<int>(bus->getUserID())].push_back(gen);
+                            generatorsByTerminalBus[static_cast<int>(bus->getUserID())].push_back(
+                                gen);
                             rawReadGen(gen, line, opt, remoteControllers, remoteControllerGroups);
                         } else {
                             std::cerr << "Invalid bus number for fixed shunt " << line.substr(0, 30)
@@ -865,7 +866,8 @@ void loadRaw(CoreObject* parentObject,
                         ++machinesPerTerminal[controller->getParent()->getUserID()];
                     }
                     for (auto* controller : groupEntry.second) {
-                        const auto count = machinesPerTerminal[controller->getParent()->getUserID()];
+                        const auto count =
+                            machinesPerTerminal[controller->getParent()->getUserID()];
                         controller->set("vcontrolfrac",
                                         controller->get("vcontrolfrac") /
                                             static_cast<double>(count));
@@ -878,7 +880,8 @@ void loadRaw(CoreObject* parentObject,
                         const auto isLocalMember = [&groupEntry](const Generator* generator) {
                             return generator->isEnabled() &&
                                 generator->checkFlag(LOCAL_VOLTAGE_CONTROL) &&
-                                std::find(groupEntry.second.begin(), groupEntry.second.end(),
+                                std::find(groupEntry.second.begin(),
+                                          groupEntry.second.end(),
                                           generator) == groupEntry.second.end();
                         };
                         size_t localMachineCount = 0;
@@ -890,10 +893,9 @@ void loadRaw(CoreObject* parentObject,
                         if (localMachineCount > 1) {
                             for (auto* localGenerator : localPlant->second) {
                                 if (isLocalMember(localGenerator)) {
-                                    localGenerator->set(
-                                        "vcontrolfrac",
-                                        localGenerator->get("vcontrolfrac") /
-                                            static_cast<double>(localMachineCount));
+                                    localGenerator->set("vcontrolfrac",
+                                                        localGenerator->get("vcontrolfrac") /
+                                                            static_cast<double>(localMachineCount));
                                 }
                             }
                         }

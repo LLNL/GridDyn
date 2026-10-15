@@ -874,7 +874,9 @@ ChangeCode GridArea::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, 
         auto* pendingShunt = root->pendingSwitchedShuntAdjustment;
         IOdata pendingInputs;
         if (auto* pendingBus = dynamic_cast<GridBus*>(pendingShunt->getParent())) {
-            pendingInputs = {pendingBus->getVoltage(), pendingBus->getAngle(), pendingBus->getFreq()};
+            pendingInputs = {pendingBus->getVoltage(),
+                             pendingBus->getAngle(),
+                             pendingBus->getFreq()};
             if (inputs.size() > PFLOW_ITERATION_LOCATION) {
                 pendingInputs.insert(pendingInputs.end(),
                                      inputs.begin() + PFLOW_ITERATION_LOCATION,
@@ -905,8 +907,7 @@ ChangeCode GridArea::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, 
             const auto adjustmentsBefore = root->powerFlowAdjustmentsThisPass;
             auto iret = obj->powerFlowAdjust(inputs, flags, level);
             ret = std::max(iret, ret);
-            if ((iret > ChangeCode::NO_CHANGE) &&
-                (root->maxPowerFlowAdjustmentsPerPass > 0) &&
+            if ((iret > ChangeCode::NO_CHANGE) && (root->maxPowerFlowAdjustmentsPerPass > 0) &&
                 (root->powerFlowAdjustmentsThisPass == adjustmentsBefore)) {
                 ++root->powerFlowAdjustmentsThisPass;
             }
