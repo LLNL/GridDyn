@@ -66,6 +66,15 @@ class GridArea: public GridPrimary {
     // this is done to break apart the headers
     std::unique_ptr<CoreObjectList> obList;  // a search index for object names
 
+    // A switched-shunt control pass must avoid changing multiple discrete banks
+    // against the same stale voltage solution. The root area owns this pass latch.
+    bool switchedShuntAdjustmentClaimed = false;
+    // Recheck a changed bank against the immediately following solved voltage
+    // before allowing another controller to move.
+    GridComponent* pendingSwitchedShuntAdjustment = nullptr;
+    count_t maxPowerFlowAdjustmentsPerPass = 0;  //!< 0 allows all adjustment objects per pass
+    count_t powerFlowAdjustmentsThisPass = 0;  //!< changed adjustment objects in the current pass
+
     std::vector<GridPrimary*> rootObjects;  //!< list of objects with roots
     std::vector<GridPrimary*> pFlowAdjustObjects;  //!< list of objects with power flow checks
     /** @brief storage location for shared_ptrs to griddyn
@@ -97,6 +106,9 @@ class GridArea: public GridPrimary {
     explicit GridArea(const std::string& objName = "area_$");
     /** @brief the default destructor*/
     virtual ~GridArea();
+
+    /** Claim the root network's single switched-shunt action for this PF adjustment pass. */
+    bool claimSwitchedShuntAdjustment(GridComponent* shunt);
 
     /** Set an external area identifier and keep future generated IDs unique. */
     void setUserID(index_t newUserID);

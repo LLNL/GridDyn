@@ -196,6 +196,7 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("ESST2A initial rectifier voltage");
     }
     const double regulator = Ke * fieldVoltage / rectifier;
+    const double originalRegulatorUpperLimit = Vrmax;
     if ((regulator < Vrmin - initializationTolerance) ||
         !adjustInitialUpperLimit(regulator, Vrmax, "ESST2A initial regulator output") ||
         (fieldVoltage < -initializationTolerance) ||
@@ -210,6 +211,13 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
     state[fieldState] = fieldVoltage;
     vBias = (regulator / Ka) + state[voltageMeasurementState] - Vref -
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation];
+    const double correction = std::max(0.0, Vrmax - originalRegulatorUpperLimit);
+    const double guard = 10.0 * limiterRootTolerance + std::abs(Ka) * 1e-5;
+    if (regulator >= Vrmax) {
+        vBias += std::max(0.2 * correction, guard) / Ka;
+    } else if (regulator <= Vrmin) {
+        vBias -= guard / Ka;
+    }
     fieldSet.resize(std::max<std::size_t>(fieldSet.size(), 2U));
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -380,18 +388,23 @@ void ExciterESST2A::rootTest(const IOdata& inputs,
     const index_t root = offsets.getRootOffset(sMode);
     if (opFlags[REGULATOR_LIMITED]) {
         roots[root] =
-            opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive : evaluation.regulatorDrive;
+            (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
+                                              evaluation.regulatorDrive) +
+            limiterRootTolerance;
     } else {
         roots[root] = std::min(Vrmax - loc.diffStateLoc[regulatorState],
-                               loc.diffStateLoc[regulatorState] - Vrmin);
+                               loc.diffStateLoc[regulatorState] - Vrmin) +
+            limiterRootTolerance;
         opFlags.set(REGULATOR_LIMIT_HIGH, loc.diffStateLoc[regulatorState] >= Vrmax);
     }
     if (opFlags[FIELD_LIMITED]) {
         roots[root + 1] =
-            opFlags[FIELD_LIMIT_HIGH] ? -evaluation.fieldDrive : evaluation.fieldDrive;
+            (opFlags[FIELD_LIMIT_HIGH] ? -evaluation.fieldDrive : evaluation.fieldDrive) +
+            limiterRootTolerance;
     } else {
         roots[root + 1] =
-            std::min(Efdmax - loc.diffStateLoc[fieldState], loc.diffStateLoc[fieldState]);
+            std::min(Efdmax - loc.diffStateLoc[fieldState], loc.diffStateLoc[fieldState]) +
+            limiterRootTolerance;
         opFlags.set(FIELD_LIMIT_HIGH, loc.diffStateLoc[fieldState] >= Efdmax);
     }
 }

@@ -153,6 +153,7 @@ void ExciterESAC5A::dynObjectInitializeB(const IOdata& inputs,
                                          const IOdata& desiredOutput,
                                          IOdata& fieldSet)
 {
+    const double originalUpperLimit = Vrmax;
     if (inputs.size() < exciterInputCount || desiredOutput.empty() ||
         !std::isfinite(desiredOutput[0]) || !std::isfinite(inputs[exciterVoltageInLocation]) ||
         !std::isfinite(inputs[exciterVsetInLocation]) ||
@@ -182,8 +183,20 @@ void ExciterESAC5A::dynObjectInitializeB(const IOdata& inputs,
     fieldSet.resize(2);
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
-    opFlags.reset(OUTSIDE_VOLTAGE_LIMITS);
-    opFlags.reset(TRIGGER_HIGH);
+    const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+    const double guard = 10.0 * limiterRootTolerance * Ta + std::abs(Ka) * 1e-5;
+    if ((Vrmax != 0.0) && (regulator >= Vrmax)) {
+        vBias += std::max(0.2 * correction, guard) / Ka;
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+        opFlags.set(TRIGGER_HIGH);
+    } else if (regulator <= Vrmin) {
+        vBias -= guard / Ka;
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+        opFlags.reset(TRIGGER_HIGH);
+    } else {
+        opFlags.reset(OUTSIDE_VOLTAGE_LIMITS);
+        opFlags.reset(TRIGGER_HIGH);
+    }
     const auto initialized = evaluate(inputs, state);
     if (std::any_of(initialized.rates.begin(),
                     initialized.rates.begin() + indices.count,
@@ -306,9 +319,9 @@ void ExciterESAC5A::rootTest(const IOdata& inputs,
     const auto indices = layout();
     const double regulator = locations.diffStateLoc[indices.regulator];
     const double drive = evaluate(inputs, locations.diffStateLoc).regulatorDrive;
-    double rootValue = std::min(Vrmax - regulator, regulator - Vrmin);
+    double rootValue = std::min(Vrmax - regulator, regulator - Vrmin) + limiterRootTolerance;
     if (opFlags[OUTSIDE_VOLTAGE_LIMITS]) {
-        rootValue = opFlags[TRIGGER_HIGH] ? -drive : drive;
+        rootValue = (opFlags[TRIGGER_HIGH] ? -drive : drive) + limiterRootTolerance;
     }
     roots[offsets.getRootOffset(sMode)] = rootValue;
 }

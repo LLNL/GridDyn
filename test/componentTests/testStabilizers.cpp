@@ -124,6 +124,68 @@ void configureStab3(stabilizers::StabilizerStab3& stabilizer)
     stabilizer.set("vlim", 2.0);
 }
 
+template <class StabilizerType>
+void expectOutputLimitsStableUnderFrequencyNoise(std::string_view modelName,
+                                                 StabilizerType& stabilizer,
+                                                 std::string_view upperLimit,
+                                                 std::string_view lowerLimit,
+                                                 std::size_t upperRoot,
+                                                 std::size_t lowerRoot)
+{
+    SCOPED_TRACE(modelName);
+    // Keep a 50x solver-tolerance root margin while applying 10x-tolerance
+    // frequency perturbations in both directions.
+    constexpr double rootMargin = 1e-4;
+    constexpr double inputNoise = 1e-5;
+    IOdata inputs{1.0, 1.0, 0.8, 0.7};
+    stabilizer.dynInitializeA(0.0, 0);
+    stabilizer.setRootOffset(0, cLocalSolverMode);
+    IOdata fieldSet;
+    stabilizer.dynInitializeB(inputs, {0.0}, fieldSet);
+    auto state = stabilizer.getStates();
+    std::vector<double> stateDerivative(state.size(), 0.0);
+    stabilizer.setState(0.0, state.data(), stateDerivative.data(), cLocalSolverMode);
+    const StateData stateData(0.0, state.data(), stateDerivative.data());
+    std::array<double, 4> roots{};
+
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    const double unlimitedOutput =
+        stabilizer.get(upperLimit) + rootMargin - roots[upperRoot];
+    const double upperTestLimit = unlimitedOutput;
+    const double lowerTestLimit = unlimitedOutput - 0.1;
+    if (upperTestLimit < stabilizer.get(lowerLimit)) {
+        stabilizer.set(lowerLimit, lowerTestLimit);
+    }
+    stabilizer.set(upperLimit, upperTestLimit);
+    stabilizer.set(lowerLimit, lowerTestLimit);
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[upperRoot], rootMargin, 1e-12);
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[pssOmegaInLocation] = 1.0 + delta;
+        stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[upperRoot], 0.0) << delta;
+    }
+
+    inputs[pssOmegaInLocation] = 1.0;
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    const double lowerBoundaryOutput =
+        roots[lowerRoot] + stabilizer.get(lowerLimit) - rootMargin;
+    const double lowerTestBoundary = lowerBoundaryOutput;
+    const double upperTestBoundary = lowerBoundaryOutput + 0.1;
+    if (lowerTestBoundary > stabilizer.get(upperLimit)) {
+        stabilizer.set(upperLimit, upperTestBoundary);
+    }
+    stabilizer.set(lowerLimit, lowerTestBoundary);
+    stabilizer.set(upperLimit, upperTestBoundary);
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[lowerRoot], rootMargin, 1e-12);
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[pssOmegaInLocation] = 1.0 + delta;
+        stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[lowerRoot], 0.0) << delta;
+    }
+}
+
 void runAttachedStabilizerLoadPulseTest(
     std::unique_ptr<GridDynSimulation>& simulation,
     const std::string& modelName,
@@ -261,6 +323,111 @@ TEST(StabilizerModelTests, IeeestLimitsVoltageGateAndRetainsAndesZeroBypasses)
     EXPECT_ANY_THROW(stabilizer.set("mode", 2.0));
     EXPECT_ANY_THROW(stabilizer.set("busr", 9.0));
     EXPECT_ANY_THROW(stabilizer.set("t6", 0.0));
+}
+
+TEST(StabilizerModelTests, IeeestLimitRootsStayClearOfZeroForSmallTwoSidedInputNoise)
+{
+    stabilizers::StabilizerIEEEST stabilizer;
+    configureIeeest(stabilizer);
+    stabilizer.dynInitializeA(0.0, 0);
+    stabilizer.setRootOffset(0, cLocalSolverMode);
+    IOdata inputs{1.0, 1.0, 0.8, 0.7};
+    IOdata fieldSet;
+    stabilizer.dynInitializeB(inputs, {0.0}, fieldSet);
+    auto state = stabilizer.getStates();
+    std::vector<double> stateDerivative(state.size(), 0.0);
+    stabilizer.setState(0.0, state.data(), stateDerivative.data(), cLocalSolverMode);
+    const StateData stateData(0.0, state.data(), stateDerivative.data());
+    std::array<double, 4> roots{};
+
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    constexpr double rootMargin = 1e-4;
+    const double unlimitedOutput = stabilizer.get("lsmax") + rootMargin - roots[0];
+    stabilizer.set("lsmin", unlimitedOutput - 0.1);
+    stabilizer.set("lsmax", unlimitedOutput);
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[0], rootMargin, 1e-12);
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        inputs[pssOmegaInLocation] = speed;
+        stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0], 0.0);
+    }
+
+    inputs[pssOmegaInLocation] = 1.0;
+    stabilizer.set("lsmax", unlimitedOutput + 0.1);
+    stabilizer.set("lsmin", unlimitedOutput);
+    stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[1], rootMargin, 1e-12);
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        inputs[pssOmegaInLocation] = speed;
+        stabilizer.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[1], 0.0);
+    }
+}
+
+TEST(StabilizerModelTests, AllOutputLimitRootFamiliesStayClearUnderSmallFrequencyNoise)
+{
+    stabilizers::StabilizerIee2st iee2st;
+    configureIee2st(iee2st);
+    expectOutputLimitsStableUnderFrequencyNoise("IEE2ST", iee2st, "lsmax", "lsmin", 0, 1);
+
+    stabilizers::StabilizerPss2a pss2a;
+    configurePss2a(pss2a);
+    expectOutputLimitsStableUnderFrequencyNoise("PSS2A", pss2a, "vstmax", "vstmin", 0, 1);
+
+    stabilizers::StabilizerST2CUT st2cut;
+    configureSt2cut(st2cut);
+    expectOutputLimitsStableUnderFrequencyNoise("ST2CUT", st2cut, "lsmax", "lsmin", 0, 1);
+}
+
+TEST(StabilizerModelTests, Stab3UpperAndLowerLimitRootsStayClearUnderSmallPowerNoise)
+{
+    constexpr double rootMargin = 1e-4;
+    constexpr double inputNoise = 1e-5;
+    stabilizers::StabilizerStab3 stabilizer;
+    configureStab3(stabilizer);
+    // With the input filters bypassed, the initialized electrical-power
+    // perturbation is the only small signal crossing the limiter surface.
+    stabilizer.set("tt", 0.0);
+    stabilizer.set("tx1", 0.0);
+    stabilizer.dynInitializeA(0.0, 0);
+    stabilizer.setRootOffset(0, cLocalSolverMode);
+    IOdata inputs{1.0, 1.0, 0.8, 0.8};
+    IOdata fieldSet;
+    stabilizer.dynInitializeB(inputs, {0.0}, fieldSet);
+    auto state = stabilizer.getStates();
+    ASSERT_EQ(state.size(), 2U);
+    std::vector<double> stateDerivative(state.size(), 0.0);
+    std::array<double, 2> roots{};
+
+    state[1] = 1e-3;
+    stabilizer.setState(0.0, state.data(), stateDerivative.data(), cLocalSolverMode);
+    const StateData upperState(0.0, state.data(), stateDerivative.data());
+    stabilizer.rootTest(inputs, upperState, roots.data(), cLocalSolverMode);
+    const double upperOutput = stabilizer.get("vlim") + rootMargin - roots[0];
+    stabilizer.set("vlim", upperOutput);
+    stabilizer.rootTest(inputs, upperState, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[0], rootMargin, 1e-12);
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[pssElectricalPowerInLocation] = 0.8 + delta;
+        stabilizer.rootTest(inputs, upperState, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0], 0.0) << delta;
+    }
+
+    inputs[pssElectricalPowerInLocation] = 0.8;
+    state[1] = -1e-3;
+    stabilizer.setState(0.0, state.data(), stateDerivative.data(), cLocalSolverMode);
+    const StateData lowerState(0.0, state.data(), stateDerivative.data());
+    stabilizer.rootTest(inputs, lowerState, roots.data(), cLocalSolverMode);
+    const double lowerOutput = -stabilizer.get("vlim") + roots[1] - rootMargin;
+    stabilizer.set("vlim", -lowerOutput);
+    stabilizer.rootTest(inputs, lowerState, roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[1], rootMargin, 1e-12);
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[pssElectricalPowerInLocation] = 0.8 + delta;
+        stabilizer.rootTest(inputs, lowerState, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[1], 0.0) << delta;
+    }
 }
 
 TEST(StabilizerModelTests, IeeestFactoryCloneAndParameterValidation)

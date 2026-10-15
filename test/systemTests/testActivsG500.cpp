@@ -350,6 +350,18 @@ TEST_F(ActivsG500Tests, EpcDydDaeIdaPreservesInitialOperatingPoint)
     runActivsG500DaeStabilityCase(*this, "activsg500_epc_dyd_dae_stability.xml", 1e-3);
 }
 
+TEST_F(ActivsG500Tests, DaeIncrementalStepUsesConsistentStartup)
+{
+    gds = readSimXMLFile(std::string(ACTIVSG500_TEST_DIRECTORY) +
+                         "activsg500_dae_stability.xml");
+    gds->consolePrintLevel = PrintLevel::NO_PRINT;
+    ASSERT_EQ(gds->powerflow(), 0);
+    ASSERT_EQ(gds->dynInitialize(), 0);
+    CoreTime reached = 0.0;
+    ASSERT_EQ(gds->step(0.1, reached), 0);
+    EXPECT_NEAR(reached, 0.1, 1e-9);
+}
+
 #ifdef GRIDDYN_ENABLE_CVODE
 TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
 {
@@ -389,6 +401,18 @@ TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
                  gds->getState(differentialMode),
                  1e-4,
                  "CVODE differential state");
+}
+
+TEST_F(ActivsG500Tests, PartitionedDaeInitializationUsesConsistentStartup)
+{
+    gds = readSimXMLFile(std::string(ACTIVSG500_TEST_DIRECTORY) +
+                         "activsg500_cvode_kinsol_stability.xml");
+    gds->consolePrintLevel = PrintLevel::NO_PRINT;
+    gds->setFlag("dae_initialization_for_partitioned", true);
+    ASSERT_EQ(gds->powerflow(), 0);
+    ASSERT_EQ(gds->dynInitialize(), 0);
+    ASSERT_EQ(gds->run(), 0);
+    ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
 }
 #endif
 

@@ -239,6 +239,7 @@ void ExciterSCRX::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("SCRX initial source multiplier");
     }
     const double amplifierOutput = desiredOutput[0] / source;
+    const double originalUpperLimit = Vrmax;
     if (amplifierOutput < Vrmin - 1e-7) {
         throw InvalidParameterValue("SCRX initial amplifier output below lower limit");
     }
@@ -258,6 +259,20 @@ void ExciterSCRX::dynObjectInitializeB(const IOdata& inputs,
     vBias = error + inputs[exciterVoltageInLocation] - Vref -
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation] -
         inputs[exciterVuelInLocation] + inputs[exciterVoelInLocation];
+    const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+    const double guard = 10.0 * limiterRootTolerance * Te + std::abs(Ka) * 1e-5;
+    double overdrive = 0.0;
+    if ((Vrmax != 0.0) && (amplifierOutput >= Vrmax)) {
+        overdrive = std::max(0.2 * correction, guard);
+    } else if (amplifierOutput <= Vrmin) {
+        overdrive = -guard;
+    }
+    if (overdrive != 0.0) {
+        vBias += overdrive / Ka;
+        if (Tb > 0.0) {
+            state[layout.leadLag] += overdrive / Ka;
+        }
+    }
     fieldSet.resize(2);
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -418,9 +433,11 @@ void ExciterSCRX::rootTest(const IOdata& inputs,
     const index_t rootOffset = offsets.getRootOffset(sMode);
     if (opFlags[AMPLIFIER_LIMITED]) {
         const double drive = evaluateModel(inputs, locations.diffStateLoc).amplifierLimitDrive;
-        roots[rootOffset] = opFlags[AMPLIFIER_LIMIT_HIGH] ? drive : -drive;
+        roots[rootOffset] = (opFlags[AMPLIFIER_LIMIT_HIGH] ? drive : -drive) +
+            limiterRootTolerance;
     } else {
-        roots[rootOffset] = std::min(Vrmax - amplifier, amplifier - Vrmin);
+        roots[rootOffset] = std::min(Vrmax - amplifier, amplifier - Vrmin) +
+            limiterRootTolerance;
     }
 }
 

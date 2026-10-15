@@ -66,6 +66,7 @@ void GovernorSteamNR::dynObjectInitializeB(const IOdata& /*inputs*/,
                                            const IOdata& desiredOutput,
                                            IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[outputState])) {
         throw InvalidParameterValue("SteamNR governor initial output");
     }
@@ -82,6 +83,19 @@ void GovernorSteamNR::dynObjectInitializeB(const IOdata& /*inputs*/,
     Pset = power;
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = power;
+    if (opFlags[USES_POWER_LIMITS]) {
+        const double correction = std::max(0.0, Pmax - originalUpperLimit);
+        const double margin = std::max(0.2 * correction, 1e-4 * T3);
+        if (power >= Pmax) {
+            initialSetpointOverdrive = margin;
+            opFlags.set(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        } else if (power <= Pmin) {
+            initialSetpointOverdrive = -margin;
+            opFlags.reset(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        }
+    }
 }
 
 void GovernorSteamNR::residual(const IOdata& inputs,
@@ -115,7 +129,7 @@ void GovernorSteamNR::derivative(const IOdata& inputs,
     const auto* state = locations.diffStateLoc;
     auto* dst = locations.destDiffLoc;
     const double speedDeviation = inputs[govOmegaInLocation] - Wref;
-    const double unrestrictedRate = (inputs[govpSetInLocation] - state[valveState] -
+    const double unrestrictedRate = (effectivePowerSetpoint(inputs) - state[valveState] -
                                      (K * state[filterState]) - ((K * T2 * speedDeviation) / T1)) /
         T3;
     dst[valveState] = opFlags[POWER_LIMITED] ? 0.0 : std::clamp(unrestrictedRate, Pdown, Pup);
@@ -145,7 +159,7 @@ void GovernorSteamNR::jacobianElements(const IOdata& inputs,
     }
     const auto* state = locations.diffStateLoc;
     const double speedDeviation = inputs[govOmegaInLocation] - Wref;
-    const double unrestrictedRate = (inputs[govpSetInLocation] - state[valveState] -
+    const double unrestrictedRate = (effectivePowerSetpoint(inputs) - state[valveState] -
                                      (K * state[filterState]) - ((K * T2 * speedDeviation) / T1)) /
         T3;
     const bool rateLimited =

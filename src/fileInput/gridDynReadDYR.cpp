@@ -451,7 +451,8 @@ namespace detail {
         } else if (type == "'WT3P1'") {
             // The first-generation PSS/E WT3P1 pitch controller is the
             // WTPTA1 core without its Kcc cross term. Preserve its fixed Pset
-            // while translating the parameter order to the existing model.
+            // while translating the PSS/E order (Tp, Kpp, Kip, Kpc, Kic,
+            // ThetaMin, ThetaMax, RThetaMax, Pset) to the WTPTA1 order.
             if (lineTokens.size() != 12U) {
                 throw InvalidParameterValue("WT3P1 DYR record must contain 9 parameters");
             }
@@ -464,16 +465,16 @@ namespace detail {
             stringVec pitchTokens{lineTokens[0],
                                   "'WTPTA1'",
                                   lineTokens[2],
-                                  lineTokens[4],
-                                  lineTokens[3],
-                                  lineTokens[6],
                                   lineTokens[5],
-                                  "0",
-                                  lineTokens[10],
+                                  lineTokens[4],
                                   lineTokens[7],
-                                  lineTokens[8],
+                                  lineTokens[6],
+                                  "0",
+                                  lineTokens[3],
                                   lineTokens[9],
-                                  std::format("{:.17g}", -params[9]),
+                                  lineTokens[8],
+                                  lineTokens[10],
+                                  std::format("{:.17g}", -params[10]),
                                   lineTokens[11]};
             loadRenewable(parentObject, pitchTokens, "WTPTA1");
         } else if (type == "'WT3T1'") {
@@ -508,9 +509,13 @@ namespace detail {
                 lineTokens[0], "'WTDS'", lineTokens[2], lineTokens[4], lineTokens[5], "1"};
             if (turbineInertiaFraction != 0.0) {
                 shaftTokens[1] = "'WTDTA1'";
-                shaftTokens.emplace_back(lineTokens[8]);
+                // WT3T1 order is VW, H, DAMP, Kaero, Theta2, Htfrac,
+                // Freq1, Dshaft. WTDTA1 expects H, DAMP, Htfrac, Freq1,
+                // Dshaft, then the optional initial speed reference.
+                shaftTokens[5] = lineTokens[8];
                 shaftTokens.emplace_back(lineTokens[9]);
                 shaftTokens.emplace_back(lineTokens[10]);
+                shaftTokens.emplace_back("1");
             }
             loadRenewable(parentObject,
                           shaftTokens,

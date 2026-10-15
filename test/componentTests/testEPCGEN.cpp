@@ -12,6 +12,7 @@
 #include "griddyn/generators/RenewableGenerator.h"
 #include "griddyn/renewables/EPCGEN.h"
 #include "utilities/MatrixDataSparse.hpp"
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -82,6 +83,57 @@ TEST(EPCGENReference, DissertationOperatingPointInitializes)
     ASSERT_EQ(output.size(), 2U);
     EXPECT_NEAR(output[0], 0.4, 1.0e-12);
     EXPECT_NEAR(output[1], 0.1, 1.0e-12);
+}
+
+TEST(EPCGENReference, InitializedCurrentAndVoltageTripRootsStayClearUnderTwoSidedNoise)
+{
+    EPCGEN model;
+    setDissertationParameters(model);
+    model.dynInitializeA(0.0, 0);
+    IOdata fields;
+    model.dynInitializeB({1.0, 1.0}, {0.4, 0.1}, fields);
+
+    auto state = model.getStates();
+    ASSERT_EQ(state.size(), 12U);
+    std::vector<double> stateDerivative(state.size(), 0.0);
+    StateData stateData(0.0, state.data(), stateDerivative.data());
+    stateData.stateSize = static_cast<count_t>(state.size());
+    constexpr double inputNoise = 1e-5;  // 10x GridDyn's default relative tolerance.
+    const double initialCurrent = std::hypot(state[7], state[6]);
+    model.set("imax", initialCurrent + 5e-5);
+    model.setRootOffset(0, cLocalSolverMode);
+
+    std::array<double, 2> roots{};
+    IOdata inputs{1.0, 1.0};
+    model.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+    const auto initialRoots = roots;
+    EXPECT_NEAR(roots[0], -5e-5, 1e-12);
+    EXPECT_NEAR(roots[1], -0.2, 1e-12);
+
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[0] = 1.0 + delta;
+        model.rootTest(inputs, stateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0] * initialRoots[0], 0.0);
+        EXPECT_GT(roots[1] * initialRoots[1], 0.0);
+        EXPECT_LE(roots[0], -4e-5);
+        EXPECT_LE(roots[1], -0.19);
+
+        // Active and reactive currents are differential states initialized
+        // from P/Q. Perturb each in both directions around that operating point.
+        for (const std::size_t currentState : {6U, 7U}) {
+            for (const double currentDelta : {-inputNoise, inputNoise}) {
+                auto perturbedState = state;
+                perturbedState[currentState] += currentDelta;
+                StateData perturbedData(0.0, perturbedState.data(), stateDerivative.data());
+                perturbedData.stateSize = static_cast<count_t>(perturbedState.size());
+                model.rootTest(inputs, perturbedData, roots.data(), cLocalSolverMode);
+                EXPECT_GT(roots[0] * initialRoots[0], 0.0);
+                EXPECT_GT(roots[1] * initialRoots[1], 0.0);
+                EXPECT_LE(roots[0], -3e-5);
+                EXPECT_LE(roots[1], -0.19);
+            }
+        }
+    }
 }
 
 TEST(EPCGENReference, DaeJacobianMatchesFiniteDifference)

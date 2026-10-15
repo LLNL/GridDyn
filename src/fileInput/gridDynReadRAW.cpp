@@ -347,7 +347,8 @@ static void rawReadFixedShunt(GridLoad* loadObject, const std::string& line, Bas
 static void rawReadGen(Generator* gen,
                        const std::string& line,
                        BasicReaderInfo& opt,
-                       std::unordered_map<int, Generator*>& remoteControllers);
+                       std::unordered_map<int, Generator*>& remoteControllers,
+                       std::unordered_map<int, std::vector<Generator*>>& remoteControllerGroups);
 static void rawReadBranch(CoreObject* parentObject,
                           const std::string& line,
                           std::vector<GridBus*>& busList,
@@ -783,13 +784,13 @@ void loadRaw(CoreObject* parentObject,
     std::string line;  // line storage
     std::string temp1;  // temporary storage for substrings
     std::vector<GridBus*> busList;
-    // PSS/E permits several generators to share an IREG bus and divide the
-    // reactive response with RMPCT.  The current GridDyn power-flow model can
-    // represent one indirect voltage controller cleanly, but not that group
-    // as a coordinated set.  Keep track of active controllers while reading
-    // so the unsupported case is rejected instead of being imported as two
-    // independent voltage equations.
+    // Track active remote voltage controllers so members of an IREG group can
+    // be checked for a consistent voltage target and their RMPCT weights
+    // normalized together after the generator section is read.
     std::unordered_map<int, Generator*> remoteControllers;
+    std::unordered_map<int, std::vector<Generator*>> remoteControllerGroups;
+    std::unordered_map<int, std::vector<Generator*>> generatorsByTerminalBus;
+    std::unordered_set<int> remoteTerminalBuses;
     std::unordered_map<int, loads::Svd*> remoteSwitchedShunts;
     BasicReaderInfo readerOptionsCopy(readerOptions);
     auto& opt = readerOptionsCopy;
@@ -843,13 +844,104 @@ void loadRaw(CoreObject* parentObject,
                         if (bus != nullptr) {
                             gen = gGenfactory->makeTypeObject();
                             bus->add(gen);
-                            rawReadGen(gen, line, opt, remoteControllers);
+                            generatorsByTerminalBus[static_cast<int>(bus->getUserID())].push_back(gen);
+                            rawReadGen(gen, line, opt, remoteControllers, remoteControllerGroups);
                         } else {
                             std::cerr << "Invalid bus number for fixed shunt " << line.substr(0, 30)
                                       << '\n';
                         }
                     } else {
                         moreData = false;
+                    }
+                }
+                // RAW RegPerc sharing assigns one weight to each regulating
+                // terminal bus (plant). Several machines at one terminal split
+                // that bus's share;
+                // otherwise a two-machine plant counts twice against a
+                // one-machine plant regulating the same IREG target.
+                for (const auto& groupEntry : remoteControllerGroups) {
+                    std::unordered_map<index_t, size_t> machinesPerTerminal;
+                    for (const auto* controller : groupEntry.second) {
+                        ++machinesPerTerminal[controller->getParent()->getUserID()];
+                    }
+                    for (auto* controller : groupEntry.second) {
+                        const auto count = machinesPerTerminal[controller->getParent()->getUserID()];
+                        controller->set("vcontrolfrac",
+                                        controller->get("vcontrolfrac") /
+                                            static_cast<double>(count));
+                    }
+                    // A generator installed at IREG can also participate in
+                    // the same remote group. Its bus is one plant regardless
+                    // of how many local machines it contains.
+                    const auto localPlant = generatorsByTerminalBus.find(groupEntry.first);
+                    if (localPlant != generatorsByTerminalBus.end()) {
+                        const auto isLocalMember = [&groupEntry](const Generator* generator) {
+                            return generator->isEnabled() &&
+                                generator->checkFlag(LOCAL_VOLTAGE_CONTROL) &&
+                                std::find(groupEntry.second.begin(), groupEntry.second.end(),
+                                          generator) == groupEntry.second.end();
+                        };
+                        size_t localMachineCount = 0;
+                        for (const auto* localGenerator : localPlant->second) {
+                            if (isLocalMember(localGenerator)) {
+                                ++localMachineCount;
+                            }
+                        }
+                        if (localMachineCount > 1) {
+                            for (auto* localGenerator : localPlant->second) {
+                                if (isLocalMember(localGenerator)) {
+                                    localGenerator->set(
+                                        "vcontrolfrac",
+                                        localGenerator->get("vcontrolfrac") /
+                                            static_cast<double>(localMachineCount));
+                                }
+                            }
+                        }
+                    }
+                }
+                remoteTerminalBuses.clear();
+                for (auto& groupEntry : remoteControllerGroups) {
+                    auto* controlBus = dynamic_cast<AcBus*>(parentObject->getRoot()->findByUserID(
+                        "bus", static_cast<index_t>(groupEntry.first)));
+                    if ((controlBus == nullptr) ||
+                        (controlBus->getBusType() != static_cast<int>(GridBus::BusType::PQ))) {
+                        continue;
+                    }
+                    for (const auto* controller : groupEntry.second) {
+                        if (controller->getParent() != nullptr) {
+                            remoteTerminalBuses.insert(
+                                static_cast<int>(controller->getParent()->getUserID()));
+                        }
+                    }
+                }
+                // An active remote regulator cannot also hold its own
+                // terminal-bus voltage. Make those terminal bus magnitudes
+                // unknown so the generator's Q state participates in the
+                // local reactive balance and can affect its IREG voltage.
+                // Units at a Q limit still have fixed Q, so their terminal
+                // buses also need a reactive-balance equation. Retain the angle
+                // reference if a remote controller is on the RAW swing bus;
+                // AFIX is the voltage-free, angle-fixed form.
+                for (const auto terminalBusId : remoteTerminalBuses) {
+                    const auto terminalGenerators = generatorsByTerminalBus.find(terminalBusId);
+                    if (terminalGenerators == generatorsByTerminalBus.end() ||
+                        terminalGenerators->second.empty()) {
+                        continue;
+                    }
+                    auto* terminalBus =
+                        dynamic_cast<AcBus*>(terminalGenerators->second.front()->getParent());
+                    if (terminalBus == nullptr) {
+                        continue;
+                    }
+                    const auto busType = terminalBus->getBusType();
+                    if (busType == static_cast<int>(GridBus::BusType::PV)) {
+                        terminalBus->set("type", "pq");
+                    } else if (busType == static_cast<int>(GridBus::BusType::SLK)) {
+                        terminalBus->set("type", "afix");
+                        terminalBus->set("dyntype", "fixangle");
+                    }
+                    for (auto* terminalGenerator : terminalGenerators->second) {
+                        terminalGenerator->setFlag("local_voltage_control", false);
                     }
                 }
                 break;
@@ -1535,7 +1627,8 @@ static void
 static void rawReadGen(Generator* gen,
                        const std::string& line,
                        BasicReaderInfo& opt,
-                       std::unordered_map<int, Generator*>& remoteControllers)
+                       std::unordered_map<int, Generator*>& remoteControllers,
+                       std::unordered_map<int, std::vector<Generator*>>& remoteControllerGroups)
 {
     // PSS/E v35 adds NREG after IREG.  All generator fields from MBASE
     // onward consequently move one column to the right.
@@ -1601,18 +1694,19 @@ static void rawReadGen(Generator* gen,
         gen->log(gen, PrintLevel::WARNING, message);
     }
 
+    const auto rbus = numeric_conversion<int>(strvec[7], 0);
+
     // get the Qmax and Qmin
     auto qmax = numeric_conversion<double>(strvec[4], 0.0);
     auto qmin = numeric_conversion<double>(strvec[5], 0.0);
-    // Preserve a one-sided zero limit, but treat a zero/zero pair as omitted
-    // limits.  IEEE and legacy PSS/E exports use that pair for an unconstrained
-    // swing generator; applying it literally would force the unit to Q = 0.
-    if ((qmax != 0.0) || (qmin != 0.0)) {
+    // Preserve one-sided zero limits, but treat a zero/zero pair as omitted
+    // limits for local generators. A remote controller with a zero-width range
+    // has no reactive capability and must remain fixed at QG.
+    if ((qmax != 0.0) || (qmin != 0.0) || (rbus != 0)) {
         gen->set("qmax", qmax, MVAR);
         gen->set("qmin", qmin, MVAR);
     }
     const auto voltageTarget = numeric_conversion<double>(strvec[6], 1.0);
-    const auto rbus = numeric_conversion<int>(strvec[7], 0);
     GridBus* remoteControlBus = nullptr;
     const auto remoteParticipation =
         numeric_conversion<double>(strvec[15 + generatorFieldOffset], 100.0);
@@ -1639,15 +1733,22 @@ static void rawReadGen(Generator* gen,
             throw std::runtime_error(message);
         }
 
-        if (const auto existing = remoteControllers.find(rbus);
-            existing != remoteControllers.end()) {
-            const auto message = "unsupported PSS/E RMPCT group on remote bus " +
-                std::to_string(rbus) + ": generators on buses " +
-                std::to_string(existing->second->getParent()->getUserID()) + " and " +
-                std::to_string(gen->getParent()->getUserID()) +
-                " share IREG; grouped remote voltage control is not implemented";
-            gen->log(gen, PrintLevel::ERROR, message);
-            throw std::runtime_error(message);
+        if (qmax != qmin) {
+            if (const auto existing = remoteControllers.find(rbus);
+                existing != remoteControllers.end()) {
+                constexpr double remoteVoltageTargetTolerance = 1.0e-6;
+                const auto existingTarget = existing->second->get("vtarget");
+                if (std::abs(existingTarget - voltageTarget) > remoteVoltageTargetTolerance) {
+                    const auto message =
+                        "inconsistent VS targets in PSS/E RMPCT group on remote bus " +
+                        std::to_string(rbus) + ": generators on buses " +
+                        std::to_string(existing->second->getParent()->getUserID()) + " and " +
+                        std::to_string(gen->getParent()->getUserID()) + " specify " +
+                        std::to_string(existingTarget) + " and " + std::to_string(voltageTarget);
+                    gen->log(gen, PrintLevel::ERROR, message);
+                    throw std::runtime_error(message);
+                }
+            }
         }
 
         remoteControlBus =
@@ -1660,16 +1761,23 @@ static void rawReadGen(Generator* gen,
             throw std::runtime_error(message);
         }
 
-        // The generator's vtarget is the remote voltage target used by the
-        // indirect power-flow equation.  Set the remote bus target as well so
-        // the direct-controller path has the same VS setpoint.  Do not change
-        // the generator terminal bus voltage: its RAW VM is an independent
-        // solved value in remote-control cases.
-        gen->set("vtarget", voltageTarget);
-        gen->set("vcontrolfrac", remoteParticipation / 100.0);
-        remoteControlBus->set("vtarget", voltageTarget);
-        gen->add(remoteControlBus);
-        remoteControllers.emplace(rbus, gen);
+        if (qmax == qmin) {
+            // A zero-width Q range has no ability to regulate IREG. Keep this
+            // unit fixed at its terminal bus and leave it out of the group.
+            gen->setFlag("local_voltage_control", false);
+            gen->setFlag("remote_voltage_control", false);
+            gen->setFlag("adjustable_q", false);
+        } else {
+            // Keep the generator's remote target separate from its terminal
+            // voltage and preserve its RAW QG as the group sharing bias.
+            gen->set("vtarget", voltageTarget);
+            gen->set("qbias", reactivePower, MVAR);
+            gen->set("vcontrolfrac", remoteParticipation / 100.0);
+            remoteControlBus->set("vtarget", voltageTarget);
+            gen->add(remoteControlBus);
+            remoteControllers.try_emplace(rbus, gen);
+            remoteControllerGroups[rbus].push_back(gen);
+        }
     }
 
     auto resistance = numeric_conversion<double>(strvec[9 + generatorFieldOffset], 0.0);

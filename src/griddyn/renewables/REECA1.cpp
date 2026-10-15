@@ -264,7 +264,13 @@ void REECA1::set(std::string_view param, double val, units::unit unitType)
     } else if (key == "thld") {
         Thld = val;
     } else if (key == "thld2") {
+        const bool hadRoots = Thld2 > 0.0;
         Thld2 = val;
+        const bool hasRoots = Thld2 > 0.0;
+        if (hadRoots != hasRoots) {
+            offsets.local().local.algRoots = hasRoots ? 2 : 0;
+            alert(this, hasRoots ? ROOT_COUNT_INCREASE : ROOT_COUNT_DECREASE);
+        }
     } else if (key == "tp") {
         Tp = val;
     } else if (key == "qmax") {
@@ -712,7 +718,12 @@ void REECA1::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("REECA1 must initialize outside voltage-dip range");
     }
     if (initialP < PMIN || initialP > PMAX || initialQ < QMin || initialQ > QMax) {
-        throw InvalidParameterValue("REECA1 initial power outside reference limits");
+        const auto hostName = (getParent() != nullptr) ? getParent()->getName() : std::string{"unknown"};
+        throw InvalidParameterValue(
+            "REECA1 initial power outside reference limits for " + hostName + ": P=" +
+            std::to_string(initialP) + " pu (" + std::to_string(PMIN) + " to " +
+            std::to_string(PMAX) + "), Q=" + std::to_string(initialQ) + " pu (" +
+            std::to_string(QMin) + " to " + std::to_string(QMax) + ")");
     }
     m_state[2 + voltageFilter] = inputs[0];
     m_state[2 + powerFilter] = initialP / generatorSpeed(inputs);
@@ -1118,7 +1129,9 @@ void REECA1::rootTest(const IOdata& inputs,
     if (Thld2 <= 0.0) {
         return;
     }
-    constexpr double hysteresis = 1e-7;
+    // Keep the voltage-dip root away from zero for small initialization noise
+    // in terminal voltage, then use the same margin for recovery hysteresis.
+    constexpr double hysteresis = 2e-6;
     const auto root = offsets.getRootOffset(sMode);
     const double voltage = inputs[0];
     const double distance = std::min(voltage - Vdip, Vup - voltage);

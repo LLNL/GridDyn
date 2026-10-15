@@ -18,7 +18,6 @@
 // system headers
 #include <cmath>
 #include <cstdio>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -80,6 +79,7 @@ int GridDynSimulation::powerflow()
             }
             voltageIterationCount = 0;
             ChangeCode adjustmentChanges = ChangeCode::NO_CHANGE;
+            bool voltageIterationLimitExceeded = false;
             do {
                 guessState(currentTime, pFlowData->stateData(), nullptr, solverModeRef);
                 if ((controlFlags[SAVE_POWER_FLOW_INPUT_DATA] &&
@@ -155,7 +155,10 @@ int GridDynSimulation::powerflow()
                     makePowerFlowAdjustmentInputs(allBusses, voltageIterationCount);
 
                 if (voltageIterationCount > max_Vadjust_iterations) {
-                    logging::warning(this, "WARNING::Voltage Loop iteration count limit exceeded");
+                    logging::error(this,
+                                   "Voltage-control loop did not converge within {} iterations",
+                                   max_Vadjust_iterations);
+                    voltageIterationLimitExceeded = true;
                     break;
                 }
 
@@ -164,8 +167,11 @@ int GridDynSimulation::powerflow()
 
                     if (pState == GridState::INITIALIZED) {
                         if (controlFlags[FIRST_RUN_LIMITS_ONLY]) {
+                            const auto firstRunFlags = lower_flags(controlFlags) &
+                                ((1U << DISABLE_SHUNT_ADJUSTMENTS) |
+                                 (1U << DISABLE_TAP_CHANGER_ADJUSTMENTS));
                             adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
-                                                                0,
+                                                                firstRunFlags,
                                                                 CheckLevel::REVERSABLE_ONLY);
                         } else {
                             adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
@@ -198,6 +204,10 @@ int GridDynSimulation::powerflow()
                     adjustmentChanges = ChangeCode::NO_CHANGE;
                 }
             } while ((retval < 0) || (adjustmentChanges != ChangeCode::NO_CHANGE));
+
+            if (voltageIterationLimitExceeded) {
+                return FUNCTION_EXECUTION_FAILURE;
+            }
 
             if (controlFlags[POWER_ADJUST_ENABLED]) {
                 hasPowerAdjustments = loadBalance(prevPower, slkBusBase);
@@ -304,7 +314,9 @@ void GridDynSimulation::reInitpFlow(const SolverMode& sMode, ChangeCode change)
                 }
             }
             if ((!controlFlags[DENSE_SOLVER]) &&
-                ((offsetsReassigned && !solverResized) || opFlags[JACOBIAN_COUNT_CHANGE_FLAG])) {
+                ((offsetsReassigned && !solverResized) || opFlags[JACOBIAN_COUNT_CHANGE_FLAG] ||
+                 (change == ChangeCode::JACOBIAN_CHANGE))) {
+                pFlowData->setMaxNonZeros(jacSize(sMode));
                 pFlowData->sparseReInit(SolverInterface::SparseReinitMode::RESIZE);
             }
         }

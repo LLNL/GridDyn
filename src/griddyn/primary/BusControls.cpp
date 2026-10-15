@@ -7,6 +7,7 @@
 #include "BusControls.h"
 
 #include "../GridSecondary.h"
+#include "../Generator.h"
 #include "../Link.h"
 #include "AcBus.h"
 #include "gmlc/utilities/vectorOps.hpp"
@@ -108,7 +109,9 @@ void BusControls::addVoltageControlObject(GridComponent* comp, bool update)
             }
         }
         vControlObjects.push_back(static_cast<GridSecondary*>(comp));
-        vcfrac.push_back(comp->get("vcontrolfrac"));
+        const double controlFraction = comp->get("vcontrolfrac");
+        vcfrac.push_back(controlFraction);
+        vcfracInput.push_back(controlFraction);
     } else if (dynamic_cast<Link*>(comp) != nullptr) {
         auto objid = comp->getID();
         for (auto& rvc : vControlLinks) {
@@ -117,7 +120,9 @@ void BusControls::addVoltageControlObject(GridComponent* comp, bool update)
             }
         }
         vControlLinks.push_back(static_cast<Link*>(comp));
-        vclinkFrac.push_back(comp->get("vcontrolfrac"));
+        const double controlFraction = comp->get("vcontrolfrac");
+        vclinkFrac.push_back(controlFraction);
+        vclinkFracInput.push_back(controlFraction);
     } else {
         return;
     }
@@ -155,6 +160,7 @@ void BusControls::removeVoltageControlObject(id_type_t oid, bool update)
         if (oid == vControlObjects[kk]->getID()) {
             vControlObjects.erase(vControlObjects.begin() + kk);
             vcfrac.erase(vcfrac.begin() + kk);
+            vcfracInput.erase(vcfracInput.begin() + kk);
             if (update) {
                 updateVoltageControls();
             }
@@ -165,6 +171,7 @@ void BusControls::removeVoltageControlObject(id_type_t oid, bool update)
         if (oid == vControlLinks[kk]->getID()) {
             vControlLinks.erase(vControlLinks.begin() + kk);
             vclinkFrac.erase(vclinkFrac.begin() + kk);
+            vclinkFracInput.erase(vclinkFracInput.begin() + kk);
             if (update) {
                 updateVoltageControls();
             }
@@ -176,7 +183,11 @@ using gmlc::utilities::sum;
 
 void BusControls::updateVoltageControls()
 {
-    const double voltageFractionSum = sum(vcfrac) + sum(vclinkFrac);
+    // Keep the imported/controller weights separate from the normalized
+    // fractions.  Voltage controls register one at a time during pflow
+    // initialization; normalizing the already-normalized partial set each
+    // time biases earlier controllers and corrupts RAW RMPCT shares.
+    const double voltageFractionSum = sum(vcfracInput) + sum(vclinkFracInput);
     proxyVControlObject.clear();
     bool nonDirectRemote = false;
     GridComponent* vco;
@@ -184,16 +195,18 @@ void BusControls::updateVoltageControls()
     Qmin = 0;
     for (size_t kk = 0; kk < vcfrac.size(); ++kk) {
         vco = vControlObjects[kk];
-        if (voltageFractionSum != 1.0) {
-            vcfrac[kk] /= voltageFractionSum;
-            vco->set("vcontrolfrac", vcfrac[kk]);
+        if (voltageFractionSum > 0.0) {
+            vcfrac[kk] = vcfracInput[kk] / voltageFractionSum;
         }
+        vco->set("vcontrolfrac", vcfrac[kk]);
         Qmax += vco->get("qmax");
         Qmin += vco->get("qmin");
         if (vco->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
-            if (static_cast<AcBus*>(vco->find("bus"))->directPath(controlledBus, vco)) {
+            auto* controllerBus = static_cast<AcBus*>(vco->find("bus"));
+            const bool isDirect = controllerBus->directPath(controlledBus, vco);
+            if (isDirect) {
                 auto opath =
-                    static_cast<AcBus*>(vco->find("bus"))->getDirectPath(controlledBus, vco);
+                    controllerBus->getDirectPath(controlledBus, vco);
                 opath.pop_back();
                 if (dynamic_cast<Link*>(opath.back()) != nullptr) {
                     proxyVControlObject.push_back(static_cast<Link*>(opath.back()));
@@ -203,13 +216,12 @@ void BusControls::updateVoltageControls()
             }
         }
     }
-
     for (size_t kk = 0; kk < vclinkFrac.size(); ++kk) {
         vco = vControlLinks[kk];
-        if (voltageFractionSum != 1.0) {
-            vclinkFrac[kk] /= voltageFractionSum;
-            vco->set("vcontrolfrac", vclinkFrac[kk]);
+        if (voltageFractionSum > 0.0) {
+            vclinkFrac[kk] = vclinkFracInput[kk] / voltageFractionSum;
         }
+        vco->set("vcontrolfrac", vclinkFrac[kk]);
         Qmax += vco->get("qmax");
         Qmin += vco->get("qmin");
         if (vco->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
@@ -219,10 +231,21 @@ void BusControls::updateVoltageControls()
 
     if (nonDirectRemote) {
         for (auto& vcobj : vControlObjects) {
-            vcobj->setFlag("indirect_voltage_control", true);
+            if (auto* gen = dynamic_cast<Generator*>(vcobj); gen != nullptr &&
+                !gen->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
+                gen->configureIndirectVoltageControl(controlledBus);
+            } else {
+                vcobj->setFlag("indirect_voltage_control", true);
+            }
         }
         for (auto& vcobj : vControlLinks) {
-            vcobj->setFlag("indirect_voltage_control", true);
+            if (vcobj->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
+                vcobj->setFlag("indirect_voltage_control", true);
+            }
+        }
+        if ((controlledBus->getType() != GridBus::BusType::PQ) &&
+            controlledBus->pFlowInitialVoltageCaptured) {
+            controlledBus->voltage = controlledBus->pFlowInitialVoltage;
         }
         controlledBus->set("type", "pq");
         controlledBus->opFlags.set(INDIRECT_VOLTAGE_CONTROL);

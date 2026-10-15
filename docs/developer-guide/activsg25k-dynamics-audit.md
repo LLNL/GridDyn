@@ -10,6 +10,15 @@ Model/import status below was reviewed against the GridDyn working tree on
 2026-10-04. The source-case inventory and parameter counts remain the
 2026-09-25 snapshot described above.
 
+Whole-case execution update (2026-10-11): the ACTIVSg25k RAW+DYR pair has been
+loaded through the dynamic initialization path. The saved strict RAW result is
+not reproducible in the current working tree: no-adjustment runs can leave
+remote targets uncontrolled at their Q limits, and adjustment-enabled runs
+fail KINSOL. The dynamic run also stops at time zero with a REECA1
+initial-power/reference-limit error. No five-second trajectory has been
+validated. See the
+[25k diagnosis procedure and current findings](activsg25k-dynamic-investigation.md).
+
 ## Model inventory
 
 `ACTIVSg25k.dyr` has 18,108 records in 22 model families. The 16 synchronous
@@ -36,7 +45,7 @@ parameters and initial conditions are not yet certified by this audit.
 | Renewable model | DYR records | Current GridDyn status                                                                                                                                                                                                                            |
 | --------------- | ----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | REGCA1          |         614 | Reader and converter exist. `Accel=0.8` is accepted as a numerical parameter. Zero reactive recovery limits are treated as disabled. Trajectories need validation.                                                                                |
-| REECA1          |         614 | Reader, constant-Q branch, zeroed VDL tables, `Tpord=0`, and the `Thld2=0.5` active-current hold are implemented. The case profile initializes in a reader test; disturbance trajectories still need validation.                                  |
+| REECA1          |         614 | Reader and case-specific control paths are implemented. Whole-case dynamic initialization currently stops at time zero with `initial power outside reference limits`; the exact record and values are being isolated. No full trajectory is validated. |
 | WT3G1           |         119 | Dedicated Type-3 electrical interface, PSS/E DYR mapping, PLL/equivalent-reactance path, steady-state initialization, and host-Jacobian tests are implemented. Full-plant validation remains open because WT3T1/WT3P1 adapters are provisional.   |
 | WT3E1           |         119 | Dedicated Type-3 electrical controller, PSS/E DYR mapping, initialization-command handoff, steady-state initialization, and host-Jacobian tests are implemented. Full-plant validation remains open because WT3T1/WT3P1 adapters are provisional. |
 | WT3T1           |         119 | DYR adapter splits the record into `WTARA1` plus `WTDS`/`WTDTA1`; the mapping is not verified against authoritative `WT3T1` equations or trajectories.                                                                                            |
@@ -102,7 +111,7 @@ parameter takes `1.65`, `2.2`, or `2.75`. `WT3E1` has 37 positional
 parameters, `WT3T1` has eight, and `WT3P1` has nine. They have multiple
 parameter variants, so one representative record is not enough for tests.
 
-### WT3P1/WT3T1 adapter and model-fidelity status (reviewed 2026-10-04)
+### WT3P1/WT3T1 adapter and model-fidelity status (reviewed 2026-10-12)
 
 The adapters currently use the parameter interpretation described below.
 Import support must not be reported as a dedicated implementation or as
@@ -113,10 +122,10 @@ The local test corpus at
 shapes, but not the model specifications. Representative records in the
 `EI_NPCC_WIND20_WT3G1.dyr` and `WECC_WIND10.dyr` fixtures are:
 
-| Record  | Status values observed | Positional values after status             | Evidence currently established                                                                                                    |
-| ------- | ---------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `WT3T1` | `1`, `Z`               | `1.25, 4.95, 0, 0.007, 21.98, 0, 1.8, 1.5` | Eight-field schema and repeatable case values; parameter names, equations, signs, and initialization are still unverified.        |
-| `WT3P1` | `1`, `Z`               | `0.3, 150, 25, 3, 30, 0, 27, 10, 1`        | Nine-field schema and repeatable case values; parameter names, equations, limits, flags, and initialization are still unverified. |
+| Record  | Status values observed | Positional values after status             | Evidence currently established                                                                                                                                                                |
+| ------- | ---------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WT3T1` | `1`, `Z`               | `1.25, 4.95, 0, 0.007, 21.98, 0, 1.8, 1.5` | Eight-field schema and repeatable case values; parameter names, equations, signs, and initialization are still unverified.                                                                    |
+| `WT3P1` | `1`, `Z`               | `0.3, 150, 25, 3, 30, 0, 27, 10, 1`        | PowerWorld identifies fields as `Tp, Kpp, Kip, Kpc, Kic, ThetaMin, ThetaMax, RThetaMax, Pset` and states there are no pitch-control non-windup limits; the DYR field-order adapter was corrected. Full equation, base, and initialization equivalence remain unverified. |
 
 An older OpenIPSL history artifact,
 `OpenIPSL/Electrical/Wind/PSSE/WT1G/WT12T1.mo` (commit `56e4cd9`), has a
@@ -124,15 +133,18 @@ two-mass turbine/shaft implementation whose icon labels it “WT3T1.” It is a
 useful equation-level lead for the mechanical states, but it is named
 `WT12T1`, exposes a different parameter interface, and does not establish the
 PSS/E `WT3T1` positional mapping. Neither the current OpenIPSL model tree nor
-GridKit contains an exact `WT3P1` implementation. `WTDTA1`, `WTPTA1`, GE, and
-PSAT models remain non-authoritative alternatives and must not be mapped into
-these records by position or by role.
+GridKit contains an exact `WT3P1` implementation. The WT3P1 reader now
+translates its documented fields to the existing WTPTA1 core in the confirmed
+order, but that core has non-windup behavior that differs from WT3P1. Keep the
+translation provisional until the full equations, bases, and steady-state
+initialization are validated.
 
-Dedicated model fidelity is still blocked on an authoritative PSS/E WT3P1/WT3T1
-specification (or a vendor/reference implementation) that names every field
-and defines the equations, signal connections, initialization, limiter/flag
-behavior, and sign/base conventions. Keep the adapters explicitly provisional
-until that comparison is complete; do not claim a validated full Type-3 plant.
+Dedicated model fidelity is still blocked on a complete WT3T1 specification
+and reference evidence for the WT3P1 equations, signal connections,
+initialization, and sign/base conventions. Keep both adapters explicitly
+provisional until that comparison is complete; do not claim a validated full
+Type-3 plant. See the [PowerWorld WT3P/WT3P1 description](https://www.powerworld.com/WebHelp/Content/TransientModels_HTML/Stabilizer%20WT3P%20and%20WT3P1.htm)
+and [block diagram](https://www.powerworld.com/files/Block-Diagrams-17.pdf).
 
 ## Other formats in this directory
 

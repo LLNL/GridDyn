@@ -387,6 +387,7 @@ void ExciterESAC6A::dynObjectInitializeB(const IOdata& inputs,
         std::clamp(Kh * (fieldFeedback - Vfelim), 0.0, static_cast<double>(Vhmax));
     const double voltageRegulator = fieldFeedback;
     const double leadLagOutput = voltageRegulator + feedbackLimiter;
+    const double originalUpperLimit = Vamax;
     const double terminalVoltage = inputs[exciterVoltageInLocation];
     const double regulatorLower = terminalVoltage * Vrmin;
     const double regulatorUpper = terminalVoltage * Vrmax;
@@ -424,6 +425,16 @@ void ExciterESAC6A::dynObjectInitializeB(const IOdata& inputs,
     vBias = error + inputs[exciterVoltageInLocation] - Vref -
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation] -
         inputs[exciterVuelInLocation];
+    const double regulatorMargin =
+        std::max(0.2 * std::max(0.0, Vamax - originalUpperLimit),
+                 10.0 * limiterRootTolerance);
+    if (leadLagOutput >= Vamax) {
+        state[layout.regulator] += regulatorMargin;
+        vBias += regulatorMargin / Ka;
+    } else if (leadLagOutput <= Vamin) {
+        state[layout.regulator] -= regulatorMargin;
+        vBias -= regulatorMargin / Ka;
+    }
     fieldSet.resize(2);
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -565,8 +576,8 @@ void ExciterESAC6A::rootTest(const IOdata& inputs,
     const auto locations = offsets.getLocations(stateData, sMode, this);
     const auto evaluation = evaluateModel(inputs, locations.diffStateLoc);
     roots[offsets.getRootOffset(sMode)] = opFlags[EXCITER_AT_LOWER_LIMIT] ?
-        -evaluation.exciterLimitDrive :
-        locations.diffStateLoc[stateLayout().exciter];
+        -evaluation.exciterLimitDrive + limiterRootTolerance :
+        locations.diffStateLoc[stateLayout().exciter] + limiterRootTolerance;
 }
 
 void ExciterESAC6A::rootTrigger(CoreTime /*time*/,

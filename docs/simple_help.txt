@@ -32,6 +32,8 @@ sparse:  set the solvers to use the sparse solvers in IDA and kinsol
 threads:  request the verified GridDyn residual-evaluation OpenMP path for dynamic simulation
 ignore_bus_limits:  disable reactive power limits on generators
 no_link_adjustments:  disable adjustable transformers
+no_tap_changer: disable discrete transformer tap and phase-shift adjustments in the power-flow loop
+maxpowerflowadjustmentsperpass: cap changed top-level adjustment objects per pass (0=all, 1=one, N=up to N; bus controls form one group)
 dcflow_initialization:  use the dc power solution to initialize the ac power flow solution (not well tested)
 constraints_disabled:  disable all constraint handling (constraints not used yet)
 record_on_halt:  tell all recorders to capture a value on a IDA stop for any reason

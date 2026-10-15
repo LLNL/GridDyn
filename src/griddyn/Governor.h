@@ -48,6 +48,7 @@ class Governor: public GridSubModel {
     model_parameter deadbandLow = kBigNum;  //!< lower threshold on the deadband;
     model_parameter machineBasePower = 100.0;  //!< the machine base of the generator;
     bool strictInitialLimitChecking = false;  //!< reject initial outputs above upper limits
+    double initialSetpointOverdrive = 0.0;  //!< reference offset for an initially active limit
     blocks::DeadbandBlock dbb;  //!< block managing the deadband
     blocks::ControlBlock cb;  //!< block managing the filtering functions on the frequency response
     blocks::DelayBlock delay;  //!< block managing the throttle filter
@@ -74,6 +75,7 @@ class Governor: public GridSubModel {
      * its model-specific initialization error.
      */
     bool adjustInitialUpperLimit(double initialValue, std::string_view limitName);
+    double effectivePowerSetpoint(const IOdata& inputs) const;
 
   public:
     virtual void set(std::string_view param, std::string_view val) override;

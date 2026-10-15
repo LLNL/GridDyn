@@ -29,6 +29,11 @@ namespace {
     constexpr std::array<RenewablePort, 1> outputPortMap{{
         {.signal = RenewableSignal::pitchAngle, .ioIndex = 0},
     }};
+    constexpr auto fixedPsetInputPortMap = [] {
+        auto ports = inputPortMap;
+        ports[2].required = false;
+        return ports;
+    }();
     constexpr index_t theta = 0, speedIntegral = 1, powerIntegral = 2;
 }  // namespace
 
@@ -61,7 +66,8 @@ CoreObject* WTPTA1::clone(CoreObject* obj) const
 
 std::span<const RenewablePort> WTPTA1::inputPorts() const
 {
-    return inputPortMap;
+    return hasFixedPset ? std::span<const RenewablePort>{fixedPsetInputPortMap} :
+                          std::span<const RenewablePort>{inputPortMap};
 }
 std::span<const RenewablePort> WTPTA1::outputPorts() const
 {

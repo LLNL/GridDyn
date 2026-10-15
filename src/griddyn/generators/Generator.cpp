@@ -59,10 +59,13 @@ governor --- Pm(t0) = Pset is stored externally as well
 
 namespace griddyn {
 namespace {
-    bool hasSingleRemoteVoltageController(const GridBus* remoteBus)
+    Generator* indirectVoltageControlReference(const GridBus* remoteBus)
     {
         const auto* acRemoteBus = dynamic_cast<const AcBus*>(remoteBus);
-        return (acRemoteBus != nullptr) && (acRemoteBus->voltageControlCount() == 1);
+        if (acRemoteBus == nullptr) {
+            return nullptr;
+        }
+        return acRemoteBus->indirectVoltageControlReference();
     }
 }  // namespace
 
@@ -139,6 +142,7 @@ CoreObject* Generator::clone(CoreObject* obj) const
 
     gen->P = P;
     gen->Q = Q;
+    gen->Qbias = Qbias;
     gen->Pset = Pset;
     gen->Qmax = Qmax;
     gen->Qmin = Qmin;
@@ -162,6 +166,7 @@ CoreObject* Generator::clone(CoreObject* obj) const
     gen->m_Xs = m_Xs;
     gen->m_Vtarget = m_Vtarget;
     gen->vRegFraction = vRegFraction;
+    gen->remoteBus = remoteBus;
     return gen;
 }
 
@@ -186,6 +191,16 @@ void Generator::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
             remoteBus->registerVoltageControl(this);
             if (remoteBus->getType() == GridBus::BusType::PQ) {
                 opFlags.set(INDIRECT_VOLTAGE_CONTROL);
+            }
+        }
+        // Keep RAW dispatches at a reactive limit fixed for the first solve;
+        // the remote voltage group can release them after its initial bus
+        // voltage is known.
+        if (opFlags[INDIRECT_VOLTAGE_CONTROL] || opFlags[REMOTE_VOLTAGE_CONTROL]) {
+            const double qLimitTolerance = 1.0e-8 * (std::max)(1.0, std::abs(Q));
+            if ((std::abs(Q - getQmax()) <= qLimitTolerance) ||
+                (std::abs(Q - getQmin()) <= qLimitTolerance)) {
+                opFlags.set(AT_LIMIT);
             }
         }
         // load up power control
@@ -213,6 +228,24 @@ void Generator::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
     }
 
     GridSecondary::pFlowObjectInitializeA(time0, flags);
+}
+
+void Generator::configureIndirectVoltageControl(GridBus* controlBus)
+{
+    if (controlBus == nullptr) {
+        return;
+    }
+    if (!opFlags[INDIRECT_VOLTAGE_CONTROL] || (remoteBus == nullptr)) {
+        remoteBus = controlBus;
+        m_Vtarget = controlBus->get("vtarget");
+        Qbias = Q;
+        const double qLimitTolerance = 1.0e-8 * (std::max)(1.0, std::abs(Q));
+        if ((std::abs(Q - getQmax()) <= qLimitTolerance) ||
+            (std::abs(Q - getQmin()) <= qLimitTolerance)) {
+            opFlags.set(AT_LIMIT);
+        }
+    }
+    setFlag("indirect_voltage_control", true);
 }
 
 void Generator::dynObjectInitializeA(CoreTime time0, std::uint32_t flags)
@@ -369,6 +402,7 @@ void Generator::setRemoteBus(CoreObject* newRemoteBus)
         }
     }
 }
+
 // set properties
 void Generator::set(std::string_view param, std::string_view val)
 {
@@ -467,26 +501,38 @@ ChangeCode Generator::powerFlowAdjust(const IOdata& /*inputs*/,
                                       CheckLevel /*level*/)
 {
     if (opFlags[AT_LIMIT]) {
+        // A zero-width reactive range is a fixed-Q controller and must not be
+        // released just because the remote bus is on the opposite side of VS.
+        if (getQmax() == getQmin()) {
+            return ChangeCode::NO_CHANGE;
+        }
         const double voltage = remoteBus->getVoltage();
+        // Avoid toggling an indirect controller at its Q limit for a voltage
+        // difference that is within the power-flow numerical noise band.
+        constexpr double remoteVoltageTolerance = 1.0e-5;
         if (Q >= getQmax()) {
-            if (voltage > m_Vtarget) {
+            if (voltage > m_Vtarget + remoteVoltageTolerance) {
                 opFlags.reset(AT_LIMIT);
-                return ChangeCode::PARAMETER_CHANGE;
+                return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
+                                                          ChangeCode::PARAMETER_CHANGE;
             }
-        } else if (voltage < m_Vtarget) {
+        } else if (voltage < m_Vtarget - remoteVoltageTolerance) {
             opFlags.reset(AT_LIMIT);
-            return ChangeCode::PARAMETER_CHANGE;
+            return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
+                                                      ChangeCode::PARAMETER_CHANGE;
         }
     } else {
         if (Q > getQmax()) {
             opFlags.set(AT_LIMIT);
             Q = getQmax();
-            return ChangeCode::PARAMETER_CHANGE;
+            return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
+                                                      ChangeCode::PARAMETER_CHANGE;
         }
         if (Q < getQmin()) {
             opFlags.set(AT_LIMIT);
             Q = getQmin();
-            return ChangeCode::PARAMETER_CHANGE;
+            return opFlags[INDIRECT_VOLTAGE_CONTROL] ? ChangeCode::JACOBIAN_CHANGE :
+                                                      ChangeCode::PARAMETER_CHANGE;
         }
     }
     return ChangeCode::NO_CHANGE;
@@ -523,12 +569,23 @@ void Generator::setFlag(std::string_view flag, bool val)
         opFlags.set(REMOTE_POWER_CONTROL, false);
         opFlags.set(LOCAL_VOLTAGE_CONTROL, false);
         opFlags.set(REMOTE_VOLTAGE_CONTROL, false);
+    } else if (flag == "adjustable_q") {
+        opFlags.set(ADJUSTABLE_Q, val);
+    } else if (flag == "local_voltage_control") {
+        opFlags.set(LOCAL_VOLTAGE_CONTROL, val);
+    } else if (flag == "remote_voltage_control") {
+        opFlags.set(REMOTE_VOLTAGE_CONTROL, val);
     } else if ((flag == "reserve") || (flag == "reservecapable")) {
         opFlags.set(RESERVE_CAPABLE, val);
     } else if ((flag == "agc") || (flag == "agccapable") || (flag == "agc_capable")) {
         opFlags.set(AGC_CAPABLE, val);
     } else if (flag == "indirect_voltage_control") {
+        const bool wasIndirect = opFlags[INDIRECT_VOLTAGE_CONTROL];
         opFlags.set(INDIRECT_VOLTAGE_CONTROL, val);
+        if (wasIndirect != val) {
+            offsets.stateUnload();
+            alert(this, STATE_COUNT_CHANGE);
+        }
     } else if ((flag == "isoc") || (flag == "isochronous")) {
         opFlags.set(ISOCHRONOUS_OPERATION, val);
     } else {
@@ -765,19 +822,16 @@ void Generator::algebraicUpdate(const IOdata& /*inputs*/,
     if ((!isDynamic(sMode)) &&
         (opFlags[INDIRECT_VOLTAGE_CONTROL])) {  // the bus is managing a remote bus voltage
         auto offset = offsets.getAlgOffset(sMode);
-        if (hasSingleRemoteVoltageController(remoteBus) && !opFlags[AT_LIMIT]) {
-            // A single controller has a direct voltage equation; its Q state
-            // is set by the terminal-bus reactive-power balance.
+        if (indirectVoltageControlReference(remoteBus) != nullptr) {
+            // Group members start from their RAW reactive-power operating point.
             update[offset] = -Q;
-        } else {
+        } else if (!opFlags[AT_LIMIT]) {
             const double voltage = remoteBus->getVoltage(stateDataValue, sMode);
-            if (!opFlags[AT_LIMIT]) {
-                constexpr double remoteVoltageGain = 10000.0;
-                update[offset] =
-                    -Qbias + ((voltage - m_Vtarget) * vRegFraction * remoteVoltageGain);
-            } else {
-                update[offset] = -Q;
-            }
+            constexpr double remoteVoltageGain = 10000.0;
+            update[offset] =
+                -Qbias + ((voltage - m_Vtarget) * vRegFraction * remoteVoltageGain);
+        } else {
+            update[offset] = -Q;
         }
     }
 }
@@ -791,17 +845,25 @@ void Generator::residual(const IOdata& /*inputs*/,
         (opFlags[INDIRECT_VOLTAGE_CONTROL])) {  // the bus is managing a remote bus voltage
         const double voltage = remoteBus->getVoltage(stateDataValue, sMode);
         auto offset = offsets.getAlgOffset(sMode);
-        if (hasSingleRemoteVoltageController(remoteBus) && !opFlags[AT_LIMIT]) {
-            // A single controller supplies the one voltage constraint for the
-            // remote bus.  The generator algebraic state is still solved by
-            // the terminal bus Q balance through getReactivePower().
-            resid[offset] = voltage - m_Vtarget;
-        } else if (!opFlags[AT_LIMIT]) {
+        auto* reference = indirectVoltageControlReference(remoteBus);
+        if (opFlags[AT_LIMIT]) {
+            resid[offset] = stateDataValue.state[offset] + Q;
+        } else if (reference != nullptr) {
+            if (reference == this) {
+                resid[offset] = voltage - m_Vtarget;
+            } else if (vRegFraction > 1e-12) {
+                const auto referenceOffset = reference->offsets.getAlgOffset(sMode);
+                resid[offset] =
+                    ((stateDataValue.state[offset] + Qbias) / vRegFraction) -
+                    ((stateDataValue.state[referenceOffset] + reference->Qbias) /
+                     reference->vRegFraction);
+            } else {
+                resid[offset] = stateDataValue.state[offset] + Qbias;
+            }
+        } else {
             constexpr double remoteVoltageGain = 10000.0;
             resid[offset] = stateDataValue.state[offset] + Qbias -
                 ((voltage - m_Vtarget) * vRegFraction * remoteVoltageGain);
-        } else {
-            resid[offset] = stateDataValue.state[offset] + Q;
         }
     }
 }
@@ -816,14 +878,25 @@ void Generator::jacobianElements(const IOdata& /*inputs*/,
         (opFlags[INDIRECT_VOLTAGE_CONTROL])) {  // the bus is managing a remote bus voltage
         auto voltageOffset = remoteBus->getOutputLoc(sMode, VOLTAGE_IN_LOCATION);
         auto offset = offsets.getAlgOffset(sMode);
-        if (hasSingleRemoteVoltageController(remoteBus) && !opFlags[AT_LIMIT]) {
-            matrixDataValue.assignCheck(offset, voltageOffset, 1.0);
-        } else if (!opFlags[AT_LIMIT]) {
+        auto* reference = indirectVoltageControlReference(remoteBus);
+        if (opFlags[AT_LIMIT]) {
+            matrixDataValue.assignCheck(offset, offset, 1.0);
+        } else if (reference != nullptr) {
+            if (reference == this) {
+                matrixDataValue.assignCheck(offset, voltageOffset, 1.0);
+            } else if (vRegFraction > 1e-12) {
+                const auto referenceOffset = reference->offsets.getAlgOffset(sMode);
+                matrixDataValue.assignCheck(offset, offset, 1.0 / vRegFraction);
+                matrixDataValue.assignCheck(offset,
+                                            referenceOffset,
+                                            -1.0 / reference->vRegFraction);
+            } else {
+                matrixDataValue.assignCheck(offset, offset, 1.0);
+            }
+        } else {
             constexpr double remoteVoltageGain = 10000.0;
             matrixDataValue.assignCheck(offset, offset, 1.0);
             matrixDataValue.assignCheck(offset, voltageOffset, -vRegFraction * remoteVoltageGain);
-        } else {
-            matrixDataValue.assignCheck(offset, offset, 1.0);
         }
     }
 }

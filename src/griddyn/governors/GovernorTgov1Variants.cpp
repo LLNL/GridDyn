@@ -96,6 +96,7 @@ void GovernorTgov1Variant::dynObjectInitializeB(const IOdata& /*inputs*/,
                                                 const IOdata& desiredOutput,
                                                 IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[0]) || desiredOutput[0] < Pmin ||
         !adjustInitialUpperLimit(desiredOutput[0], "TGOV1 valve")) {
         throw InvalidParameterValue("ANDES TGOV1 initial valve outside limits");
@@ -111,6 +112,13 @@ void GovernorTgov1Variant::dynObjectInitializeB(const IOdata& /*inputs*/,
     // model stores R*Pset and divides its sum by R; N stores Pset directly.
     referenceOffset = -(normalized ? paux : K * paux);
     fieldSet[govpSetInLocation] = valve;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 1e-4 * T1);
+    if (valve >= Pmax) {
+        initialSetpointOverdrive = margin;
+    } else if (valve <= Pmin) {
+        initialSetpointOverdrive = -margin;
+    }
 }
 
 double GovernorTgov1Variant::speedSignal(const IOdata& inputs) const
@@ -134,7 +142,7 @@ double GovernorTgov1Variant::speedSlope(const IOdata& inputs) const
 }
 double GovernorTgov1Variant::valveCommand(const IOdata& inputs) const
 {
-    return inputs[govpSetInLocation] + referenceOffset + (normalized ? paux : K * paux) -
+    return effectivePowerSetpoint(inputs) + referenceOffset + (normalized ? paux : K * paux) -
         (K * speedSignal(inputs));
 }
 double GovernorTgov1Variant::valveRate(const IOdata& inputs, const double* state) const

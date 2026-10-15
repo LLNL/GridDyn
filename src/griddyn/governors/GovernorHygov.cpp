@@ -28,6 +28,10 @@ namespace {
     constexpr double minimumGate = 1e-8;
     constexpr double rateLimitTolerance = 1e-7;
     constexpr double positionLimitTolerance = 1e-7;
+    // Root-only hysteresis absorbs small input changes without loosening the
+    // physical rate and gate-position limits above.
+    constexpr double rateLimitRootTolerance = 1e-4;
+    constexpr double positionLimitRootTolerance = 1e-3;
 }  // namespace
 
 GovernorHygov::GovernorHygov(const std::string& objName): Governor(objName)
@@ -94,6 +98,7 @@ void GovernorHygov::dynObjectInitializeB(const IOdata& inputs,
                                          const IOdata& desiredOutput,
                                          IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[pmechOutput])) {
         throw InvalidParameterValue("HYGOV initial mechanical power");
     }
@@ -115,12 +120,23 @@ void GovernorHygov::dynObjectInitializeB(const IOdata& inputs,
     m_state[diffOffset + gatePositionState] = initialGate;
     m_state[diffOffset + servoState] = initialGate;
     m_state[diffOffset + flowState] = initialFlow;
+    // Keep the filter at its steady value after moving the unconstrained
+    // gate request beyond an active position bound.  This preserves all
+    // differential initial conditions, including the filter equation.
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double gateMargin = std::max(0.2 * correction,
+                                       10.0 * positionLimitRootTolerance *
+                                           std::abs(K * temporaryDroop * Tr));
+    if (initialGate >= Pmax) {
+        Pset += gateMargin / K;
+    } else if (initialGate <= Pmin) {
+        Pset -= gateMargin / K;
+    }
+    m_state[diffOffset + filterState] =
+        governorError(inputs, m_state.data() + diffOffset);
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = Pset;
-    // An initial output that was accepted at the configured upper bound is
-    // already in the position-limited branch.  Mark it before IDA evaluates
-    // roots so the release root is offset into the admissible region instead
-    // of being identically zero at t=0.
+    // Select the active branch before the first root evaluation.
     updateLimitFlags(inputs, m_state.data() + diffOffset);
 }
 
@@ -391,9 +407,10 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // from the event state after rootTrigger(); without this small
         // hysteresis it can immediately rediscover the same zero repeatedly.
         roots[rootOffset] =
-            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) - rateLimitTolerance;
+            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) -
+            rateLimitRootTolerance;
     } else {
-        roots[rootOffset] = std::min(VELM - rate, rate + VELM);
+        roots[rootOffset] = std::min(VELM - rate, rate + VELM) + rateLimitRootTolerance;
     }
     const double limitedRateValue = limitedGateRate(inputs, state);
     if (opFlags[GATE_POSITION_LIMITED]) {
@@ -402,8 +419,8 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // offset is on the release side: a high limit releases for a negative
         // rate and a low limit releases for a positive rate.
         roots[rootOffset + 1] = opFlags[GATE_POSITION_LIMIT_HIGH] ?
-            -limitedRateValue - (2.0 * positionLimitTolerance) :
-            limitedRateValue - (2.0 * positionLimitTolerance);
+            -limitedRateValue - positionLimitRootTolerance :
+            limitedRateValue - positionLimitRootTolerance;
     } else if (((state[gatePositionState] >= (Pmax - positionLimitTolerance)) &&
                 (limitedRateValue < 0.0)) ||
                ((state[gatePositionState] <= (Pmin + positionLimitTolerance)) &&
@@ -411,7 +428,7 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // At a geometric boundary with an inward rate the governor is not
         // limited, but the distance-only root would still be exactly zero.
         // Keep IDA away from that non-eventful surface.
-        roots[rootOffset + 1] = positionLimitTolerance;
+        roots[rootOffset + 1] = positionLimitRootTolerance;
     } else if ((std::abs(limitedRateValue) <= positionLimitTolerance) &&
                (((state[gatePositionState] >= (Pmax - positionLimitTolerance)) &&
                  (state[gatePositionState] <= (Pmax + positionLimitTolerance))) ||
@@ -420,10 +437,11 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // Likewise, a zero-rate operating point on a position bound is not a
         // crossing.  Return a small positive value until the rate gives a
         // definite direction for a real limiter entry or release.
-        roots[rootOffset + 1] = positionLimitTolerance;
+        roots[rootOffset + 1] = positionLimitRootTolerance;
     } else {
         roots[rootOffset + 1] =
-            std::min(Pmax - state[gatePositionState], state[gatePositionState] - Pmin);
+            std::min(Pmax - state[gatePositionState], state[gatePositionState] - Pmin) +
+            positionLimitRootTolerance;
     }
 }
 

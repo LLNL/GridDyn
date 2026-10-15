@@ -423,6 +423,17 @@ int KinsolInterface::solve(CoreTime tStop, CoreTime& tReturn, StepMode /*mode*/)
         auto mvec = findMissing(&a1);
     }
 #endif
+    // KINSOL distinguishes a converged initial guess from convergence after
+    // iterations. Both are successful solves for GridDyn callers, whose
+    // success contract is FUNCTION_EXECUTION_SUCCESS (zero).
+    if (retval == KIN_INITIAL_GUESS_OK) {
+        retval = FUNCTION_EXECUTION_SUCCESS;
+    } else if (retval == KIN_STEP_LT_STPTOL) {
+        // A small Newton step alone is not proof of convergence. It also has
+        // the same numeric value as GridDyn's SOLVER_ROOT_FOUND status, so it
+        // must not escape as a positive solver result.
+        retval = SOLVER_CONVERGENCE_ERROR;
+    }
     if (retval >= 0) {
         tReturn = solveTime;
     } else if (m_gds != nullptr) {

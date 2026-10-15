@@ -99,6 +99,9 @@ class Generator: public GridSecondary {
     virtual void pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags) override;
     virtual void dynObjectInitializeA(CoreTime time0, std::uint32_t flags) override;
 
+    /** Configure a local voltage controller after it joins a remote bus group. */
+    void configureIndirectVoltageControl(GridBus* controlBus);
+
     virtual void dynObjectInitializeB(const IOdata& inputs,
                                       const IOdata& desiredOutput,
                                       IOdata& fieldSet) override;

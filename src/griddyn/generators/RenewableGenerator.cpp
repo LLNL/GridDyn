@@ -253,7 +253,11 @@ void RenewableGenerator::validateAssembly() const
             if (((input.required || !component->sourceName(input.signal).empty()) &&
                  providers != 1) ||
                 providers > 1) {
-                throw InvalidParameterValue("renewable input has no unique compatible provider");
+                throw InvalidParameterValue(
+                    "renewable input has no unique compatible provider: generator " + getName() +
+                    ", component " + component->getName() + ", signal " +
+                    std::to_string(static_cast<int>(input.signal)) + ", providers " +
+                    std::to_string(providers));
             }
         }
         if (component != electricalModel) {
@@ -964,6 +968,9 @@ double RenewableGenerator::getRealPower(const IOdata& inputs,
                                         const StateData& stateDataValue,
                                         const SolverMode& sMode) const
 {
+    if (!isDynamic(sMode) || electricalModel == nullptr) {
+        return Generator::getRealPower(inputs, stateDataValue, sMode);
+    }
     return getOutputs(inputs, stateDataValue, sMode)[POUT_LOCATION];
 }
 
@@ -971,6 +978,9 @@ double RenewableGenerator::getReactivePower(const IOdata& inputs,
                                             const StateData& stateDataValue,
                                             const SolverMode& sMode) const
 {
+    if (!isDynamic(sMode) || electricalModel == nullptr) {
+        return Generator::getReactivePower(inputs, stateDataValue, sMode);
+    }
     return getOutputs(inputs, stateDataValue, sMode)[QOUT_LOCATION];
 }
 

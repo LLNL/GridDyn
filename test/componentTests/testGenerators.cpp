@@ -790,7 +790,7 @@ TEST(ExcitationLimiterTests, Oel4cRootsScheduleAndResetDelay)
     double roots[2]{};
     StateData beforeDelay(0.2, states.data());
     limiter.rootTest(inputs, beforeDelay, roots, cLocalSolverMode);
-    EXPECT_NEAR(roots[0], 0.3, 1e-8);
+    EXPECT_NEAR(roots[0], 0.3001, 1e-8);
     EXPECT_NEAR(roots[1], -0.1, 1e-12);
     StateData atDelay(0.3, states.data());
     limiter.rootTest(inputs, atDelay, roots, cLocalSolverMode);
@@ -803,6 +803,52 @@ TEST(ExcitationLimiterTests, Oel4cRootsScheduleAndResetDelay)
     StateData cleared(0.4, states.data());
     limiter.rootTest(inputs, cleared, roots, cLocalSolverMode);
     EXPECT_DOUBLE_EQ(roots[1], 1.0);
+}
+
+TEST(ExcitationLimiterTests, Oel4cInitializationIsQuietOnBothSidesOfReactiveLimit)
+{
+    limiters::ExcitationLimiterOEL4C limiter;
+    limiter.set("qref", 0.0);
+    limiter.set("tdelay", 0.2);
+    limiter.set("kp", 2.0);
+    limiter.set("ki", 1.0);
+    limiter.set("vmin", -0.2);
+    limiter.dynInitializeA(0.0, 0);
+    limiter.setRootOffset(0, cLocalSolverMode);
+
+    constexpr double inputNoise = 1e-5;  // 10x GridDyn's default relative tolerance.
+    IOdata inputs(excitationLimiterInputCount, 0.0);
+    inputs[limiterVdInLocation] = 1.0;
+    IOdata fieldSet;
+    limiter.dynInitializeB(inputs, {}, fieldSet);
+
+    std::array<double, 2> roots{};
+    limiter.rootTest(inputs, StateData(0.0), roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[0], -1e-4, 1e-12);
+    const double unviolatedRoot = roots[0];
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[limiterIqInLocation] = delta;
+        limiter.rootTest(inputs, StateData(0.0), roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0] * unviolatedRoot, 0.0) << delta;
+        EXPECT_GT(std::abs(roots[0]), 8e-5) << delta;
+    }
+
+    inputs[limiterIqInLocation] = -2e-4;
+    EXPECT_EQ(limiter.rootCheck(inputs,
+                                StateData(0.0),
+                                cLocalSolverMode,
+                                CheckLevel::REVERSABLE_ONLY),
+              ChangeCode::JACOBIAN_CHANGE);
+    inputs[limiterIqInLocation] = 0.0;
+    limiter.rootTest(inputs, StateData(0.0), roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[0], 1e-4, 1e-12);
+    const double violatedRoot = roots[0];
+    for (const double delta : {-inputNoise, inputNoise}) {
+        inputs[limiterIqInLocation] = delta;
+        limiter.rootTest(inputs, StateData(0.0), roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0] * violatedRoot, 0.0) << delta;
+        EXPECT_GT(std::abs(roots[0]), 8e-5) << delta;
+    }
 }
 
 TEST(DynamicGeneratorModelTests, MechanicalPowerSourceCanBeExternalAndIndexed)

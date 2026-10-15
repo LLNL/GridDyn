@@ -1038,6 +1038,12 @@ void GridComponent::setupDynFlags()
     auto stateCount = stateSize(cDaeSolverMode);
 
     opFlags.set(HAS_DYN_STATES, (stateCount > 0));
+    // Dynamic models are also used by the partitioned solver, which may load
+    // root counts in its own solver modes without ever loading the DAE mode.
+    // Ensure the DAE root offsets are populated before deriving HAS_ROOTS;
+    // otherwise a Jacobian change can clear this cascading flag on the first
+    // limiter transition and leave the solver's root callback unwritten.
+    static_cast<void>(rootSize(cDaeSolverMode));
     const auto& solverOffsetsValue = offsets.getOffsets(cDaeSolverMode);
     if (solverOffsetsValue.total.algRoots > 0) {
         opFlags.set(HAS_ALG_ROOTS);

@@ -16,6 +16,7 @@
 
 namespace griddyn {
 class GridBlock;
+class Generator;
 
 /** @brief basic power system bus for a power grid simulation
   The GridBus class provides the basic node in a power systems analysis.  It is a locational basis
@@ -70,6 +71,8 @@ class AcBus: public GridBus {
     model_parameter frequencyFilterTw = 0.1;  //!< optional washout time constant [s]
     model_parameter frequencyFilterFn = 60.0;  //!< optional nominal frequency [Hz]
     bool frequencyFilterConfigured = false;  //!< use the lag/washout frequency block
+    double pFlowInitialVoltage = 1.0;  //!< original bus voltage before PV target initialization
+    bool pFlowInitialVoltageCaptured = false;
 
     CoreTime lastSetTime = negTime;  //!< last set time
     CoreOwningPtr<GridBlock> fblock;  //!< pointer to frequency estimator block
@@ -375,6 +378,8 @@ class AcBus: public GridBus {
         return static_cast<count_t>(busController.vControlObjects.size() +
                                     busController.vControlLinks.size());
     }
+    /** @brief select the stable reference controller for a generator-only indirect group. */
+    Generator* indirectVoltageControlReference() const;
     /** @brief  register an object for power control on a bus*/
     void registerPowerControl(GridComponent* comp) override;
     /** @brief  remove an object from power control on a bus*/

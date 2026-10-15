@@ -41,6 +41,7 @@ class ExciterESAC1A final: public ExciterEXAC1 {
     double get(std::string_view param, units::unit unitType = units::defunit) const override;
 
   protected:
+    bool adjustRegulatorInitialUpperLimit(double initialValue) override;
     double regulatorUpperLimit() const override;
     double regulatorLowerLimit() const override;
 

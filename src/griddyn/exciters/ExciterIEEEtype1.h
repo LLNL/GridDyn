@@ -76,6 +76,7 @@ class ExciterIEEEtype1: public Exciter {
                                  CheckLevel level) override;
 
   protected:
+    virtual bool adjustInitialRegulatorLimit(double initialValue, double terminalVoltage);
     void configureSaturation();
     double saturationFeedback(double fieldVoltage) const;
     double saturationDerivative(double fieldVoltage) const;

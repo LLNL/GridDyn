@@ -89,6 +89,7 @@ void GovernorGast::dynObjectInitializeB(const IOdata& inputs,
     const double initialPower = desiredOutput[pmechState];
     const double speedDeviation = inputs[govOmegaInLocation] - 1.0;
     const double initialFlow = initialPower + (Dt * speedDeviation);
+    const double originalUpperLimit = Pmax;
     if (!std::isfinite(initialFlow)) {
         throw InvalidParameterValue("GAST initial fuel flow");
     }
@@ -101,6 +102,13 @@ void GovernorGast::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("GAST initial fuel flow outside upper limit");
     }
     Pset = initialFlow + (speedDeviation / R);
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 1e-4);
+    if ((initialFlow >= Pmax) && (initialTemperatureRequest > initialFlow + margin)) {
+        initialSetpointOverdrive = margin;
+    } else if (initialFlow <= Pmin) {
+        initialSetpointOverdrive = -margin;
+    }
     // Match the GridKit and ANDES anti-windup realization: an initial point
     // outside the entered response limits is retained and may move only back
     // toward the entered range. This avoids an initialization discontinuity.
@@ -117,7 +125,7 @@ void GovernorGast::dynObjectInitializeB(const IOdata& inputs,
 
 double GovernorGast::speedDroopRequest(const IOdata& inputs) const
 {
-    return inputs[govpSetInLocation] - ((inputs[govOmegaInLocation] - 1.0) / R);
+    return effectivePowerSetpoint(inputs) - ((inputs[govOmegaInLocation] - 1.0) / R);
 }
 
 double GovernorGast::temperatureRequest(const double state[]) const

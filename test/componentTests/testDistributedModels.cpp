@@ -101,6 +101,59 @@ TEST(DistributedModels, VoltageAndFrequencyLatches)
     EXPECT_EQ(model.get("frequency_latched"), 0.0);
 }
 
+TEST(DistributedModels, ThresholdRootsStayClearUnderTwoSidedInitializationNoise)
+{
+    constexpr double inputNoise = 1e-5;  // 10x GridDyn's default relative tolerance.
+    for (const auto* type : {"pvd1", "esd1", "ev1", "ev2"}) {
+        SCOPED_TRACE(type);
+        std::unique_ptr<CoreObject> object(
+            CoreObjectFactory::instance()->createObject("renewable_model", type));
+        ASSERT_NE(object, nullptr);
+        auto* model = dynamic_cast<DistributedConverter*>(object.get());
+        ASSERT_NE(model, nullptr);
+
+        // Put the normal operating point just inside both voltage and
+        // frequency deadband edges, on opposite sides of their root functions.
+        model->set("vt1", 1.0 - 2e-5);
+        model->set("vt2", 1.0 + 2e-5);
+        model->set("ft1", 59.99);
+        model->set("ft2", 60.01);
+        model->set("vrflag", 1.0);
+        model->set("frflag", 1.0);
+        model->dynInitializeA(0.0, 0);
+        const IOdata initialInputs{1.0, 0.0, 1.0, 1.0};
+        IOdata fields;
+        model->dynInitializeB(initialInputs, {0.2, 0.05}, fields);
+        model->setRootOffset(0, cLocalSolverMode);
+
+        std::array<double, 8> roots{};
+        model->rootTest(initialInputs, emptyStateData, roots.data(), cLocalSolverMode);
+        const auto initialRoots = roots;
+        EXPECT_NEAR(roots[1], 2e-5, 1e-12);
+        EXPECT_NEAR(roots[2], -2e-5, 1e-12);
+        EXPECT_NEAR(roots[5], 0.01, 1e-12);
+        EXPECT_NEAR(roots[6], -0.01, 1e-12);
+
+        for (const double delta : {-inputNoise, inputNoise}) {
+            auto inputs = initialInputs;
+            inputs[3] += delta;
+            model->rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
+            EXPECT_GT(roots[1] * initialRoots[1], 0.0) << "voltage threshold, delta " << delta;
+            EXPECT_GT(roots[2] * initialRoots[2], 0.0) << "voltage threshold, delta " << delta;
+            EXPECT_GT(std::abs(roots[1]), 9e-6);
+            EXPECT_GT(std::abs(roots[2]), 9e-6);
+
+            inputs = initialInputs;
+            inputs[2] += delta;
+            model->rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
+            EXPECT_GT(roots[5] * initialRoots[5], 0.0) << "frequency threshold, delta " << delta;
+            EXPECT_GT(roots[6] * initialRoots[6], 0.0) << "frequency threshold, delta " << delta;
+            EXPECT_GT(std::abs(roots[5]), 0.009);
+            EXPECT_GT(std::abs(roots[6]), 0.009);
+        }
+    }
+}
+
 TEST(DistributedModels, StorageAndVehicleChargeLimits)
 {
     ESD1 storage;

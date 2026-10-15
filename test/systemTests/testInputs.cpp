@@ -13,6 +13,7 @@
 #include "griddyn/links/AcLine.h"
 #include "griddyn/links/AdjustableTransformer.h"
 #include "griddyn/links/RawDcLine.h"
+#include "griddyn/primary/AcBus.h"
 #include <array>
 #include <cmath>
 #include <filesystem>
@@ -427,11 +428,110 @@ TEST_F(InputTests, PssERawSingleRemoteVoltageControl)
     EXPECT_NEAR(remoteBus->getVoltage(), 1.04, 1e-7);
 }
 
-TEST_F(InputTests, PssERawRemoteVoltageGroupsAreUnsupported)
+TEST_F(InputTests, PssERawRemoteSwingTerminalKeepsDynamicAngleReference)
 {
     gds = std::make_unique<GridDynSimulation>();
-    EXPECT_THROW(loadFile(gds, std::string(INPUT_TEST_DIRECTORY) + "raw_remote_voltage_group.raw"),
-                 std::runtime_error);
+    ASSERT_NO_THROW(loadFile(gds,
+                             std::string(INPUT_TEST_DIRECTORY) +
+                                 "raw_remote_voltage_swing_terminal.raw"));
+
+    auto* terminalBus = dynamic_cast<AcBus*>(gds->findByUserID("bus", 1));
+    ASSERT_NE(terminalBus, nullptr);
+    EXPECT_EQ(terminalBus->getBusType(), static_cast<int>(GridBus::BusType::AFIX));
+    EXPECT_EQ(terminalBus->getDynType(), GridBus::DynBusType::FIX_ANGLE);
+}
+
+TEST_F(InputTests, PssERawRemoteVoltageGroupSharesRegulation)
+{
+    gds = std::make_unique<GridDynSimulation>();
+    ASSERT_NO_THROW(
+        loadFile(gds, std::string(INPUT_TEST_DIRECTORY) + "raw_remote_voltage_group.raw"));
+
+    auto* remoteBus = dynamic_cast<GridBus*>(gds->findByUserID("bus", 2));
+    auto* remoteAcBus = dynamic_cast<AcBus*>(remoteBus);
+    auto* firstTerminalBus = dynamic_cast<GridBus*>(gds->findByUserID("bus", 3));
+    auto* secondTerminalBus = dynamic_cast<GridBus*>(gds->findByUserID("bus", 4));
+    ASSERT_NE(remoteBus, nullptr);
+    ASSERT_NE(remoteAcBus, nullptr);
+    ASSERT_NE(firstTerminalBus, nullptr);
+    ASSERT_NE(secondTerminalBus, nullptr);
+    ASSERT_EQ(firstTerminalBus->getInt("gencount"), 2);
+    ASSERT_EQ(secondTerminalBus->getInt("gencount"), 1);
+    auto* firstGenerator = firstTerminalBus->getGen(0);
+    auto* firstPlantSecondGenerator = firstTerminalBus->getGen(1);
+    auto* secondGenerator = secondTerminalBus->getGen(0);
+    ASSERT_NE(firstGenerator, nullptr);
+    ASSERT_NE(firstPlantSecondGenerator, nullptr);
+    ASSERT_NE(secondGenerator, nullptr);
+
+    EXPECT_NEAR(firstGenerator->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(firstPlantSecondGenerator->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(secondGenerator->get("vcontrolfrac"), 1.0, 1e-12);
+    EXPECT_NEAR(firstGenerator->get("vtarget"), 1.04, 1e-12);
+    EXPECT_NEAR(firstPlantSecondGenerator->get("vtarget"), 1.04, 1e-12);
+    EXPECT_NEAR(secondGenerator->get("vtarget"), 1.04, 1e-12);
+
+    ASSERT_EQ(gds->powerflow(), 0);
+    requireState(GridDynSimulation::GridState::POWERFLOW_COMPLETE);
+    EXPECT_EQ(remoteAcBus->voltageControlCount(), 3);
+    EXPECT_TRUE(firstGenerator->checkFlag(INDIRECT_VOLTAGE_CONTROL));
+    EXPECT_TRUE(firstPlantSecondGenerator->checkFlag(INDIRECT_VOLTAGE_CONTROL));
+    EXPECT_TRUE(secondGenerator->checkFlag(INDIRECT_VOLTAGE_CONTROL));
+    EXPECT_NEAR(firstGenerator->get("vcontrolfrac"), 0.25, 1e-12);
+    EXPECT_NEAR(firstPlantSecondGenerator->get("vcontrolfrac"), 0.25, 1e-12);
+    EXPECT_NEAR(secondGenerator->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(remoteBus->getVoltage(), 1.04, 2e-4);
+    EXPECT_NEAR(firstGenerator->getReactivePower(), firstPlantSecondGenerator->getReactivePower(),
+                1e-7);
+    EXPECT_NEAR(firstGenerator->getReactivePower() +
+                    firstPlantSecondGenerator->getReactivePower(),
+                secondGenerator->getReactivePower(), 1e-7);
+}
+
+TEST_F(InputTests, PssERawRemoteVoltageGroupIncludesLocalPlant)
+{
+    gds = std::make_unique<GridDynSimulation>();
+    ASSERT_NO_THROW(loadFile(gds, std::string(INPUT_TEST_DIRECTORY) +
+                                  "raw_remote_voltage_local_group.raw"));
+
+    auto* target = dynamic_cast<AcBus*>(gds->findByUserID("bus", 2));
+    auto* remotePlant = dynamic_cast<GridBus*>(gds->findByUserID("bus", 3));
+    auto* singleMachinePlant = dynamic_cast<GridBus*>(gds->findByUserID("bus", 4));
+    ASSERT_NE(target, nullptr);
+    ASSERT_NE(remotePlant, nullptr);
+    ASSERT_NE(singleMachinePlant, nullptr);
+    ASSERT_EQ(target->getInt("gencount"), 2);
+    ASSERT_EQ(remotePlant->getInt("gencount"), 2);
+
+    auto* local1 = target->getGen(0);
+    auto* local2 = target->getGen(1);
+    auto* remote1 = remotePlant->getGen(0);
+    auto* remote2 = remotePlant->getGen(1);
+    auto* single = singleMachinePlant->getGen(0);
+    ASSERT_NE(local1, nullptr);
+    ASSERT_NE(local2, nullptr);
+    ASSERT_NE(remote1, nullptr);
+    ASSERT_NE(remote2, nullptr);
+    ASSERT_NE(single, nullptr);
+    EXPECT_NEAR(local1->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(local2->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(remote1->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(remote2->get("vcontrolfrac"), 0.5, 1e-12);
+    EXPECT_NEAR(single->get("vcontrolfrac"), 1.0, 1e-12);
+
+    ASSERT_EQ(gds->powerflow(), 0);
+    requireState(GridDynSimulation::GridState::POWERFLOW_COMPLETE);
+    EXPECT_EQ(target->voltageControlCount(), 5);
+    EXPECT_NEAR(static_cast<GridBus*>(target)->getVoltage(), 1.04, 2e-4);
+    EXPECT_NEAR(local1->get("vcontrolfrac"), 1.0 / 6.0, 1e-12);
+    EXPECT_NEAR(local2->get("vcontrolfrac"), 1.0 / 6.0, 1e-12);
+    EXPECT_NEAR(remote1->get("vcontrolfrac"), 1.0 / 6.0, 1e-12);
+    EXPECT_NEAR(remote2->get("vcontrolfrac"), 1.0 / 6.0, 1e-12);
+    EXPECT_NEAR(single->get("vcontrolfrac"), 1.0 / 3.0, 1e-12);
+    EXPECT_NEAR(local1->getReactivePower() + local2->getReactivePower(),
+                remote1->getReactivePower() + remote2->getReactivePower(), 1e-7);
+    EXPECT_NEAR(local1->getReactivePower() + local2->getReactivePower(),
+                single->getReactivePower(), 1e-7);
 }
 
 TEST_F(InputTests, PssERawRemoteSwitchedShuntGroupsAreUnsupported)
