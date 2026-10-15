@@ -88,7 +88,8 @@ void expectStable(const std::vector<double>& initial,
     EXPECT_LE(maxDifference, tolerance)
         << label << " max difference=" << maxDifference << " at index=" << maxIndex
         << (stateNames != nullptr && maxIndex < stateNames->size() ?
-                " state=" + (*stateNames)[maxIndex] : std::string{})
+                " state=" + (*stateNames)[maxIndex] :
+                std::string{})
         << " initial=" << initial[maxIndex] << " final=" << final[maxIndex];
 }
 
