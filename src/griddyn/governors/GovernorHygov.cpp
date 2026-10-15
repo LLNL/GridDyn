@@ -409,9 +409,9 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // hysteresis it can immediately rediscover the same zero repeatedly.
         // Scale the release margin by the speed-to-rate sensitivity so a
         // small frequency perturbation does not immediately reverse the root.
-        const double releaseRootTolerance = std::max(
-            rateLimitRootTolerance,
-            rateLimitReleaseMargin * rateLimitSpeedNoiseTolerance / (temporaryDroop * Tf));
+        const double releaseRootTolerance =
+            std::max(rateLimitRootTolerance,
+                     rateLimitReleaseMargin * rateLimitSpeedNoiseTolerance / (temporaryDroop * Tf));
         roots[rootOffset] =
             (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) - releaseRootTolerance;
     } else {
