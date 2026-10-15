@@ -2090,3 +2090,40 @@ The completed outputs are `activsg25k-partitioned-baseline-5s-20261014.bin`,
 `activsg25k-dae-load-step-1mw-5s-20261014.txt`.
 Partial stress-run outputs are `activsg25k-partitioned-load-step-5s-20261014.bin`
 and `activsg25k-dae-load-step-10mw-5s-20261014.bin`.
+
+### Branch review and regression gaps (2026-10-15)
+
+A grouped RAW fixture exposed a missing conversion of remote generator terminal
+buses when the regulated bus starts as PV and has local generators. The remote
+terminals remained PV, so their local voltage equations could mask remote
+regulation. The importer now makes those terminals PQ; the local-plant group
+test checks this before solving and still checks group Q sharing afterward.
+Cloning a remotely regulated group also left each generator's `remoteBus`
+pointing into the source simulation. A clone test now destroys the source,
+initializes the clone, and checks its three voltage controllers and solve.
+
+Follow-up regression work:
+
+- Exercise remote groups with fixed and one-sided Q limits, a swing target,
+  and a terminal plant containing both local and remote controllers. Check bus
+  types, controller fractions, reactive sharing, and solved voltage together.
+- Exercise the switched-shunt outer loop with multiple banks across genuine
+  power-flow passes. The current direct SVD unit test resets between opposite
+  voltage probes and does not establish whole-loop sequencing or convergence.
+- Automate a Release 25k no-shunt static solve and the flat-Pset five-second
+  DAE and partitioned baseline and 1 MW step checks. Add initial residual and
+  root-event assertions. The documented runs use a modified DYR profile, so
+  the original DYR still needs its own acceptance check.
+- Diagnose the remaining DAE post-initialization residual and the ACTIVSg500
+  partitioned CVODE drift. The G500 test's `1.1e-4` threshold accepts the
+  observed `1.007e-4` change but does not correct its cause. Keep the state
+  name and initial/final values in failures to localize future changes.
+- Continue the default RAW switched-shunt power-flow investigation. The
+  documented 25k solve with shunt movement disabled is a useful baseline, not
+  proof that the automatic-shunt case converges.
+
+After the PV-target remote-terminal fix, a fresh Release build completed the
+original 25k RAW static solve with `no_shunt_adjustments` and
+`no_powerflow_error_recovery` (25,000 buses, exit code 0). With only
+`no_powerflow_error_recovery`, switched-shunt banks acted and KINSOL reached
+its iteration limit (`-6`); the default-shunt static case remains unresolved.

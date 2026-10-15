@@ -500,6 +500,8 @@ TEST_F(InputTests, PssERawRemoteVoltageGroupIncludesLocalPlant)
     ASSERT_NE(target, nullptr);
     ASSERT_NE(remotePlant, nullptr);
     ASSERT_NE(singleMachinePlant, nullptr);
+    EXPECT_EQ(remotePlant->getType(), GridBus::BusType::PQ);
+    EXPECT_EQ(singleMachinePlant->getType(), GridBus::BusType::PQ);
     ASSERT_EQ(target->getInt("gencount"), 2);
     ASSERT_EQ(remotePlant->getInt("gencount"), 2);
 

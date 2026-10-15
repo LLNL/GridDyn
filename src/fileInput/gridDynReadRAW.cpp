@@ -905,12 +905,13 @@ void loadRaw(CoreObject* parentObject,
                 for (auto& groupEntry : remoteControllerGroups) {
                     auto* controlBus = dynamic_cast<AcBus*>(parentObject->getRoot()->findByUserID(
                         "bus", static_cast<index_t>(groupEntry.first)));
-                    if ((controlBus == nullptr) ||
-                        (controlBus->getBusType() != static_cast<int>(GridBus::BusType::PQ))) {
+                    if (controlBus == nullptr) {
                         continue;
                     }
                     for (const auto* controller : groupEntry.second) {
-                        if (controller->getParent() != nullptr) {
+                        if (controller->checkFlag(REMOTE_VOLTAGE_CONTROL) &&
+                            controller->getParent() != nullptr &&
+                            controller->getParent() != controlBus) {
                             remoteTerminalBuses.insert(
                                 static_cast<int>(controller->getParent()->getUserID()));
                         }

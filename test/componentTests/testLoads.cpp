@@ -1263,7 +1263,9 @@ TEST_F(LoadTests, SvdSteppedControlHonorsInitialLevel)
     auto gds = std::make_unique<GridDynSimulation>();
     auto* bus = new AcBus("bus");
     bus->set("type", "swing");
-    bus->set("voltage", 0.9);
+    // Keep power-flow initialization inside the control band so the explicit
+    // checks below observe adjustment from the configured initial level.
+    bus->set("voltage", 1.0);
     auto* shunt = new Svd("shunt");
     bus->add(shunt);
     gds->add(bus);
@@ -1277,12 +1279,17 @@ TEST_F(LoadTests, SvdSteppedControlHonorsInitialLevel)
 
     ASSERT_EQ(gds->pFlowInitialize(), 0);
     EXPECT_EQ(shunt->get("step"), 1.0);
+    bus->setVoltageAngle(0.9, 0.0);
     EXPECT_EQ(shunt->powerFlowAdjust(noInputs, 0, CheckLevel::REVERSABLE_ONLY),
               ChangeCode::PARAMETER_CHANGE);
     EXPECT_EQ(shunt->get("step"), 2.0);
     EXPECT_NEAR(shunt->get("yq"), -0.10, 1.0e-12);
 
-    bus->set("voltage", 1.1);
+    // Start a fresh adjustment pass: this releases the area's one-shunt
+    // claim and clears the controller's overshoot history. Without that reset,
+    // it correctly holds the prior setting after an equal opposite-side move.
+    gds->reset(ResetLevels::MINIMAL);
+    bus->setVoltageAngle(1.1, 0.0);
     EXPECT_EQ(shunt->powerFlowAdjust(noInputs, 0, CheckLevel::REVERSABLE_ONLY),
               ChangeCode::PARAMETER_CHANGE);
     EXPECT_EQ(shunt->get("step"), 1.0);

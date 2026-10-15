@@ -170,6 +170,16 @@ CoreObject* Generator::clone(CoreObject* obj) const
     return gen;
 }
 
+void Generator::updateObjectLinkages(CoreObject* newRoot)
+{
+    if (remoteBus != nullptr) {
+        if (auto* match = dynamic_cast<GridBus*>(findMatchingObject(remoteBus, newRoot))) {
+            remoteBus = match;
+        }
+    }
+    GridSecondary::updateObjectLinkages(newRoot);
+}
+
 void Generator::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
 {
     if (isConnected() && isEnabled()) {
