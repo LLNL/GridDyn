@@ -83,7 +83,12 @@ void GovernorTgov1::dynObjectInitializeB(const IOdata& /*inputs*/,
     fieldSet[govpSetInLocation] = desiredOutput[POUT_LOCATION];
     if (opFlags[USES_POWER_LIMITS]) {
         const double correction = std::max(0.0, Pmax - originalUpperLimit);
-        const double margin = std::max(0.2 * correction, 10.0 * powerLimitRootTolerance * T1);
+        // TGOV1's speed input is scaled by K in the valve equation. Keep the
+        // initialized limit active through small speed perturbations by
+        // providing headroom in the same power-reference units as K*deltaW.
+        const double margin = std::max({0.2 * correction,
+                                        10.0 * powerLimitRootTolerance * K,
+                                        10.0 * powerLimitRootTolerance * T1});
         if (m_state[1] >= Pmax) {
             initialSetpointOverdrive = margin;
             opFlags.set(POWER_LIMIT_HIGH);
@@ -254,7 +259,7 @@ void GovernorTgov1::rootTest(const IOdata& inputs,
         if (opFlags[POWER_LIMITED]) {
             const double omega = inputs[govOmegaInLocation];
             const double releaseRate =
-                (-pmech + effectivePowerSetpoint(inputs) + (K * (omega - 1.0))) / T1;
+                (-pmech + effectivePowerSetpoint(inputs) - (K * (omega - 1.0))) / T1;
             roots[rootOffset] =
                 (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) + powerLimitRootTolerance;
         } else {

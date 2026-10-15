@@ -295,7 +295,11 @@ void AcBus::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
             ++activeSecondary;
         }
     }
-    if (!(opFlags[USE_AUTOGEN])) {
+    // An otherwise empty bus can be discarded when it is a leaf, but SLK
+    // and AFIX buses still provide the network angle reference.  This occurs
+    // when a RAW generator is moved to its internal side of a step-up
+    // transformer, leaving the original bus with only the transformer link.
+    if (!(opFlags[USE_AUTOGEN]) && (type != BusType::SLK) && (type != BusType::AFIX)) {
         if (CHECK_CONTROLFLAG(flags, AUTO_BUS_DISCONNECT)) {
             int activeLink = 0;
             for (auto* lnk : attachedLinks) {
@@ -783,27 +787,34 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     }
                 }
 
-                if (S.genP < (busController.Pmin - realLimitTolerance)) {
-                    S.genP = busController.Pmin;
-                    for (auto& pco : busController.pControlObjects) {
-                        pco->set("p", "min");
-                    }
-                    type = BusType::PQ;
-                    alert(this, JAC_COUNT_CHANGE);
-                    out = ChangeCode::JACOBIAN_CHANGE;
-                    if (prevType == BusType::SLK) {
-                        alert(this, SLACK_BUS_CHANGE);
-                    }
-                } else if (S.genP > (busController.Pmax + realLimitTolerance)) {
-                    S.genP = busController.Pmax;
-                    type = BusType::PQ;
-                    for (auto& pco : busController.pControlObjects) {
-                        pco->set("p", "max");
-                    }
-                    alert(this, JAC_COUNT_CHANGE);
-                    out = ChangeCode::JACOBIAN_CHANGE;
-                    if (prevType == BusType::SLK) {
-                        alert(this, SLACK_BUS_CHANGE);
+                // AFIX can be the angle reference after a remote voltage
+                // controller takes over a swing bus.  If it uses the
+                // automatic slack generator, it has no explicit P limits;
+                // treating the empty controller list's zero bounds as limits
+                // converts the reference to PQ and leaves the island unsolved.
+                if (!opFlags[USE_AUTOGEN]) {
+                    if (S.genP < (busController.Pmin - realLimitTolerance)) {
+                        S.genP = busController.Pmin;
+                        for (auto& pco : busController.pControlObjects) {
+                            pco->set("p", "min");
+                        }
+                        type = BusType::PQ;
+                        alert(this, JAC_COUNT_CHANGE);
+                        out = ChangeCode::JACOBIAN_CHANGE;
+                        if (prevType == BusType::SLK) {
+                            alert(this, SLACK_BUS_CHANGE);
+                        }
+                    } else if (S.genP > (busController.Pmax + realLimitTolerance)) {
+                        S.genP = busController.Pmax;
+                        type = BusType::PQ;
+                        for (auto& pco : busController.pControlObjects) {
+                            pco->set("p", "max");
+                        }
+                        alert(this, JAC_COUNT_CHANGE);
+                        out = ChangeCode::JACOBIAN_CHANGE;
+                        if (prevType == BusType::SLK) {
+                            alert(this, SLACK_BUS_CHANGE);
+                        }
                     }
                 }
         }

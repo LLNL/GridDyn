@@ -20,6 +20,7 @@
 #include <cassert>
 #include <chrono>
 #include <compare>
+#include <cstdio>
 #include <format>
 #include <memory>
 #include <numeric>

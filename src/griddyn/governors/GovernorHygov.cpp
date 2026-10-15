@@ -31,6 +31,8 @@ namespace {
     // Root-only hysteresis absorbs small input changes without loosening the
     // physical rate and gate-position limits above.
     constexpr double rateLimitRootTolerance = 1e-4;
+    constexpr double rateLimitSpeedNoiseTolerance = 1e-5;
+    constexpr double rateLimitReleaseMargin = 2.0;
     constexpr double positionLimitRootTolerance = 1e-3;
 }  // namespace
 
@@ -405,8 +407,13 @@ void GovernorHygov::rootTest(const IOdata& inputs,
         // Keep the active root just inside the limited region.  IDA restarts
         // from the event state after rootTrigger(); without this small
         // hysteresis it can immediately rediscover the same zero repeatedly.
+        // Scale the release margin by the speed-to-rate sensitivity so a
+        // small frequency perturbation does not immediately reverse the root.
+        const double releaseRootTolerance = std::max(
+            rateLimitRootTolerance,
+            rateLimitReleaseMargin * rateLimitSpeedNoiseTolerance / (temporaryDroop * Tf));
         roots[rootOffset] =
-            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) - rateLimitRootTolerance;
+            (opFlags[GATE_RATE_LIMIT_HIGH] ? VELM - rate : rate + VELM) - releaseRootTolerance;
     } else {
         roots[rootOffset] = std::min(VELM - rate, rate + VELM) + rateLimitRootTolerance;
     }

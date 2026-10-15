@@ -104,6 +104,7 @@ void GovernorIeeeG1::dynObjectInitializeB(const IOdata& inputs,
     initializationTargetSet[hpOutput] = true;
     initializationActive = true;
     initializeStatesFromTargets();
+    const double initializedPowerSetpoint = Pset;
 
     const double valve = m_state[offsets.getDiffOffset(cLocalSolverMode) + valveState];
     const double correction = std::max(0.0, Pmax - originalUpperLimit);
@@ -119,7 +120,9 @@ void GovernorIeeeG1::dynObjectInitializeB(const IOdata& inputs,
     }
 
     fieldSet.resize(2);
-    fieldSet[govpSetInLocation] = Pset;
+    // Report the setpoint that produced the initialized machine output.  The
+    // overdrive is internal to the limiter's unconstrained controller request.
+    fieldSet[govpSetInLocation] = initializedPowerSetpoint;
     // The reference overdrive gives an initially limited valve a definite
     // outward rate while the physical valve and turbine states stay steady.
     updateLimitFlags(inputs, m_state.data() + offsets.getDiffOffset(cLocalSolverMode));

@@ -246,7 +246,17 @@ void BusControls::updateVoltageControls()
             controlledBus->pFlowInitialVoltageCaptured) {
             controlledBus->voltage = controlledBus->pFlowInitialVoltage;
         }
-        controlledBus->set("type", "pq");
+        if ((controlledBus->getType() == GridBus::BusType::SLK) ||
+            (controlledBus->getType() == GridBus::BusType::AFIX)) {
+            // Remote regulation makes the bus voltage unknown, but it must
+            // continue to anchor the network angle when it was the RAW swing
+            // bus.  The bus's active-power balance is then supplied by its
+            // normal slack/auto-generation handling.
+            controlledBus->set("type", "afix");
+            controlledBus->set("dyntype", "fixangle");
+        } else {
+            controlledBus->set("type", "pq");
+        }
         controlledBus->opFlags.set(INDIRECT_VOLTAGE_CONTROL);
     }
     // check if the v and p controls are identical

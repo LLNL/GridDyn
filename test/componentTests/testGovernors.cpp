@@ -290,12 +290,13 @@ TEST(GovernorModelTests, IeeeSimpleAutoAdjustedLimitIsTheRuntimeBoundary)
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    EXPECT_NEAR(root, 1e-5, 1e-12);
+    // The 0.5 pu limit correction gives this model 20% overdrive.  At the
+    // adjusted upper bound, the active release root reflects that margin.
+    EXPECT_NEAR(root, (0.2 * (1.0 - 0.5) / 0.05) + 1e-5, 1e-12);
     for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
         governor.rootTest({speed, 1.0}, emptyStateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << speed;
     }
-    governor.rootTrigger(0.0, inputs, {1}, cLocalSolverMode);
 
     std::vector<double> derivative(2, 0.0);
     governor.derivative(inputs, emptyStateData, derivative.data(), cLocalSolverMode);
@@ -1552,7 +1553,9 @@ TEST(GovernorModelTests, Tgov1AppliesValveLimitsAndRejectsSingularParameters)
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    EXPECT_GT(root, 1e-4);
+    // The valve state is exactly at Pmax; the positive value is the root
+    // tolerance added to the zero distance from the limit.
+    EXPECT_NEAR(root, 1e-5, 1e-12);
     governor.rootTrigger(0.0, inputs, {1}, cLocalSolverMode);
 
     std::vector<double> derivative(3, 0.0);
@@ -1592,7 +1595,9 @@ TEST(GovernorModelTests, Tgov1InitializedUpperLimitIsQuietUnderSmallFrequencyNoi
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    EXPECT_NEAR(root, 1e-5, 1e-12);
+    const double expectedRoot =
+        (10.0 * 1e-5 * governor.get("k") / governor.get("t1")) + 1e-5;
+    EXPECT_NEAR(root, expectedRoot, 1e-12);
     for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
         governor.rootTest({speed, 1.05}, emptyStateData, &root, cLocalSolverMode);
         EXPECT_GT(root, 0.0) << speed;
