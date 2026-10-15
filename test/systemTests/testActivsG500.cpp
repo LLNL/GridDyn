@@ -34,6 +34,7 @@ using namespace griddyn;
 namespace {
 
 constexpr char ACTIVSG500_TEST_DIRECTORY[] = GRIDDYN_TEST_DIRECTORY "/texas_am/ACTIVSg500/";
+constexpr double longPartitionedCvodeMaxSteps = 5000.0;
 
 class ActivsG500Tests: public GridDynSimulationTestFixture, public ::testing::Test {};
 
@@ -402,6 +403,10 @@ TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
     ASSERT_NE(differentialSolver, nullptr);
     EXPECT_NE(dynamic_cast<solvers::KinsolInterface*>(algebraicSolver.get()), nullptr);
     EXPECT_NE(dynamic_cast<solvers::CvodeInterface*>(differentialSolver.get()), nullptr);
+    // This 30-second run permits at most 0.05-second CVODE steps, so it needs
+    // at least 600 internal steps. The default 1500-step cap can be reached
+    // near the end on other platforms even for a stable trajectory.
+    differentialSolver->set("maxiterations", longPartitionedCvodeMaxSteps);
 
     std::vector<double> initialVoltage;
     std::vector<double> initialAngle;
@@ -414,6 +419,7 @@ TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
 
     ASSERT_EQ(gds->run(), 0);
     ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
+    EXPECT_NEAR(static_cast<double>(gds->getSimulationTime()), 30.0, 1e-8);
     expectBusOperatingPointStable(gds.get(), initialVoltage, initialAngle);
     expectStable(initialAlgebraicState,
                  gds->getState(algebraicMode),
@@ -437,8 +443,12 @@ TEST_F(ActivsG500Tests, PartitionedDaeInitializationUsesConsistentStartup)
     gds->setFlag("dae_initialization_for_partitioned", true);
     ASSERT_EQ(gds->powerflow(), 0);
     ASSERT_EQ(gds->dynInitialize(), 0);
+    auto differentialSolver = gds->getSolverInterface(gds->getSolverMode("differential"));
+    ASSERT_NE(differentialSolver, nullptr);
+    differentialSolver->set("maxiterations", longPartitionedCvodeMaxSteps);
     ASSERT_EQ(gds->run(), 0);
     ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
+    EXPECT_NEAR(static_cast<double>(gds->getSimulationTime()), 30.0, 1e-8);
 }
 #endif
 

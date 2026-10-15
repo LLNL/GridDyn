@@ -1883,12 +1883,9 @@ have `VARFLG=0` and `VLRFLG=1`. WT3E1 currently stores `varFlag` but does not
 use it in its command or rate equations; that is a separate model-coverage
 issue. It is not needed to explain this case's polarity error: the relevant
 records enable terminal-voltage regulation through `VLRFLG=1`. The reference
-equations used for the sign comparison are [OpenIPSL WT3G1]
-(https://raw.githubusercontent.com/OpenIPSL/OpenIPSL/master/OpenIPSL/Electrical/Wind/PSSE/WT3G/WT3G1.mo),
-[OpenIPSL WT3E1]
-(https://raw.githubusercontent.com/OpenIPSL/OpenIPSL/master/OpenIPSL/Electrical/Wind/PSSE/WT3G/WT3E1.mo),
-and [PowerWorld's WT3E1 parameter definition]
-(https://www.powerworld.com/WebHelp/Content/TransientModels_HTML/Exciter%20WT3E%20and%20WT3E1.htm).
+equations used for the sign comparison are [OpenIPSL WT3G1](https://raw.githubusercontent.com/OpenIPSL/OpenIPSL/master/OpenIPSL/Electrical/Wind/PSSE/WT3G/WT3G1.mo),
+[OpenIPSL WT3E1](https://raw.githubusercontent.com/OpenIPSL/OpenIPSL/master/OpenIPSL/Electrical/Wind/PSSE/WT3G/WT3E1.mo),
+and [PowerWorld's WT3E1 parameter definition](https://www.powerworld.com/WebHelp/Content/TransientModels_HTML/Exciter%20WT3E%20and%20WT3E1.htm).
 
 `src/griddyn/renewables/WT3G1.cpp` now initializes positive `Eq` for the
 positive-injection convention and uses positive `currentImag = Eq/Xeq` in its

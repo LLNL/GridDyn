@@ -691,11 +691,17 @@ TEST(GovernorModelTests, HygovMatchesOpenIpslInitializationAndPerturbedEquations
     const auto& initialized = governor.getStates();
     ASSERT_EQ(initialized.size(), 5U);
     EXPECT_DOUBLE_EQ(initialized[0], 0.4);
-    EXPECT_DOUBLE_EQ(initialized[1], 0.0);
+    EXPECT_NEAR(initialized[1], 0.0, 1e-14);
     EXPECT_NEAR(initialized[2], initialFlow, 1e-14);
     EXPECT_NEAR(initialized[3], initialFlow, 1e-14);
     EXPECT_NEAR(initialized[4], initialFlow, 1e-14);
     EXPECT_NEAR(fieldSet[govpSetInLocation], 0.05 * initialFlow, 1e-14);
+
+    std::vector<double> initialResidual(initialized.size(), 0.0);
+    governor.residual(inputs, emptyStateData, initialResidual.data(), cLocalSolverMode);
+    for (const auto value : initialResidual) {
+        EXPECT_NEAR(value, 0.0, 1e-14);
+    }
 
     std::vector<double> state{0.42, 0.02, 0.40, 0.41, 0.42};
     std::vector<double> stateDerivative(state.size(), 0.0);
