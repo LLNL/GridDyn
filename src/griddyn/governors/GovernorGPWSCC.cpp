@@ -240,6 +240,7 @@ void GovernorGPWSCC::dynObjectInitializeB(const IOdata& inputs,
     }
     const double scale = powerScale();
     const double desiredPower = desiredOutput[pmechState];
+    const double originalGateMaximum = gateMaximum;
     const double desiredTurbinePower = desiredPower / scale;
     const double desiredCurveGate = inverseCurve(desiredTurbinePower);
     const double initialGate = inverseGateOutput(desiredCurveGate);
@@ -266,6 +267,24 @@ void GovernorGPWSCC::dynObjectInitializeB(const IOdata& inputs,
     state[valveState] = 0.0;
     state[gateState] = initialGate;
     state[turbineState] = desiredTurbinePower;
+    const double correction = std::max(0.0, gateMaximum - originalGateMaximum);
+    const double margin = std::max(0.2 * correction, 1e-4);
+    const bool upperActive = (initialGate >= gateMaximum) && (Kg > 0.0) && (Velopen > 0.0);
+    const bool lowerActive = (initialGate <= gateMinimum) && (Kg > 0.0) && (Velclose < 0.0);
+    if (upperActive || lowerActive) {
+        const double signedMargin = upperActive ? margin : -margin;
+        state[filterState] = signedMargin;
+        state[derivativeState] = signedMargin;
+        state[integratorState] += (1.0 + std::abs(Kp)) * signedMargin;
+        const double controllerOverdrive = (1.0 + std::abs(Kp) + Kp) * signedMargin;
+        state[valveState] = Kg * controllerOverdrive;
+        const double speedError =
+            evaluateDeadband(1.0 - inputs[govOmegaInLocation], db1 + eps).value;
+        const double initialFeedback = (Tt > 0.0) ? electricalPower : initialGate;
+        const double baselineError = speedError + Paux - R * initialFeedback;
+        initialSetpointOverdrive =
+            scale * (signedMargin - baselineError + ((Tt > 0.0) ? 0.0 : R * controllerOverdrive));
+    }
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = desiredPower;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -279,7 +298,8 @@ GovernorGPWSCC::Signals GovernorGPWSCC::evaluate(const IOdata& inputs, const dou
     const double controllerOutput = (Kp * state[filterState]) + state[integratorState] +
         (Kd * (state[filterState] - state[derivativeState]) / Tf);
     const double feedback = (Tt > 0.0) ? state[electricalPowerState] : controllerOutput;
-    const double setpointChange = (inputs[govpSetInLocation] / scale) - initializedInputReference;
+    const double setpointChange =
+        (effectivePowerSetpoint(inputs) / scale) - initializedInputReference;
     const double error = speed.value + Paux + setpointChange - (R * feedback);
     const double rawRate = state[valveState];
     const double limitedRate =

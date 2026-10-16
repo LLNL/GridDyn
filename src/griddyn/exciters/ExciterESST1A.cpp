@@ -148,6 +148,8 @@ void ExciterESST1A::dynObjectInitializeB(const IOdata& inputs,
     const double stabilizer = inputs[exciterVssInLocation];
     const double amplifierVoltage =
         fieldVoltage + currentLimit - ((vosSelector == 2) ? stabilizer : 0.0);
+    const double initialInput = amplifierVoltage / Ka;
+    const double originalAmplifierUpperLimit = Vamax;
     const double lower = Vrmin * inputs[exciterVoltageInLocation];
     const double upper =
         (Vrmax * inputs[exciterVoltageInLocation]) - (Kc * inputs[exciterXadIfdInLocation]);
@@ -159,12 +161,30 @@ void ExciterESST1A::dynObjectInitializeB(const IOdata& inputs,
     m_state[0] = fieldVoltage;
     double* state = m_state.data() + 1;
     state[voltageMeasurementState] = inputs[exciterVoltageInLocation];
-    state[firstLeadLagState] = amplifierVoltage / Ka;
-    state[secondLeadLagState] = amplifierVoltage / Ka;
+    state[firstLeadLagState] = initialInput;
+    state[secondLeadLagState] = initialInput;
     state[amplifierState] = amplifierVoltage;
     state[feedbackState] = Kf * fieldVoltage / Tf;
-    vBias = (amplifierVoltage / Ka) + state[voltageMeasurementState] - Vref -
+    vBias = initialInput + state[voltageMeasurementState] - Vref -
         ((vosSelector == 1) ? stabilizer : 0.0) - inputs[exciterVsetInLocation] + 1.0;
+    const double correction = std::max(0.0, Vamax - originalAmplifierUpperLimit);
+    const double guard = 10.0 * limiterRootTolerance + std::abs(Ka) * 1e-5;
+    double inputOverdrive = 0.0;
+    if (amplifierVoltage >= Vamax) {
+        inputOverdrive = std::max(0.2 * correction, guard) / Ka;
+    } else if (amplifierVoltage <= Vamin) {
+        inputOverdrive = -guard / Ka;
+    }
+    if ((inputOverdrive != 0.0) && (initialInput + inputOverdrive <= Vimax) &&
+        (initialInput + inputOverdrive >= Vimin)) {
+        // Both lead-lag states must follow the changed reference to keep
+        // their initial derivatives zero while the amplifier stays limited.
+        vBias += inputOverdrive;
+        state[firstLeadLagState] += inputOverdrive;
+        state[secondLeadLagState] += inputOverdrive;
+        opFlags.set(AMPLIFIER_LIMITED);
+        opFlags.set(AMPLIFIER_LIMIT_HIGH, inputOverdrive > 0.0);
+    }
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
 }
@@ -418,9 +438,10 @@ void ExciterESST1A::rootTest(const IOdata& inputs,
     const index_t root = offsets.getRootOffset(sMode);
     if (opFlags[AMPLIFIER_LIMITED]) {
         const double drive = evaluate(inputs, state).amplifierDrive;
-        roots[root] = opFlags[AMPLIFIER_LIMIT_HIGH] ? -drive : drive;
+        roots[root] = (opFlags[AMPLIFIER_LIMIT_HIGH] ? -drive : drive) + limiterRootTolerance;
     } else {
-        roots[root] = std::min(Vamax - state[amplifierState], state[amplifierState] - Vamin);
+        roots[root] = std::min(Vamax - state[amplifierState], state[amplifierState] - Vamin) +
+            limiterRootTolerance;
         opFlags.set(AMPLIFIER_LIMIT_HIGH, state[amplifierState] >= Vamax);
     }
 }

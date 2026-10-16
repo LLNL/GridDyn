@@ -75,6 +75,7 @@ class GovernorGgov1 final: public Governor {
     model_parameter Rup = 99.0;
     model_parameter Rdown = -99.0;
     double powerReference = 0.0;
+    double initialValveOverdrive = 0.0;
 
   public:
     explicit GovernorGgov1(const std::string& objName = "govGgov1_#");

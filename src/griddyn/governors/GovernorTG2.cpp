@@ -57,6 +57,7 @@ void GovernorTG2::dynObjectInitializeB([[maybe_unused]] const IOdata& inputs,
                                        const IOdata& desired,
                                        IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desired.empty() || !std::isfinite(desired[0]) ||
         (hardLimitEnabled &&
          (desired[0] < Pmin || !adjustInitialUpperLimit(desired[0], "TG2 initial power")))) {
@@ -67,6 +68,15 @@ void GovernorTG2::dynObjectInitializeB([[maybe_unused]] const IOdata& inputs,
     m_state[offsets.getDiffOffset(cLocalSolverMode)] = 0.0;
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = Pset;
+    if (hardLimitEnabled) {
+        const double correction = std::max(0.0, Pmax - originalUpperLimit);
+        const double margin = std::max(0.2 * correction, 1e-4);
+        if (desired[0] >= Pmax) {
+            initialSetpointOverdrive = margin;
+        } else if (desired[0] <= Pmin) {
+            initialSetpointOverdrive = -margin;
+        }
+    }
 }
 double GovernorTG2::speedInput(const IOdata& inputs) const
 {
@@ -89,7 +99,7 @@ double GovernorTG2::speedSlope(const IOdata& inputs) const
 double GovernorTG2::output(const IOdata& inputs, double state) const
 {
     const double raw =
-        inputs[govpSetInLocation] + state + ((T1 / T2) * ((K * speedInput(inputs)) - state));
+        effectivePowerSetpoint(inputs) + state + ((T1 / T2) * ((K * speedInput(inputs)) - state));
     return hardLimitEnabled ?
         std::clamp(raw, static_cast<double>(Pmin), static_cast<double>(Pmax)) :
         raw;
@@ -97,7 +107,7 @@ double GovernorTG2::output(const IOdata& inputs, double state) const
 double GovernorTG2::outputSlope(const IOdata& inputs, double state) const
 {
     const double raw =
-        inputs[govpSetInLocation] + state + ((T1 / T2) * ((K * speedInput(inputs)) - state));
+        effectivePowerSetpoint(inputs) + state + ((T1 / T2) * ((K * speedInput(inputs)) - state));
     return (!hardLimitEnabled || (raw > Pmin && raw < Pmax)) ? 1.0 : 0.0;
 }
 void GovernorTG2::derivative(const IOdata& inputs,

@@ -66,6 +66,7 @@ void GovernorHygov4::dynObjectInitializeB([[maybe_unused]] const IOdata& inputs,
                                           const IOdata& desiredOutput,
                                           IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[0])) {
         throw InvalidParameterValue("HYGOV4 initial power");
     }
@@ -86,6 +87,15 @@ void GovernorHygov4::dynObjectInitializeB([[maybe_unused]] const IOdata& inputs,
     // The generator's pset input remains its dispatched mechanical power.
     // Preserve the ANDES pref=Rperm*gate equilibrium with a reference offset.
     referenceOffset = Pset - desiredOutput[0] - paux;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double servoMargin = std::max(0.2 * correction, 1e-4) * Tg;
+    if (gate >= Pmax) {
+        m_state[diffOffset + 2] = servoMargin;
+        referenceOffset += servoMargin;
+    } else if (gate <= Pmin) {
+        m_state[diffOffset + 2] = -servoMargin;
+        referenceOffset -= servoMargin;
+    }
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = Pset - paux;
 }
@@ -123,7 +133,7 @@ void GovernorHygov4::derivative(const IOdata& inputs,
     loc.destDiffLoc[0] = gateRate(state);
     loc.destDiffLoc[1] = (state[0] - state[1]) / Tr;
     loc.destDiffLoc[2] =
-        (inputs[govpSetInLocation] + referenceOffset + paux - (Rperm * state[0]) -
+        (effectivePowerSetpoint(inputs) + referenceOffset + paux - (Rperm * state[0]) -
          (Rtemp * (state[0] - state[1])) - (inputs[govOmegaInLocation] - 1.0) - state[2]) /
         Tp;
     loc.destDiffLoc[3] = (Hdam - head) / Tw;

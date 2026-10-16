@@ -27,8 +27,11 @@ namespace {
     constexpr index_t loadIntegralState = 8;
     constexpr index_t accelerationState = 9;
     constexpr double accelerationStep = 0.005;
-    constexpr double selectorTieTolerance = 1e-10;
-    constexpr double selectorInteriorMargin = 1e-6;
+    constexpr double selectorInteriorMargin = 1e-5;
+    // Match the branch deadband to the startup interior margin. When Vmax is
+    // expanded to the initial fuel request, that margin collapses to zero and
+    // tiny integration noise can otherwise activate the temperature PI.
+    constexpr double selectorTieTolerance = selectorInteriorMargin;
 
     double deadZone(double value, double width)
     {
@@ -107,6 +110,7 @@ CoreObject* GovernorGgov1::clone(CoreObject* obj) const
     COPY(Rup);
     COPY(Rdown);
     COPY(powerReference);
+    COPY(initialValveOverdrive);
 #undef COPY
     return out;
 }
@@ -114,6 +118,7 @@ CoreObject* GovernorGgov1::clone(CoreObject* obj) const
 void GovernorGgov1::dynObjectInitializeA(CoreTime time0, std::uint32_t flags)
 {
     setInitialLimitPolicy(flags);
+    initialValveOverdrive = 0.0;
     const std::array<double, 33> parameters{R,     Tpelec, maxerr, minerr, Kpgov,  Kigov,   Kdgov,
                                             Tdgov, Pmax,   Pmin,   Tact,   Kturb,  Wfnl,    Tb,
                                             Tc,    Teng,   Tfload, Kpload, Kiload, Ldref,   Dm,
@@ -153,6 +158,7 @@ void GovernorGgov1::dynObjectInitializeB(const IOdata& inputs,
     const double power = desiredOutput[0];
     const double electricalPower = inputs[govElectricalPowerInLocation];
     const double fuel = power / Kturb + Wfnl;
+    const double originalUpperLimit = Pmax;
     if ((fuel < Pmin - 1e-7) || !adjustInitialUpperLimit(fuel, "GGOV1 initial valve position")) {
         throw InvalidParameterValue("GGOV1 initial valve position outside limits");
     }
@@ -189,6 +195,13 @@ void GovernorGgov1::dynObjectInitializeB(const IOdata& inputs,
     Pset = electricalPower;
     m_state[0] = power;
     fieldSet[govpSetInLocation] = Pset;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max({0.2 * correction, 1e-4, 1e-4 * Tact});
+    if (fuel >= Pmax) {
+        initialValveOverdrive = margin;
+    } else if (fuel <= Pmin) {
+        initialValveOverdrive = -margin;
+    }
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
 }
 
@@ -299,7 +312,7 @@ void GovernorGgov1::derivative(const IOdata& inputs,
     double* stateDerivative = loc.destDiffLoc;
     const auto signals = evaluate(inputs, state);
     stateDerivative[peState] = (inputs[govElectricalPowerInLocation] - state[peState]) / Tpelec;
-    const double resetDrive = Kimw * (inputs[govpSetInLocation] - state[peState]);
+    const double resetDrive = Kimw * (effectivePowerSetpoint(inputs) - state[peState]);
     const double resetLimit = 1.1 * std::abs(R);
     stateDerivative[resetState] = (((state[resetState] >= resetLimit) && (resetDrive > 0.0)) ||
                                    ((state[resetState] <= -resetLimit) && (resetDrive < 0.0))) ?
@@ -307,7 +320,7 @@ void GovernorGgov1::derivative(const IOdata& inputs,
         resetDrive;
     stateDerivative[integralState] = Kigov * signals.mLimitedError;
     stateDerivative[derivativeState] = (signals.mLimitedError - state[derivativeState]) / Tdgov;
-    double rate = std::clamp((signals.mFuelRequest - signals.mValve) / Tact,
+    double rate = std::clamp((signals.mFuelRequest + initialValveOverdrive - signals.mValve) / Tact,
                              static_cast<double>(Rclose),
                              static_cast<double>(Ropen));
     if (((signals.mValve >= Pmax) && (rate > 0.0)) || ((signals.mValve <= Pmin) && (rate < 0.0))) {
@@ -380,7 +393,7 @@ void GovernorGgov1::jacobianElements(const IOdata& inputs,
                               inputLocs[govElectricalPowerInLocation],
                               1.0 / Tpelec);
     matrixData.assign(differentialRow + resetState, differentialRow + resetState, -stateData.cj);
-    const double resetDrive = Kimw * (inputs[govpSetInLocation] - state[peState]);
+    const double resetDrive = Kimw * (effectivePowerSetpoint(inputs) - state[peState]);
     const double resetLimit = 1.1 * std::abs(R);
     const bool resetBlocked = ((state[resetState] >= resetLimit) && (resetDrive > 0.0)) ||
         ((state[resetState] <= -resetLimit) && (resetDrive < 0.0));
@@ -493,7 +506,8 @@ void GovernorGgov1::jacobianElements(const IOdata& inputs,
         requestValveDerivative = requestIntegralDerivative = requestFilterDerivative = 0.0;
         requestTemperatureDerivative = requestLoadDerivative = requestAccelerationDerivative = 0.0;
     }
-    const double unlimitedRate = (signals.mFuelRequest - signals.mValve) / Tact;
+    const double unlimitedRate =
+        (signals.mFuelRequest + initialValveOverdrive - signals.mValve) / Tact;
     const bool valveBlocked = (unlimitedRate <= Rclose) || (unlimitedRate >= Ropen) ||
         ((signals.mValve >= Pmax) && (unlimitedRate > 0.0)) ||
         ((signals.mValve <= Pmin) && (unlimitedRate < 0.0));

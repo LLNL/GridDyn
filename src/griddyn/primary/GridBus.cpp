@@ -25,7 +25,6 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <cstdio>
 #include <iostream>
 #include <print>
 #include <queue>

@@ -189,6 +189,10 @@ void ExciterIEEEX1::rootTest(const IOdata& inputs,
                              double roots[],
                              const SolverMode& sMode)
 {
+    if (hasLeadLag()) {
+        ExciterDC2A::rootTest(inputs, stateData, roots, sMode);
+        return;
+    }
     const auto locations = offsets.getLocations(stateData, sMode, this);
     const auto rootOffset = offsets.getRootOffset(sMode);
     const double* state = locations.diffStateLoc;
@@ -210,6 +214,9 @@ ChangeCode ExciterIEEEX1::rootCheck(const IOdata& inputs,
                                     const SolverMode& sMode,
                                     CheckLevel level)
 {
+    if (hasLeadLag()) {
+        return ExciterDC2A::rootCheck(inputs, stateData, sMode, level);
+    }
     (void)stateData;
     (void)sMode;
     (void)level;

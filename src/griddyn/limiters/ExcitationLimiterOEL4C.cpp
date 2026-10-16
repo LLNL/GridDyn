@@ -17,7 +17,8 @@
 namespace griddyn::limiters {
 namespace {
     constexpr double timerRootTolerance = 1e-8;
-    constexpr double reactiveRootTolerance = 1e-9;
+    // Keep Q-limit roots clear under 10x-relative-tolerance current noise.
+    constexpr double reactiveRootTolerance = 1e-4;
 }  // namespace
 ExcitationLimiterOEL4C::ExcitationLimiterOEL4C(const std::string& objName):
     ExcitationLimiter(objName)

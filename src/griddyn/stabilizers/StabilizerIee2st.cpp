@@ -18,8 +18,11 @@
 
 namespace griddyn::stabilizers {
 namespace {
+    // Keep output-limit roots clear under 10x-relative-tolerance input noise,
+    // including the cascade gain from frequency to stabilizer output.
+    constexpr double limitRootTolerance = 1e-4;
     constexpr double inputValidityLimit = 1e20;
-}
+}  // namespace
 
 StabilizerIee2st::StabilizerIee2st(const std::string& objName): Stabilizer(objName)
 {
@@ -544,8 +547,8 @@ void StabilizerIee2st::rootTest(const IOdata& inputs,
     const auto locations = offsets.getLocations(stateData, sMode, this);
     const index_t rootOffset = offsets.getRootOffset(sMode);
     const double unlimited = outputExpression(inputs, locations.diffStateLoc).value;
-    roots[rootOffset] = Lsmax - unlimited;
-    roots[rootOffset + 1] = unlimited - Lsmin;
+    roots[rootOffset] = Lsmax - unlimited + limitRootTolerance;
+    roots[rootOffset + 1] = unlimited - Lsmin + limitRootTolerance;
     roots[rootOffset + 2] = inputs[pssVoltageInLocation] - (initialVoltage + Vcl);
     roots[rootOffset + 3] = (initialVoltage + Vcu) - inputs[pssVoltageInLocation];
 }

@@ -71,6 +71,7 @@ void GovernorHydro::dynObjectInitializeB(const IOdata& /*inputs*/,
                                          const IOdata& desiredOutput,
                                          IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[outputState])) {
         throw InvalidParameterValue("hydro governor initial output");
     }
@@ -87,6 +88,13 @@ void GovernorHydro::dynObjectInitializeB(const IOdata& /*inputs*/,
     m_state[diffOffset + waterwayState] = power;
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = Pset;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 1e-4);
+    if (power >= Pmax) {
+        initialSetpointOverdrive = margin;
+    } else if (power <= Pmin) {
+        initialSetpointOverdrive = -margin;
+    }
 }
 
 void GovernorHydro::residual(const IOdata& inputs,
@@ -123,7 +131,7 @@ void GovernorHydro::derivative(const IOdata& inputs,
     stateDerivative[leadLagState] = governorLeadLag.derivative(speedDeviation, state[leadLagState]);
     const double governorOutput = governorLeadLag.output(speedDeviation, state[leadLagState]);
     stateDerivative[gateLagState] = (governorOutput - state[gateLagState]) / T3;
-    const double unlimitedGate = inputs[govpSetInLocation] - state[gateLagState];
+    const double unlimitedGate = effectivePowerSetpoint(inputs) - state[gateLagState];
     const double gate =
         std::clamp(unlimitedGate, static_cast<double>(Pmin), static_cast<double>(Pmax));
     const double gateDerivative = (gate == unlimitedGate) ? -stateDerivative[gateLagState] : 0.0;
@@ -183,7 +191,7 @@ void GovernorHydro::jacobianElements(const IOdata& inputs,
                               inputLocs[govOmegaInLocation],
                               governorLeadLag.outputInputJacobian() / T3);
 
-    const double unlimitedGate = inputs[govpSetInLocation] - state[gateLagState];
+    const double unlimitedGate = effectivePowerSetpoint(inputs) - state[gateLagState];
     const bool gateLimited = (unlimitedGate < Pmin) || (unlimitedGate > Pmax);
     matrixData.assign(diffOffset + waterwayState,
                       diffOffset + waterwayState,

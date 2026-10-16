@@ -15,6 +15,10 @@
 #include <string>
 #include <vector>
 namespace griddyn::exciters {
+namespace {
+    constexpr double initialLimitContactTolerance = 1e-7;
+}
+
 ExciterDC1A::ExciterDC1A(const std::string& objName): ExciterIEEEtype1(objName)
 {
     // default values
@@ -68,21 +72,35 @@ void ExciterDC1A::dynObjectInitializeB(const IOdata& inputs,
                                        const IOdata& desiredOutput,
                                        IOdata& fieldSet)
 {
+    const double terminalVoltage = inputs[VOLTAGE_IN_LOCATION];
+    const double originalUpperLimit = Vrmax;
     Exciter::dynObjectInitializeB(inputs,
                                   desiredOutput,
                                   fieldSet);  // this will dynInitializeB the field state if need be
     double* stateValues = m_state.data();
     stateValues[1] = saturationFeedback(stateValues[0]);  // Vr
-    if (!adjustInitialRegulatorLimit(stateValues[1], inputs[VOLTAGE_IN_LOCATION])) {
+    if (!adjustInitialRegulatorLimit(stateValues[1], terminalVoltage)) {
         throw InvalidParameterValue("DC1A initial regulator output outside limits");
     }
-    stateValues[2] = stateValues[1] / Ka;  // X
+    const double upperBound = initialRegulatorUpperBound(terminalVoltage);
+    const double lowerBound = initialRegulatorLowerBound(terminalVoltage);
+    double overdrive = 0.0;
+    if ((Vrmax != 0.0) && (stateValues[1] >= upperBound - initialLimitContactTolerance)) {
+        overdrive = initialRegulatorOverdrive(originalUpperLimit, terminalVoltage);
+        opFlags.set(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    } else if (stateValues[1] <= lowerBound + initialLimitContactTolerance) {
+        overdrive = -initialRegulatorOverdrive(Vrmax, terminalVoltage);
+        opFlags.reset(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    }
+    stateValues[2] = (stateValues[1] + overdrive) / Ka;  // X
     stateValues[3] = (stateValues[0] * Kf) / Tf;  // Rf
     if (Tr > 0.0) {
         stateValues[4] = inputs[VOLTAGE_IN_LOCATION];
     }
 
-    vBias = inputs[VOLTAGE_IN_LOCATION] + (stateValues[1] / Ka) - Vref;
+    vBias = terminalVoltage + stateValues[2] - Vref;
     fieldSet[1] = Vref;
 }
 
@@ -90,6 +108,24 @@ bool ExciterDC1A::adjustInitialRegulatorLimit(double initialValue, double /*term
 {
     return (initialValue >= Vrmin - 1e-7) &&
         adjustInitialUpperLimit(initialValue, Vrmax, "DC1A initial regulator output");
+}
+
+double ExciterDC1A::initialRegulatorUpperBound(double /*terminalVoltage*/) const
+{
+    return regulatorUpperLimit();
+}
+
+double ExciterDC1A::initialRegulatorLowerBound(double /*terminalVoltage*/) const
+{
+    return Vrmin;
+}
+
+double ExciterDC1A::initialRegulatorOverdrive(double originalUpperLimit,
+                                              double /*terminalVoltage*/) const
+{
+    const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+    const double guard = 1e-4 + std::abs(Ka) * std::max(1.0, std::abs(Tc / Tb)) * 1e-5;
+    return std::max(0.2 * correction, guard);
 }
 
 // residual
@@ -165,7 +201,7 @@ void ExciterDC1A::jacobianElements(const IOdata& inputs,
     const double temp1 =
         (-saturationDerivative(stateDataValue.state[offset]) / Te) - stateDataValue.cj;
     matrixDataValue.assign(refI, refI, temp1);
-    matrixDataValue.assign(refI, refI + 1, 1.0 / Te);
+    fieldRegulatorJacobian(matrixDataValue, refI, refI + 1, voltageLoc);
 
     if (opFlags[OUTSIDE_VOLTAGE_LIMITS]) {
         const int limiterVoltageLoc = (Tr > 0.0) ? (refI + 4) : voltageLoc;
@@ -219,6 +255,14 @@ void ExciterDC1A::limitJacobian(double /*V*/,
     // freezes the regulator state.  The DAE Jacobian contribution is
     // therefore -cj, not +cj.
     matrixDataValue.assign(refLoc, refLoc, -cjValue);
+}
+
+void ExciterDC1A::fieldRegulatorJacobian(MatrixData<double>& matrixDataValue,
+                                         index_t fieldRow,
+                                         index_t regulatorCol,
+                                         index_t /*voltageCol*/) const
+{
+    matrixDataValue.assign(fieldRow, regulatorCol, 1.0 / Te);
 }
 
 void ExciterDC1A::rootTest(const IOdata& inputs,

@@ -306,6 +306,7 @@ int GridDynSimulation::checkNetwork(NetworkCheckType checkType)
         bool slackFound = false;
         bool pvFound = false;
         bool afixFound = false;
+        bool indirectVoltageControlFound = false;
         for (auto& slackBus : slkBusses) {
             if (slackBus->Network == nn) {
                 if (slackBus->getType() == GridBus::BusType::SLK) {
@@ -322,14 +323,17 @@ int GridDynSimulation::checkNetwork(NetworkCheckType checkType)
                         slackFound = true;
                         break;
                     }
+                    if (networkBus->checkFlag(INDIRECT_VOLTAGE_CONTROL)) {
+                        indirectVoltageControlFound = true;
+                    }
                     if (networkBus->getType() == GridBus::BusType::PV) {
                         pvFound = true;
                     } else if (networkBus->getType() == GridBus::BusType::AFIX) {
                         afixFound = true;
                     }
-                    if (afixFound && pvFound) {
-                        slackFound =
-                            true;  // a pv bus and a separate afix bus can function as a slk bus
+                    if (afixFound && (pvFound || indirectVoltageControlFound)) {
+                        // AFIX plus a PV or remote voltage controller is a reference.
+                        slackFound = true;
                         break;
                     }
                 }
@@ -1052,6 +1056,12 @@ static const std::unordered_map<std::string, int>& getFlagControlMap()
         {"DC_FLOW_INITIALIZATION", DC_FLOW_INITIALIZATION},
         {"no_link_adjustments", DISABLE_LINK_ADJUSTMENTS},
         {"DISABLE_LINK_ADJUSTMENTS", DISABLE_LINK_ADJUSTMENTS},
+        {"no_tap_changer", DISABLE_TAP_CHANGER_ADJUSTMENTS},
+        {"no_tap_changer_adjustments", DISABLE_TAP_CHANGER_ADJUSTMENTS},
+        {"DISABLE_TAP_CHANGER_ADJUSTMENTS", DISABLE_TAP_CHANGER_ADJUSTMENTS},
+        {"no_shunt_adjustments", DISABLE_SHUNT_ADJUSTMENTS},
+        {"no_switched_shunt_adjustments", DISABLE_SHUNT_ADJUSTMENTS},
+        {"DISABLE_SHUNT_ADJUSTMENTS", DISABLE_SHUNT_ADJUSTMENTS},
         {"ignore_bus_limits", IGNORE_BUS_LIMITS},
         {"IGNORE_BUS_LIMITS", IGNORE_BUS_LIMITS},
         {"powerflow_only", POWER_FLOW_ONLY},

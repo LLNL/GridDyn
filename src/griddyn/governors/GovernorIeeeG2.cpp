@@ -69,6 +69,7 @@ void GovernorIeeeG2::dynObjectInitializeB(const IOdata& inputs,
                                           const IOdata& desiredOutput,
                                           IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[0])) {
         throw InvalidParameterValue("IEEEG2 initial mechanical power");
     }
@@ -93,6 +94,13 @@ void GovernorIeeeG2::dynObjectInitializeB(const IOdata& inputs,
     fieldSet.resize(2);
     fieldSet[0] = Pset;
     fieldSet[1] = Pset;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 1e-4);
+    if (initialPower >= Pmax) {
+        initialSetpointOverdrive = margin;
+    } else if (initialPower <= Pmin) {
+        initialSetpointOverdrive = -margin;
+    }
     (void)inputs;
 }
 
@@ -136,7 +144,7 @@ double GovernorIeeeG2::speedLagOutput(const IOdata& inputs, const double state[]
 
 double GovernorIeeeG2::limitedInput(const IOdata& inputs, const double state[]) const
 {
-    return std::clamp(speedLagOutput(inputs, state) + inputs[govpSetInLocation],
+    return std::clamp(speedLagOutput(inputs, state) + effectivePowerSetpoint(inputs),
                       static_cast<double>(Pmin),
                       static_cast<double>(Pmax));
 }
@@ -153,7 +161,7 @@ double GovernorIeeeG2::waterOutput(const IOdata& inputs, const double state[]) c
 
 double GovernorIeeeG2::limiterSlope(const IOdata& inputs, const double state[]) const
 {
-    const double raw = speedLagOutput(inputs, state) + inputs[govpSetInLocation];
+    const double raw = speedLagOutput(inputs, state) + effectivePowerSetpoint(inputs);
     return (raw > Pmin) && (raw < Pmax) ? 1.0 : 0.0;
 }
 

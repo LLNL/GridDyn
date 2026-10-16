@@ -118,14 +118,24 @@ void Exciter::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t flags)
 void Exciter::setInitialLimitPolicy(std::uint32_t flags)
 {
     strictInitialLimitChecking = CHECK_CONTROLFLAG(flags, STRICT_EXCITER_LIMITS);
+    // A new dynamic initialization must select its limiter branch from the
+    // new operating point, rather than inherit a branch from a prior run.
+    opFlags.reset(OUTSIDE_VOLTAGE_LIMITS);
+    opFlags.reset(TRIGGER_HIGH);
 }
 
 bool Exciter::adjustInitialUpperLimit(double initialValue,
                                       double& upperLimit,
-                                      std::string_view limitName)
+                                      std::string_view limitName,
+                                      double fractionalHeadroom,
+                                      double minimumHeadroom)
 {
     constexpr double initializationTolerance = 1e-7;
+    if (initialValue <= upperLimit) {
+        return true;
+    }
     if (initialValue <= upperLimit + initializationTolerance) {
+        upperLimit = initialValue;
         return true;
     }
     if (strictInitialLimitChecking) {
@@ -133,7 +143,8 @@ bool Exciter::adjustInitialUpperLimit(double initialValue,
     }
 
     const double originalLimit = upperLimit;
-    upperLimit = initialValue;
+    const double requiredShift = initialValue - originalLimit;
+    upperLimit = initialValue + std::max(fractionalHeadroom * requiredShift, minimumHeadroom);
     logging::warning(this,
                      "{} initial value {} exceeds upper limit {}; adjusting upper limit to {}",
                      std::string{limitName},

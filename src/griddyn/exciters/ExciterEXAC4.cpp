@@ -84,6 +84,11 @@ void ExciterEXAC4::dynObjectInitializeB(const IOdata& inputs,
     state[leadLagState] = regulator / Ka;
     m_state[0] = fieldVoltage;
     vref0 = inputs[exciterVoltageInLocation] + fieldVoltage / Ka;
+    if (state[leadLagState] >= Vimax) {
+        vref0 += 10.0 * limiterRootTolerance;
+    } else if (state[leadLagState] <= Vimin) {
+        vref0 -= 10.0 * limiterRootTolerance;
+    }
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
     updateLimitFlags(inputs, state);
@@ -243,10 +248,11 @@ void ExciterEXAC4::rootTest(const IOdata& inputs,
     const double* state = locations.diffStateLoc;
     const index_t root = offsets.getRootOffset(sMode);
     const double input = unlimitedInput(state);
-    roots[root] = std::min(Vimax - input, input - Vimin);
+    roots[root] = std::min(Vimax - input, input - Vimin) + limiterRootTolerance;
     const double output = state[regulatorState];
     roots[root + 1] = std::min(Vrmax - Kc * inputs[exciterXadIfdInLocation] - output,
-                               output - (Vrmin - Kc * inputs[exciterXadIfdInLocation]));
+                               output - (Vrmin - Kc * inputs[exciterXadIfdInLocation])) +
+        limiterRootTolerance;
 }
 void ExciterEXAC4::rootTrigger(CoreTime /*time*/,
                                const IOdata& inputs,

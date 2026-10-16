@@ -17,8 +17,10 @@
 
 namespace griddyn::exciters {
 namespace {
-    constexpr double limiterRootTolerance = 0.00001;
-}
+    // Keep this distinct from Exciter::limiterRootTolerance, the generic 2e-6 threshold.
+    constexpr double ieeeType1LimiterRootTolerance = 0.00001;
+    constexpr double initialLimitContactTolerance = 1e-7;
+}  // namespace
 
 ExciterIEEEtype1::ExciterIEEEtype1(const std::string& objName): Exciter(objName)
 {
@@ -66,13 +68,13 @@ void ExciterIEEEtype1::dynObjectInitializeB(const IOdata& inputs,
                                             const IOdata& desiredOutput,
                                             IOdata& fieldSet)
 {
+    const double originalUpperLimit = Vrmax;
     Exciter::dynObjectInitializeB(inputs,
                                   desiredOutput,
                                   fieldSet);  // this will dynInitializeB the field state if need be
     double* stateValues = m_state.data();
     stateValues[1] = saturationFeedback(stateValues[0]);  // Vr
-    if ((stateValues[1] < Vrmin - 1e-7) ||
-        !adjustInitialUpperLimit(stateValues[1], Vrmax, "IEEE Type 1 initial regulator output")) {
+    if (!adjustInitialRegulatorLimit(stateValues[1], inputs[VOLTAGE_IN_LOCATION])) {
         throw InvalidParameterValue("IEEE Type 1 initial regulator output outside limits");
     }
     stateValues[2] = (stateValues[0] * Kf) / Tf;  // Rf
@@ -80,8 +82,31 @@ void ExciterIEEEtype1::dynObjectInitializeB(const IOdata& inputs,
         stateValues[3] = inputs[VOLTAGE_IN_LOCATION];
     }
     vBias = inputs[VOLTAGE_IN_LOCATION] + (stateValues[1] / Ka) - Vref;
+    if ((Vrmax != 0.0) && (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
+        // A regulator parked at its upper bound needs an unconstrained
+        // request beyond the bound; otherwise a tiny voltage change releases
+        // the limiter.  The field and regulator states remain at equilibrium.
+        const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+        const double guard = 10.0 * ieeeType1LimiterRootTolerance + std::abs(Ka) * 1e-5;
+        vBias += std::max(0.2 * correction, guard) / Ka;
+        opFlags.set(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    } else if (stateValues[1] <= Vrmin + initialLimitContactTolerance) {
+        const double guard = 10.0 * ieeeType1LimiterRootTolerance + std::abs(Ka) * 1e-5;
+        vBias -= guard / Ka;
+        opFlags.reset(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    }
     fieldSet[1] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
+}
+
+bool ExciterIEEEtype1::adjustInitialRegulatorLimit(double initialValue, double /*terminalVoltage*/)
+{
+    if (initialValue < Vrmin - 1e-7) {
+        return false;
+    }
+    return adjustInitialUpperLimit(initialValue, Vrmax, "IEEE Type 1 initial regulator output");
 }
 
 // residual
@@ -193,8 +218,8 @@ void ExciterIEEEtype1::rootTest(const IOdata& inputs,
         // rootCheck() releases a high limiter when this quantity becomes
         // negative and a low limiter when it becomes positive. Offset the
         // held-side value so a zero release condition is not a repeated root.
-        roots[rootOffset] = opFlags[TRIGGER_HIGH] ? releaseRoot + limiterRootTolerance :
-                                                    releaseRoot - limiterRootTolerance;
+        roots[rootOffset] = opFlags[TRIGGER_HIGH] ? releaseRoot + ieeeType1LimiterRootTolerance :
+                                                    releaseRoot - ieeeType1LimiterRootTolerance;
     } else {
         roots[rootOffset] =
             std::min(regulatorUpperLimit() - exciterState[1], exciterState[1] - Vrmin) + 0.00001;

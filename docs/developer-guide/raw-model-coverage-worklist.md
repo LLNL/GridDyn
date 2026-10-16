@@ -24,9 +24,9 @@ fields are currently ignored.
   cases.
 - The 40 archived AESO RAW files contain 44 active nonzero-`IREG` records.
   They use only remote buses `610` and `1054`, all have `RMPCT=100%`, and no
-  active generator pairs share an `IREG` bus. They therefore fit the current
-  single-controller power-flow subset; the AESO corpus does not exercise the
-  grouped-participation rejection or the step-up-generator relocation path.
+  active generator pairs share an `IREG` bus. They fit the current remote
+  voltage-control power-flow support, but do not exercise grouped participation
+  or the step-up-generator relocation path.
 - The v33 failure was traced to fixed phase-shifter/control interpretation and
   invalid tap-limit normalization in a `CW=1`/zero-`NOMV1` combination. The
   reader now retains fixed negative phase-shifter controls and avoids creating
@@ -45,20 +45,21 @@ fields are currently ignored.
 ### Merge checkpoint and next steps
 
 The current change set is the mergeable power-flow increment for the AESO
-review. It covers the active AESO switched-shunt population, single-generator
-remote voltage control, transformer magnetizing admittance, fixed and active
-two-winding transformer import, and the observed v32/v33 correction-table
-forms. Negative transformer `CONT` direction is preserved through
+review. It covers the active AESO switched-shunt population, grouped and
+single-generator remote voltage control, transformer magnetizing admittance,
+fixed and active two-winding transformer import, and the observed v32/v33
+correction-table forms. Negative transformer `CONT` direction is preserved through
 power-flow initialization, and `NTP=0`, `NTP=1`, and stepped `NTP>1` now have
 explicit continuous, fixed, and stepped semantics.
 
 The focused regression tests cover switched-shunt initialization and
-continuous-control Jacobians, remote-control rejection/operation, transformer
+continuous-control Jacobians, grouped remote-control sharing and invalid
+control rejection, transformer
 magnetization, fixed negative phase-shifters, negative transformer control
 direction, and transformer tap-position counts. The 40-case AESO corpus review
-remains the compatibility baseline: grouped `RMPCT` controls are rejected
-explicitly, while the observed single-controller cases are supported in power
-flow only.
+remains the compatibility baseline; generator groups sharing an IREG bus are
+supported in power flow when their VS targets agree. Remote generator
+voltage-control dynamics remain unsupported.
 
 Next steps should be separate follow-up changes rather than prerequisites for
 this merge:
@@ -68,8 +69,8 @@ this merge:
 - Decide whether to implement PSS/E `ADJM` adjustment ordering and
   `MODSW=3..6`, or reject those modes explicitly instead of accepting reduced
   semantics.
-- Design coordinated grouped `RMPCT` equations for generators and switched
-  shunts; dynamic remote control requires a separate controller/state design.
+- Implement coordinated grouped `RMPCT` control for switched shunts; dynamic
+  remote generator control requires a separate controller/state design.
 - Add broader three-winding and v35 transformer coverage, including independent
   winding correction tables, `RATE4`-`RATE12`, and `NOD`.
 - Keep `.SAVE` reverse engineering and `.SEQ` sequence-network modeling out of
@@ -109,8 +110,8 @@ this merge:
   `CW=2/3`, active MW/Mvar control, independent winding correction tables,
   v35 `RATE4`-`RATE12`/`NOD`, and transformer ownership/name metadata remain
   reduced or discarded.
-- Outside transformers, the highest-value unimplemented RAW areas are grouped
-  generator voltage participation (`IREG`/`RMPCT` and newer remote controls),
+- Outside transformers, the highest-value unimplemented RAW areas are dynamic
+  remote generator voltage control and newer remote-control fields,
   induction-machine records, physical multi-terminal DC/FACTS/GNE devices,
   emergency bus-voltage limits, and area interchange targets. These are tracked
   in the numbered items below rather than being silently treated as supported.
@@ -205,22 +206,22 @@ larger numeric rating set before extending the reader.
 **Priority:** Medium
 
 `Generator` already has P/Q limits, a voltage target, a remote bus, machine
-base, impedance, and participation-related fields. The RAW reader now applies
-`VS`, `IREG`, and `RMPCT` for one active generator regulating one remote bus in
-power flow. The generator is attached to the remote `AcBus`, and the existing
-indirect-control path uses an exact remote-voltage equation when it is the
-only voltage controller on that bus. v35's inserted `NREG` field is accounted
-for when locating the subsequent generator fields.
+base, impedance, and participation-related fields. The RAW reader applies
+`VS`, `IREG`, and `RMPCT` to active generators regulating one remote bus in
+power flow. A group must use a consistent VS target; each member's RMPCT
+weight shares reactive adjustments about the generator's RAW QG operating
+point through the high-gain indirect voltage-control equations. v35's inserted
+`NREG` field is accounted for when locating the subsequent generator fields.
 
-Several-generator `IREG` groups are deliberately rejected with an error for
-now. GridDyn does not yet have the coordinated PSS/E reactive-participation
-equations needed to apply the `RMPCT` shares consistently, and this RAW
-support is power-flow-only; dynamic remote-voltage control remains future
-work. Negative/invalid remote identifiers, invalid `VS`, invalid `RMPCT`, and
-missing remote buses are also rejected rather than silently approximated.
+This support is power-flow-only; dynamic remote-voltage control and PSS/E
+limit-sharing comparisons remain future work. Negative/invalid remote
+identifiers, inconsistent `VS`, invalid `RMPCT`, and missing remote buses are
+rejected rather than silently approximated.
 
-Future work should implement grouped participation and compare limit sharing
-against PSS/E, then design a separate dynamic controller/state treatment.
+For the ACTIVSg25k DYR diagnosis workflow, including strict static baselines,
+record-prefix isolation, model-attachment tracing, and no-disturbance DAE /
+partitioned validation, see
+[the ACTIVSg25k dynamic investigation](activsg25k-dynamic-investigation.md).
 
 ### RAW-004: Complete transformer operating data
 

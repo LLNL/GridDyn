@@ -139,7 +139,10 @@ void WT3G1::dynObjectInitializeB(const IOdata& inputs,
     const double voltage = inputs[0];
     heldIp = desiredOutput[0] / voltage;
     const double reactiveCurrent = (desiredOutput[1] + (voltage * voltage / Xeq)) / voltage;
-    heldEq = -Xeq * reactiveCurrent;
+    // PSS/E WEQCMD is positive for a positive internal voltage source. With
+    // GridDyn's positive-injection P/Q convention, this gives the same sign
+    // as the WT3G1 reactive-power equation below.
+    heldEq = Xeq * reactiveCurrent;
     m_state[electricalActivePower] = desiredOutput[0];
     m_state[electricalReactivePower] = desiredOutput[1];
     m_state[2 + activeCurrentState] = heldIp;
@@ -153,7 +156,7 @@ std::array<double, 2> WT3G1::power(const IOdata& inputs, const double state[]) c
     const double angle = inputs[1] - state[rotorAngleState];
     const double voltageReal = inputs[0] * std::cos(angle);
     const double voltageImag = inputs[0] * std::sin(angle);
-    const double currentImag = -state[reactiveVoltageState] / Xeq;
+    const double currentImag = state[reactiveVoltageState] / Xeq;
     return {(voltageReal * state[activeCurrentState]) + (voltageImag * currentImag),
             (voltageReal * currentImag) - (voltageImag * state[activeCurrentState]) -
                 (inputs[0] * inputs[0] / Xeq)};

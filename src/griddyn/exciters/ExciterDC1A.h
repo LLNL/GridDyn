@@ -61,7 +61,17 @@ class ExciterDC1A: public ExciterIEEEtype1 {
     // virtual void setTime(CoreTime time){prevTime=time;};
   protected:
     /** Apply the initial regulator-output policy for the DC1A limit convention. */
-    virtual bool adjustInitialRegulatorLimit(double initialValue, double terminalVoltage);
+    bool adjustInitialRegulatorLimit(double initialValue, double terminalVoltage) override;
+    virtual double initialRegulatorUpperBound(double terminalVoltage) const;
+    virtual double initialRegulatorLowerBound(double terminalVoltage) const;
+    virtual double initialRegulatorOverdrive(double originalUpperLimit,
+                                             double terminalVoltage) const;
+
+    /** Add the field-equation derivative of the effective regulator output. */
+    virtual void fieldRegulatorJacobian(MatrixData<double>& matrixDataValue,
+                                        index_t fieldRow,
+                                        index_t regulatorCol,
+                                        index_t voltageCol) const;
 
     /** @brief the Jacobian entries for the limiter
 @param[in] V the voltage

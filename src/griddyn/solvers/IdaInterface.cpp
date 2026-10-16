@@ -492,6 +492,27 @@ void IdaInterface::logInitialConditionDiagnostics(
     stringVec stateNames;
     m_gds->getStateName(stateNames, mode);
 
+#ifdef GRIDDYN_ENABLE_KLU
+    if ((retval == IDA_LSETUP_FAIL) && !flags[DENSE_FLAG] && (LS != nullptr)) {
+        const auto* common = SUNLinSol_KLUGetCommon(LS);
+        const auto singularColumn = common->singular_col;
+        const auto columnName =
+            (singularColumn >= 0 && static_cast<size_t>(singularColumn) < stateNames.size()) ?
+            stateNames[singularColumn] :
+            std::string{"<unavailable>"};
+        logging::logTo(m_gds,
+                       m_gds,
+                       diagnosticLevel,
+                       "IDA IC KLU setup: status={}, structural_rank={}, numerical_rank={}, "
+                       "singular_col={} ({})",
+                       common->status,
+                       common->structural_rank,
+                       common->numerical_rank,
+                       singularColumn,
+                       columnName);
+    }
+#endif
+
     // A small residual after FIXED_DIFF initial-condition correction only
     // establishes DAE consistency: IDA is allowed to solve for y'.  A
     // no-disturbance stability case additionally needs those differential
@@ -683,7 +704,9 @@ void IdaInterface::logInitialConditionDiagnostics(
                    missingColumns,
                    missingDiagonals,
                    zeroDiagonal);
-    for (const auto index : zeroDiagonalIndices) {
+    for (size_t zeroIndex = 0; zeroIndex < (std::min)(size_t{16}, zeroDiagonalIndices.size());
+         ++zeroIndex) {
+        const auto index = zeroDiagonalIndices[zeroIndex];
         const auto stateName = (static_cast<size_t>(index) < stateNames.size()) ?
             stateNames[index] :
             std::string{"<unnamed>"};
@@ -695,12 +718,19 @@ void IdaInterface::logInitialConditionDiagnostics(
                        stateName);
     }
 
-    // KLU reports an unrecoverable setup error when the Jacobian is singular,
-    // but its error path does not identify the involved equations.  The IC
-    // diagnostic is explicitly opt-in and the systems are normally modest in
-    // size, so use complete-pivot elimination here to make that failure
-    // actionable.  This is intentionally diagnostic-only: it does not alter
-    // the matrix passed to IDA or the solver's pivoting behaviour.
+    // Dense complete-pivot elimination is useful for small diagnostic cases,
+    // but grows quadratically in memory and cubically in work.  In particular,
+    // a 135k-state DAE would require roughly 146 GB just for this matrix.
+    constexpr count_t maxDenseRankSize = 512;
+    if (svsize > maxDenseRankSize) {
+        logging::logTo(m_gds,
+                       m_gds,
+                       diagnosticLevel,
+                       "IDA IC Jacobian full-pivot rank skipped: state_size={} exceeds {}",
+                       svsize,
+                       maxDenseRankSize);
+        return;
+    }
     std::vector<double> denseJacobian(static_cast<size_t>(svsize) * svsize, 0.0);
     double largestJacobianElement = 0.0;
     for (const auto& entry : jacobian) {
@@ -1007,6 +1037,8 @@ int IdaInterface::calcIC(CoreTime t0, CoreTime tstep0, IcModes initCondMode, boo
                     flags.reset(USE_MASK_FLAG);
                     return SOLVER_INVALID_STATE_ERROR;
                 }
+                flags.reset(USE_MASK_FLAG);
+                return SOLVER_INVALID_STATE_ERROR;
             } else {
                 flags.reset(USE_MASK_FLAG);
                 switch (retval) {

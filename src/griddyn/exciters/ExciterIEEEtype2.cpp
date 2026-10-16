@@ -16,6 +16,10 @@
 #include <string>
 
 namespace griddyn::exciters {
+namespace {
+    constexpr double initialLimitContactTolerance = 1e-7;
+}  // namespace
+
 ExciterIEEEtype2::ExciterIEEEtype2(const std::string& objName): ExciterIEEEtype1(objName) {}
 
 // cloning function
@@ -43,6 +47,7 @@ void ExciterIEEEtype2::dynObjectInitializeB(const IOdata& inputs,
                                             const IOdata& desiredOutput,
                                             IOdata& fieldSet)
 {
+    const double originalUpperLimit = Vrmax;
     Exciter::dynObjectInitializeB(inputs,
                                   desiredOutput,
                                   fieldSet);  // this will dynInitializeB the field state if need be
@@ -56,6 +61,17 @@ void ExciterIEEEtype2::dynObjectInitializeB(const IOdata& inputs,
     stateValues[3] = stateValues[1];  // X2
 
     vBias = inputs[VOLTAGE_IN_LOCATION] + (stateValues[1] / Ka) - Vref;
+    const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+    const double guard = 1e-3 + std::abs(Ka) * 1e-5;
+    if ((Vrmax != 0.0) && (stateValues[1] >= Vrmax - initialLimitContactTolerance)) {
+        vBias += std::max(0.2 * correction, guard) / Ka;
+        opFlags.set(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    } else if (stateValues[1] <= Vrmin + initialLimitContactTolerance) {
+        vBias -= guard / Ka;
+        opFlags.reset(TRIGGER_HIGH);
+        opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+    }
     fieldSet[exciterVsetInLocation] = Vref;
 }
 
@@ -76,7 +92,7 @@ void ExciterIEEEtype2::residual(const IOdata& inputs,
         (((-(Ke + (Aex * exp(Bex * exciterState[0]))) * exciterState[0]) + exciterState[1]) / Te) -
         stateDerivative[0];
     if (opFlags[OUTSIDE_VOLTAGE_LIMITS]) {
-        residualValues[1] = stateDerivative[1];
+        residualValues[1] = -stateDerivative[1];
     } else {
         residualValues[1] = ((-exciterState[1] + (Ka * Kf * exciterState[2]) +
                               (Ka * (Vref + vBias - inputs[VOLTAGE_IN_LOCATION]))) /
@@ -138,7 +154,7 @@ void ExciterIEEEtype2::jacobianElements(const IOdata& /*inputs*/,
     matrixData.assign(refIndex, refIndex + 1, 1.0 / Te);
 
     if (opFlags[OUTSIDE_VOLTAGE_LIMITS]) {
-        matrixData.assign(refIndex + 1, refIndex + 1, stateData.cj);
+        matrixData.assign(refIndex + 1, refIndex + 1, -stateData.cj);
     } else {
         // Vr
         if (voltageLoc != kNullLocation) {

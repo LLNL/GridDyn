@@ -15,11 +15,12 @@ namespace griddyn::exciters {
  * uses the DC1A states \f[E_{fd},V_R,x,R_F,(V_m)\f] and equations, with the
  * DC2A-specific voltage-dependent regulator bounds
  * \f[
- * V_{RMIN}V_m \le V_R \le V_{RMAX}V_m.
+ * V_{RMIN}V_T \le V_R \le V_{RMAX}V_T.
  * \f]
- * Thus the inherited field equation is
- * \f$T_E\dot E_{fd}=V_R-K_EE_{fd}-S_E(E_{fd})\f$ and the regulator uses the
- * inherited sensed-voltage lead-lag and washout feedback. The PSS/E `Switch`
+ * The field equation uses the voltage-dependent bound while the limiter is
+ * active; the antiwindup regulator state remains held until release. The
+ * regulator uses the inherited sensed-voltage lead-lag and washout feedback.
+ * The PSS/E `Switch`
  * field is not implemented by PSS/E; the reader rejects a nonzero value.
  */
 class ExciterDC2A: public ExciterDC1A {
@@ -47,6 +48,14 @@ class ExciterDC2A: public ExciterDC1A {
 
   protected:
     bool adjustInitialRegulatorLimit(double initialValue, double terminalVoltage) override;
+    double initialRegulatorUpperBound(double terminalVoltage) const override;
+    double initialRegulatorLowerBound(double terminalVoltage) const override;
+    double initialRegulatorOverdrive(double originalUpperLimit,
+                                     double terminalVoltage) const override;
+    void fieldRegulatorJacobian(MatrixData<double>& matrixDataValue,
+                                index_t fieldRow,
+                                index_t regulatorCol,
+                                index_t voltageCol) const override;
 
     virtual void limitJacobian(double V,
                                int voltageLoc,

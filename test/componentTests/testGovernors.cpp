@@ -191,6 +191,7 @@ void expectGovernorDaeJacobian(Governor& governor,
         inputLocs[index] = static_cast<index_t>(20U + index);
     }
     governor.jacobianElements(inputs, stateData, jacobian, inputLocs, cDaeSolverMode);
+    jacobian.compact();
 
     const auto residualAt = [&governor, &inputs](const std::vector<double>& trialState,
                                                  const std::vector<double>& trialDerivative) {
@@ -206,7 +207,7 @@ void expectGovernorDaeJacobian(Governor& governor,
         auto trialState = state;
         auto trialDerivative = stateDerivative;
         trialState[column] += step;
-        trialDerivative[column] += step;
+        trialDerivative[column] += cj * step;
         const auto trialResidual = residualAt(trialState, trialDerivative);
         for (std::size_t row = 0; row < stateCount; ++row) {
             const double numerical = (trialResidual[row] - baseResidual[row]) / step;
@@ -250,6 +251,7 @@ void expectGovernorEquationConsistency(Governor& governor,
         inputLocs[index] = firstInputColumn + static_cast<index_t>(index);
     }
     governor.jacobianElements(inputs, stateData, jacobian, inputLocs, cDaeSolverMode);
+    jacobian.compact();
     for (std::size_t input = 0; input < inputs.size(); ++input) {
         auto trialInputs = inputs;
         trialInputs[input] += step;
@@ -288,8 +290,13 @@ TEST(GovernorModelTests, IeeeSimpleAutoAdjustedLimitIsTheRuntimeBoundary)
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    EXPECT_DOUBLE_EQ(root, 0.0);
-    governor.rootTrigger(0.0, inputs, {1}, cLocalSolverMode);
+    // The 0.5 pu limit correction gives this model 20% overdrive.  At the
+    // adjusted upper bound, the active release root reflects that margin.
+    EXPECT_NEAR(root, (0.2 * (1.0 - 0.5) / 0.05) + 1e-5, 1e-12);
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        governor.rootTest({speed, 1.0}, emptyStateData, &root, cLocalSolverMode);
+        EXPECT_GT(root, 0.0) << speed;
+    }
 
     std::vector<double> derivative(2, 0.0);
     governor.derivative(inputs, emptyStateData, derivative.data(), cLocalSolverMode);
@@ -684,11 +691,17 @@ TEST(GovernorModelTests, HygovMatchesOpenIpslInitializationAndPerturbedEquations
     const auto& initialized = governor.getStates();
     ASSERT_EQ(initialized.size(), 5U);
     EXPECT_DOUBLE_EQ(initialized[0], 0.4);
-    EXPECT_DOUBLE_EQ(initialized[1], 0.0);
+    EXPECT_NEAR(initialized[1], 0.0, 1e-14);
     EXPECT_NEAR(initialized[2], initialFlow, 1e-14);
     EXPECT_NEAR(initialized[3], initialFlow, 1e-14);
     EXPECT_NEAR(initialized[4], initialFlow, 1e-14);
     EXPECT_NEAR(fieldSet[govpSetInLocation], 0.05 * initialFlow, 1e-14);
+
+    std::vector<double> initialResidual(initialized.size(), 0.0);
+    governor.residual(inputs, emptyStateData, initialResidual.data(), cLocalSolverMode);
+    for (const auto value : initialResidual) {
+        EXPECT_NEAR(value, 0.0, 1e-14);
+    }
 
     std::vector<double> state{0.42, 0.02, 0.40, 0.41, 0.42};
     std::vector<double> stateDerivative(state.size(), 0.0);
@@ -773,6 +786,15 @@ TEST(GovernorModelTests, HygovLatchesRateLimitRootTransitions)
     EXPECT_EQ(
         governor.rootCheck(inputs, emptyStateData, cLocalSolverMode, CheckLevel::REVERSABLE_ONLY),
         ChangeCode::NO_CHANGE);
+
+    governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
+    const double heldRateRoot = roots[0];
+    for (const double delta : {-1e-5, 1e-5}) {
+        inputs[govOmegaInLocation] = 0.95 + delta;
+        governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0] * heldRateRoot, 0.0) << delta;
+        EXPECT_GT(std::abs(roots[0]), 1e-5) << delta;
+    }
 
     // A root in the opposite direction releases the upper rate limiter even
     // if the value is still on the floating-point boundary.
@@ -936,9 +958,40 @@ TEST(GovernorModelTests, IeeeG1AdjustsInitialUpperLimitByDefault)
     governor.setRootOffset(0, cLocalSolverMode);
     std::array<double, 2> roots{};
     governor.rootTest({1.0, 0.0}, emptyStateData, roots.data(), cLocalSolverMode);
-    // A permissively raised PMAX equal to the dispatch is an equilibrium,
-    // rather than an immediate position-limit event.
-    EXPECT_GT(roots[1], 0.0);
+    // The corrected PMAX starts on the active position branch with an
+    // outward unconstrained valve request.
+    EXPECT_GT(roots[0], 0.0);
+    EXPECT_LT(roots[1], 0.0);
+
+    const auto state = governor.getStates();
+    std::vector<double> derivative(state.size(), 0.0);
+    std::vector<double> residual(state.size(), 0.0);
+    governor.derivative({1.0, 0.0}, emptyStateData, derivative.data(), cLocalSolverMode);
+    governor.residual({1.0, 0.0}, emptyStateData, residual.data(), cLocalSolverMode);
+    for (std::size_t index = 0; index < state.size(); ++index) {
+        EXPECT_NEAR(derivative[index], 0.0, 1e-12) << index;
+        EXPECT_NEAR(residual[index], 0.0, 1e-12) << index;
+    }
+    // The exact PMAX point is a limiter switching surface. Check the DAE
+    // Jacobian on its smooth interior side, then separately verify the
+    // boundary's root and small-signal behavior above.
+    auto jacobianState = state;
+    jacobianState[3] -= 1e-3;
+    expectGovernorDaeJacobian(governor, {1.0, 0.0}, jacobianState, 1.0);
+
+    // Ten times the default relative tolerance on either side should remain
+    // a smooth small-signal response, with both root functions away from zero.
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        const IOdata perturbedInputs{speed, 0.0};
+        governor.derivative(perturbedInputs, emptyStateData, derivative.data(), cLocalSolverMode);
+        governor.rootTest(perturbedInputs, emptyStateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0], 0.0);
+        EXPECT_LT(roots[1], 0.0);
+        for (std::size_t index = 0; index < derivative.size(); ++index) {
+            EXPECT_TRUE(std::isfinite(derivative[index])) << index;
+            EXPECT_LT(std::abs(derivative[index]), 1e-3) << index;
+        }
+    }
 }
 
 TEST(GovernorModelTests, GovernorStrictInitialUpperLimitPolicyRejectsViolation)
@@ -969,9 +1022,8 @@ TEST(GovernorModelTests, HygovAdjustsInitialGateUpperLimitByDefault)
     governor.setRootOffset(0, cLocalSolverMode);
     std::array<double, 2> roots{};
     governor.rootTest({1.0, 0.0}, emptyStateData, roots.data(), cLocalSolverMode);
-    // A permissively raised GMAX equal to the dispatch is an equilibrium,
-    // rather than an immediate position-limit event.
-    EXPECT_GT(roots[1], 0.0);
+    // The corrected GMAX starts on the held branch with an outward rate.
+    EXPECT_LT(roots[1], 0.0);
 }
 
 TEST(GovernorModelTests, HygovPositionLimitReleaseRootHasHysteresis)
@@ -989,9 +1041,16 @@ TEST(GovernorModelTests, HygovPositionLimitReleaseRootHasHysteresis)
     governor.setState(0.0, state.data(), stateDerivative.data(), cLocalSolverMode);
 
     std::array<double, 2> roots{};
-    governor.rootTrigger(0.0, inputs, {0, -1}, cLocalSolverMode);
     governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
     EXPECT_LT(roots[1], 0.0);
+
+    const double heldPositionRoot = roots[1];
+    for (const double delta : {-1e-5, 1e-5}) {
+        inputs[govOmegaInLocation] = 1.0 + delta;
+        governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[1] * heldPositionRoot, 0.0) << delta;
+        EXPECT_GT(std::abs(roots[1]), 1e-5) << delta;
+    }
 
     inputs[govOmegaInLocation] = 1.05;
     governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
@@ -1260,7 +1319,7 @@ TEST(GovernorModelTests, Ggov1FactoryTracksInactiveLoadLimiterAndValidatesDelay)
     ASSERT_EQ(initialized.size(), 11U);
     // Leave the inactive temperature selector just above the dispatch so the
     // low-value selector starts in a smooth regime for Jacobian evaluation.
-    EXPECT_NEAR(initialized[9], 0.200001, 1e-12);
+    EXPECT_NEAR(initialized[9], 0.20001, 1e-12);
     std::vector<double> residual(governor->getStates().size(), 0.0);
     governor->residual(inputs, emptyStateData, residual.data(), cLocalSolverMode);
     for (double value : residual) {
@@ -1292,6 +1351,57 @@ TEST(GovernorModelTests, Ggov1FactoryTracksInactiveLoadLimiterAndValidatesDelay)
     governors::GovernorGgov1 delayed;
     delayed.set("teng", 0.25);
     EXPECT_THROW(delayed.dynInitializeA(0.0, 0), InvalidParameterValue);
+}
+
+TEST(GovernorModelTests, Ggov1InitializedSelectorIsStableToSmallSpeedNoise)
+{
+    governors::GovernorGgov1 governor;
+    governor.set("rselect", 1.0);
+    governor.set("fswitch", 0.0);
+    governor.set("vmax", 2.0);
+    governor.set("vmin", 0.0);
+    governor.set("ldref", 1.2);
+    governor.dynInitializeA(0.0, 0);
+
+    IOdata inputs{1.0, 0.8, 0.8};
+    IOdata fieldSet(3, 0.0);
+    governor.dynInitializeB(inputs, {0.8}, fieldSet);
+    const auto state = governor.getStates();
+    ASSERT_EQ(state.size(), 11U);
+    EXPECT_NEAR(state[9], 0.20001, 1e-12);
+
+    std::vector<double> derivative(state.size(), 0.0);
+    std::vector<double> residual(state.size(), 0.0);
+    governor.derivative(inputs, emptyStateData, derivative.data(), cLocalSolverMode);
+    governor.residual(inputs, emptyStateData, residual.data(), cLocalSolverMode);
+    for (std::size_t index = 0; index < state.size(); ++index) {
+        EXPECT_NEAR(derivative[index], 0.0, 1e-12) << index;
+        EXPECT_NEAR(residual[index], 0.0, 1e-12) << index;
+    }
+    // Move the temperature request away from the low-value selector's
+    // switching surface for a meaningful single-branch Jacobian check.
+    auto jacobianState = state;
+    jacobianState[9] += 0.01;
+    expectGovernorDaeJacobian(governor, inputs, jacobianState, 1.0);
+    // With yp fixed (cj=0), the inactive load integrator contributes a zero
+    // residual row.  IDA_Y_INIT cannot factor such a masked startup system.
+    expectGovernorDaeJacobian(governor, inputs, jacobianState, 0.0);
+
+    // The inactive temperature controller starts with an interior selector
+    // margin. Ten times the default relative tolerance must not wake its
+    // integrator; the acceleration state still responds to speed normally.
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        inputs[govOmegaInLocation] = speed;
+        governor.derivative(inputs, emptyStateData, derivative.data(), cLocalSolverMode);
+        governor.residual(inputs, emptyStateData, residual.data(), cLocalSolverMode);
+        EXPECT_NEAR(derivative[8], 0.0, 1e-12);
+        EXPECT_TRUE(std::isfinite(derivative[9]));
+        for (std::size_t index = 0; index < state.size(); ++index) {
+            EXPECT_TRUE(std::isfinite(derivative[index])) << index;
+            EXPECT_NEAR(residual[index], derivative[index], 1e-12) << index;
+        }
+        EXPECT_EQ(governor.getStates(), state);
+    }
 }
 
 TEST_F(GovernorTests, Ggov1CouplesElectricalPowerAndHasAnalyticJacobian)
@@ -1345,8 +1455,13 @@ TEST(GovernorModelTests, IeeeG1RateAndAntiWindupLimitTransitions)
 
     std::array<double, 2> roots{};
     governor.rootTest(inputs, emptyStateData, roots.data(), cLocalSolverMode);
-    EXPECT_DOUBLE_EQ(roots[1], 0.0);
+    EXPECT_DOUBLE_EQ(roots[1], 1e-4);
     governor.rootTrigger(0.0, inputs, {1, 1}, cLocalSolverMode);
+
+    // This is now a clear upper-position-limiter branch, away from the
+    // zero-rate switching surface. Check the constrained DAE Jacobian while
+    // small state perturbations keep the outward drive active.
+    expectGovernorDaeJacobian(governor, inputs, state, 1.0);
 
     std::vector<double> derivative(state.size(), 0.0);
     governor.derivative(inputs, emptyStateData, derivative.data(), cLocalSolverMode);
@@ -1444,7 +1559,9 @@ TEST(GovernorModelTests, Tgov1AppliesValveLimitsAndRejectsSingularParameters)
 
     double root = 0.0;
     governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
-    EXPECT_DOUBLE_EQ(root, 0.0);
+    // The valve state is exactly at Pmax; the positive value is the root
+    // tolerance added to the zero distance from the limit.
+    EXPECT_NEAR(root, 1e-5, 1e-12);
     governor.rootTrigger(0.0, inputs, {1}, cLocalSolverMode);
 
     std::vector<double> derivative(3, 0.0);
@@ -1470,6 +1587,26 @@ TEST(GovernorModelTests, Tgov1AppliesValveLimitsAndRejectsSingularParameters)
     // Valve-limit ordering is deferred until the complete record is loaded.
     invalidGovernor.set("pmax", 0.2);
     EXPECT_ANY_THROW(invalidGovernor.dynInitializeA(0.0, 0));
+}
+
+TEST(GovernorModelTests, Tgov1InitializedUpperLimitIsQuietUnderSmallFrequencyNoise)
+{
+    governors::GovernorTgov1 governor;
+    configureTgov1(governor);
+    governor.dynInitializeA(0.0, 0);
+    governor.setRootOffset(0, cLocalSolverMode);
+    const IOdata inputs{1.0, 1.05};
+    IOdata fieldSet(2, 0.0);
+    governor.dynInitializeB(inputs, {1.05}, fieldSet);
+
+    double root = 0.0;
+    governor.rootTest(inputs, emptyStateData, &root, cLocalSolverMode);
+    const double expectedRoot = (10.0 * 1e-5 * governor.get("k") / governor.get("t1")) + 1e-5;
+    EXPECT_NEAR(root, expectedRoot, 1e-12);
+    for (const double speed : {1.0 - 1e-5, 1.0 + 1e-5}) {
+        governor.rootTest({speed, 1.05}, emptyStateData, &root, cLocalSolverMode);
+        EXPECT_GT(root, 0.0) << speed;
+    }
 }
 
 TEST(GovernorModelTests, Tgov1SpeedStepTrajectoryMatchesAndesEquations)

@@ -18,8 +18,11 @@
 
 namespace griddyn::stabilizers {
 namespace {
+    // Keep output-limit roots clear under 10x-relative-tolerance input noise,
+    // including the cascade gain from frequency to stabilizer output.
+    constexpr double limitRootTolerance = 1e-4;
     constexpr double inputValidityLimit = 1e20;
-}
+}  // namespace
 
 StabilizerPss2a::StabilizerPss2a(const std::string& objName): Stabilizer(objName)
 {
@@ -693,8 +696,8 @@ void StabilizerPss2a::rootTest(const IOdata& inputs,
     const auto locations = offsets.getLocations(stateData, sMode, this);
     const index_t rootOffset = offsets.getRootOffset(sMode);
     const double unlimited = outputExpression(inputs, locations.diffStateLoc).value;
-    roots[rootOffset] = Vstmax - unlimited;
-    roots[rootOffset + 1] = unlimited - Vstmin;
+    roots[rootOffset] = Vstmax - unlimited + limitRootTolerance;
+    roots[rootOffset + 1] = unlimited - Vstmin + limitRootTolerance;
 }
 
 void StabilizerPss2a::rootTrigger(CoreTime /*time*/,

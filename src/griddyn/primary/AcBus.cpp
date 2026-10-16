@@ -28,7 +28,9 @@
 #include <limits>
 #include <memory>
 #include <numbers>
+#include <queue>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -109,6 +111,8 @@ CoreObject* AcBus::clone(CoreObject* obj) const
     nobj->frequencyFilterTw = frequencyFilterTw;
     nobj->frequencyFilterFn = frequencyFilterFn;
     nobj->frequencyFilterConfigured = frequencyFilterConfigured;
+    nobj->pFlowInitialVoltage = pFlowInitialVoltage;
+    nobj->pFlowInitialVoltageCaptured = pFlowInitialVoltageCaptured;
 
     nobj->busController.autogenP = busController.autogenP;
     nobj->busController.autogenQ = busController.autogenQ;
@@ -262,6 +266,10 @@ void AcBus::alert(CoreObject* obj, int code)
 // dynInitializeB states
 void AcBus::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
 {
+    if (!pFlowInitialVoltageCaptured) {
+        pFlowInitialVoltage = voltage;
+        pFlowInitialVoltageCaptured = true;
+    }
     if (Vtol < 0) {
         Vtol = getRoot()->get("voltagetolerance");
     }
@@ -287,7 +295,11 @@ void AcBus::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
             ++activeSecondary;
         }
     }
-    if (!(opFlags[USE_AUTOGEN])) {
+    // An otherwise empty bus can be discarded when it is a leaf, but SLK
+    // and AFIX buses still provide the network angle reference.  This occurs
+    // when a RAW generator is moved to its internal side of a step-up
+    // transformer, leaving the original bus with only the transformer link.
+    if (!(opFlags[USE_AUTOGEN]) && (type != BusType::SLK) && (type != BusType::AFIX)) {
         if (CHECK_CONTROLFLAG(flags, AUTO_BUS_DISCONNECT)) {
             int activeLink = 0;
             for (auto* lnk : attachedLinks) {
@@ -385,7 +397,8 @@ void AcBus::pFlowObjectInitializeA(CoreTime time0, std::uint32_t flags)
     }
 
     // update the controls
-    if ((type == BusType::PV) || (type == BusType::SLK)) {
+    if ((type == BusType::PV) || (type == BusType::SLK) ||
+        ((type == BusType::PQ) && opFlags[INDIRECT_VOLTAGE_CONTROL])) {
         busController.updateVoltageControls();
     }
     if ((type == BusType::AFIX) || (type == BusType::SLK)) {
@@ -620,6 +633,9 @@ double AcBus::getAverageAngle() const
 ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, CheckLevel level)
 {
     auto out = ChangeCode::NO_CHANGE;
+    // A bus with a zero-width reactive range cannot resume voltage control
+    // after it has been moved from PV/SLK to PQ/AFIX at its Q limit.
+    const bool hasReactiveControlRange = busController.Qmax > busController.Qmin;
     if (level == CheckLevel::LOW_VOLTAGE_CHECK) {
         if (!isConnected()) {
             return out;
@@ -638,13 +654,18 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
 
     if (!CHECK_CONTROLFLAG(flags, IGNORE_BUS_LIMITS)) {
         computePowerAdjustments();
+        // The residual excludes controlled generation. Since generator
+        // outputs enter the bus balance with the opposite sign, the residual
+        // itself is the generator-side output required to balance the bus.
         S.genQ = S.sumQ();
         S.genP = S.sumP();
+        constexpr double reactiveLimitTolerance = 1.0e-5;
+        constexpr double realLimitTolerance = 1.0e-5;
 
         switch (type) {
             case BusType::SLK:
 
-                if (S.genQ < busController.Qmin) {
+                if (S.genQ < (busController.Qmin - reactiveLimitTolerance)) {
                     S.genQ = busController.Qmin;
                     for (auto& vco : busController.vControlObjects) {
                         vco->set("q", "min");
@@ -652,7 +673,7 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     type = BusType::AFIX;
                     alert(this, JAC_COUNT_CHANGE);
                     out = ChangeCode::JACOBIAN_CHANGE;
-                } else if (S.genQ > busController.Qmax) {
+                } else if (S.genQ > (busController.Qmax + reactiveLimitTolerance)) {
                     S.genQ = busController.Qmax;
                     for (auto& vco : busController.vControlObjects) {
                         vco->set("q", "max");
@@ -664,8 +685,13 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
 
                 break;
             case BusType::PQ:
-                if (prevType == BusType::PV) {
-                    if (std::abs(S.genQ - busController.Qmin) < 0.00001) {
+                // An IREG target regulated through indirect generator
+                // equations is intentionally represented as PQ.  Its saved
+                // RAW PV type must not restore a competing local voltage
+                // equation; each remote generator handles its own Q limits.
+                if (!opFlags[INDIRECT_VOLTAGE_CONTROL] && hasReactiveControlRange &&
+                    prevType == BusType::PV) {
+                    if (std::abs(S.genQ - busController.Qmin) <= reactiveLimitTolerance) {
                         if (voltage < vTarget) {
                             if (oCount < 5) {
                                 voltage = vTarget;
@@ -688,8 +714,9 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                             }
                         }
                     }
-                } else if (prevType == BusType::SLK) {
-                    if (std::abs(S.genQ - busController.Qmin) < 0.00001) {
+                } else if (!opFlags[INDIRECT_VOLTAGE_CONTROL] && hasReactiveControlRange &&
+                           prevType == BusType::SLK) {
+                    if (std::abs(S.genQ - busController.Qmin) <= reactiveLimitTolerance) {
                         if (voltage < vTarget) {
                             if (oCount < 5) {
                                 voltage = vTarget;
@@ -714,7 +741,7 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
 
                 break;
             case BusType::PV:
-                if (S.genQ < busController.Qmin) {
+                if (S.genQ < (busController.Qmin - reactiveLimitTolerance)) {
                     S.genQ = busController.Qmin;
                     for (auto& vco : busController.vControlObjects) {
                         vco->set("q", "min");
@@ -723,7 +750,7 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     alert(this, JAC_COUNT_CHANGE);
                     out = ChangeCode::JACOBIAN_CHANGE;
                     logging::trace(this, "changing from PV to PQ from Qmin");
-                } else if (S.genQ > busController.Qmax) {
+                } else if (S.genQ > (busController.Qmax + reactiveLimitTolerance)) {
                     S.genQ = busController.Qmax;
                     for (auto& vco : busController.vControlObjects) {
                         vco->set("q", "max");
@@ -735,8 +762,9 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                 }
                 break;
             case BusType::AFIX:
-                if (prevType == BusType::SLK) {
-                    if (std::abs(S.genQ - busController.Qmin) < 0.00001) {
+                if (!opFlags[INDIRECT_VOLTAGE_CONTROL] && hasReactiveControlRange &&
+                    prevType == BusType::SLK) {
+                    if (std::abs(S.genQ - busController.Qmin) <= reactiveLimitTolerance) {
                         if (voltage < vTarget) {
                             if (oCount < 5) {
                                 voltage = vTarget;
@@ -759,27 +787,34 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     }
                 }
 
-                if (S.genP < busController.Pmin) {
-                    S.genP = busController.Pmin;
-                    for (auto& pco : busController.pControlObjects) {
-                        pco->set("p", "min");
-                    }
-                    type = BusType::PQ;
-                    alert(this, JAC_COUNT_CHANGE);
-                    out = ChangeCode::JACOBIAN_CHANGE;
-                    if (prevType == BusType::SLK) {
-                        alert(this, SLACK_BUS_CHANGE);
-                    }
-                } else if (S.genP > busController.Pmax) {
-                    S.genP = busController.Pmax;
-                    type = BusType::PQ;
-                    for (auto& pco : busController.pControlObjects) {
-                        pco->set("p", "max");
-                    }
-                    alert(this, JAC_COUNT_CHANGE);
-                    out = ChangeCode::JACOBIAN_CHANGE;
-                    if (prevType == BusType::SLK) {
-                        alert(this, SLACK_BUS_CHANGE);
+                // AFIX can be the angle reference after a remote voltage
+                // controller takes over a swing bus.  If it uses the
+                // automatic slack generator, it has no explicit P limits;
+                // treating the empty controller list's zero bounds as limits
+                // converts the reference to PQ and leaves the island unsolved.
+                if (!opFlags[USE_AUTOGEN]) {
+                    if (S.genP < (busController.Pmin - realLimitTolerance)) {
+                        S.genP = busController.Pmin;
+                        for (auto& pco : busController.pControlObjects) {
+                            pco->set("p", "min");
+                        }
+                        type = BusType::PQ;
+                        alert(this, JAC_COUNT_CHANGE);
+                        out = ChangeCode::JACOBIAN_CHANGE;
+                        if (prevType == BusType::SLK) {
+                            alert(this, SLACK_BUS_CHANGE);
+                        }
+                    } else if (S.genP > (busController.Pmax + realLimitTolerance)) {
+                        S.genP = busController.Pmax;
+                        type = BusType::PQ;
+                        for (auto& pco : busController.pControlObjects) {
+                            pco->set("p", "max");
+                        }
+                        alert(this, JAC_COUNT_CHANGE);
+                        out = ChangeCode::JACOBIAN_CHANGE;
+                        if (prevType == BusType::SLK) {
+                            alert(this, SLACK_BUS_CHANGE);
+                        }
                     }
                 }
         }
@@ -909,26 +944,120 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
     int vci = 0;
     int poi = 0;
     auto cid = getID();
+    const auto setActivePowerCommand = [this, cid](GridSecondary* controller,
+                                                   double requestedPower,
+                                                   int& proxyIndex) {
+        if (!controller->checkFlag(REMOTE_POWER_CONTROL)) {
+            // Remote voltage regulation leaves active-power control at the
+            // generator's terminal bus, so adjust that generator directly.
+            controller->set("p", requestedPower);
+            return;
+        }
+        if ((proxyIndex < 0) ||
+            (static_cast<std::size_t>(proxyIndex) >= busController.proxyPControlObject.size())) {
+            logging::warning(this,
+                             "Remote active-power controller {} has no proxy at bus {}",
+                             controller->getName(),
+                             getName());
+            return;
+        }
+        auto* proxy = busController.proxyPControlObject[static_cast<std::size_t>(proxyIndex++)];
+        proxy->fixPower(requestedPower, proxy->getReactivePower(cid), cid, cid);
+    };
     switch (type) {
         case BusType::PQ:
             break;
-        case BusType::PV:
+        case BusType::PV: {
             computePowerAdjustments();
             qgap = -S.sumQ();
-            for (auto& vco : busController.vControlObjects) {
-                if (vco->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
-                    vco->set("q", -qgap * busController.vcfrac[vci]);
-                } else {
-                    busController.proxyVControlObject[poi]->fixPower(
-                        busController.proxyVControlObject[poi]->getRealPower(cid),
-                        qgap * busController.vcfrac[vci],
-                        cid,
-                        cid);
-                    ++poi;
+            std::vector<Generator*> localGeneratorControls;
+            bool allControlsAreLocalGenerators = busController.vControlLinks.empty();
+            for (auto* vco : busController.vControlObjects) {
+                auto* gen = dynamic_cast<Generator*>(vco);
+                if ((gen == nullptr) || !gen->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
+                    allControlsAreLocalGenerators = false;
+                    break;
                 }
-                ++vci;
+                localGeneratorControls.push_back(gen);
+            }
+            if (allControlsAreLocalGenerators && !localGeneratorControls.empty()) {
+                // The power-flow bus solves one aggregate Q balance.  Restore
+                // that balance across its local generator controls without
+                // assigning any unit outside its own reactive limits.
+                std::vector<double> qValues(localGeneratorControls.size());
+                std::vector<double> qMins(localGeneratorControls.size());
+                std::vector<double> qMaxs(localGeneratorControls.size());
+                double currentQTotal = 0.0;
+                for (std::size_t index = 0; index < localGeneratorControls.size(); ++index) {
+                    auto* gen = localGeneratorControls[index];
+                    qMins[index] = gen->getQmin();
+                    qMaxs[index] = gen->getQmax();
+                    qValues[index] =
+                        std::clamp(-gen->getReactivePower(), qMins[index], qMaxs[index]);
+                    currentQTotal += qValues[index];
+                }
+
+                double remainingQ = -qgap - currentQTotal;
+                for (std::size_t pass = 0;
+                     (pass < localGeneratorControls.size()) && (std::abs(remainingQ) > 1e-12);
+                     ++pass) {
+                    double activeWeight = 0.0;
+                    for (std::size_t index = 0; index < qValues.size(); ++index) {
+                        const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
+                                                                  (qValues[index] > qMins[index]);
+                        if (canMove) {
+                            activeWeight += std::max(0.0, busController.vcfrac[index]);
+                        }
+                    }
+                    if (activeWeight <= 0.0) {
+                        break;
+                    }
+                    double appliedQ = 0.0;
+                    for (std::size_t index = 0; index < qValues.size(); ++index) {
+                        const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
+                                                                  (qValues[index] > qMins[index]);
+                        if (canMove) {
+                            const double weight = std::max(0.0, busController.vcfrac[index]);
+                            const double requestedChange = remainingQ * weight / activeWeight;
+                            const double updatedQ = std::clamp(qValues[index] + requestedChange,
+                                                               qMins[index],
+                                                               qMaxs[index]);
+                            appliedQ += updatedQ - qValues[index];
+                            qValues[index] = updatedQ;
+                        }
+                    }
+                    if (std::abs(appliedQ) <= 1e-14) {
+                        break;
+                    }
+                    remainingQ -= appliedQ;
+                }
+
+                for (std::size_t index = 0; index < localGeneratorControls.size(); ++index) {
+                    localGeneratorControls[index]->set("q", qValues[index]);
+                }
+                if (std::abs(remainingQ) > 1e-5) {
+                    logging::warning(
+                        this,
+                        "Local generator Q limits leave a reactive initialization residual of {} pu",
+                        remainingQ);
+                }
+            } else {
+                for (auto& vco : busController.vControlObjects) {
+                    if (vco->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
+                        vco->set("q", -qgap * busController.vcfrac[vci]);
+                    } else {
+                        busController.proxyVControlObject[poi]->fixPower(
+                            busController.proxyVControlObject[poi]->getRealPower(cid),
+                            qgap * busController.vcfrac[vci],
+                            cid,
+                            cid);
+                        ++poi;
+                    }
+                    ++vci;
+                }
             }
             break;
+        }
         case BusType::SLK:
 
             computePowerAdjustments();
@@ -958,16 +1087,7 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
             } else {  // adjust the power levels separately
                 // adjust the real power flow
                 for (auto& pco : busController.pControlObjects) {
-                    if (pco->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
-                        pco->set("p", -pgap * busController.pcfrac[vci]);
-                    } else {
-                        busController.proxyVControlObject[poi]->fixPower(
-                            -pgap * busController.pcfrac[vci],
-                            busController.proxyPControlObject[poi]->getReactivePower(cid),
-                            cid,
-                            cid);
-                        ++poi;
-                    }
+                    setActivePowerCommand(pco, -pgap * busController.pcfrac[vci], poi);
                     ++vci;
                 }
                 // adjust the reactive power
@@ -993,16 +1113,7 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
             pgap = -(S.sumP());
             // adjust the real power flow
             for (auto& pco : busController.pControlObjects) {
-                if (pco->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
-                    pco->set("p", -pgap * busController.pcfrac[vci]);
-                } else {
-                    busController.proxyVControlObject[poi]->fixPower(
-                        -pgap * busController.pcfrac[vci],
-                        busController.proxyPControlObject[poi]->getReactivePower(cid),
-                        cid,
-                        cid);
-                    ++poi;
-                }
+                setActivePowerCommand(pco, -pgap * busController.pcfrac[vci], poi);
                 ++vci;
             }
             break;
@@ -1532,6 +1643,33 @@ void AcBus::registerVoltageControl(GridComponent* comp)
 {
     const bool update = (opFlags[POWERFLOW_INITIALIZED]) && (type != BusType::PQ);
     busController.addVoltageControlObject(comp, update);
+}
+
+Generator* AcBus::indirectVoltageControlReference() const
+{
+    Generator* reference = nullptr;
+    for (auto* control : busController.vControlObjects) {
+        if (!control->checkFlag(INDIRECT_VOLTAGE_CONTROL) ||
+            control->checkFlag(Generator::AT_LIMIT)) {
+            continue;
+        }
+        auto* gen = dynamic_cast<Generator*>(control);
+        if (gen == nullptr) {
+            return nullptr;
+        }
+        if (gen->get("vcontrolfrac") <= 1e-12) {
+            continue;
+        }
+        if ((reference == nullptr) || (gen->getID() < reference->getID())) {
+            reference = gen;
+        }
+    }
+    for (const auto* control : busController.vControlLinks) {
+        if (control->checkFlag(INDIRECT_VOLTAGE_CONTROL)) {
+            return nullptr;
+        }
+    }
+    return reference;
 }
 
 void AcBus::removeVoltageControl(GridComponent* comp)
@@ -2640,7 +2778,75 @@ void AcBus::updateFlags(bool /*dynOnly*/)
 
 void AcBus::updateControlLimits()
 {
-    if ((type == BusType::PV) || (type == BusType::SLK)) {
+    // PowerWorld disables remote generator voltage control when every AC path
+    // from the generator terminal to the regulated bus crosses another PV
+    // bus. Check once here, after all generators have registered, so this
+    // sees the complete control group and the imported bus types.
+    const auto hasAcPath = [this](AcBus* start, bool avoidIntermediatePvBuses) {
+        if (start == nullptr) {
+            return false;
+        }
+        std::queue<AcBus*> pending;
+        std::unordered_set<AcBus*> visited;
+        pending.push(start);
+        visited.insert(start);
+        while (!pending.empty()) {
+            auto* current = pending.front();
+            pending.pop();
+            if (current == this) {
+                return true;
+            }
+            for (index_t linkIndex = 0; auto* link = current->getLink(linkIndex); ++linkIndex) {
+                if (!link->isEnabled() || !link->isConnected()) {
+                    continue;
+                }
+                for (index_t terminal = 1; terminal <= link->terminalCount(); ++terminal) {
+                    auto* next = dynamic_cast<AcBus*>(link->getBus(terminal));
+                    if ((next == nullptr) || (next == current) || visited.contains(next)) {
+                        continue;
+                    }
+                    // The start and destination buses are exempt: only other
+                    // PV buses interrupt the remote-regulation path.
+                    if (avoidIntermediatePvBuses && (next != this) &&
+                        (next->prevType == BusType::PV)) {
+                        continue;
+                    }
+                    visited.insert(next);
+                    pending.push(next);
+                }
+            }
+        }
+        return false;
+    };
+
+    for (auto* control : busController.vControlObjects) {
+        auto* gen = dynamic_cast<Generator*>(control);
+        if ((gen == nullptr) || !gen->checkFlag(REMOTE_VOLTAGE_CONTROL)) {
+            continue;
+        }
+        auto* terminalBus = dynamic_cast<AcBus*>(gen->find("bus"));
+        if (!hasAcPath(terminalBus, true)) {
+            std::string message = "Remote voltage control by generator " + gen->getName();
+            if (terminalBus != nullptr) {
+                message += " at terminal bus " + terminalBus->getName();
+            }
+            message += " to regulated bus " + getName() +
+                " has no connected AC path that avoids intermediate PV buses";
+            if (hasAcPath(terminalBus, false)) {
+                message += " (all connected paths cross another PV bus)";
+            } else {
+                message += " (no connected AC path exists)";
+            }
+            message += ". GridDyn is retaining the current control setup.";
+            log(this, PrintLevel::WARNING, message);
+        }
+    }
+
+    if (!busController.vControlObjects.empty() || !busController.vControlLinks.empty()) {
+        // Remote controllers can register after this bus finishes phase A.
+        // Rebuild proxies, flags, and RMPCT fractions after all buses register.
+        busController.updateVoltageControls();
+    } else {
         busController.updateVoltageControlLimits();
     }
     if ((type == BusType::AFIX) || (type == BusType::SLK)) {

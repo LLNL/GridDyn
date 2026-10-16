@@ -382,6 +382,11 @@ void ExciterEXPIC1::dynObjectInitializeB(const IOdata& inputs,
 
     vBias = inputs[exciterVoltageInLocation] - Vref - (inputs[exciterVsetInLocation] - 1.0) -
         inputs[exciterVssInLocation];
+    if (initialRegulator >= Vr1) {
+        differentialState[layout.piIntegrator] += 1e-4;
+    } else if (initialRegulator <= Vr2) {
+        differentialState[layout.piIntegrator] -= 1e-4;
+    }
     fieldSet.resize(2);
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);

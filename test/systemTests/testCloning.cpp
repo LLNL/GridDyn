@@ -6,6 +6,8 @@
 
 #include "../gtestHelper.h"
 #include "gmlc/utilities/vectorOps.hpp"
+#include "griddyn/GridBus.h"
+#include "griddyn/primary/AcBus.h"
 #include "griddyn/simulation/Diagnostics.h"
 #include <cstdio>
 #include <gtest/gtest.h>
@@ -20,6 +22,23 @@ using namespace griddyn;
 using gmlc::utilities::countDiffs;
 
 class CloneTests: public GridDynSimulationTestFixture, public ::testing::Test {};
+
+TEST_F(CloneTests, RawRemoteVoltageGroupCloneUsesItsOwnRegulatedBus)
+{
+    gds = std::make_unique<GridDynSimulation>();
+    ASSERT_NO_THROW(loadFile(gds,
+                             std::string(GRIDDYN_TEST_DIRECTORY) +
+                                 "/input_tests/raw_remote_voltage_group.raw"));
+    gds2 = std::unique_ptr<GridDynSimulation>(static_cast<GridDynSimulation*>(gds->clone()));
+    gds.reset();
+
+    auto* regulatedBus = dynamic_cast<AcBus*>(gds2->findByUserID("bus", 2));
+    ASSERT_NE(regulatedBus, nullptr);
+    ASSERT_EQ(gds2->pFlowInitialize(), 0);
+    ASSERT_EQ(regulatedBus->voltageControlCount(), 3);
+    ASSERT_EQ(gds2->powerflow(), 0);
+    EXPECT_NEAR(static_cast<GridBus*>(regulatedBus)->getVoltage(), 1.04, 2e-4);
+}
 
 TEST_F(CloneTests, CloningTest1)
 {

@@ -206,6 +206,12 @@ void ExciterIEEET3::dynObjectInitializeB(const IOdata& inputs,
     state[fieldState] = fieldVoltage;
     vBias = (regulator / Ka) + state[voltageMeasurementState] - Vref -
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation];
+    const double guard = 10.0 * limiterRootTolerance + std::abs(Ka) * 1e-5;
+    if ((Vrmax != 0.0) && (regulator >= upperRegulatorLimit(Vrmax))) {
+        vBias += guard / Ka;
+    } else if (regulator <= Vrmin) {
+        vBias -= guard / Ka;
+    }
     fieldSet.resize(std::max<std::size_t>(fieldSet.size(), 2U));
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -354,12 +360,14 @@ void ExciterIEEET3::rootTest(const IOdata& inputs,
     const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
     const index_t root = offsets.getRootOffset(sMode);
     if (opFlags[REGULATOR_LIMITED]) {
-        roots[root] =
-            opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive : evaluation.regulatorDrive;
+        roots[root] = (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
+                                                       evaluation.regulatorDrive) +
+            limiterRootTolerance;
     } else {
         const double upper = upperRegulatorLimit(Vrmax);
         roots[root] = std::min(upper - loc.diffStateLoc[regulatorState],
-                               loc.diffStateLoc[regulatorState] - Vrmin);
+                               loc.diffStateLoc[regulatorState] - Vrmin) +
+            limiterRootTolerance;
         opFlags.set(REGULATOR_LIMIT_HIGH, loc.diffStateLoc[regulatorState] >= upper);
     }
 }

@@ -22,6 +22,14 @@ namespace griddyn::governors {
 namespace {
     constexpr double initializationTolerance = 1e-7;
     constexpr double positionLimitTolerance = 1e-7;
+    // Root-only hysteresis prevents a small speed variation at an initialized
+    // valve boundary from looking like a new crossing.
+    constexpr double positionLimitRootTolerance = 1e-4;
+    // At a valve position limit, absorb tiny outward rate requests as a
+    // deadzone. This keeps input noise from turning the exact-boundary root
+    // into an immediate limiter event while still allowing meaningful valve
+    // commands to enter the active limit branch.
+    constexpr double positionLimitInputDeadband = 1e-4;
 }  // namespace
 
 GovernorIeeeG1::GovernorIeeeG1(const std::string& objName): Governor(objName)
@@ -88,6 +96,7 @@ void GovernorIeeeG1::dynObjectInitializeB(const IOdata& inputs,
                                           const IOdata& desiredOutput,
                                           IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[hpOutput])) {
         throw InvalidParameterValue("IEEEG1 initial high-pressure output");
     }
@@ -95,12 +104,27 @@ void GovernorIeeeG1::dynObjectInitializeB(const IOdata& inputs,
     initializationTargetSet[hpOutput] = true;
     initializationActive = true;
     initializeStatesFromTargets();
+    const double initializedPowerSetpoint = Pset;
+
+    const double valve = m_state[offsets.getDiffOffset(cLocalSolverMode) + valveState];
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 10.0 * positionLimitInputDeadband * T3);
+    if (valve >= Pmax) {
+        Pset += margin;
+        opFlags.set(POWER_LIMITED);
+        opFlags.set(POWER_LIMIT_HIGH);
+    } else if (valve <= Pmin) {
+        Pset -= margin;
+        opFlags.set(POWER_LIMITED);
+        opFlags.reset(POWER_LIMIT_HIGH);
+    }
 
     fieldSet.resize(2);
-    fieldSet[govpSetInLocation] = Pset;
-    // Keep an accepted initial PMAX/PMIN operating point on the active
-    // position-limiter branch.  This lets rootTest apply its release-side
-    // hysteresis before IDA's first root evaluation.
+    // Report the setpoint that produced the initialized machine output.  The
+    // overdrive is internal to the limiter's unconstrained controller request.
+    fieldSet[govpSetInLocation] = initializedPowerSetpoint;
+    // The reference overdrive gives an initially limited valve a definite
+    // outward rate while the physical valve and turbine states stay steady.
     updateLimitFlags(inputs, m_state.data() + offsets.getDiffOffset(cLocalSolverMode));
 }
 
@@ -196,9 +220,17 @@ double GovernorIeeeG1::unlimitedValveRate(const IOdata& inputs, const double dif
 
 double GovernorIeeeG1::limitedValveRate(const IOdata& inputs, const double diffState[]) const
 {
-    return std::clamp(unlimitedValveRate(inputs, diffState),
-                      static_cast<double>(Uc),
-                      static_cast<double>(Uo));
+    const double rate = std::clamp(unlimitedValveRate(inputs, diffState),
+                                   static_cast<double>(Uc),
+                                   static_cast<double>(Uo));
+    if (!opFlags[POWER_LIMITED] &&
+        (((diffState[valveState] >= (Pmax - positionLimitTolerance)) && (rate > 0.0) &&
+          (rate <= positionLimitInputDeadband)) ||
+         ((diffState[valveState] <= (Pmin + positionLimitTolerance)) && (rate < 0.0) &&
+          (rate >= -positionLimitInputDeadband)))) {
+        return 0.0;
+    }
+    return rate;
 }
 
 std::array<double, 4> GovernorIeeeG1::turbineOutputs(const double diffState[]) const
@@ -445,8 +477,8 @@ void GovernorIeeeG1::rootTest(const IOdata& inputs,
         // restart.  The root returns when the limited rate points back into
         // the admissible position range.
         roots[rootOffset + 1] = opFlags[POWER_LIMIT_HIGH] ?
-            -limitedRate - (2.0 * positionLimitTolerance) :
-            limitedRate - (2.0 * positionLimitTolerance);
+            -limitedRate - positionLimitRootTolerance :
+            limitedRate - positionLimitRootTolerance;
     } else if ((((state[valveState] >= (Pmax - positionLimitTolerance)) && (limitedRate < 0.0)) ||
                 ((state[valveState] <= (Pmin + positionLimitTolerance)) && (limitedRate > 0.0))) ||
                ((std::abs(limitedRate) <= positionLimitTolerance) &&
@@ -457,9 +489,10 @@ void GovernorIeeeG1::rootTest(const IOdata& inputs,
         // A state on a valve bound with an inward or zero rate is not a
         // limiter crossing.  Avoid presenting its geometric distance as an
         // exact zero root to IDA.
-        roots[rootOffset + 1] = positionLimitTolerance;
+        roots[rootOffset + 1] = positionLimitRootTolerance;
     } else {
-        roots[rootOffset + 1] = std::min(Pmax - state[valveState], state[valveState] - Pmin);
+        roots[rootOffset + 1] = std::min(Pmax - state[valveState], state[valveState] - Pmin) +
+            positionLimitRootTolerance;
     }
 }
 

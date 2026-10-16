@@ -80,6 +80,10 @@ CoreObject* GridSimulation::clone(CoreObject* obj) const
 
     EvQ->cloneTo(sim->EvQ.get());
     sim->EvQ->mapObjectsOnto(sim);
+    // GridArea::clone skips linkage remapping when cloning into this derived
+    // simulation. Rebind references held by buses and secondary objects now
+    // that the complete network has been copied.
+    sim->updateObjectLinkages(sim);
     // TODO(PT):: mapping the collectors
     return sim;
 }

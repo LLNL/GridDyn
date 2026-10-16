@@ -144,6 +144,9 @@ class ExciterEXAC1: public Exciter {
                                 const double state[],
                                 double regulatorValue) const;
     int regulatorLimitStatus(const double state[], double regulatorValue) const;
+    bool regulatorDerivativeBlocked(const double state[],
+                                    double regulatorValue,
+                                    double regulatorDerivative) const;
     bool updateLimitFlags(const IOdata& inputs, double state[], double regulatorValue);
 };
 }  // namespace griddyn::exciters

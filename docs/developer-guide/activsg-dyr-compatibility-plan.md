@@ -5,6 +5,8 @@ For the current ACTIVSg25k renewable parameter and format audit, see
 "Missing" labels in the historical inventory below predate the current
 REGCA1/REECA1 implementation; the audit describes the remaining case-specific
 gaps and is the source of truth for ACTIVSg25k renewable status.
+The latest whole-case initialization diagnosis and reproducible method are in
+[the ACTIVSg25k dynamic investigation](activsg25k-dynamic-investigation.md).
 
 ## Scope
 
@@ -78,9 +80,9 @@ the one-dimensional helper blindly.
 
 ## Dynamic execution results
 
-The ACTIVSg10k diagnostic run measurements below are from 2026-09-22. Model
-and importer availability was reviewed against the GridDyn working tree on
-2026-10-04; no later whole-case dynamic trajectory result is recorded here.
+The ACTIVSg10k load-step measurements below are from 2026-09-22. The
+2026-10-14 flat-run checks and the remote-swing-bus importer correction are
+recorded after those results.
 
 The merged branch has moved ACTIVSg10k beyond import-only status. The supplied
 RAW/DYR pair now initializes in the Release build with the supported
@@ -98,9 +100,55 @@ IEEE Type-1 exciter and IEEEG1 governor limiter roots. This is a usable smoke
 result, not full dynamic validation: a 9-second post-disturbance run, an
 independent trajectory comparison, and a performance fix remain outstanding.
 
-ACTIVSg25k remains power-flow validated but its DYR file has not been run
-dynamically. Its full run is still blocked by the missing renewable plant
-families listed below.
+### ACTIVSg10k remote swing-terminal dynamic reference (2026-10-14)
+
+A flat full-case DAE and partitioned run initially drifted because a RAW swing
+bus whose generator remotely regulates another bus was converted from static
+SLK to AFIX, while its dynamic bus type remained NORMAL. That left its dynamic
+angle reference free. A controlled one-generator case isolated the issue:
+adding `dyntype=fixangle` to that swing bus reduced the partitioned 100 ms
+maximum absolute state-vector change from `1.528` to `3.8e-5`; the DAE 10 ms
+change fell from `4.55` to `6.3e-5`.
+
+The RAW importer now sets both static AFIX and dynamic FIX_ANGLE for this case.
+The focused RAW regression fixture
+`test/test_files/input_tests/raw_remote_voltage_swing_terminal.raw` verifies
+both bus types. The focused single-controller and grouped remote-voltage
+import tests pass.
+
+With the original ACTIVSg10k RAW/DYR pair, roots enabled, switched-shunt and
+tap adjustments disabled, and no disturbance, both Release solver modes
+completed to `1.03 s`. Capturing states every 10 ms produced 104 snapshots
+through the endpoint. The largest absolute state-vector displacement from
+initialization was `7.97e-5` for DAE and `8.20e-5` for partitioned; the endpoint
+displacements were `7.93e-5` and `8.13e-5`, respectively. These are
+flat-equilibrium smoke runs, not a disturbed trajectory comparison; the
+9-second post-disturbance validation above remains open.
+
+Reproduce either flat run from PowerShell by setting `$method` to `dae` or
+`partitioned`:
+
+```powershell
+$case = 'C:\Users\phlpt\Documents\test_cases\ACTIVSg10k'
+$method = 'dae' # or 'partitioned'
+& .\build-ninja-release\bin\gridDynMain.exe `
+  "--input=$case\ACTIVSg10k.RAW" `
+  "--import=$case\ACTIVSg10k_dynamics.dyr" `
+  "--param=dynamicsolvermethod=$method" '--param=timestop=1.03' `
+  '--flags=sparse,no_tap_changer,no_shunt_adjustments' `
+  --state-output="activsg10k-$method-1030ms.bin" --save-state-period=10
+```
+
+ACTIVSg25k's standalone RAW power flow has a converged baseline with switched-
+shunt adjustments disabled, and the full RAW+DYR file has been loaded into the
+dynamic path. Earlier Release runs stopped at time zero with REECA1 or ESST4B
+initialization-limit errors. After rebuilding with ESST4B failure context, a
+flat DAE attempt remained active for 30 minutes and a partitioned CVODE attempt
+for one hour without a terminal status; both were stopped without a completed
+trajectory. A 0.1-second partitioned run with state saves every 10 ms stayed
+active for 15 minutes without its first snapshot. No full DAE or partitioned
+run has passed, and the five-second stability check remains open. The four-
+record Type-3 wind adapter's fidelity remains a separate limitation.
 
 ## Power-flow readiness
 
@@ -136,33 +184,33 @@ consistently in both models.
 
 ## Dynamic-model inventory
 
-| PSS/E model | ACTIVSg500 | ACTIVSg2000 | ACTIVSg10k | ACTIVSg25k | ACTIVSg70k |  Total | Current status / required work                                                                                                                                                                     |
-| ----------- | ---------: | ----------: | ---------: | ---------: | ---------: | -----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GENROU`    |         90 |         410 |      1,136 |      2,857 |      6,937 | 11,430 | Reader supported; continue initialization and trajectory validation.                                                                                                                               |
-| `SEXS`      |         90 |           0 |          0 |          0 |          0 |     90 | Reader supported; validate case configurations.                                                                                                                                                    |
-| `TGOV1`     |         21 |           0 |          0 |          0 |          0 |     21 | Reader supported; validate case configurations.                                                                                                                                                    |
-| `IEEEST`    |          2 |         434 |      1,851 |      4,101 |      9,243 | 15,631 | Reader supported for local-input configurations; validate variants used.                                                                                                                           |
-| `IEEEG1`    |          0 |          43 |        162 |      1,115 |      3,518 |  4,838 | Reader supported; validate case configurations.                                                                                                                                                    |
-| `ESDC1A`    |          0 |          12 |        163 |        123 |        427 |    725 | Reader supported; validate case configurations.                                                                                                                                                    |
-| `EXAC2`     |          0 |          38 |        106 |        239 |        486 |    869 | **Implemented and merged; external trajectory pending.** Zero-`TR` and bypassed-state paths, initialization, active limits, and root rearming have regression coverage.                            |
-| `GGOV1`     |          0 |         367 |        974 |      1,742 |      3,419 |  6,502 | **Reader/model implemented.** Equation, initialization, DYR-order, coupling, residual, and analytic-Jacobian tests exist. Nonzero `TENG` is rejected.                                              |
-| `ESST4B`    |          0 |         278 |        745 |      1,396 |      3,187 |  5,606 | **Reader/model implemented.** Exact DYR mapping and GENSAL-coupled residual/Jacobian tests exist; external UEL/OEL inputs remain unrouted.                                                         |
-| `GENSAL`    |          0 |          25 |        715 |      1,244 |      2,306 |  4,290 | **Implemented and merged.** Salient-pole equations, quadratic saturation, initialization, controller signals, Jacobians, and the valid `Xdp == Xdpp` degenerate case are covered.                  |
-| `HYGOV`     |         39 |          25 |        715 |      1,244 |      2,306 |  4,329 | Dedicated `GovernorHygov` and DYR mapping implemented; validate case initialization, limits, and trajectories.                                                                                     |
-| `SCRX`      |          0 |           5 |        312 |        446 |      1,053 |  1,816 | **Reader/model implemented; external trajectory open.** OpenIPSL/PowerDynamics equations, source selection, crowbar behavior, and DYR mapping are covered.                                         |
-| `IEEET1`    |          0 |          23 |        214 |        942 |      1,907 |  3,086 | **Implemented; external trajectory open.** Native IEEE Type 1 model and exact DYR mapping are available; validate representative case configurations and trajectories.                             |
-| `EXPIC1`    |          0 |          61 |        153 |        287 |        569 |  1,070 | **Implemented; external trajectory open.** GridKit-specified equations, exact DYR schema, full block tests, and whole-case residual/Jacobian coverage are present.                                 |
-| `ESDC2A`    |          0 |           1 |         87 |        202 |        104 |    394 | **Implemented and merged; external trajectory pending.** Shares DC2A/EXDC2 equations and DYR schema; nonzero unsupported `Switch` is rejected.                                                     |
-| `ESAC6A`    |          0 |           7 |         26 |        194 |        583 |    810 | **Reader/model implemented; external trajectory open.** GridKit AC6A equations, saturation/rectifier behavior, initialization, and DYR mapping are covered.                                        |
-| `EXAC1`     |          0 |           6 |         22 |        130 |        381 |    539 | **Implemented and merged; external trajectory pending.** `TA=0` algebraic-regulator and bypassed-state paths, limits, and root behavior have regression coverage.                                  |
-| `ESAC1A`    |          0 |           4 |         23 |        142 |        546 |    715 | **Implemented and merged; external trajectory pending.** Dedicated AC1A DYR mapping and control-element limits reuse the AC-exciter core; UEL/OEL routing remains open.                            |
-| `GAST`      |         30 |           0 |          0 |          0 |          0 |     30 | **Implemented; external trajectory open.** OpenIPSL/ANDES/GridKit equations, DYR mapping, initialization, selector/limit, and Jacobian tests are present.                                          |
-| `REECA1`    |          0 |           0 |          0 |        614 |        571 |  1,185 | **Implemented; validation pending.** Native renewable electrical control and DYR mapping are available with the associated `REGCA1` converter; complete external and whole-case trajectory checks. |
-| `REGCA1`    |          0 |           0 |          0 |        614 |        571 |  1,185 | **Implemented; validation pending.** Native renewable converter and DYR mapping are available with `REECA1`; complete external and whole-case trajectory checks.                                   |
-| `WT3E1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Dedicated model; validation pending.** Electrical controller, DYR mapping, initialization, and host-Jacobian coverage are present; whole-plant trajectories remain open.                         |
-| `WT3G1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Dedicated model; validation pending.** Electrical interface, DYR mapping, initialization, and host-Jacobian coverage are present; whole-plant trajectories remain open.                          |
-| `WT3P1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Provisional adapter.** DYR records translate to `WTPTA1`; source field semantics and equation/trajectory equivalence remain unverified.                                                          |
-| `WT3T1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Provisional adapter.** DYR records translate to `WTARA1` plus `WTDS`/`WTDTA1`; source field semantics and equation/trajectory equivalence remain unverified.                                     |
+| PSS/E model | ACTIVSg500 | ACTIVSg2000 | ACTIVSg10k | ACTIVSg25k | ACTIVSg70k |  Total | Current status / required work                                                                                                                                                                                                                                |
+| ----------- | ---------: | ----------: | ---------: | ---------: | ---------: | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GENROU`    |         90 |         410 |      1,136 |      2,857 |      6,937 | 11,430 | Reader supported; continue initialization and trajectory validation.                                                                                                                                                                                          |
+| `SEXS`      |         90 |           0 |          0 |          0 |          0 |     90 | Reader supported; validate case configurations.                                                                                                                                                                                                               |
+| `TGOV1`     |         21 |           0 |          0 |          0 |          0 |     21 | Reader supported; validate case configurations.                                                                                                                                                                                                               |
+| `IEEEST`    |          2 |         434 |      1,851 |      4,101 |      9,243 | 15,631 | Reader supported for local-input configurations; validate variants used.                                                                                                                                                                                      |
+| `IEEEG1`    |          0 |          43 |        162 |      1,115 |      3,518 |  4,838 | Reader supported; validate case configurations.                                                                                                                                                                                                               |
+| `ESDC1A`    |          0 |          12 |        163 |        123 |        427 |    725 | Reader supported; validate case configurations.                                                                                                                                                                                                               |
+| `EXAC2`     |          0 |          38 |        106 |        239 |        486 |    869 | **Implemented and merged; external trajectory pending.** Zero-`TR` and bypassed-state paths, initialization, active limits, and root rearming have regression coverage.                                                                                       |
+| `GGOV1`     |          0 |         367 |        974 |      1,742 |      3,419 |  6,502 | **Reader/model implemented.** Equation, initialization, DYR-order, coupling, residual, and analytic-Jacobian tests exist. Nonzero `TENG` is rejected.                                                                                                         |
+| `ESST4B`    |          0 |         278 |        745 |      1,396 |      3,187 |  5,606 | **Reader/model implemented.** Exact DYR mapping and GENSAL-coupled residual/Jacobian tests exist; external UEL/OEL inputs remain unrouted.                                                                                                                    |
+| `GENSAL`    |          0 |          25 |        715 |      1,244 |      2,306 |  4,290 | **Implemented and merged.** Salient-pole equations, quadratic saturation, initialization, controller signals, Jacobians, and the valid `Xdp == Xdpp` degenerate case are covered.                                                                             |
+| `HYGOV`     |         39 |          25 |        715 |      1,244 |      2,306 |  4,329 | Dedicated `GovernorHygov` and DYR mapping implemented; validate case initialization, limits, and trajectories.                                                                                                                                                |
+| `SCRX`      |          0 |           5 |        312 |        446 |      1,053 |  1,816 | **Reader/model implemented; external trajectory open.** OpenIPSL/PowerDynamics equations, source selection, crowbar behavior, and DYR mapping are covered.                                                                                                    |
+| `IEEET1`    |          0 |          23 |        214 |        942 |      1,907 |  3,086 | **Implemented; external trajectory open.** Native IEEE Type 1 model and exact DYR mapping are available; validate representative case configurations and trajectories.                                                                                        |
+| `EXPIC1`    |          0 |          61 |        153 |        287 |        569 |  1,070 | **Implemented; external trajectory open.** GridKit-specified equations, exact DYR schema, full block tests, and whole-case residual/Jacobian coverage are present.                                                                                            |
+| `ESDC2A`    |          0 |           1 |         87 |        202 |        104 |    394 | **Implemented and merged; external trajectory pending.** Shares DC2A/EXDC2 equations and DYR schema; nonzero unsupported `Switch` is rejected.                                                                                                                |
+| `ESAC6A`    |          0 |           7 |         26 |        194 |        583 |    810 | **Reader/model implemented; external trajectory open.** GridKit AC6A equations, saturation/rectifier behavior, initialization, and DYR mapping are covered.                                                                                                   |
+| `EXAC1`     |          0 |           6 |         22 |        130 |        381 |    539 | **Implemented and merged; external trajectory pending.** `TA=0` algebraic-regulator and bypassed-state paths, limits, and root behavior have regression coverage.                                                                                             |
+| `ESAC1A`    |          0 |           4 |         23 |        142 |        546 |    715 | **Implemented and merged; external trajectory pending.** Dedicated AC1A DYR mapping and control-element limits reuse the AC-exciter core; UEL/OEL routing remains open.                                                                                       |
+| `GAST`      |         30 |           0 |          0 |          0 |          0 |     30 | **Implemented; external trajectory open.** OpenIPSL/ANDES/GridKit equations, DYR mapping, initialization, selector/limit, and Jacobian tests are present.                                                                                                     |
+| `REECA1`    |          0 |           0 |          0 |        614 |        571 |  1,185 | **Implemented; validation pending.** Native renewable electrical control and DYR mapping are available with the associated `REGCA1` converter; complete external and whole-case trajectory checks.                                                            |
+| `REGCA1`    |          0 |           0 |          0 |        614 |        571 |  1,185 | **Implemented; validation pending.** Native renewable converter and DYR mapping are available with `REECA1`; complete external and whole-case trajectory checks.                                                                                              |
+| `WT3E1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Dedicated model; validation pending.** Electrical controller, DYR mapping, initialization, and host-Jacobian coverage are present; whole-plant trajectories remain open.                                                                                    |
+| `WT3G1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Dedicated model; validation pending.** Electrical interface, DYR mapping, initialization, and host-Jacobian coverage are present; whole-plant trajectories remain open.                                                                                     |
+| `WT3P1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Provisional adapter.** The DYR field order now follows PowerWorld's documented `Tp, Kpp, Kip, Kpc, Kic, ThetaMin, ThetaMax, RThetaMax, Pset` list when translating to WTPTA1. Equation, initialization, base, and trajectory equivalence remain unverified. |
+| `WT3T1`     |          0 |           0 |          0 |        119 |        576 |    695 | **Provisional adapter.** DYR records translate to `WTARA1` plus `WTDS`/`WTDTA1`; source field semantics and equation/trajectory equivalence remain unverified.                                                                                                |
 
 The broader model-by-model mapping is maintained in the
 [ANDES compatibility roadmap](andes-compatibility.md); this table is the
@@ -191,8 +239,11 @@ dependent on the separate RAW/DYR delivery; GridKit cannot substitute for it.
 
 ### ACTIVSg25k static DYR assessment
 
-`ACTIVSg25k.dyr` was inspected as text only and was not loaded or run. It has
-18,108 records in 22 model families. DYR dispatch recognizes all 22 names,
+`ACTIVSg25k.dyr` has 18,108 records in 22 model families. It has now been
+loaded for whole-case dynamic initialization. Earlier binaries stopped at
+renewable reference-limit or ESST4B lower-limit errors; the current no-shunt
+Release attempts remained active but did not produce completed trajectories.
+DYR dispatch recognizes all 22 names,
 including provisional `WT3P1` and `WT3T1` adapters that translate to existing
 wind components. Those translations have not been validated against the
 legacy model equations, so the case remains uncertified for full Type-3
@@ -226,13 +277,13 @@ artifacts are useful cross-tool references, but are not substitutes for the
 RAW/DYR import. The DYR is a complete plant assembly, so a run must attach
 every record for a machine ID before initializing the case.
 
-| Dynamic assembly                | DYR families required together                     |                                  Records | Execution consequence                                                                                                                                                                            |
-| ------------------------------- | -------------------------------------------------- | ---------------------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Round-rotor conventional plants | `GENROU`, exciter, governor, and optional `IEEEST` |                   6,937 `GENROU` records | The machine and the six currently recognized controller families need full initialization and trajectory validation; missing controller records cannot be dropped.                               |
-| Salient-pole hydro plants       | `GENSAL` + `HYGOV` + exciter + optional `IEEEST`   | 2,306 `GENSAL` and 2,306 `HYGOV` records | Native machine and governor models are implemented; validate whole-plant initialization, bases, limits, controller interfaces, and disturbed trajectories.                                       |
-| General-governor plants         | `GENROU` + `GGOV1` + exciter + optional `IEEEST`   |                    3,419 `GGOV1` records | Native selectable governor/turbine modes are implemented; validate case parameter combinations and reject nonzero `TENG` until transport delay is added.                                         |
-| Renewable converter plants      | `REGCA1` + `REECA1`                                |                              571 of each | Components and DYR mappings are implemented; whole-case initialization and disturbed-trajectory validation remain required.                                                                      |
-| Type-3 wind plants              | `WT3G1` + `WT3E1` + `WT3P1` + `WT3T1`              |                              576 of each | `WT3G1`/`WT3E1` are dedicated models; `WT3P1`/`WT3T1` currently translate to existing wind components. Import is recognized, but mapping fidelity and full-plant trajectories remain unverified. |
+| Dynamic assembly                | DYR families required together                     |                                  Records | Execution consequence                                                                                                                                                                                        |
+| ------------------------------- | -------------------------------------------------- | ---------------------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Round-rotor conventional plants | `GENROU`, exciter, governor, and optional `IEEEST` |                   6,937 `GENROU` records | The machine and the six currently recognized controller families need full initialization and trajectory validation; missing controller records cannot be dropped.                                           |
+| Salient-pole hydro plants       | `GENSAL` + `HYGOV` + exciter + optional `IEEEST`   | 2,306 `GENSAL` and 2,306 `HYGOV` records | Native machine and governor models are implemented; validate whole-plant initialization, bases, limits, controller interfaces, and disturbed trajectories.                                                   |
+| General-governor plants         | `GENROU` + `GGOV1` + exciter + optional `IEEEST`   |                    3,419 `GGOV1` records | Native selectable governor/turbine modes are implemented; validate case parameter combinations and reject nonzero `TENG` until transport delay is added.                                                     |
+| Renewable converter plants      | `REGCA1` + `REECA1`                                |                              571 of each | Components and DYR mappings are implemented; whole-case initialization and disturbed-trajectory validation remain required.                                                                                  |
+| Type-3 wind plants              | `WT3G1` + `WT3E1` + `WT3P1` + `WT3T1`              |                              576 of each | `WT3G1`/`WT3E1` are dedicated models; WT3P1's documented field order is translated to WTPTA1, and WT3T1 translates to WTARA1 plus WTDS/WTDTA1. Model behavior and full-plant trajectories remain unverified. |
 
 GridDyn may use the RAW alone for static power-flow work once large-scale
 topology validation is complete. A full 70k DYR run is not yet a validated

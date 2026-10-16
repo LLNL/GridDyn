@@ -18,6 +18,9 @@
 
 namespace griddyn::governors {
 using units::unit;
+namespace {
+    constexpr double powerLimitRootTolerance = 1e-5;
+}
 
 GovernorTgov1::GovernorTgov1(const std::string& objName): GovernorIeeeSimple(objName)
 {
@@ -69,6 +72,7 @@ void GovernorTgov1::dynObjectInitializeB(const IOdata& /*inputs*/,
                                          const IOdata& desiredOutput,
                                          IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[POUT_LOCATION]) ||
         !adjustInitialUpperLimit(desiredOutput[POUT_LOCATION], "TGOV1 initial valve")) {
         throw InvalidParameterValue("TGOV1 initial valve outside upper limit");
@@ -77,6 +81,24 @@ void GovernorTgov1::dynObjectInitializeB(const IOdata& /*inputs*/,
     m_state[1] = desiredOutput[POUT_LOCATION];
     m_state[0] = desiredOutput[POUT_LOCATION];
     fieldSet[govpSetInLocation] = desiredOutput[POUT_LOCATION];
+    if (opFlags[USES_POWER_LIMITS]) {
+        const double correction = std::max(0.0, Pmax - originalUpperLimit);
+        // TGOV1's speed input is scaled by K in the valve equation. Keep the
+        // initialized limit active through small speed perturbations by
+        // providing headroom in the same power-reference units as K*deltaW.
+        const double margin = std::max({0.2 * correction,
+                                        10.0 * powerLimitRootTolerance * K,
+                                        10.0 * powerLimitRootTolerance * T1});
+        if (m_state[1] >= Pmax) {
+            initialSetpointOverdrive = margin;
+            opFlags.set(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        } else if (m_state[1] <= Pmin) {
+            initialSetpointOverdrive = -margin;
+            opFlags.reset(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        }
+    }
 }
 
 // residual
@@ -116,7 +138,7 @@ void GovernorTgov1::derivative(const IOdata& inputs,
         loc.destDiffLoc[1] = 0.0;
     } else {
         loc.destDiffLoc[1] =
-            (-governorState[1] + inputs[govpSetInLocation] - (K * (omega - 1.0))) / T1;
+            (-governorState[1] + effectivePowerSetpoint(inputs) - (K * (omega - 1.0))) / T1;
     }
 
     loc.destDiffLoc[0] = turbineTransfer.outputStateDerivative(governorState[1],
@@ -236,10 +258,17 @@ void GovernorTgov1::rootTest(const IOdata& inputs,
 
         if (opFlags[POWER_LIMITED]) {
             const double omega = inputs[govOmegaInLocation];
-            roots[rootOffset] = (-pmech + inputs[govpSetInLocation] + (K * (omega - 1.0))) / T1;
+            const double releaseRate =
+                (-pmech + effectivePowerSetpoint(inputs) - (K * (omega - 1.0))) / T1;
+            roots[rootOffset] =
+                (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) + powerLimitRootTolerance;
         } else {
-            roots[rootOffset] = std::min(Pmax - pmech, pmech - Pmin);
-            opFlags.set(POWER_LIMIT_HIGH, pmech > Pmax);
+            roots[rootOffset] = std::min(Pmax - pmech, pmech - Pmin) + powerLimitRootTolerance;
+            if (pmech >= Pmax) {
+                opFlags.set(POWER_LIMIT_HIGH);
+            } else if (pmech <= Pmin) {
+                opFlags.reset(POWER_LIMIT_HIGH);
+            }
         }
         ++rootOffset;
     }

@@ -9,6 +9,7 @@
 #include "core/CoreObjectTemplates.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "utilities/MatrixData.hpp"
+#include "utilities/logger.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -332,6 +333,32 @@ void WT3E1::dynObjectInitializeB(const IOdata& inputs,
     const double initialIp =
         inputs.size() > 6 && inputs[6] != kNullVal ? inputs[6] : initialP / vref;
     initialEq = inputs.size() > 7 && inputs[7] != kNullVal ? inputs[7] : 0.0;
+    if (vlrFlag != 0) {
+        const double lowerLimit = Xiqmin - 1.0;
+        const double upperLimit = Xiqmax + 1.0;
+        if (initialEq < lowerLimit) {
+            const double originalLimit = Xiqmin;
+            Xiqmin = initialEq + 1.0;
+            logging::warning(this,
+                             "WT3E1 initial Eqcmd {} is below its effective lower limit {}; "
+                             "adjusting XIQMIN from {} to {}",
+                             initialEq,
+                             lowerLimit,
+                             originalLimit,
+                             Xiqmin);
+        }
+        if (initialEq > upperLimit) {
+            const double originalLimit = Xiqmax;
+            Xiqmax = initialEq - 1.0;
+            logging::warning(this,
+                             "WT3E1 initial Eqcmd {} is above its effective upper limit {}; "
+                             "adjusting XIQMAX from {} to {}",
+                             initialEq,
+                             upperLimit,
+                             originalLimit,
+                             Xiqmax);
+        }
+    }
     m_state[0] = initialIp;
     m_state[1] = initialEq;
     m_state[2] = initialP;

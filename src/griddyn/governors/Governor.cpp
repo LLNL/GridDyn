@@ -97,6 +97,7 @@ CoreObject* Governor::clone(CoreObject* obj) const
     gov->deadbandLow = deadbandLow;
     gov->machineBasePower = machineBasePower;
     gov->strictInitialLimitChecking = strictInitialLimitChecking;
+    gov->initialSetpointOverdrive = initialSetpointOverdrive;
     cb.clone(&(gov->cb));
     dbb.clone(&(gov->dbb));
 
@@ -135,12 +136,23 @@ void Governor::dynObjectInitializeA(CoreTime time0, std::uint32_t flags)
 void Governor::setInitialLimitPolicy(std::uint32_t flags)
 {
     strictInitialLimitChecking = CHECK_CONTROLFLAG(flags, STRICT_GOVERNOR_LIMITS);
+    initialSetpointOverdrive = 0.0;
+}
+
+double Governor::effectivePowerSetpoint(const IOdata& inputs) const
+{
+    return inputs[govpSetInLocation] + initialSetpointOverdrive;
 }
 
 bool Governor::adjustInitialUpperLimit(double initialValue, std::string_view limitName)
 {
     constexpr double initializationTolerance = 1e-7;
+    if (initialValue <= Pmax) {
+        return true;
+    }
     if (initialValue <= Pmax + initializationTolerance) {
+        Pmax = initialValue;
+        delay.set("max", Pmax);
         return true;
     }
     if (strictInitialLimitChecking) {
@@ -200,7 +212,7 @@ void Governor::residual(const IOdata& inputs,
 {
     cb.blockResidual(inputs[govOmegaInLocation], 0, stateData, resid, sMode);
     dbb.blockResidual(cb.getBlockOutput(stateData, sMode), 0, stateData, resid, sMode);
-    delay.blockResidual(dbb.getBlockOutput(stateData, sMode) + inputs[govpSetInLocation],
+    delay.blockResidual(dbb.getBlockOutput(stateData, sMode) + effectivePowerSetpoint(inputs),
                         0,
                         stateData,
                         resid,
@@ -212,7 +224,7 @@ void Governor::timestep(CoreTime time, const IOdata& inputs, const SolverMode& /
     double out = cb.step(time, inputs[govOmegaInLocation]);
 
     out = dbb.step(time, out);
-    delay.step(time, out + inputs[govpSetInLocation]);
+    delay.step(time, out + effectivePowerSetpoint(inputs));
 }
 
 void Governor::derivative(const IOdata& inputs,
@@ -223,7 +235,7 @@ void Governor::derivative(const IOdata& inputs,
     IOdata blockInput{inputs[govOmegaInLocation]};  // deadband doesn't have any derivatives
     cb.derivative(blockInput, stateData, deriv, sMode);
     blockInput[0] = dbb.getOutput(blockInput, stateData, sMode) +
-        inputs[govpSetInLocation];  // gain from deadband +Pset
+        effectivePowerSetpoint(inputs);  // gain from deadband +Pset
     delay.derivative(blockInput, stateData, deriv, sMode);
 }
 
@@ -244,7 +256,7 @@ void Governor::jacobianElements(const IOdata& inputs,
     output = dbb.getOutput(gKNullVec, stateData, sMode);
     frequencyLoc = dbb.getOutputLoc(sMode);
     delay.blockJacobianElements(
-        output + inputs[govpSetInLocation], 0, stateData, delayJacobian, 0, sMode);
+        output + effectivePowerSetpoint(inputs), 0, stateData, delayJacobian, 0, sMode);
 
     if (inputLocs[govpSetInLocation] != kNullLocation) {
         for (index_t pp = 0; pp < delayJacobian.size(); ++pp) {

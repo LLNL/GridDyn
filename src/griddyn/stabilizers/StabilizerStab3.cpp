@@ -18,8 +18,11 @@
 
 namespace griddyn::stabilizers {
 namespace {
+    // Keep output-limit roots clear under 10x-relative-tolerance input noise,
+    // including the gain from electrical power to stabilizer output.
+    constexpr double limitRootTolerance = 1e-4;
     constexpr double inputValidityLimit = 1e20;
-}
+}  // namespace
 
 StabilizerStab3::StabilizerStab3(const std::string& objName): Stabilizer(objName)
 {
@@ -294,8 +297,8 @@ void StabilizerStab3::rootTest(const IOdata& inputs,
     const auto locations = offsets.getLocations(stateData, sMode, this);
     const index_t rootOffset = offsets.getRootOffset(sMode);
     const double unlimited = unlimitedOutput(inputs, locations.diffStateLoc).value;
-    roots[rootOffset] = Vlim - unlimited;
-    roots[rootOffset + 1] = unlimited + Vlim;
+    roots[rootOffset] = Vlim - unlimited + limitRootTolerance;
+    roots[rootOffset + 1] = unlimited + Vlim + limitRootTolerance;
 }
 
 void StabilizerStab3::rootTrigger(CoreTime /*time*/,

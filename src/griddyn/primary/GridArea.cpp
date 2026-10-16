@@ -193,6 +193,7 @@ CoreObject* GridArea::clone(CoreObject* obj) const
     area->interAreaTransfers = interAreaTransfers;
     area->interchangeSlackBusUserID = interchangeSlackBusUserID;
     area->interchangeSlackBusName = interchangeSlackBusName;
+    area->maxPowerFlowAdjustmentsPerPass = maxPowerFlowAdjustmentsPerPass;
     // clone all the areas
     for (size_t kk = 0; kk < m_GridAreas.size(); kk++) {
         if (kk >= area->m_GridAreas.size()) {
@@ -739,6 +740,11 @@ bool GridArea::isMember(const CoreObject* object) const
 // reset the bus parameters
 void GridArea::reset(ResetLevels level)
 {
+    if (dynamic_cast<GridArea*>(getParent()) == nullptr) {
+        switchedShuntAdjustmentClaimed = false;
+        pendingSwitchedShuntAdjustment = nullptr;
+        powerFlowAdjustmentsThisPass = 0;
+    }
     for (auto* obj : primaryObjects) {
         obj->reset(level);
     }
@@ -848,20 +854,79 @@ void GridArea::updateLocalCache(const IOdata& inputs,
 
 ChangeCode GridArea::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, CheckLevel level)
 {
+    auto* root = this;
+    while (auto* parentArea = dynamic_cast<GridArea*>(root->getParent())) {
+        root = parentArea;
+    }
+    if (dynamic_cast<GridArea*>(getParent()) == nullptr) {
+        switchedShuntAdjustmentClaimed = false;
+    }
+    if (root == this) {
+        powerFlowAdjustmentsThisPass = 0;
+    }
     auto ret = ChangeCode::NO_CHANGE;
     opFlags.set(DISABLE_FLAG_UPDATES);  // this is so the adjustment object list can't get reset in
                                         // the middle of
     // this computation
-    if (level < CheckLevel::LOW_VOLTAGE_CHECK) {
+    bool pendingShuntChanged = false;
+    if ((root == this) && (level < CheckLevel::LOW_VOLTAGE_CHECK) &&
+        (root->pendingSwitchedShuntAdjustment != nullptr)) {
+        auto* pendingShunt = root->pendingSwitchedShuntAdjustment;
+        IOdata pendingInputs;
+        if (auto* pendingBus = dynamic_cast<GridBus*>(pendingShunt->getParent())) {
+            pendingInputs = {pendingBus->getVoltage(),
+                             pendingBus->getAngle(),
+                             pendingBus->getFreq()};
+            if (inputs.size() > PFLOW_ITERATION_LOCATION) {
+                pendingInputs.insert(pendingInputs.end(),
+                                     inputs.begin() + PFLOW_ITERATION_LOCATION,
+                                     inputs.end());
+            }
+        } else {
+            pendingInputs = inputs;
+        }
+        const auto iret = pendingShunt->powerFlowAdjust(pendingInputs, flags, level);
+        ret = std::max(iret, ret);
+        if (iret > ChangeCode::NO_CHANGE) {
+            if (root->maxPowerFlowAdjustmentsPerPass > 0) {
+                ++root->powerFlowAdjustmentsThisPass;
+            }
+            pendingShuntChanged = true;
+        } else if (root->pendingSwitchedShuntAdjustment == pendingShunt) {
+            // This controller has now judged the result of its previous step.
+            // Let the remaining control list run only after that comparison.
+            root->pendingSwitchedShuntAdjustment = nullptr;
+        }
+    }
+    if ((level < CheckLevel::LOW_VOLTAGE_CHECK) && !pendingShuntChanged) {
         for (auto* obj : pFlowAdjustObjects) {
+            if ((root->maxPowerFlowAdjustmentsPerPass > 0) &&
+                (root->powerFlowAdjustmentsThisPass >= root->maxPowerFlowAdjustmentsPerPass)) {
+                break;
+            }
+            const auto adjustmentsBefore = root->powerFlowAdjustmentsThisPass;
             auto iret = obj->powerFlowAdjust(inputs, flags, level);
             ret = std::max(iret, ret);
+            if ((iret > ChangeCode::NO_CHANGE) && (root->maxPowerFlowAdjustmentsPerPass > 0) &&
+                (root->powerFlowAdjustmentsThisPass == adjustmentsBefore)) {
+                ++root->powerFlowAdjustmentsThisPass;
+            }
+            if ((iret > ChangeCode::NO_CHANGE) &&
+                (root->pendingSwitchedShuntAdjustment != nullptr)) {
+                // The next solved voltage belongs to this bank's step. Do not
+                // let later controls obscure its before/after comparison.
+                break;
+            }
         }
-    } else {
+    } else if (level >= CheckLevel::LOW_VOLTAGE_CHECK) {
         for (auto* obj : primaryObjects) {
             if (obj->isEnabled()) {
                 auto iret = obj->powerFlowAdjust(inputs, flags, level);
                 ret = std::max(iret, ret);
+                if ((iret > ChangeCode::NO_CHANGE) &&
+                    (root->pendingSwitchedShuntAdjustment != nullptr)) {
+                    break;
+                }
             }
         }
     }
@@ -871,6 +936,20 @@ ChangeCode GridArea::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, 
         updateFlags();
     }
     return ret;
+}
+
+bool GridArea::claimSwitchedShuntAdjustment(GridComponent* shunt)
+{
+    auto* root = this;
+    while (auto* parentArea = dynamic_cast<GridArea*>(root->getParent())) {
+        root = parentArea;
+    }
+    if (root->switchedShuntAdjustmentClaimed) {
+        return false;
+    }
+    root->switchedShuntAdjustmentClaimed = true;
+    root->pendingSwitchedShuntAdjustment = shunt;
+    return true;
 }
 
 void GridArea::pFlowCheck(std::vector<Violation>& violationVector)
@@ -1037,8 +1116,9 @@ void GridArea::set(std::string_view param, std::string_view val)
     }
 }
 
-static constexpr std::array<std::string_view, 2> locNumStrings{"schedulednetinterchange",
-                                                               "interchangetolerance"};
+static constexpr std::array<std::string_view, 3> locNumStrings{"schedulednetinterchange",
+                                                               "interchangetolerance",
+                                                               "maxpowerflowadjustmentsperpass"};
 static constexpr std::array<std::string_view, 1> locStrStrings{"interchangeslackbus"};
 static constexpr std::array<std::string_view, 0> flagStrings{};
 
@@ -1076,6 +1156,17 @@ void GridArea::set(std::string_view param, double val, unit unitType)
             throw InvalidParameterValue("interchange slack bus ID must be a non-negative integer");
         }
         setInterchangeSlackBus(static_cast<index_t>(val));
+    } else if (param == "maxpowerflowadjustmentsperpass") {
+        if (!std::isfinite(val) || val < 0.0 || std::floor(val) != val ||
+            val > static_cast<double>(std::numeric_limits<count_t>::max())) {
+            throw InvalidParameterValue(
+                "max power-flow adjustments per pass must be a non-negative integer");
+        }
+        auto* root = this;
+        while (auto* parentArea = dynamic_cast<GridArea*>(root->getParent())) {
+            root = parentArea;
+        }
+        root->maxPowerFlowAdjustmentsPerPass = static_cast<count_t>(val);
     } else {
         GridPrimary::set(param, val, unitType);
     }
@@ -1107,6 +1198,13 @@ double GridArea::get(std::string_view param, unit unitType) const
         return interchangeSlackBusUserID.has_value() ?
             static_cast<double>(*interchangeSlackBusUserID) :
             kNullVal;
+    }
+    if (param == "maxpowerflowadjustmentsperpass") {
+        const GridArea* root = this;
+        while (const auto* parentArea = dynamic_cast<const GridArea*>(root->getParent())) {
+            root = parentArea;
+        }
+        return static_cast<double>(root->maxPowerFlowAdjustmentsPerPass);
     }
     if (param == "buscount") {
         vali = m_Buses.size();

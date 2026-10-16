@@ -39,6 +39,20 @@ class Svd: public RampLoad {
     int stepCount = 0;  //!< the total number of steps available
     std::vector<std::pair<int, double>>
         Cblocks;  // a vector containing the capacitive blocks (count, size[puMW])
+    std::vector<int> currentBlockSteps;  //!< active steps by input block order
+
+    // Remember the last discrete move so a bank that steps across its full
+    // voltage band does not immediately switch back to the previous setting.
+    bool hasLastDiscreteAdjustment = false;
+    std::vector<int> lastAdjustmentFromSteps;
+    std::vector<int> lastAdjustmentToSteps;
+    double lastAdjustmentVoltage = 1.0;
+    int lastAdjustmentIteration = -1;
+    bool hasOvershootHold = false;
+    std::vector<int> overshootHeldSteps;
+    std::vector<int> overshootBlockedSteps;
+    bool overshootHeldOnHighSide = false;
+    double overshootHoldVoltage = 1.0;
 
     int adjustmentMethod = 0;  //!< RAW ADJM metadata; exact PSS/E switching method is not modeled
 
@@ -175,8 +189,11 @@ class Svd: public RampLoad {
 
   protected:
     double levelForStep(int step) const;
+    double levelForBlockSteps(const std::vector<int>& blockSteps) const;
+    std::vector<int> blockStepsForLevel(double level) const;
     int nearestStep(double level) const;
-    int voltageControlStep(double voltage) const;
+    std::vector<int> voltageControlSteps(double voltage) const;
+    void updateBlockSetting(std::vector<int> blockSteps);
     bool powerFlowAdjustmentAllowed(const IOdata& inputs) const;
 
     int andesMaxStep() const;

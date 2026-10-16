@@ -20,6 +20,9 @@
 namespace griddyn::governors {
 using units::puMW;
 using units::unit;
+namespace {
+    constexpr double powerLimitRootTolerance = 1e-5;
+}
 
 GovernorIeeeSimple::GovernorIeeeSimple(const std::string& objName): Governor(objName)
 {
@@ -64,6 +67,7 @@ void GovernorIeeeSimple::dynObjectInitializeB(const IOdata& /*inputs*/,
                                               const IOdata& desiredOutput,
                                               IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[0]) ||
         !adjustInitialUpperLimit(desiredOutput[0], "IEEE simple initial output")) {
         throw InvalidParameterValue("IEEE simple initial output outside upper limit");
@@ -74,6 +78,19 @@ void GovernorIeeeSimple::dynObjectInitializeB(const IOdata& /*inputs*/,
     m_state[1] = 0;
     m_state[0] = desiredOutput[0];
     fieldSet[1] = desiredOutput[0];
+    if (opFlags[USES_POWER_LIMITS]) {
+        const double correction = std::max(0.0, Pmax - originalUpperLimit);
+        const double margin = std::max(0.2 * correction, 10.0 * powerLimitRootTolerance * T3);
+        if (m_state[0] >= Pmax) {
+            initialSetpointOverdrive = margin;
+            opFlags.set(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        } else if (m_state[0] <= Pmin) {
+            initialSetpointOverdrive = -margin;
+            opFlags.reset(POWER_LIMIT_HIGH);
+            opFlags.set(POWER_LIMITED);
+        }
+    }
 }
 
 // residual
@@ -106,7 +123,7 @@ void GovernorIeeeSimple::derivative(const IOdata& inputs,
         Loc.destDiffLoc[0] = 0;
     } else {
         Loc.destDiffLoc[0] =
-            (inputs[govpSetInLocation] - gs[0] - K * gs[1] - K * T2 * (omega - 1.0) / T1) / T3;
+            (effectivePowerSetpoint(inputs) - gs[0] - K * gs[1] - K * T2 * (omega - 1.0) / T1) / T3;
     }
 
     Loc.destDiffLoc[1] = (-gs[1] + (1 - T2 / T1) * (omega - 1.0)) / T1;
@@ -206,16 +223,19 @@ void GovernorIeeeSimple::rootTest(const IOdata& inputs,
         double Pmech = Loc.diffStateLoc[0];
 
         if (!opFlags[POWER_LIMITED]) {
-            roots[rootOffset] = std::min(Pmax - Pmech, Pmech - Pmin);
-            if (Pmech > Pmax) {
+            roots[rootOffset] = std::min(Pmax - Pmech, Pmech - Pmin) + powerLimitRootTolerance;
+            if (Pmech >= Pmax) {
                 opFlags.set(POWER_LIMIT_HIGH);
+            } else if (Pmech <= Pmin) {
+                opFlags.reset(POWER_LIMIT_HIGH);
             }
         } else {
-            // double omega = getControlFrequency (inputs);
-            double omega = inputs[govOmegaInLocation];
-            roots[rootOffset] = (inputs[govpSetInLocation] - Pmech - K * Loc.diffStateLoc[1] -
-                                 K * T2 * (omega - 1.0) / T1) /
+            const double omega = inputs[govOmegaInLocation];
+            const double releaseRate = (effectivePowerSetpoint(inputs) - Pmech -
+                                        K * Loc.diffStateLoc[1] - K * T2 * (omega - 1.0) / T1) /
                 T3;
+            roots[rootOffset] =
+                (opFlags[POWER_LIMIT_HIGH] ? releaseRate : -releaseRate) + powerLimitRootTolerance;
         }
         ++rootOffset;
     }

@@ -61,6 +61,11 @@ double ExciterESAC1A::regulatorUpperLimit() const
     return Vamax;
 }
 
+bool ExciterESAC1A::adjustRegulatorInitialUpperLimit(double initialValue)
+{
+    return adjustInitialUpperLimit(initialValue, Vamax, "ESAC1A initial control-element output");
+}
+
 double ExciterESAC1A::regulatorLowerLimit() const
 {
     return Vamin;

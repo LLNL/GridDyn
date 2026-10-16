@@ -72,6 +72,7 @@ void GovernorReheat::dynObjectInitializeB(const IOdata& /*inputs*/,
                                           const IOdata& desiredOutput,
                                           IOdata& fieldSet)
 {
+    const double originalUpperLimit = Pmax;
     if (desiredOutput.empty() || !std::isfinite(desiredOutput[0]) ||
         !adjustInitialUpperLimit(desiredOutput[0], "IEESGO initial valve")) {
         throw InvalidParameterValue("IEESGO initial valve outside upper limit");
@@ -86,6 +87,21 @@ void GovernorReheat::dynObjectInitializeB(const IOdata& /*inputs*/,
 
     fieldSet.resize(2);
     fieldSet[govpSetInLocation] = power;
+    const double correction = std::max(0.0, Pmax - originalUpperLimit);
+    const double margin = std::max(0.2 * correction, 1e-4);
+    double overdrive = 0.0;
+    if (power >= Pmax) {
+        overdrive = margin;
+    } else if (power <= Pmin) {
+        overdrive = -margin;
+    }
+    if (overdrive != 0.0) {
+        // The two states before the valve clamp must track the overdriven
+        // reference.  Downstream turbine states retain the dispatched power.
+        m_state[1] += overdrive;
+        m_state[2] += overdrive;
+        initialSetpointOverdrive = overdrive;
+    }
 }
 
 // residual
@@ -115,7 +131,7 @@ void GovernorReheat::derivative(const IOdata& inputs,
     const auto loc = offsets.getLocations(stateData, deriv, sMode, this);
     const auto* state = loc.diffStateLoc;
     const double controllerInput =
-        inputs[govpSetInLocation] + (K * (Wref - inputs[govOmegaInLocation]));
+        effectivePowerSetpoint(inputs) + (K * (Wref - inputs[govOmegaInLocation]));
     loc.destDiffLoc[0] = (controllerInput - state[0]) / T1;
     loc.destDiffLoc[1] = (state[0] - state[1]) / T3;
     const double valve =

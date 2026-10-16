@@ -113,19 +113,26 @@ class Exciter: public GridSubModel {
     virtual bool supportsLimiterSignal(ExciterLimiterSignal signal) const;
 
   protected:
+    // Keep limiter roots outside the solver's near-zero band at an exactly
+    // initialized bound. Individual models may use a larger margin when their
+    // input gain amplifies terminal-voltage noise.
+    static constexpr double limiterRootTolerance = 2e-6;
     /** Configure the initial exciter-limit policy from simulation flags. */
     void setInitialLimitPolicy(std::uint32_t flags);
 
     /**
      * Check an initialized value against an exciter upper limit.
      *
-     * The default policy raises the supplied upper limit to an exceeded
-     * initialized value and emits a warning. Strict initialization returns
+     * The default policy raises the supplied upper limit above an exceeded
+     * initialized value by the larger requested headroom and emits a warning.
+     * Callers that omit headroom retain the exact-value adjustment. Strict initialization returns
      * false so the caller can retain its model-specific initialization error.
      */
     bool adjustInitialUpperLimit(double initialValue,
                                  double& upperLimit,
-                                 std::string_view limitName);
+                                 std::string_view limitName,
+                                 double fractionalHeadroom = 0.0,
+                                 double minimumHeadroom = 0.0);
 
     void checkForLimits();
 };

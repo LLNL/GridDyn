@@ -103,6 +103,11 @@ void ExciterEXST1::dynObjectInitializeB(const IOdata& inputs,
     const double setpointInput = inputs[exciterVsetInLocation] - 1.0;
     vBias = state[voltageMeasurementState] + initialInput - Vref - setpointInput -
         inputs[exciterVssInLocation];
+    if (initialInput >= Vimax) {
+        vBias += 10.0 * limiterRootTolerance;
+    } else if (initialInput <= Vimin) {
+        vBias -= 10.0 * limiterRootTolerance;
+    }
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
     updateLimitFlags(inputs, state);
@@ -327,13 +332,14 @@ void ExciterEXST1::rootTest(const IOdata& inputs,
     const double* state = locations.diffStateLoc;
     const index_t rootOffset = offsets.getRootOffset(sMode);
     const double input = unlimitedInput(inputs, state);
-    roots[rootOffset] = std::min(Vimax - input, input - Vimin);
+    roots[rootOffset] = std::min(Vimax - input, input - Vimin) + limiterRootTolerance;
 
     const double fieldCurrent = inputs[exciterXadIfdInLocation];
     const double upperBound = Vrmax - Kc * fieldCurrent;
     const double lowerBound = Vrmin - Kc * fieldCurrent;
     const double regulatorOutput = state[regulatorState];
-    roots[rootOffset + 1] = std::min(upperBound - regulatorOutput, regulatorOutput - lowerBound);
+    roots[rootOffset + 1] =
+        std::min(upperBound - regulatorOutput, regulatorOutput - lowerBound) + limiterRootTolerance;
 }
 
 void ExciterEXST1::rootTrigger(CoreTime /*time*/,

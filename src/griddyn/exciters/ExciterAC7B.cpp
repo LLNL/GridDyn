@@ -306,6 +306,8 @@ void ExciterAC7B::dynObjectInitializeB(const IOdata& inputs,
     const double sourceVoltage = (Kp == 0.0) ? 1.0 : Kp * terminalVoltage;
     const double piOutput = fieldFeedback / sourceVoltage;
     const double pidOutput = (Kf1 * fieldVoltage) + (Kf2 * fieldFeedback);
+    const double originalPidUpperLimit = Vrmax;
+    const double originalPiUpperLimit = Vamax;
     const double rectifierMismatch =
         (exciterVoltage *
          detail::computeRectifierFactor(
@@ -335,6 +337,37 @@ void ExciterAC7B::dynObjectInitializeB(const IOdata& inputs,
     state[exciterVoltageState] = exciterVoltage;
     vBias = state[voltageMeasurementState] - Vref - (inputs[exciterVsetInLocation] - 1.0) -
         inputs[exciterVssInLocation];
+    const double guard = 10.0 * limiterRootTolerance;
+    if ((Kpa > 0.0) && (Kia > 0.0)) {
+        const double correction = std::max(0.0, Vamax - originalPiUpperLimit);
+        const double margin = std::max(0.2 * correction, guard);
+        const double pidIncrement = std::max(margin / Kpa, margin / Kia);
+        if ((piOutput >= Vamax) && (pidOutput + pidIncrement < Vrmax)) {
+            state[pidIntegralState] += pidIncrement;
+            opFlags.set(PI_LIMITED);
+            opFlags.set(PI_LIMIT_HIGH);
+        } else if ((piOutput <= Vamin) && (pidOutput - pidIncrement > Vrmin)) {
+            state[pidIntegralState] -= pidIncrement;
+            opFlags.set(PI_LIMITED);
+            opFlags.reset(PI_LIMIT_HIGH);
+        }
+    }
+    if ((Kpr > 0.0) && (Kir > 0.0)) {
+        const double correction = std::max(0.0, Vrmax - originalPidUpperLimit);
+        const double margin = std::max(0.2 * correction, guard);
+        const double inputMargin = std::max({margin / Kpr, margin / Kir, 1e-5});
+        if (pidOutput >= Vrmax) {
+            vBias += inputMargin;
+            state[pidDerivativeState] += inputMargin;
+            opFlags.set(PID_LIMITED);
+            opFlags.set(PID_LIMIT_HIGH);
+        } else if (pidOutput <= Vrmin) {
+            vBias -= inputMargin;
+            state[pidDerivativeState] -= inputMargin;
+            opFlags.set(PID_LIMITED);
+            opFlags.reset(PID_LIMIT_HIGH);
+        }
+    }
     fieldSet.resize(std::max<std::size_t>(fieldSet.size(), 2U));
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -528,25 +561,31 @@ void ExciterAC7B::rootTest(const IOdata& inputs,
         roots[root] = opFlags[PID_LIMIT_HIGH] ?
             std::max(Vrmax - evaluation.pidDrive, -evaluation.pidIntegratorDrive) :
             std::max(evaluation.pidDrive - Vrmin, evaluation.pidIntegratorDrive);
+        roots[root] += limiterRootTolerance;
     } else {
-        roots[root] = std::min(Vrmax - evaluation.pidDrive, evaluation.pidDrive - Vrmin);
+        roots[root] = std::min(Vrmax - evaluation.pidDrive, evaluation.pidDrive - Vrmin) +
+            limiterRootTolerance;
         opFlags.set(PID_LIMIT_HIGH, evaluation.pidDrive >= Vrmax);
     }
     if (opFlags[PI_LIMITED]) {
         roots[root + 1] = opFlags[PI_LIMIT_HIGH] ?
             std::max(Vamax - evaluation.piDrive, -evaluation.piIntegratorDrive) :
             std::max(evaluation.piDrive - Vamin, evaluation.piIntegratorDrive);
+        roots[root + 1] += limiterRootTolerance;
     } else {
-        roots[root + 1] = std::min(Vamax - evaluation.piDrive, evaluation.piDrive - Vamin);
+        roots[root + 1] =
+            std::min(Vamax - evaluation.piDrive, evaluation.piDrive - Vamin) + limiterRootTolerance;
         opFlags.set(PI_LIMIT_HIGH, evaluation.piDrive >= Vamax);
     }
     if (opFlags[EXCITER_LIMITED]) {
         roots[root + 2] = opFlags[EXCITER_LIMIT_HIGH] ?
             std::max(Vemax - evaluation.fieldFeedback, -evaluation.exciterDrive) :
             std::max(loc.diffStateLoc[exciterVoltageState] - Vemin, evaluation.exciterDrive);
+        roots[root + 2] += limiterRootTolerance;
     } else {
         roots[root + 2] = std::min(Vemax - evaluation.fieldFeedback,
-                                   loc.diffStateLoc[exciterVoltageState] - Vemin);
+                                   loc.diffStateLoc[exciterVoltageState] - Vemin) +
+            limiterRootTolerance;
         opFlags.set(EXCITER_LIMIT_HIGH, evaluation.fieldFeedback >= Vemax);
     }
 }

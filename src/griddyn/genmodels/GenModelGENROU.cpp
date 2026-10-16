@@ -12,6 +12,7 @@
 #include "core/CoreObjectTemplates.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/MatrixData.hpp"
+#include <array>
 #include <cmath>
 #include <complex>
 #include <string>

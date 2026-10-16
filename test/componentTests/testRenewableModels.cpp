@@ -1097,7 +1097,44 @@ TEST(RenewableModels, REECA1ZeroCurvesAndZeroOrderingLag)
     controller.set("thld2", 0.5);
     EXPECT_DOUBLE_EQ(controller.get("thld2"), 0.5);
     EXPECT_NO_THROW(controller.dynInitializeA(0.0, 0));
+    REECA1 voltageRootController;
+    voltageRootController.set("thld2", 0.5);
+    voltageRootController.dynInitializeA(0.0, 0);
+    EXPECT_EQ(voltageRootController.rootSize(cDaeSolverMode), 2U);
+}
+
+TEST(RenewableModels, REECA1HoldDelayUpdatesCachedRootCount)
+{
+    REECA1 controller;
+    controller.dynInitializeA(0.0, 0);
+    EXPECT_EQ(controller.rootSize(cDaeSolverMode), 0U);
+
+    controller.set("thld2", 0.5);
     EXPECT_EQ(controller.rootSize(cDaeSolverMode), 2U);
+
+    controller.set("thld2", 0.0);
+    EXPECT_EQ(controller.rootSize(cDaeSolverMode), 0U);
+}
+
+TEST(RenewableModels, REECA1DipRootHasTwoSidedInitializationNoiseMargin)
+{
+    REECA1 controller;
+    controller.set("thld2", 0.5);
+    controller.set("vdip", 1.0);
+    controller.set("vup", 1.15);
+    controller.dynInitializeA(0.0, 0);
+    IOdata fields;
+    controller.dynInitializeB({1.0}, {0.8, 0.1}, fields);
+    controller.setRootOffset(0, cLocalSolverMode);
+
+    std::array<double, 2> roots{};
+    controller.rootTest({1.0}, StateData(0.0), roots.data(), cLocalSolverMode);
+    EXPECT_NEAR(roots[0], 2e-6, 1e-12);
+    for (const double voltage : {1.0 - 1e-6, 1.0 + 1e-6}) {
+        controller.rootTest({voltage}, StateData(0.0), roots.data(), cLocalSolverMode);
+        EXPECT_GT(roots[0], 0.0);
+        EXPECT_GT(roots[1], 0.0);
+    }
 }
 
 TEST(RenewableModels, ACTIVSg25kDyrProfileLoadsRecoveryHold)
@@ -3034,6 +3071,8 @@ TEST(RenewableModels, SolarDyrIntegratesInNetwork)
             ASSERT_NE(electrical, nullptr);
             electrical->set("thld2", 0.5);
             electrical->set("tpord", 0.0);
+            electrical->dynInitializeA(0.0, 0);
+            host->dynInitializeA(0.0, 0);
         }
         loadOtherMachines(*simulation);
         ASSERT_EQ(simulation->dynInitialize(), 0);

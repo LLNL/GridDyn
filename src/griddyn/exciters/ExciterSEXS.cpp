@@ -10,12 +10,14 @@
 #include "../GridComponentHelperClasses.h"
 #include "../GridPrimary.h"
 #include "../gridDynDefinitions.hpp"
+#include "core/CoreExceptions.h"
 #include "core/CoreObject.h"
 #include "core/CoreObjectTemplates.hpp"
 #include "core/coreDefinitions.hpp"
 #include "solvers/SolverMode.hpp"
 #include "utilities/MatrixData.hpp"
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -43,8 +45,9 @@ CoreObject* ExciterSEXS::clone(CoreObject* obj) const
     return gdE;
 }
 
-void ExciterSEXS::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t /*flags*/)
+void ExciterSEXS::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t flags)
 {
+    setInitialLimitPolicy(flags);
     offsets.local().local.diffSize = 2;
     offsets.local().local.jacSize = 6;
     checkForLimits();
@@ -54,12 +57,32 @@ void ExciterSEXS::dynObjectInitializeB(const IOdata& inputs,
                                        const IOdata& desiredOutput,
                                        IOdata& fieldSet)
 {
+    const double originalUpperLimit = Vrmax;
     Exciter::dynObjectInitializeB(inputs, desiredOutput, fieldSet);
 
     auto* stateValues = m_state.data();
     const auto vErr = Vref + vBias - inputs[VOLTAGE_IN_LOCATION];
     if (Tb != 0.0) {
         stateValues[1] = (stateValues[0] / Ka) - ((Ta / Tb) * vErr);
+        if ((stateValues[0] < Vrmin - 1e-7) ||
+            !adjustInitialUpperLimit(stateValues[0], Vrmax, "SEXS initial regulator output")) {
+            throw InvalidParameterValue("SEXS initial regulator output outside limits");
+        }
+        const double correction = std::max(0.0, Vrmax - originalUpperLimit);
+        const double guard = 1e-4 + std::abs(Ka) * 1e-5;
+        if ((Vrmax != 0.0) && (stateValues[0] >= Vrmax)) {
+            const double inputOverdrive = std::max(0.2 * correction, guard) / Ka;
+            vBias += inputOverdrive;
+            stateValues[1] += (1.0 - Ta / Tb) * inputOverdrive;
+            opFlags.set(TRIGGER_HIGH);
+            opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+        } else if (stateValues[0] <= Vrmin) {
+            const double inputOverdrive = guard / Ka;
+            vBias -= inputOverdrive;
+            stateValues[1] -= (1.0 - Ta / Tb) * inputOverdrive;
+            opFlags.reset(TRIGGER_HIGH);
+            opFlags.set(OUTSIDE_VOLTAGE_LIMITS);
+        }
     } else {
         stateValues[1] = 0.0;
     }
