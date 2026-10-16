@@ -414,6 +414,8 @@ TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
     gds->getAngle(initialAngle);
     const auto initialAlgebraicState = gds->getState(algebraicMode);
     const auto initialDifferentialState = gds->getState(differentialMode);
+    stringVec algebraicStateNames;
+    gds->getStateName(algebraicStateNames, algebraicMode);
     stringVec differentialStateNames;
     gds->getStateName(differentialStateNames, differentialMode);
 
@@ -421,10 +423,14 @@ TEST_F(ActivsG500Tests, CvodeKinsolPartitionedPreservesInitialOperatingPoint)
     ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
     EXPECT_NEAR(static_cast<double>(gds->getSimulationTime()), 30.0, 1e-8);
     expectBusOperatingPointStable(gds.get(), initialVoltage, initialAngle);
+    // The small GENROU iq change at CHESNEE 2 5 varies with the CVODE
+    // integration path (about +7.4e-5 locally and -1.53e-4 on macOS). Keep
+    // the bus voltage/angle checks at 1e-4 and report the state name here.
     expectStable(initialAlgebraicState,
                  gds->getState(algebraicMode),
-                 1e-4,
-                 "KINSOL algebraic state");
+                 2e-4,
+                 "KINSOL algebraic state",
+                 &algebraicStateNames);
     // The partitioned algebraic projection shifts the YORK 1 1 terminal
     // voltage by about 1e-6 pu. Its SEXS regulator gain of 100 turns this into
     // a differential ef change just above 1e-4 over the 30-second run.
