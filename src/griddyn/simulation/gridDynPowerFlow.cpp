@@ -170,8 +170,7 @@ int GridDynSimulation::powerflow()
                 if (!controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
                     // check the solution if voltage limits are not ignored
                     auto adjustmentFlags = lower_flags(controlFlags);
-                    if ((pState == GridState::INITIALIZED) &&
-                        controlFlags[FIRST_RUN_LIMITS_ONLY]) {
+                    if ((pState == GridState::INITIALIZED) && controlFlags[FIRST_RUN_LIMITS_ONLY]) {
                         SET_CONTROLFLAG(adjustmentFlags, DISABLE_SHUNT_ADJUSTMENTS);
                         SET_CONTROLFLAG(adjustmentFlags, DISABLE_TAP_CHANGER_ADJUSTMENTS);
                     }

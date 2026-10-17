@@ -361,13 +361,12 @@ struct NativeQpProblem {
                 return fail("native problem has an invalid variable bound");
             }
             const double type = variableTypes[column];
-            if ((type != CONTINUOUS_OBJECTIVE_VARIABLE) &&
-                (type != INTEGER_OBJECTIVE_VARIABLE) && (type != BINARY_OBJECTIVE_VARIABLE)) {
+            if ((type != CONTINUOUS_OBJECTIVE_VARIABLE) && (type != INTEGER_OBJECTIVE_VARIABLE) &&
+                (type != BINARY_OBJECTIVE_VARIABLE)) {
                 return fail("native problem has an unknown variable type");
             }
             if ((type == BINARY_OBJECTIVE_VARIABLE) &&
-                ((variableLowerBounds[column] < 0.0) ||
-                 (variableUpperBounds[column] > 1.0))) {
+                ((variableLowerBounds[column] < 0.0) || (variableUpperBounds[column] > 1.0))) {
                 return fail("native problem binary variable bounds must lie in [0, 1]");
             }
         }

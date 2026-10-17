@@ -1145,12 +1145,13 @@ int NativeOptimizer::prepareProblemData(double time)
     }
 
     const bool hasIntegerVariables =
-        std::any_of(candidate.variableTypes.begin(), candidate.variableTypes.end(), [](double type) {
-            return type != CONTINUOUS_OBJECTIVE_VARIABLE;
-        });
+        std::any_of(candidate.variableTypes.begin(),
+                    candidate.variableTypes.end(),
+                    [](double type) { return type != CONTINUOUS_OBJECTIVE_VARIABLE; });
     if (hasIntegerVariables && !supportsIntegerVariables()) {
         candidate.classification = NativeProblemClass::UNSUPPORTED_INTEGER;
-        return reject("native optimizer supports continuous variables only; use HiGHS for integer or binary variables");
+        return reject(
+            "native optimizer supports continuous variables only; use HiGHS for integer or binary variables");
     }
 
     bool hasQuadraticTerm = false;
