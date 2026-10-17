@@ -631,8 +631,7 @@ void GridGenOpt::getObjectiveNames(stringVec& objectiveNames,
                 objectiveNames[optimizationOffsets.contOffset + 1 +
                                static_cast<index_t>(segmentIndex)] =
                     prefix + getName() + ":Fraction" + std::to_string(segmentIndex);
-                objectiveNames[optimizationOffsets.intOffset +
-                               static_cast<index_t>(segmentIndex)] =
+                objectiveNames[optimizationOffsets.intOffset + static_cast<index_t>(segmentIndex)] =
                     prefix + getName() + ":Segment" + std::to_string(segmentIndex);
             }
         }

@@ -30,9 +30,8 @@ class FlagRecordingPowerFlowSimulation: public GridDynSimulation {
   public:
     std::vector<std::pair<std::uint32_t, CheckLevel>> adjustmentCalls;
 
-    ChangeCode powerFlowAdjust(const IOdata& /*inputs*/,
-                               std::uint32_t flags,
-                               CheckLevel level) override
+    ChangeCode
+        powerFlowAdjust(const IOdata& /*inputs*/, std::uint32_t flags, CheckLevel level) override
     {
         adjustmentCalls.emplace_back(flags, level);
         return ChangeCode::NO_CHANGE;

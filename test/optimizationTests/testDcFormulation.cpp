@@ -1037,8 +1037,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironme
         << optimizer.lastSolveResult().objectiveValue
         << " status=" << static_cast<int>(optimizer.lastSolveResult().status)
         << " max_constraint_violation=" << optimizer.lastSolveResult().maximumConstraintViolation
-        << " max_bound_violation=" << optimizer.lastSolveResult().maximumBoundViolation
-        << '\n';
+        << " max_bound_violation=" << optimizer.lastSolveResult().maximumBoundViolation << '\n';
     EXPECT_EQ(optimizer.lastSolveResult().status, griddyn::NativeSolveStatus::OPTIMAL);
     EXPECT_TRUE(std::isfinite(optimizer.lastSolveResult().objectiveValue));
     EXPECT_LE(optimizer.lastSolveResult().maximumConstraintViolation, 1e-6);
