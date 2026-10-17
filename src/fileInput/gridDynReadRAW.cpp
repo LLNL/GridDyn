@@ -2829,6 +2829,7 @@ static void rawReadSwitchedShunt(CoreObject* parentObject,
     int blockStart = 7;
     int adjustmentMethod = 0;
     bool inService = true;
+    bool hasV35ShuntFields = false;
     // TODO(phlpt): Verify this logic; it may not be totally correct right now.
     // VERSION 32 has some ambiguity in the interpretation
     if (opt.version >= 32) {
@@ -2839,10 +2840,11 @@ static void rawReadSwitchedShunt(CoreObject* parentObject,
         // in voltage/reactive-power control.
         inService = (numeric_conversion<int>(strvec[3], 1) != 0);
     }
-    // This v35 export retains a quoted switched-shunt identifier and one
-    // additional control field. Detect that layout rather than shifting all
-    // v35 files, since the PSS/E field-definition card does not list it.
+    // PSS/E v35 records add a quoted switched-shunt ID and NREG. Some exports
+    // retain the older field-definition card, so identify the record layout
+    // from the quoted ID rather than that card.
     if ((opt.version >= 35) && (strvec.size() > 11) && trim(strvec[1]).starts_with("'")) {
+        hasV35ShuntFields = true;
         shift = 3;
         blockStart = 11;
         mode = numeric_conversion<int>(strvec[2], 0);
@@ -2853,7 +2855,8 @@ static void rawReadSwitchedShunt(CoreObject* parentObject,
     auto low = numeric_conversion<double>(strvec[3 + shift], 0.0);
     // get the controlled bus
     auto cbus = numeric_conversion<int>(strvec[4 + shift], -1);
-    const auto remoteParticipation = numeric_conversion<double>(strvec[5 + shift], 100.0);
+    const auto remoteParticipation = numeric_conversion<double>(
+        strvec[hasV35ShuntFields ? 9U : static_cast<size_t>(5 + shift)], 100.0);
 
     if (cbus < 0) {
         trimString(strvec[4 + shift]);
@@ -2954,14 +2957,29 @@ static void rawReadSwitchedShunt(CoreObject* parentObject,
     } else if (opt.version >= 32 && blockStart == 7) {
         blockStart = 9;
     }
-    const size_t ksize = strvec.size() - 1;
-    for (size_t kk = blockStart + 1; kk < ksize; kk += 2) {
-        auto cnt = numeric_conversion<int>(strvec[kk], 0);
-        auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
-        if ((cnt > 0) && (block != 0.0)) {
-            loadObject->addBlock(cnt, -block, MVAR);
-        } else {
-            break;
+    const size_t ksize = strvec.size();
+    if (hasV35ShuntFields) {
+        // PSS/E v35 adds an initial status field (S_i) before each block's
+        // step count and step susceptance: S_i, N_i, B_i.  The case's field
+        // definition card may still show the older N_i, B_i pairs.
+        for (size_t kk = blockStart + 1; kk + 2 < ksize; kk += 3) {
+            const auto cnt = numeric_conversion<int>(strvec[kk + 1], 0);
+            const auto block = numeric_conversion<double>(strvec[kk + 2], 0.0);
+            if ((cnt > 0) && (block != 0.0)) {
+                loadObject->addBlock(cnt, -block, MVAR);
+            } else {
+                break;
+            }
+        }
+    } else {
+        for (size_t kk = blockStart + 1; kk + 1 < ksize; kk += 2) {
+            const auto cnt = numeric_conversion<int>(strvec[kk], 0);
+            const auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
+            if ((cnt > 0) && (block != 0.0)) {
+                loadObject->addBlock(cnt, -block, MVAR);
+            } else {
+                break;
+            }
         }
     }
     // set the initial value

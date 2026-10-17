@@ -22,8 +22,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <iomanip>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>
@@ -911,7 +914,7 @@ TEST(OptimizationDcFormulationTests, NativeOptimizerMaterializesCase118)
     EXPECT_EQ(optimizer.problem().constraintMatrix, firstMatrix);
 }
 
-TEST(OptimizationDcFormulationTests, NativeOptimizerRejectsPiecewiseLinearCost)
+TEST(OptimizationDcFormulationTests, NativeOptimizerMaterializesConvexPiecewiseLinearCost)
 {
     auto gds = std::make_unique<griddyn::GridDynOptimization>();
     const auto filePath = makeValidationCasePath("case30pwl.m");
@@ -928,10 +931,130 @@ TEST(OptimizationDcFormulationTests, NativeOptimizerRejectsPiecewiseLinearCost)
               FUNCTION_EXECUTION_SUCCESS);
     optimizer.initialize(0.0);
 
-    EXPECT_EQ(optimizer.prepareProblemData(0.0), FUNCTION_EXECUTION_FAILURE);
-    EXPECT_EQ(optimizer.get("problem_loaded"), 0.0);
-    EXPECT_NE(optimizer.getLastErrorString().find("piecewise-linear"), std::string::npos);
+    ASSERT_EQ(optimizer.prepareProblemData(0.0), FUNCTION_EXECUTION_SUCCESS)
+        << optimizer.getLastErrorString();
+    EXPECT_EQ(optimizer.problem().classification, griddyn::NativeProblemClass::SUPPORTED_LINEAR);
+    EXPECT_EQ(optimizer.problem().constraintCount,
+              static_cast<std::size_t>(root->constraintSize(mode)));
 }
+
+#ifdef GRIDDYN_ENABLE_HIGHS
+TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesNonconvexPiecewiseLinearCost)
+{
+    auto gds = std::make_unique<griddyn::GridDynOptimization>();
+    const auto filePath = makePyPowerCasePath("case2.py");
+    ASSERT_TRUE(std::filesystem::exists(filePath));
+    griddyn::loadFile(gds.get(), filePath.string());
+
+    auto* root = gds->getOptimizationObject();
+    ASSERT_NE(root, nullptr);
+    auto* bus = dynamic_cast<griddyn::GridBusOpt*>(root->findByUserID("bus", 1));
+    ASSERT_NE(bus, nullptr);
+    auto* generator = dynamic_cast<griddyn::GridGenOpt*>(bus->getGen(0));
+    ASSERT_NE(generator, nullptr);
+    gds->setGeneratorCostCurve(generator->sourceGenerator(),
+                               griddyn::MatPowerCostCurve{.model = 1,
+                                                           .coefficients = {0.0, 0.0,
+                                                                            40.0, 400.0,
+                                                                            150.0, 500.0}});
+
+    const auto mode = makeDcMode(griddyn::LinearityMode::LINEAR);
+    gds->initializeOptimizationModel(mode);
+    root = gds->getOptimizationObject();
+    ASSERT_NE(root, nullptr);
+    griddyn::NativeOptimizer native(gds.get(), mode);
+    ASSERT_EQ(native.allocate(root->objSize(mode), root->constraintSize(mode)),
+              FUNCTION_EXECUTION_SUCCESS);
+    native.initialize(0.0);
+    EXPECT_EQ(native.prepareProblemData(0.0), FUNCTION_EXECUTION_FAILURE);
+    EXPECT_NE(native.getLastErrorString().find("integer"), std::string::npos);
+
+    griddyn::HighsOptimizer highs(gds.get(), mode);
+    ASSERT_EQ(highs.allocate(root->objSize(mode), root->constraintSize(mode)),
+              FUNCTION_EXECUTION_SUCCESS);
+    highs.initialize(0.0);
+    double returnTime = -1.0;
+    ASSERT_EQ(highs.solve(0.0, returnTime), FUNCTION_EXECUTION_SUCCESS)
+        << highs.lastSolveResult().message;
+    EXPECT_EQ(highs.problem().classification,
+              griddyn::NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR);
+    EXPECT_NEAR(highs.lastSolveResult().objectiveValue, 400.0 + 100.0 / 11.0, 1e-5);
+    const auto& offsets = generator->offsets.getOffsets(mode);
+    EXPECT_NEAR(highs.values[offsets.gOffset], 0.5, 1e-8);
+    EXPECT_NEAR(highs.values[offsets.intOffset], 0.0, 1e-8);
+    EXPECT_NEAR(highs.values[offsets.intOffset + 1], 1.0, 1e-8);
+}
+
+TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironment)
+{
+    const char* caseFile = std::getenv("GRIDDYN_MIDWEST25K_MFILE");
+    if ((caseFile == nullptr) || (*caseFile == '\0')) {
+        GTEST_SKIP() << "Set GRIDDYN_MIDWEST25K_MFILE to run the large integration case";
+    }
+    const std::filesystem::path filePath{caseFile};
+    ASSERT_TRUE(std::filesystem::exists(filePath)) << filePath.string();
+    const auto elapsed = [](auto start) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+                   std::chrono::steady_clock::now() - start)
+            .count();
+    };
+    const auto start = std::chrono::steady_clock::now();
+    auto gds = std::make_unique<griddyn::GridDynOptimization>();
+    griddyn::loadFile(gds.get(), filePath.string());
+    std::cerr << "Midwest25k load_ms=" << elapsed(start) << std::endl;
+
+    const auto mode = makeDcMode(griddyn::LinearityMode::LINEAR);
+    const auto setupStart = std::chrono::steady_clock::now();
+    gds->initializeOptimizationModel(mode);
+    auto* root = gds->getOptimizationObject();
+    ASSERT_NE(root, nullptr);
+    std::cerr << "Midwest25k setup_ms=" << elapsed(setupStart)
+              << " variables=" << root->objSize(mode)
+              << " constraints=" << root->constraintSize(mode) << std::endl;
+
+    griddyn::HighsOptimizer optimizer(gds.get(), mode);
+    ASSERT_EQ(optimizer.allocate(root->objSize(mode), root->constraintSize(mode)),
+              FUNCTION_EXECUTION_SUCCESS);
+    optimizer.initialize(0.0);
+    const auto prepareStart = std::chrono::steady_clock::now();
+    ASSERT_EQ(optimizer.prepareProblemData(0.0), FUNCTION_EXECUTION_SUCCESS)
+        << optimizer.getLastErrorString();
+    const auto& problem = optimizer.problem();
+    std::cerr << "Midwest25k prepare_ms=" << elapsed(prepareStart)
+              << " rows=" << problem.constraintCount
+              << " columns=" << problem.variableCount
+              << " nonzeros=" << problem.constraintMatrix.size()
+              << " integer_columns="
+              << std::count_if(problem.variableTypes.begin(),
+                               problem.variableTypes.end(),
+                               [](double type) {
+                                   return type != CONTINUOUS_OBJECTIVE_VARIABLE;
+                               })
+              << std::endl;
+    ASSERT_EQ(problem.classification,
+              griddyn::NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR);
+
+    const auto solveStart = std::chrono::steady_clock::now();
+    double returnTime = -1.0;
+    ASSERT_EQ(optimizer.solve(0.0, returnTime), FUNCTION_EXECUTION_SUCCESS)
+        << optimizer.lastSolveResult().message;
+    std::cerr << "Midwest25k solve_ms=" << elapsed(solveStart)
+              << " objective=" << std::setprecision(12)
+              << optimizer.lastSolveResult().objectiveValue
+              << " status=" << static_cast<int>(optimizer.lastSolveResult().status)
+              << " max_constraint_violation="
+              << optimizer.lastSolveResult().maximumConstraintViolation
+              << " max_bound_violation="
+              << optimizer.lastSolveResult().maximumBoundViolation
+              << std::endl;
+    EXPECT_EQ(optimizer.lastSolveResult().status, griddyn::NativeSolveStatus::OPTIMAL);
+    EXPECT_TRUE(std::isfinite(optimizer.lastSolveResult().objectiveValue));
+    EXPECT_LE(optimizer.lastSolveResult().maximumConstraintViolation, 1e-6);
+    EXPECT_LE(optimizer.lastSolveResult().maximumBoundViolation, 1e-6);
+    EXPECT_EQ(returnTime, 0.0);
+    EXPECT_EQ(optimizer.get("solution_valid"), 1.0);
+}
+#endif
 
 TEST(OptimizationDcFormulationTests, NativeOptimizerSetsUpCase13659WithoutSolve)
 {

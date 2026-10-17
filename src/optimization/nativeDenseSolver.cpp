@@ -1228,7 +1228,8 @@ namespace {
         }
         if ((problem.classification == NativeProblemClass::UNSUPPORTED_MODE) ||
             (problem.classification == NativeProblemClass::UNSUPPORTED_NONLINEAR) ||
-            (problem.classification == NativeProblemClass::UNSUPPORTED_INTEGER)) {
+            (problem.classification == NativeProblemClass::UNSUPPORTED_INTEGER) ||
+            (problem.classification == NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR)) {
             status = NativeSolveStatus::UNSUPPORTED;
             message = "native problem classification is unsupported";
             return false;

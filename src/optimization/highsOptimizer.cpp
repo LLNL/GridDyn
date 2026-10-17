@@ -61,7 +61,9 @@ namespace {
             highs.setOptionValue("presolve", "on") == HighsStatus::kError ||
             highs.setOptionValue("primal_feasibility_tolerance", tolerance) ==
                 HighsStatus::kError ||
-            highs.setOptionValue("dual_feasibility_tolerance", tolerance) == HighsStatus::kError) {
+            highs.setOptionValue("dual_feasibility_tolerance", tolerance) == HighsStatus::kError ||
+            highs.setOptionValue("mip_feasibility_tolerance", tolerance) == HighsStatus::kError ||
+            highs.setOptionValue("mip_rel_gap", tolerance) == HighsStatus::kError) {
             return false;
         }
         if (maxIterations > 0) {
@@ -117,7 +119,12 @@ namespace {
                     (std::max)(columnMagnitude[column],
                                std::sqrt(std::abs(2.0 * problem.quadraticObjective[column])));
             }
-            scaling.mVariableScale[column] = scaleFromMagnitude(columnMagnitude[column]);
+            // Scaling an integer column changes its lattice. Keep its physical
+            // unit so HiGHS sees the same integer values as GridDyn.
+            scaling.mVariableScale[column] =
+                (problem.variableTypes[column] == CONTINUOUS_OBJECTIVE_VARIABLE) ?
+                scaleFromMagnitude(columnMagnitude[column]) :
+                1.0;
         }
 
         // Scale each bounded row by the largest transformed coefficient. Bounds
@@ -158,6 +165,13 @@ namespace {
         linearProgram.col_cost_.resize(problem.variableCount);
         linearProgram.col_lower_.resize(problem.variableCount);
         linearProgram.col_upper_.resize(problem.variableCount);
+        const bool hasIntegerVariables = std::any_of(
+            problem.variableTypes.begin(), problem.variableTypes.end(), [](double type) {
+                return type != CONTINUOUS_OBJECTIVE_VARIABLE;
+            });
+        if (hasIntegerVariables) {
+            linearProgram.integrality_.assign(problem.variableCount, HighsVarType::kContinuous);
+        }
         for (std::size_t column = 0; column < problem.variableCount; ++column) {
             const double variableScale = scaling.mVariableScale[column];
             linearProgram.col_cost_[column] = problem.linearObjective[column] * variableScale;
@@ -165,6 +179,10 @@ namespace {
                 scaleFiniteBound(problem.variableLowerBounds[column], variableScale);
             linearProgram.col_upper_[column] =
                 scaleFiniteBound(problem.variableUpperBounds[column], variableScale);
+            if (hasIntegerVariables &&
+                problem.variableTypes[column] != CONTINUOUS_OBJECTIVE_VARIABLE) {
+                linearProgram.integrality_[column] = HighsVarType::kInteger;
+            }
         }
         linearProgram.row_lower_.resize(problem.constraintCount);
         linearProgram.row_upper_.resize(problem.constraintCount);

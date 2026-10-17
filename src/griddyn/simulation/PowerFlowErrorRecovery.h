@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 namespace griddyn {
@@ -63,6 +64,7 @@ class powerFlowErrorRecovery {
     bool powerFlowFix5();
 
     bool lowVoltageFix();
+    std::uint32_t adjustmentFlags() const;
 };
 
 }  // namespace griddyn

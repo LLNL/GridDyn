@@ -10,6 +10,7 @@
 #include "griddyn/GridBus.h"
 #include "griddyn/solvers/SolverInterface.h"
 #include <array>
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -24,6 +25,72 @@ using gmlc::utilities::countDiffs;
 static const char pFlow_test_directory[] = GRIDDYN_TEST_DIRECTORY "/pFlow_tests/";
 
 class PowerflowSystemTests: public GridDynSimulationTestFixture, public ::testing::Test {};
+
+class FlagRecordingPowerFlowSimulation: public GridDynSimulation {
+  public:
+    std::vector<std::pair<std::uint32_t, CheckLevel>> adjustmentCalls;
+
+    ChangeCode powerFlowAdjust(const IOdata&, std::uint32_t flags, CheckLevel level) override
+    {
+        adjustmentCalls.emplace_back(flags, level);
+        return ChangeCode::NO_CHANGE;
+    }
+};
+
+TEST_F(PowerflowSystemTests, FirstRunLimitsOnlyPreservesFlagsAndDisablesSteppedControls)
+{
+    FlagRecordingPowerFlowSimulation simulation;
+    loadCdf(&simulation, std::string(ieee_test_directory) + "ieee30_no_limit.cdf");
+    simulation.setFlag("first_run_limits_only");
+    simulation.setFlag("ignore_bus_limits");
+    ASSERT_TRUE(simulation.isFlagSet(FIRST_RUN_LIMITS_ONLY));
+
+    ASSERT_EQ(simulation.powerflow(), FUNCTION_EXECUTION_SUCCESS);
+    ASSERT_EQ(simulation.adjustmentCalls.size(), 2U);
+    EXPECT_EQ(simulation.adjustmentCalls[0].second, CheckLevel::REVERSABLE_ONLY);
+    EXPECT_EQ(simulation.adjustmentCalls[1].second, CheckLevel::FULL_CHECK);
+    for (const auto& call : simulation.adjustmentCalls) {
+        const auto flags = call.first;
+        EXPECT_TRUE(CHECK_CONTROLFLAG(flags, DISABLE_SHUNT_ADJUSTMENTS));
+        EXPECT_TRUE(CHECK_CONTROLFLAG(flags, DISABLE_TAP_CHANGER_ADJUSTMENTS));
+        EXPECT_TRUE(CHECK_CONTROLFLAG(flags, IGNORE_BUS_LIMITS));
+    }
+
+    simulation.adjustmentCalls.clear();
+    ASSERT_EQ(simulation.powerflow(), FUNCTION_EXECUTION_SUCCESS);
+    ASSERT_EQ(simulation.adjustmentCalls.size(), 2U);
+    for (const auto& call : simulation.adjustmentCalls) {
+        const auto flags = call.first;
+        EXPECT_FALSE(CHECK_CONTROLFLAG(flags, DISABLE_SHUNT_ADJUSTMENTS));
+        EXPECT_FALSE(CHECK_CONTROLFLAG(flags, DISABLE_TAP_CHANGER_ADJUSTMENTS));
+        EXPECT_TRUE(CHECK_CONTROLFLAG(flags, IGNORE_BUS_LIMITS));
+    }
+}
+
+TEST_F(PowerflowSystemTests, RecoveryAndNetworkFlagsAreConfigurable)
+{
+    GridDynSimulation simulation;
+    simulation.setFlag("no_auto_slack_bus");
+    simulation.setFlag("no_auto_disconnect");
+    simulation.setFlag("no_automatic_load_loss");
+    simulation.setFlag("no_reset");
+    simulation.setFlag("force_event_powerflow");
+    EXPECT_TRUE(simulation.isFlagSet(DISABLE_AUTO_SLACK_BUS));
+    EXPECT_TRUE(simulation.isFlagSet(DISABLE_AUTO_DISCONNECT));
+    EXPECT_TRUE(simulation.isFlagSet(DISABLE_AUTOMATIC_LOAD_LOSS));
+    EXPECT_TRUE(simulation.isFlagSet(NO_RESET));
+    EXPECT_TRUE(simulation.isFlagSet(FORCE_POWER_FLOW));
+}
+
+TEST_F(PowerflowSystemTests, NoPowerFlowAdjustmentsSkipsNormalAdjustmentPasses)
+{
+    FlagRecordingPowerFlowSimulation simulation;
+    loadCdf(&simulation, std::string(ieee_test_directory) + "ieee30_no_limit.cdf");
+    simulation.setFlag("no_powerflow_adjustments");
+
+    ASSERT_EQ(simulation.powerflow(), FUNCTION_EXECUTION_SUCCESS);
+    EXPECT_TRUE(simulation.adjustmentCalls.empty());
+}
 
 /** test to make sure the basic power flow loads and runs*/
 TEST_F(PowerflowSystemTests, PFlowTest1)

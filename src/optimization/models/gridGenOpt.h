@@ -106,6 +106,8 @@ class GridGenOpt: public GridOptObject {
         current system base from its attached Generator when converting it. */
     virtual void loadMatPowerCostCoeff(std::vector<double> coeff, int powerMode, int costModel);
     void loadMatPowerCostCurve(const MatPowerCostCurve& curve, bool reactive = false);
+    /** Whether this generator's active piecewise curve covers its current Pg bounds. */
+    bool piecewiseCoversGenerationBounds(double time) const;
     const MatPowerCostCurve& matPowerCostCurve(bool reactive = false) const
     {
         return reactive ? reactiveCostCurve : activeCostCurve;
@@ -119,6 +121,8 @@ class GridGenOpt: public GridOptObject {
     virtual GridOptObject* getArea(index_t index) const override;
 
   protected:
+    bool usesActivePiecewiseCost(const OptimizationMode& oMode) const;
+    bool hasNonconvexActiveCost() const;
 };
 
 }  // namespace griddyn
