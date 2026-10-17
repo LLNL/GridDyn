@@ -21,9 +21,9 @@ powerFlowErrorRecovery::powerFlowErrorRecovery(GridDynSimulation* gds,
 }
 powerFlowErrorRecovery::~powerFlowErrorRecovery() = default;
 
-powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(int error_code)
+powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(int errorCode)
 {
-    if ((error_code == SOLVER_STEP_LIMIT_REACHED) &&
+    if ((errorCode == SOLVER_STEP_LIMIT_REACHED) &&
         (sim->currentProcessState() !=
          GridDynSimulation::GridState::INITIALIZED)) {  // something possibly went wrong in the
                                                         // initial setup try a full
@@ -34,7 +34,7 @@ powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(i
         sim->reInitpFlow(solver->getSolverMode(), ChangeCode::STATE_SIZE_CHANGE);
         return RecoveryReturnCodes::MORE_OPTIONS;
     }
-    if ((error_code == SOLVER_INVALID_STATE_ERROR) && (attempt_number < 5) && lowVoltageFix()) {
+    if ((errorCode == SOLVER_INVALID_STATE_ERROR) && (attempt_number < 5) && lowVoltageFix()) {
         ++attempt_number;
         return RecoveryReturnCodes::MORE_OPTIONS;
     }

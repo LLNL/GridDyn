@@ -977,7 +977,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesNonconvexPiecewiseLinea
         << highs.lastSolveResult().message;
     EXPECT_EQ(highs.problem().classification,
               griddyn::NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR);
-    EXPECT_NEAR(highs.lastSolveResult().objectiveValue, 400.0 + 100.0 / 11.0, 1e-5);
+    EXPECT_NEAR(highs.lastSolveResult().objectiveValue, 400.0 + (100.0 / 11.0), 1e-5);
     const auto& offsets = generator->offsets.getOffsets(mode);
     EXPECT_NEAR(highs.values[offsets.gOffset], 0.5, 1e-8);
     EXPECT_NEAR(highs.values[offsets.intOffset], 0.0, 1e-8);
@@ -1000,7 +1000,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironme
     const auto start = std::chrono::steady_clock::now();
     auto gds = std::make_unique<griddyn::GridDynOptimization>();
     griddyn::loadFile(gds.get(), filePath.string());
-    std::cerr << "Midwest25k load_ms=" << elapsed(start) << std::endl;
+    std::cerr << "Midwest25k load_ms=" << elapsed(start) << '\n';
 
     const auto mode = makeDcMode(griddyn::LinearityMode::LINEAR);
     const auto setupStart = std::chrono::steady_clock::now();
@@ -1009,7 +1009,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironme
     ASSERT_NE(root, nullptr);
     std::cerr << "Midwest25k setup_ms=" << elapsed(setupStart)
               << " variables=" << root->objSize(mode)
-              << " constraints=" << root->constraintSize(mode) << std::endl;
+              << " constraints=" << root->constraintSize(mode) << '\n';
 
     griddyn::HighsOptimizer optimizer(gds.get(), mode);
     ASSERT_EQ(optimizer.allocate(root->objSize(mode), root->constraintSize(mode)),
@@ -1025,7 +1025,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironme
               << std::count_if(problem.variableTypes.begin(),
                                problem.variableTypes.end(),
                                [](double type) { return type != CONTINUOUS_OBJECTIVE_VARIABLE; })
-              << std::endl;
+              << '\n';
     ASSERT_EQ(problem.classification, griddyn::NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR);
 
     const auto solveStart = std::chrono::steady_clock::now();
@@ -1038,7 +1038,7 @@ TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesMidwest25kFromEnvironme
         << " status=" << static_cast<int>(optimizer.lastSolveResult().status)
         << " max_constraint_violation=" << optimizer.lastSolveResult().maximumConstraintViolation
         << " max_bound_violation=" << optimizer.lastSolveResult().maximumBoundViolation
-        << std::endl;
+        << '\n';
     EXPECT_EQ(optimizer.lastSolveResult().status, griddyn::NativeSolveStatus::OPTIMAL);
     EXPECT_TRUE(std::isfinite(optimizer.lastSolveResult().objectiveValue));
     EXPECT_LE(optimizer.lastSolveResult().maximumConstraintViolation, 1e-6);

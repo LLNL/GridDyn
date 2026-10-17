@@ -38,7 +38,7 @@ class powerFlowErrorRecovery {
   @return RecoveryReturnCodes::MORE_OPTIONS if attemptFix can be called again without reset
   RecoveryReturnCodes::OUT_OF_OPTIONS if no more fix attempts are available
   */
-    virtual RecoveryReturnCodes attemptFix(int error_code = 0);
+    virtual RecoveryReturnCodes attemptFix(int errorCode = 0);
 
     /** @brief reset the fix counter so it can try again*/
     void reset();

@@ -87,7 +87,7 @@ namespace {
 
     std::size_t piecewiseSegmentCount(const std::vector<double>& coefficients)
     {
-        return (coefficients.size() >= 4U) ? coefficients.size() / 2U - 1U : 0U;
+        return (coefficients.size() >= 4U) ? (coefficients.size() / 2U) - 1U : 0U;
     }
 
     double piecewiseSlope(const std::vector<double>& coefficients, std::size_t segment)
@@ -120,7 +120,7 @@ namespace {
     {
         const auto segmentCount = piecewiseSegmentCount(coefficients);
         for (std::size_t segment = 0U; segment + 1U < segmentCount; ++segment) {
-            if (power <= coefficients[2U * segment + 2U]) {
+            if (power <= coefficients[(2U * segment) + 2U]) {
                 return segment;
             }
         }
@@ -130,8 +130,8 @@ namespace {
     double piecewiseCostAt(const std::vector<double>& coefficients, double power)
     {
         const auto segment = piecewiseSegmentForPower(coefficients, power);
-        return coefficients[2U * segment + 1U] +
-            piecewiseSlope(coefficients, segment) * (power - coefficients[2U * segment]);
+        return coefficients[(2U * segment) + 1U] +
+            (piecewiseSlope(coefficients, segment) * (power - coefficients[2U * segment]));
     }
 }  // namespace
 
@@ -287,7 +287,7 @@ void GridGenOpt::guessState(double /*time*/, double val[], const OptimizationMod
                 val[optimizationOffsets.contOffset + 1 + static_cast<index_t>(index)] = 0.0;
                 val[optimizationOffsets.intOffset + static_cast<index_t>(index)] = 0.0;
             }
-            const double width = Pcoeff[2U * segment + 2U] - Pcoeff[2U * segment];
+            const double width = Pcoeff[(2U * segment) + 2U] - Pcoeff[2U * segment];
             val[optimizationOffsets.contOffset + 1 + static_cast<index_t>(segment)] =
                 (std::max)(0.0, (std::min)(1.0, (power - Pcoeff[2U * segment]) / width));
             val[optimizationOffsets.intOffset + static_cast<index_t>(segment)] = 1.0;
@@ -480,10 +480,11 @@ void GridGenOpt::getConstraints(const OptimizationData& /* of */,
     const auto power = off.gOffset;
     const auto cost = off.contOffset;
     if (!hasNonconvexActiveCost()) {
-        for (std::size_t j = 0; j < count; ++j) {
-            const auto line = row + static_cast<index_t>(j);
-            const double slope = piecewiseSlope(Pcoeff, j);
-            lowerLimit[line] = Pcoeff[2U * j + 1U] - slope * Pcoeff[2U * j];
+        for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+            const auto coefficientIndex = 2U * segmentIndex;
+            const auto line = row + static_cast<index_t>(segmentIndex);
+            const double slope = piecewiseSlope(Pcoeff, segmentIndex);
+            lowerLimit[line] = Pcoeff[coefficientIndex + 1U] - (slope * Pcoeff[coefficientIndex]);
             upperLimit[line] = kBigNum;
             cons.assign(line, cost, 1.0);
             cons.assign(line, power, -slope);
@@ -495,19 +496,20 @@ void GridGenOpt::getConstraints(const OptimizationData& /* of */,
     lowerLimit[row + 2] = upperLimit[row + 2] = 0.0;
     cons.assign(row + 1, power, 1.0);
     cons.assign(row + 2, cost, 1.0);
-    for (std::size_t j = 0; j < count; ++j) {
-        const auto fraction = off.contOffset + 1 + static_cast<index_t>(j);
-        const auto selector = off.intOffset + static_cast<index_t>(j);
-        const auto selectionRow = row + 3 + static_cast<index_t>(j);
-        const double p = Pcoeff[2U * j];
-        const double dp = Pcoeff[2U * j + 2U] - p;
-        const double f = Pcoeff[2U * j + 1U];
-        const double df = Pcoeff[2U * j + 3U] - f;
+    for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+        const auto coefficientIndex = 2U * segmentIndex;
+        const auto fraction = off.contOffset + 1 + static_cast<index_t>(segmentIndex);
+        const auto selector = off.intOffset + static_cast<index_t>(segmentIndex);
+        const auto selectionRow = row + 3 + static_cast<index_t>(segmentIndex);
+        const double powerAtSegmentStart = Pcoeff[coefficientIndex];
+        const double powerWidth = Pcoeff[coefficientIndex + 2U] - powerAtSegmentStart;
+        const double costAtSegmentStart = Pcoeff[coefficientIndex + 1U];
+        const double costWidth = Pcoeff[coefficientIndex + 3U] - costAtSegmentStart;
         cons.assign(row, selector, 1.0);
-        cons.assign(row + 1, selector, -p);
-        cons.assign(row + 1, fraction, -dp);
-        cons.assign(row + 2, selector, -f);
-        cons.assign(row + 2, fraction, -df);
+        cons.assign(row + 1, selector, -powerAtSegmentStart);
+        cons.assign(row + 1, fraction, -powerWidth);
+        cons.assign(row + 2, selector, -costAtSegmentStart);
+        cons.assign(row + 2, fraction, -costWidth);
         cons.assign(selectionRow, fraction, 1.0);
         cons.assign(selectionRow, selector, -1.0);
         lowerLimit[selectionRow] = -kBigNum;
@@ -515,7 +517,7 @@ void GridGenOpt::getConstraints(const OptimizationData& /* of */,
     }
 }
 
-void GridGenOpt::constraintValue(const OptimizationData& of,
+void GridGenOpt::constraintValue(const OptimizationData& optimizationData,
                                  double cVals[],
                                  const OptimizationMode& oMode)
 {
@@ -525,31 +527,37 @@ void GridGenOpt::constraintValue(const OptimizationData& of,
     const auto& off = offsets.getOffsets(oMode);
     const auto count = piecewiseSegmentCount(Pcoeff);
     const auto row = off.constraintOffset;
-    const double power = of.val[off.gOffset];
-    const double cost = of.val[off.contOffset];
+    const double power = optimizationData.val[off.gOffset];
+    const double cost = optimizationData.val[off.contOffset];
     if (!hasNonconvexActiveCost()) {
-        for (std::size_t j = 0; j < count; ++j) {
-            cVals[row + static_cast<index_t>(j)] = cost - piecewiseSlope(Pcoeff, j) * power;
+        for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+            cVals[row + static_cast<index_t>(segmentIndex)] =
+                cost - (piecewiseSlope(Pcoeff, segmentIndex) * power);
         }
         return;
     }
     cVals[row] = 0.0;
     cVals[row + 1] = power;
     cVals[row + 2] = cost;
-    for (std::size_t j = 0; j < count; ++j) {
-        const double fraction = of.val[off.contOffset + 1 + static_cast<index_t>(j)];
-        const double selector = of.val[off.intOffset + static_cast<index_t>(j)];
-        const double p = Pcoeff[2U * j];
-        const double f = Pcoeff[2U * j + 1U];
+    for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+        const auto coefficientIndex = 2U * segmentIndex;
+        const double fraction =
+            optimizationData.val[off.contOffset + 1 + static_cast<index_t>(segmentIndex)];
+        const double selector =
+            optimizationData.val[off.intOffset + static_cast<index_t>(segmentIndex)];
+        const double powerAtSegmentStart = Pcoeff[coefficientIndex];
+        const double costAtSegmentStart = Pcoeff[coefficientIndex + 1U];
+        const double powerWidth = Pcoeff[coefficientIndex + 2U] - powerAtSegmentStart;
+        const double costWidth = Pcoeff[coefficientIndex + 3U] - costAtSegmentStart;
         cVals[row] += selector;
-        cVals[row + 1] -= p * selector + (Pcoeff[2U * j + 2U] - p) * fraction;
-        cVals[row + 2] -= f * selector + (Pcoeff[2U * j + 3U] - f) * fraction;
-        cVals[row + 3 + static_cast<index_t>(j)] = fraction - selector;
+        cVals[row + 1] -= (powerAtSegmentStart * selector) + (powerWidth * fraction);
+        cVals[row + 2] -= (costAtSegmentStart * selector) + (costWidth * fraction);
+        cVals[row + 3 + static_cast<index_t>(segmentIndex)] = fraction - selector;
     }
 }
 
 void GridGenOpt::constraintJacobianElements(const OptimizationData& /* of */,
-                                            MatrixData<double>& md,
+                                            MatrixData<double>& matrixDataRef,
                                             const OptimizationMode& oMode)
 {
     if (!usesActivePiecewiseCost(oMode)) {
@@ -559,26 +567,31 @@ void GridGenOpt::constraintJacobianElements(const OptimizationData& /* of */,
     const auto count = piecewiseSegmentCount(Pcoeff);
     const auto row = off.constraintOffset;
     if (!hasNonconvexActiveCost()) {
-        for (std::size_t j = 0; j < count; ++j) {
-            const auto line = row + static_cast<index_t>(j);
-            md.assign(line, off.contOffset, 1.0);
-            md.assign(line, off.gOffset, -piecewiseSlope(Pcoeff, j));
+        for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+            const auto line = row + static_cast<index_t>(segmentIndex);
+            matrixDataRef.assign(line, off.contOffset, 1.0);
+            matrixDataRef.assign(line, off.gOffset, -piecewiseSlope(Pcoeff, segmentIndex));
         }
         return;
     }
-    md.assign(row + 1, off.gOffset, 1.0);
-    md.assign(row + 2, off.contOffset, 1.0);
-    for (std::size_t j = 0; j < count; ++j) {
-        const auto fraction = off.contOffset + 1 + static_cast<index_t>(j);
-        const auto selector = off.intOffset + static_cast<index_t>(j);
-        const auto selectionRow = row + 3 + static_cast<index_t>(j);
-        md.assign(row, selector, 1.0);
-        md.assign(row + 1, selector, -Pcoeff[2U * j]);
-        md.assign(row + 1, fraction, Pcoeff[2U * j] - Pcoeff[2U * j + 2U]);
-        md.assign(row + 2, selector, -Pcoeff[2U * j + 1U]);
-        md.assign(row + 2, fraction, Pcoeff[2U * j + 1U] - Pcoeff[2U * j + 3U]);
-        md.assign(selectionRow, fraction, 1.0);
-        md.assign(selectionRow, selector, -1.0);
+    matrixDataRef.assign(row + 1, off.gOffset, 1.0);
+    matrixDataRef.assign(row + 2, off.contOffset, 1.0);
+    for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+        const auto coefficientIndex = 2U * segmentIndex;
+        const auto fraction = off.contOffset + 1 + static_cast<index_t>(segmentIndex);
+        const auto selector = off.intOffset + static_cast<index_t>(segmentIndex);
+        const auto selectionRow = row + 3 + static_cast<index_t>(segmentIndex);
+        matrixDataRef.assign(row, selector, 1.0);
+        matrixDataRef.assign(row + 1, selector, -Pcoeff[coefficientIndex]);
+        matrixDataRef.assign(row + 1,
+                             fraction,
+                             Pcoeff[coefficientIndex] - Pcoeff[coefficientIndex + 2U]);
+        matrixDataRef.assign(row + 2, selector, -Pcoeff[coefficientIndex + 1U]);
+        matrixDataRef.assign(row + 2,
+                             fraction,
+                             Pcoeff[coefficientIndex + 1U] - Pcoeff[coefficientIndex + 3U]);
+        matrixDataRef.assign(selectionRow, fraction, 1.0);
+        matrixDataRef.assign(selectionRow, selector, -1.0);
     }
 }
 
@@ -614,11 +627,13 @@ void GridGenOpt::getObjectiveNames(stringVec& objectiveNames,
             if (objectiveNames.size() < lastSelector) {
                 objectiveNames.resize(lastSelector);
             }
-            for (std::size_t j = 0; j < count; ++j) {
-                objectiveNames[optimizationOffsets.contOffset + 1 + static_cast<index_t>(j)] =
-                    prefix + getName() + ":Fraction" + std::to_string(j);
-                objectiveNames[optimizationOffsets.intOffset + static_cast<index_t>(j)] =
-                    prefix + getName() + ":Segment" + std::to_string(j);
+            for (std::size_t segmentIndex = 0; segmentIndex < count; ++segmentIndex) {
+                objectiveNames[optimizationOffsets.contOffset + 1 +
+                               static_cast<index_t>(segmentIndex)] =
+                    prefix + getName() + ":Fraction" + std::to_string(segmentIndex);
+                objectiveNames[optimizationOffsets.intOffset +
+                               static_cast<index_t>(segmentIndex)] =
+                    prefix + getName() + ":Segment" + std::to_string(segmentIndex);
             }
         }
     }
@@ -747,14 +762,14 @@ void GridGenOpt::loadMatPowerCostCoeff(std::vector<double> coeff, int powerMode,
             const double minimum = gen->getPmin(0.0);
             if (minimum < coeff.front()) {
                 const double slope = piecewiseSlope(coeff, 0U);
-                const double cost = coeff[1] + slope * (minimum - coeff[0]);
+                const double cost = coeff[1] + (slope * (minimum - coeff[0]));
                 coeff.insert(coeff.begin(), {minimum, cost});
             }
             const double maximum = gen->getPmax(0.0);
             if (maximum > coeff[coeff.size() - 2U]) {
                 const auto last = piecewiseSegmentCount(coeff) - 1U;
                 const double slope = piecewiseSlope(coeff, last);
-                const double cost = coeff.back() + slope * (maximum - coeff[coeff.size() - 2U]);
+                const double cost = coeff.back() + (slope * (maximum - coeff[coeff.size() - 2U]));
                 coeff.insert(coeff.end(), {maximum, cost});
             }
         }

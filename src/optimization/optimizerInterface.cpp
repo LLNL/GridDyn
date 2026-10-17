@@ -1165,10 +1165,13 @@ int NativeOptimizer::prepareProblemData(double time)
     if (hasIntegerVariables && hasQuadraticTerm) {
         return reject("mixed-integer quadratic objectives are not supported");
     }
-    candidate.classification = hasIntegerVariables ?
-        NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR :
-        (hasQuadraticTerm ? NativeProblemClass::SUPPORTED_CONVEX_DIAGONAL_QUADRATIC :
-                            NativeProblemClass::SUPPORTED_LINEAR);
+    if (hasIntegerVariables) {
+        candidate.classification = NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR;
+    } else if (hasQuadraticTerm) {
+        candidate.classification = NativeProblemClass::SUPPORTED_CONVEX_DIAGONAL_QUADRATIC;
+    } else {
+        candidate.classification = NativeProblemClass::SUPPORTED_LINEAR;
+    }
 
     const auto validationPoint = nativeValidationPoint(candidate);
     std::vector<double> validationConstraints(candidate.constraintCount, 0.0);

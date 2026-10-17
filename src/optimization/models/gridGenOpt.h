@@ -62,10 +62,10 @@ class GridGenOpt: public GridOptObject {
                              double lowerLimit[],
                              const OptimizationMode& oMode) override;
 
-    virtual void linearObj(const OptimizationData& of,
+    virtual void linearObj(const OptimizationData& optimizationData,
                            vectData<double>& linObj,
                            const OptimizationMode& oMode) override;
-    virtual void quadraticObj(const OptimizationData& of,
+    virtual void quadraticObj(const OptimizationData& optimizationData,
                               vectData<double>& linObj,
                               vectData<double>& quadObj,
                               const OptimizationMode& oMode) override;
@@ -78,16 +78,16 @@ class GridGenOpt: public GridOptObject {
     virtual void jacobianElements(const OptimizationData& optimizationData,
                                   MatrixData<double>& matrixDataRef,
                                   const OptimizationMode& oMode) override;
-    virtual void getConstraints(const OptimizationData& of,
+    virtual void getConstraints(const OptimizationData& optimizationData,
                                 MatrixData<double>& cons,
                                 double upperLimit[],
                                 double lowerLimit[],
                                 const OptimizationMode& oMode) override;
-    virtual void constraintValue(const OptimizationData& of,
+    virtual void constraintValue(const OptimizationData& optimizationData,
                                  double cVals[],
                                  const OptimizationMode& oMode) override;
-    virtual void constraintJacobianElements(const OptimizationData& of,
-                                            MatrixData<double>& md,
+    virtual void constraintJacobianElements(const OptimizationData& optimizationData,
+                                            MatrixData<double>& matrixDataRef,
                                             const OptimizationMode& oMode) override;
     virtual void getObjectiveNames(stringVec& objectiveNames,
                                    const OptimizationMode& oMode,
