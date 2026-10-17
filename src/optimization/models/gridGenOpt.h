@@ -62,10 +62,10 @@ class GridGenOpt: public GridOptObject {
                              double lowerLimit[],
                              const OptimizationMode& oMode) override;
 
-    virtual void linearObj(const OptimizationData& of,
+    virtual void linearObj(const OptimizationData& optimizationData,
                            vectData<double>& linObj,
                            const OptimizationMode& oMode) override;
-    virtual void quadraticObj(const OptimizationData& of,
+    virtual void quadraticObj(const OptimizationData& optimizationData,
                               vectData<double>& linObj,
                               vectData<double>& quadObj,
                               const OptimizationMode& oMode) override;
@@ -78,16 +78,16 @@ class GridGenOpt: public GridOptObject {
     virtual void jacobianElements(const OptimizationData& optimizationData,
                                   MatrixData<double>& matrixDataRef,
                                   const OptimizationMode& oMode) override;
-    virtual void getConstraints(const OptimizationData& of,
+    virtual void getConstraints(const OptimizationData& optimizationData,
                                 MatrixData<double>& cons,
                                 double upperLimit[],
                                 double lowerLimit[],
                                 const OptimizationMode& oMode) override;
-    virtual void constraintValue(const OptimizationData& of,
+    virtual void constraintValue(const OptimizationData& optimizationData,
                                  double cVals[],
                                  const OptimizationMode& oMode) override;
-    virtual void constraintJacobianElements(const OptimizationData& of,
-                                            MatrixData<double>& md,
+    virtual void constraintJacobianElements(const OptimizationData& optimizationData,
+                                            MatrixData<double>& matrixDataRef,
                                             const OptimizationMode& oMode) override;
     virtual void getObjectiveNames(stringVec& objectiveNames,
                                    const OptimizationMode& oMode,
@@ -106,6 +106,8 @@ class GridGenOpt: public GridOptObject {
         current system base from its attached Generator when converting it. */
     virtual void loadMatPowerCostCoeff(std::vector<double> coeff, int powerMode, int costModel);
     void loadMatPowerCostCurve(const MatPowerCostCurve& curve, bool reactive = false);
+    /** Whether this generator's active piecewise curve covers its current Pg bounds. */
+    bool piecewiseCoversGenerationBounds(double time) const;
     const MatPowerCostCurve& matPowerCostCurve(bool reactive = false) const
     {
         return reactive ? reactiveCostCurve : activeCostCurve;
@@ -119,6 +121,8 @@ class GridGenOpt: public GridOptObject {
     virtual GridOptObject* getArea(index_t index) const override;
 
   protected:
+    bool usesActivePiecewiseCost(const OptimizationMode& oMode) const;
+    bool hasNonconvexActiveCost() const;
 };
 
 }  // namespace griddyn

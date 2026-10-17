@@ -166,11 +166,12 @@ struct NativeSparseMatrix {
     bool operator==(const NativeSparseMatrix&) const = default;
 };
 
-/** Classification produced while materializing a native continuous LP/QP. */
+/** Classification produced while materializing a native DC LP/QP/MILP. */
 enum class NativeProblemClass {
     INVALID,  //!< Storage has not been materialized or did not pass validation.
     SUPPORTED_LINEAR,  //!< Continuous DC linear objective and constraints.
     SUPPORTED_CONVEX_DIAGONAL_QUADRATIC,  //!< Continuous DC convex diagonal QP.
+    SUPPORTED_MIXED_INTEGER_LINEAR,  //!< DC mixed-integer linear objective and constraints.
     UNSUPPORTED_MODE,  //!< Requested optimization mode is outside the native scope.
     UNSUPPORTED_NONLINEAR,  //!< Nonlinear constraints or objective terms are present.
     UNSUPPORTED_INTEGER,  //!< Integer or binary variables are present.
@@ -358,6 +359,15 @@ struct NativeQpProblem {
         for (std::size_t column = 0; column < variableCount; ++column) {
             if (!validBound(variableLowerBounds[column], variableUpperBounds[column])) {
                 return fail("native problem has an invalid variable bound");
+            }
+            const double type = variableTypes[column];
+            if ((type != CONTINUOUS_OBJECTIVE_VARIABLE) && (type != INTEGER_OBJECTIVE_VARIABLE) &&
+                (type != BINARY_OBJECTIVE_VARIABLE)) {
+                return fail("native problem has an unknown variable type");
+            }
+            if ((type == BINARY_OBJECTIVE_VARIABLE) &&
+                ((variableLowerBounds[column] < 0.0) || (variableUpperBounds[column] > 1.0))) {
+                return fail("native problem binary variable bounds must lie in [0, 1]");
             }
         }
         for (std::size_t row = 0; row < constraintCount; ++row) {

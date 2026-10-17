@@ -227,7 +227,7 @@ namespace {
         return true;
     }
 
-    bool hasPiecewiseLinearCost(const GridOptObject* root)
+    bool hasUncoveredPiecewiseLinearCost(const GridOptObject* root, double time)
     {
         if (root == nullptr) {
             return false;
@@ -238,7 +238,7 @@ namespace {
             pending.pop_back();
             if (const auto* generator = dynamic_cast<const GridGenOpt*>(object);
                 generator != nullptr) {
-                if (generator->optFlags[GridGenOpt::PIECEWISE_LINEAR_COST]) {
+                if (!generator->piecewiseCoversGenerationBounds(time)) {
                     return true;
                 }
                 continue;
@@ -985,7 +985,7 @@ int NativeOptimizer::prepareProblemData(double time)
     };
 
     if (mode.flowMode != FlowModel::DC) {
-        return reject("native optimizer supports only the continuous DC flow model");
+        return reject("native optimizer supports only the DC flow model");
     }
     if (mode.linMode == LinearityMode::NONLINEAR) {
         return reject("native optimizer does not support nonlinear optimization modes");
@@ -993,10 +993,6 @@ int NativeOptimizer::prepareProblemData(double time)
     if ((mode.linMode != LinearityMode::LINEAR) && (mode.linMode != LinearityMode::QUADRATIC)) {
         return reject("native optimizer received an unknown linearity mode");
     }
-    if (hasPiecewiseLinearCost(rootOptimizationObject())) {
-        return reject("native optimizer does not support piecewise-linear generator costs");
-    }
-
     if (!mInitialized) {
         initialize(time);
     }
@@ -1007,6 +1003,9 @@ int NativeOptimizer::prepareProblemData(double time)
 
     if (loadVariableBounds(time) != FUNCTION_EXECUTION_SUCCESS) {
         return FUNCTION_EXECUTION_FAILURE;
+    }
+    if (hasUncoveredPiecewiseLinearCost(rootOptimizationObject(), time)) {
+        return reject("piecewise-linear cost breakpoints do not cover generator power bounds");
     }
     if (loadVariableTypes() != FUNCTION_EXECUTION_SUCCESS) {
         return FUNCTION_EXECUTION_FAILURE;
@@ -1145,11 +1144,14 @@ int NativeOptimizer::prepareProblemData(double time)
         return reject("native optimizer problem validation failed: " + validationError);
     }
 
-    for (std::size_t column = 0; column < candidate.variableCount; ++column) {
-        if (candidate.variableTypes[column] != CONTINUOUS_OBJECTIVE_VARIABLE) {
-            candidate.classification = NativeProblemClass::UNSUPPORTED_INTEGER;
-            return reject("native optimizer supports continuous variables only");
-        }
+    const bool hasIntegerVariables =
+        std::any_of(candidate.variableTypes.begin(),
+                    candidate.variableTypes.end(),
+                    [](double type) { return type != CONTINUOUS_OBJECTIVE_VARIABLE; });
+    if (hasIntegerVariables && !supportsIntegerVariables()) {
+        candidate.classification = NativeProblemClass::UNSUPPORTED_INTEGER;
+        return reject(
+            "native optimizer supports continuous variables only; use HiGHS for integer or binary variables");
     }
 
     bool hasQuadraticTerm = false;
@@ -1160,9 +1162,16 @@ int NativeOptimizer::prepareProblemData(double time)
         }
         hasQuadraticTerm = hasQuadraticTerm || (std::abs(quadraticCoefficient) > 1e-12);
     }
-    candidate.classification = hasQuadraticTerm ?
-        NativeProblemClass::SUPPORTED_CONVEX_DIAGONAL_QUADRATIC :
-        NativeProblemClass::SUPPORTED_LINEAR;
+    if (hasIntegerVariables && hasQuadraticTerm) {
+        return reject("mixed-integer quadratic objectives are not supported");
+    }
+    if (hasIntegerVariables) {
+        candidate.classification = NativeProblemClass::SUPPORTED_MIXED_INTEGER_LINEAR;
+    } else if (hasQuadraticTerm) {
+        candidate.classification = NativeProblemClass::SUPPORTED_CONVEX_DIAGONAL_QUADRATIC;
+    } else {
+        candidate.classification = NativeProblemClass::SUPPORTED_LINEAR;
+    }
 
     const auto validationPoint = nativeValidationPoint(candidate);
     std::vector<double> validationConstraints(candidate.constraintCount, 0.0);
@@ -1370,6 +1379,13 @@ int NativeOptimizer::acceptSolution(double time, NativeSolveResult result)
     maximumBoundViolation = (std::max)(0.0, maximumBoundViolation);
     if (maximumBoundViolation > options.feasibilityTolerance) {
         return rejectCandidate("candidate violates a variable bound");
+    }
+    for (std::size_t column = 0; column < mProblem.variableCount; ++column) {
+        if ((mProblem.variableTypes[column] != CONTINUOUS_OBJECTIVE_VARIABLE) &&
+            (std::abs(candidate[column] - std::round(candidate[column])) >
+             options.feasibilityTolerance)) {
+            return rejectCandidate("candidate violates integer integrality");
+        }
     }
 
     MatrixDataSparse<double> callbackJacobian;

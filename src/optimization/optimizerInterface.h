@@ -241,6 +241,9 @@ class NativeOptimizer: public OptimizerInterface {
     /** Name used in backend diagnostics and write-back errors. */
     virtual std::string_view backendName() const { return "native"; }
 
+    /** Whether this backend accepts integer and binary variables in a linear model. */
+    virtual bool supportsIntegerVariables() const { return false; }
+
   public:
     /** Construct a native optimizer with the named optimizer registration. */
     explicit NativeOptimizer(std::string_view optName = "native");

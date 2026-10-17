@@ -11,7 +11,7 @@
 namespace griddyn {
 
 /**
- * HiGHS-backed optimizer for the solver-neutral continuous DC LP/QP model.
+ * HiGHS-backed optimizer for solver-neutral DC LP, QP, and MILP models.
  *
  * `HighsOptimizer` deliberately reuses `NativeOptimizer::prepareProblemData`
  * and its callback validation. The only backend-specific work is translating
@@ -22,6 +22,7 @@ class HighsOptimizer final: public NativeOptimizer {
   protected:
     /** @return the backend name used in diagnostics. */
     std::string_view backendName() const override { return "HiGHS"; }
+    bool supportsIntegerVariables() const override { return true; }
 
   public:
     /** Construct an unbound HiGHS optimizer. */

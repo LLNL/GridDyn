@@ -21,19 +21,22 @@ powerFlowErrorRecovery::powerFlowErrorRecovery(GridDynSimulation* gds,
 }
 powerFlowErrorRecovery::~powerFlowErrorRecovery() = default;
 
-powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(int error_code)
+powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(int errorCode)
 {
-    if ((error_code == -11) &&
+    if ((errorCode == SOLVER_STEP_LIMIT_REACHED) &&
         (sim->currentProcessState() !=
          GridDynSimulation::GridState::INITIALIZED)) {  // something possibly went wrong in the
                                                         // initial setup try a full
                                                         // reinitialization
+        if (++attempt_number > 3) {
+            return RecoveryReturnCodes::OUT_OF_OPTIONS;
+        }
         sim->reInitpFlow(solver->getSolverMode(), ChangeCode::STATE_SIZE_CHANGE);
-        return (attempt_number > 3) ? RecoveryReturnCodes::OUT_OF_OPTIONS :
-                                      RecoveryReturnCodes::MORE_OPTIONS;
+        return RecoveryReturnCodes::MORE_OPTIONS;
     }
-    if (error_code == SOLVER_INVALID_STATE_ERROR) {
-        lowVoltageFix();
+    if ((errorCode == SOLVER_INVALID_STATE_ERROR) && (attempt_number < 5) && lowVoltageFix()) {
+        ++attempt_number;
+        return RecoveryReturnCodes::MORE_OPTIONS;
     }
     while (attempt_number < 5) {
         ++attempt_number;
@@ -59,8 +62,8 @@ powerFlowErrorRecovery::RecoveryReturnCodes powerFlowErrorRecovery::attemptFix(i
                 }
                 break;
             case 5:
-                powerFlowFix5();
-                return RecoveryReturnCodes::MORE_OPTIONS;
+                return powerFlowFix5() ? RecoveryReturnCodes::MORE_OPTIONS :
+                                         RecoveryReturnCodes::OUT_OF_OPTIONS;
             default:
                 break;
         }
@@ -81,15 +84,26 @@ int powerFlowErrorRecovery::attempts() const
 {
     return attempt_number;
 }
+
+std::uint32_t powerFlowErrorRecovery::adjustmentFlags() const
+{
+    auto flags = lower_flags(sim->controlFlags);
+    // Recovery may inspect limits and protection on a failed solve, but
+    // discretionary stepped controls require a converged voltage profile.
+    SET_CONTROLFLAG(flags, DISABLE_SHUNT_ADJUSTMENTS);
+    SET_CONTROLFLAG(flags, DISABLE_TAP_CHANGER_ADJUSTMENTS);
+    return flags;
+}
+
 // Try any non-reversible adjustments which might be out there
 bool powerFlowErrorRecovery::powerFlowFix1()
 {
-    if (!sim->opFlags[HAS_POWERFLOW_ADJUSTMENTS]) {
+    if (sim->controlFlags[NO_POWERFLOW_ADJUSTMENTS] || !sim->opFlags[HAS_POWERFLOW_ADJUSTMENTS]) {
         return false;
     }
     sim->updateLocalCache();
     const ChangeCode eval =
-        sim->powerFlowAdjust(noInputs, lower_flags(sim->controlFlags), CheckLevel::FULL_CHECK);
+        sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::FULL_CHECK);
     if (eval > ChangeCode::NON_STATE_CHANGE) {
         sim->checkNetwork(GridDynSimulation::NetworkCheckType::SIMPLIFIED);
         sim->reInitpFlow(solver->getSolverMode(), eval);
@@ -112,11 +126,10 @@ bool powerFlowErrorRecovery::powerFlowFix2()
                   ConvergeMode::BLOCK_ITERATION,
                   0.1);
     sim->setState(sim->getSimulationTime(), solver->stateData(), nullptr, solver->getSolverMode());
-    if (sim->opFlags[HAS_POWERFLOW_ADJUSTMENTS]) {
+    if (sim->opFlags[HAS_POWERFLOW_ADJUSTMENTS] && !sim->controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
         sim->updateLocalCache();
-        const ChangeCode eval = sim->powerFlowAdjust(noInputs,
-                                                     lower_flags(sim->controlFlags),
-                                                     CheckLevel::REVERSABLE_ONLY);
+        const ChangeCode eval =
+            sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::REVERSABLE_ONLY);
         sim->reInitpFlow(solver->getSolverMode(), eval);
     }
     return true;
@@ -125,6 +138,9 @@ bool powerFlowErrorRecovery::powerFlowFix2()
 // check for some low voltage conditions and change the low voltage load conditions
 bool powerFlowErrorRecovery::powerFlowFix3()
 {
+    if (sim->controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
+        return false;
+    }
     std::vector<double> voltages;
     sim->getVoltage(voltages);
     if (std::any_of(voltages.begin(), voltages.end(), [](double voltageValue) {
@@ -151,7 +167,7 @@ bool powerFlowErrorRecovery::powerFlowFix3()
             sim->log(sim, PrintLevel::DEBUG, "pq adjust on load");
         }
         sim->updateLocalCache();
-        sim->powerFlowAdjust(noInputs, lower_flags(sim->controlFlags), CheckLevel::REVERSABLE_ONLY);
+        sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::REVERSABLE_ONLY);
         sim->reInitpFlow(solver->getSolverMode(), ChangeCode::STATE_SIZE_CHANGE);
         sim->guessState(sim->getSimulationTime(),
                         solver->stateData(),
@@ -168,10 +184,15 @@ bool powerFlowErrorRecovery::powerFlowFix3()
                       nullptr,
                       solver->getSolverMode());
         sim->updateLocalCache();
-        ChangeCode adjustmentEval = sim->powerFlowAdjust(noInputs,
-                                                         lower_flags(sim->controlFlags),
-                                                         CheckLevel::REVERSABLE_ONLY);
+        ChangeCode adjustmentEval =
+            sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::REVERSABLE_ONLY);
+        count_t adjustmentCount = 0;
         while (adjustmentEval > ChangeCode::NO_CHANGE) {
+            if (adjustmentCount >= sim->max_Vadjust_iterations) {
+                sim->reInitpFlow(solver->getSolverMode(), adjustmentEval);
+                return true;
+            }
+            ++adjustmentCount;
             sim->reInitpFlow(solver->getSolverMode(), adjustmentEval);
             sim->guessState(sim->getSimulationTime(),
                             solver->stateData(),
@@ -188,9 +209,8 @@ bool powerFlowErrorRecovery::powerFlowFix3()
                           nullptr,
                           solver->getSolverMode());
             sim->updateLocalCache();
-            adjustmentEval = sim->powerFlowAdjust(noInputs,
-                                                  lower_flags(sim->controlFlags),
-                                                  CheckLevel::REVERSABLE_ONLY);
+            adjustmentEval =
+                sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::REVERSABLE_ONLY);
         }
         return true;
     }
@@ -214,9 +234,11 @@ bool powerFlowErrorRecovery::powerFlowFix4()
 
 bool powerFlowErrorRecovery::lowVoltageFix()
 {
-    const ChangeCode eval = sim->powerFlowAdjust(noInputs,
-                                                 lower_flags(sim->controlFlags),
-                                                 CheckLevel::LOW_VOLTAGE_CHECK);
+    if (sim->controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
+        return false;
+    }
+    const ChangeCode eval =
+        sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::LOW_VOLTAGE_CHECK);
     if (eval > ChangeCode::NO_CHANGE) {
         sim->checkNetwork(GridDynSimulation::NetworkCheckType::SIMPLIFIED);
         sim->reInitpFlow(solver->getSolverMode(), eval);
@@ -228,8 +250,11 @@ bool powerFlowErrorRecovery::lowVoltageFix()
 // Don't know what to do here yet
 bool powerFlowErrorRecovery::powerFlowFix5()
 {
+    if (sim->controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
+        return false;
+    }
     const ChangeCode eval =
-        sim->powerFlowAdjust(noInputs, lower_flags(sim->controlFlags), CheckLevel::HIGH_ANGLE_TRIP);
+        sim->powerFlowAdjust(noInputs, adjustmentFlags(), CheckLevel::HIGH_ANGLE_TRIP);
     if (eval > ChangeCode::NO_CHANGE) {
         sim->checkNetwork(GridDynSimulation::NetworkCheckType::SIMPLIFIED);
         sim->reInitpFlow(solver->getSolverMode(), eval);

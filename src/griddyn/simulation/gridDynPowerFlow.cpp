@@ -16,6 +16,7 @@
 #include "PowerFlowErrorRecovery.h"
 #include "gmlc/utilities/vectorOps.hpp"
 // system headers
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <memory>
@@ -91,6 +92,14 @@ int GridDynSimulation::powerflow()
                 CoreTime returnTime = currentTime;
                 retval = pFlowData->solve(currentTime, returnTime);
 
+                if ((retval >= 0) &&
+                    !std::all_of(pFlowData->stateData(),
+                                 pFlowData->stateData() + pFlowData->size(),
+                                 [](double stateValue) { return std::isfinite(stateValue); })) {
+                    logging::error(this, "solver returned a non-finite power-flow state");
+                    return FUNCTION_EXECUTION_FAILURE;
+                }
+
                 if (retval < 0) {
                     logging::warning(this, "solver error return code:{}", retval);
 
@@ -104,7 +113,10 @@ int GridDynSimulation::powerflow()
                     auto prc = pfer.attemptFix(retval);
                     if (prc == powerFlowErrorRecovery::RecoveryReturnCodes::OUT_OF_OPTIONS) {
                         if (tripSlippedLines() > 0) {
-                            checkNetwork(NetworkCheckType::FULL);
+                            const int networkStatus = checkNetwork(NetworkCheckType::FULL);
+                            if (networkStatus != FUNCTION_EXECUTION_SUCCESS) {
+                                return networkStatus;
+                            }
                             reInitpFlow(solverModeRef, ChangeCode::JACOBIAN_CHANGE);
                             if (hasPowerAdjustments) {
                                 slkBusBase.resize(slkBusses.size());
@@ -135,14 +147,7 @@ int GridDynSimulation::powerflow()
 
                     continue;
                 }
-                if (pfer.attempts() > 0) {
-                    if (!std::all_of(pFlowData->stateData(),
-                                     pFlowData->stateData() + pFlowData->size(),
-                                     [](double stateValue) { return std::isfinite(stateValue); })) {
-                        logging::warning(this, "solver returned an infinite or nan");
-                        retval = -30;
-                    }
-                }
+                pfer.reset();
                 currentTime = returnTime;
                 // pass the solution to the bus objects
                 setState(currentTime, pFlowData->stateData(), nullptr, solverModeRef);
@@ -164,25 +169,14 @@ int GridDynSimulation::powerflow()
 
                 if (!controlFlags[NO_POWERFLOW_ADJUSTMENTS]) {
                     // check the solution if voltage limits are not ignored
-
-                    if (pState == GridState::INITIALIZED) {
-                        if (controlFlags[FIRST_RUN_LIMITS_ONLY]) {
-                            const auto firstRunFlags = lower_flags(controlFlags) &
-                                ((1U << DISABLE_SHUNT_ADJUSTMENTS) |
-                                 (1U << DISABLE_TAP_CHANGER_ADJUSTMENTS));
-                            adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
-                                                                firstRunFlags,
-                                                                CheckLevel::REVERSABLE_ONLY);
-                        } else {
-                            adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
-                                                                lower_flags(controlFlags),
-                                                                CheckLevel::REVERSABLE_ONLY);
-                        }
-                    } else {
-                        adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
-                                                            lower_flags(controlFlags),
-                                                            CheckLevel::REVERSABLE_ONLY);
+                    auto adjustmentFlags = lower_flags(controlFlags);
+                    if ((pState == GridState::INITIALIZED) && controlFlags[FIRST_RUN_LIMITS_ONLY]) {
+                        SET_CONTROLFLAG(adjustmentFlags, DISABLE_SHUNT_ADJUSTMENTS);
+                        SET_CONTROLFLAG(adjustmentFlags, DISABLE_TAP_CHANGER_ADJUSTMENTS);
                     }
+                    adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
+                                                        adjustmentFlags,
+                                                        CheckLevel::REVERSABLE_ONLY);
 
                     if (adjustmentChanges > ChangeCode::NON_STATE_CHANGE) {
                         reInitpFlow(solverModeRef, adjustmentChanges);
@@ -191,11 +185,14 @@ int GridDynSimulation::powerflow()
                         // if there were no adjustable changes check if there was any non-reversable
                         // changes
                         adjustmentChanges = powerFlowAdjust(powerFlowAdjustmentInputs,
-                                                            lower_flags(controlFlags),
+                                                            adjustmentFlags,
                                                             CheckLevel::FULL_CHECK);
                         if (adjustmentChanges > ChangeCode::NO_CHANGE) {
-                            checkNetwork(NetworkCheckType::SIMPLIFIED);
-                            if (adjustmentChanges == ChangeCode::STATE_SIZE_CHANGE) {
+                            const int networkStatus = checkNetwork(NetworkCheckType::SIMPLIFIED);
+                            if (networkStatus != FUNCTION_EXECUTION_SUCCESS) {
+                                return networkStatus;
+                            }
+                            if (adjustmentChanges > ChangeCode::NON_STATE_CHANGE) {
                                 reInitpFlow(solverModeRef, adjustmentChanges);
                             }
                         }

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 namespace griddyn {
@@ -33,11 +34,11 @@ class powerFlowErrorRecovery {
     virtual ~powerFlowErrorRecovery();
 
     /** @brief attempt the various fixes in order
-  @param[in] error_code optional error code value
+  @param[in] errorCode optional error code value
   @return RecoveryReturnCodes::MORE_OPTIONS if attemptFix can be called again without reset
   RecoveryReturnCodes::OUT_OF_OPTIONS if no more fix attempts are available
   */
-    virtual RecoveryReturnCodes attemptFix(int error_code = 0);
+    virtual RecoveryReturnCodes attemptFix(int errorCode = 0);
 
     /** @brief reset the fix counter so it can try again*/
     void reset();
@@ -63,6 +64,7 @@ class powerFlowErrorRecovery {
     bool powerFlowFix5();
 
     bool lowVoltageFix();
+    std::uint32_t adjustmentFlags() const;
 };
 
 }  // namespace griddyn
