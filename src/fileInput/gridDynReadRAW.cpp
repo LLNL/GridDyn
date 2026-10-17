@@ -776,6 +776,9 @@ static void readRawLoadSection(std::ifstream& file,
     }
 }
 
+// Keep the RAW section dispatch centralized: section boundaries and a few
+// cross-section relationships are resolved while the stream is consumed.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void loadRaw(CoreObject* parentObject,
              const std::string& fileName,
              const BasicReaderInfo& readerOptions)
