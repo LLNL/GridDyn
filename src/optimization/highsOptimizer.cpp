@@ -165,10 +165,10 @@ namespace {
         linearProgram.col_cost_.resize(problem.variableCount);
         linearProgram.col_lower_.resize(problem.variableCount);
         linearProgram.col_upper_.resize(problem.variableCount);
-        const bool hasIntegerVariables = std::any_of(
-            problem.variableTypes.begin(), problem.variableTypes.end(), [](double type) {
-                return type != CONTINUOUS_OBJECTIVE_VARIABLE;
-            });
+        const bool hasIntegerVariables =
+            std::any_of(problem.variableTypes.begin(),
+                        problem.variableTypes.end(),
+                        [](double type) { return type != CONTINUOUS_OBJECTIVE_VARIABLE; });
         if (hasIntegerVariables) {
             linearProgram.integrality_.assign(problem.variableCount, HighsVarType::kContinuous);
         }

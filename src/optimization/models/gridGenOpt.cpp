@@ -277,8 +277,7 @@ void GridGenOpt::guessState(double /*time*/, double val[], const OptimizationMod
             val[optimizationOffsets.qOffset] = qGuess;
         }
     }
-    if (usesActivePiecewiseCost(oMode) &&
-        (optimizationOffsets.contOffset != kNullLocation)) {
+    if (usesActivePiecewiseCost(oMode) && (optimizationOffsets.contOffset != kNullLocation)) {
         const double power = val[optimizationOffsets.gOffset];
         val[optimizationOffsets.contOffset] = piecewiseCostAt(Pcoeff, power);
         if (hasNonconvexActiveCost()) {
@@ -290,8 +289,7 @@ void GridGenOpt::guessState(double /*time*/, double val[], const OptimizationMod
             }
             const double width = Pcoeff[2U * segment + 2U] - Pcoeff[2U * segment];
             val[optimizationOffsets.contOffset + 1 + static_cast<index_t>(segment)] =
-                (std::max)(0.0,
-                           (std::min)(1.0, (power - Pcoeff[2U * segment]) / width));
+                (std::max)(0.0, (std::min)(1.0, (power - Pcoeff[2U * segment]) / width));
             val[optimizationOffsets.intOffset + static_cast<index_t>(segment)] = 1.0;
         }
     }
@@ -337,10 +335,9 @@ void GridGenOpt::valueBounds(double time,
     if (usesActivePiecewiseCost(oMode) && hasNonconvexActiveCost()) {
         const auto segmentCount = piecewiseSegmentCount(Pcoeff);
         for (std::size_t segment = 0U; segment < segmentCount; ++segment) {
-            const auto fraction = optimizationOffsets.contOffset + 1 +
-                static_cast<index_t>(segment);
-            const auto selector = optimizationOffsets.intOffset +
-                static_cast<index_t>(segment);
+            const auto fraction =
+                optimizationOffsets.contOffset + 1 + static_cast<index_t>(segment);
+            const auto selector = optimizationOffsets.intOffset + static_cast<index_t>(segment);
             lowerLimit[fraction] = lowerLimit[selector] = 0.0;
             upperLimit[fraction] = upperLimit[selector] = 1.0;
         }
@@ -612,7 +609,8 @@ void GridGenOpt::getObjectiveNames(stringVec& objectiveNames,
         }
         objectiveNames[optimizationOffsets.contOffset] = prefix + getName() + ":Cost";
         if (hasNonconvexActiveCost()) {
-            const auto lastSelector = static_cast<std::size_t>(optimizationOffsets.intOffset) + count;
+            const auto lastSelector =
+                static_cast<std::size_t>(optimizationOffsets.intOffset) + count;
             if (objectiveNames.size() < lastSelector) {
                 objectiveNames.resize(lastSelector);
             }
@@ -756,8 +754,7 @@ void GridGenOpt::loadMatPowerCostCoeff(std::vector<double> coeff, int powerMode,
             if (maximum > coeff[coeff.size() - 2U]) {
                 const auto last = piecewiseSegmentCount(coeff) - 1U;
                 const double slope = piecewiseSlope(coeff, last);
-                const double cost = coeff.back() +
-                    slope * (maximum - coeff[coeff.size() - 2U]);
+                const double cost = coeff.back() + slope * (maximum - coeff[coeff.size() - 2U]);
                 coeff.insert(coeff.end(), {maximum, cost});
             }
         }
@@ -805,8 +802,7 @@ bool GridGenOpt::piecewiseCoversGenerationBounds(double time) const
     const double first = Pcoeff.front();
     const double last = Pcoeff[Pcoeff.size() - 2U];
     const double tolerance = 1.0e-9 * (std::max)({1.0, std::abs(first), std::abs(last)});
-    return gen->getPmin(time) >= first - tolerance &&
-        gen->getPmax(time) <= last + tolerance;
+    return gen->getPmin(time) >= first - tolerance && gen->getPmax(time) <= last + tolerance;
 }
 
 GridOptObject* GridGenOpt::getBus(index_t /*index*/) const

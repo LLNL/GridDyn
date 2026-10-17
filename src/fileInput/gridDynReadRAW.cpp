@@ -2858,8 +2858,9 @@ static void rawReadSwitchedShunt(CoreObject* parentObject,
     auto low = numeric_conversion<double>(strvec[3 + shift], 0.0);
     // get the controlled bus
     auto cbus = numeric_conversion<int>(strvec[4 + shift], -1);
-    const auto remoteParticipation = numeric_conversion<double>(
-        strvec[hasV35ShuntFields ? 9U : static_cast<size_t>(5 + shift)], 100.0);
+    const auto remoteParticipation =
+        numeric_conversion<double>(strvec[hasV35ShuntFields ? 9U : static_cast<size_t>(5 + shift)],
+                                   100.0);
 
     if (cbus < 0) {
         trimString(strvec[4 + shift]);
