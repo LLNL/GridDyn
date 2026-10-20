@@ -33,7 +33,7 @@ case-insensitive):
 | `.xml`                  | GridDyn XML                                                           |
 | `.csv`                  | GridDyn CSV                                                           |
 | `.raw`, `.psse`, `.pti` | PSS/E RAW                                                             |
-| `.aux`                  | PowerWorld static power-flow network data                              |
+| `.aux`                  | PowerWorld static power-flow network data                             |
 | `.dyr`                  | PSS/E dynamic models                                                  |
 | `.dyd`                  | PSLF dynamic models                                                   |
 | `.cdf`, `.txt`          | IEEE Common Data Format                                               |

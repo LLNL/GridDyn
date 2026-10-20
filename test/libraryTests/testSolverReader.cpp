@@ -223,10 +223,7 @@ namespace {
     TEST_F(SolverReaderTests, AuxExplicitUppercaseFormatUsesReader)
     {
         gds = std::make_unique<GridDynSimulation>();
-        loadFile(gds,
-                 std::string{inputTestDirectory} + "aux_basic_network.aux",
-                 nullptr,
-                 ".AUX");
+        loadFile(gds, std::string{inputTestDirectory} + "aux_basic_network.aux", nullptr, ".AUX");
         EXPECT_EQ(gds->getInt("totalbuscount"), 3);
         EXPECT_EQ(gds->getInt("totallinkcount"), 2);
     }
