@@ -107,6 +107,11 @@ void loadRaw(CoreObject* parentObject,
              const std::string& fileName,
              const BasicReaderInfo& readerOptions = defInfo);
 
+/** Import PowerWorld AUX power-flow network DATA sections. */
+void loadAux(CoreObject* parentObject,
+             const std::string& fileName,
+             const BasicReaderInfo& readerOptions = defInfo);
+
 void loadDyr(CoreObject* parentObject,
              const std::string& fileName,
              const BasicReaderInfo& readerOptions = defInfo);

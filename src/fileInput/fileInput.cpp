@@ -196,6 +196,8 @@ void loadFile(CoreObject* parentObject,
         loadCsv(parentObject, fileName, *readerInf);
     } else if (ext == "raw" || ext == "psse" || ext == "pss/e" || ext == "pti") {
         loadRaw(parentObject, fileName, *readerInf);
+    } else if (ext == "aux") {
+        loadAux(parentObject, fileName, *readerInf);
     } else if (ext == "dyr") {
         loadDyr(parentObject, fileName, *readerInf);
     } else if (ext == "dyd") {
