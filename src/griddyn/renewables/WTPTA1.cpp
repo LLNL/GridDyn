@@ -186,8 +186,7 @@ void WTPTA1::dynObjectInitializeB(const IOdata& inputs,
             throw InvalidParameterValue("WT3P1 initial power order is invalid");
         }
         if (std::abs(Pset - inputs[1]) > alignmentTolerance) {
-            if (configuredPset != 1.0 &&
-                std::abs(Pset - configuredPset) <= alignmentTolerance) {
+            if (configuredPset != 1.0 && std::abs(Pset - configuredPset) <= alignmentTolerance) {
                 logging::warning(this,
                                  "WT3P1 Pset {} differs from initial PORD {}; aligning Pset to "
                                  "the operating point",

@@ -2887,8 +2887,7 @@ void AcBus::computePowerAdjustments()
     }
 }
 
-bool AcBus::dispatchLocalVoltageControls(double requiredReactivePower,
-                                         bool allowUniformFallback)
+bool AcBus::dispatchLocalVoltageControls(double requiredReactivePower, bool allowUniformFallback)
 {
     if (busController.vControlObjects.empty() || !busController.vControlLinks.empty()) {
         return false;
@@ -2917,8 +2916,7 @@ bool AcBus::dispatchLocalVoltageControls(double requiredReactivePower,
     }
 
     double remainingQ = requiredReactivePower - currentQTotal;
-    for (std::size_t pass = 0;
-         (pass < localGenerators.size()) && (std::abs(remainingQ) > 1e-12);
+    for (std::size_t pass = 0; (pass < localGenerators.size()) && (std::abs(remainingQ) > 1e-12);
          ++pass) {
         double activeWeight = 0.0;
         std::size_t activeCount = 0;
@@ -2943,12 +2941,11 @@ bool AcBus::dispatchLocalVoltageControls(double requiredReactivePower,
             const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
                                                       (qValues[index] > qMins[index]);
             if (canMove) {
-                const double weight = useUniformWeights ? 1.0 :
-                    std::max(0.0, busController.vcfrac[index]);
+                const double weight =
+                    useUniformWeights ? 1.0 : std::max(0.0, busController.vcfrac[index]);
                 const double requestedChange = remainingQ * weight / activeWeight;
-                const double updatedQ = std::clamp(qValues[index] + requestedChange,
-                                                   qMins[index],
-                                                   qMaxs[index]);
+                const double updatedQ =
+                    std::clamp(qValues[index] + requestedChange, qMins[index], qMaxs[index]);
                 appliedQ += updatedQ - qValues[index];
                 qValues[index] = updatedQ;
             }

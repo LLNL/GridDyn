@@ -546,8 +546,9 @@ TEST(ExampleReaderTests, AlignsWt3pDydSetpointAtInitialization)
     ASSERT_NE(bus, nullptr);
     auto* generator = dynamic_cast<griddyn::RenewableGenerator*>(bus->getGen(0));
     ASSERT_NE(generator, nullptr);
-    auto* pitch = dynamic_cast<griddyn::WTPTA1*>(generator->getSubObject(
-        "renewable_component", static_cast<index_t>(griddyn::RenewableRole::pitchControl)));
+    auto* pitch = dynamic_cast<griddyn::WTPTA1*>(
+        generator->getSubObject("renewable_component",
+                                static_cast<index_t>(griddyn::RenewableRole::pitchControl)));
     ASSERT_NE(pitch, nullptr);
     griddyn::IOdata output;
     pitch->dynInitializeB({1.0, 0.8, 0.8, 1.0, 0.0}, {}, output);
@@ -592,7 +593,8 @@ TEST(ExampleReaderTests, LoadPslfExciterParameterExtensionsFromDyd)
 
     const auto getGenerator = [&simulation](int busId) {
         auto* bus = dynamic_cast<griddyn::GridBus*>(simulation->findByUserID("bus", busId));
-        return (bus == nullptr) ? nullptr : dynamic_cast<griddyn::DynamicGenerator*>(bus->getGen(0));
+        return (bus == nullptr) ? nullptr :
+                                  dynamic_cast<griddyn::DynamicGenerator*>(bus->getGen(0));
     };
     auto* generator1 = getGenerator(1);
     auto* generator2 = getGenerator(2);
@@ -602,8 +604,7 @@ TEST(ExampleReaderTests, LoadPslfExciterParameterExtensionsFromDyd)
     ASSERT_NE(generator3, nullptr);
     EXPECT_NE(dynamic_cast<griddyn::exciters::ExciterDC1A*>(generator1->find("exciter")), nullptr);
     EXPECT_NE(dynamic_cast<griddyn::exciters::ExciterDC2A*>(generator2->find("exciter")), nullptr);
-    auto* esac6a =
-        dynamic_cast<griddyn::exciters::ExciterESAC6A*>(generator3->find("exciter"));
+    auto* esac6a = dynamic_cast<griddyn::exciters::ExciterESAC6A*>(generator3->find("exciter"));
     ASSERT_NE(esac6a, nullptr);
     EXPECT_DOUBLE_EQ(esac6a->get("spdmlt"), 1.0);
     EXPECT_DOUBLE_EQ(esac6a->get("vfelim"), 1.0);

@@ -274,9 +274,10 @@ namespace {
             if ((sourcePayload.size() != 23U) && (sourcePayload.size() != 24U)) {
                 return false;
             }
-            static constexpr std::array<std::size_t, 23> esac6aOrder{
-                0U,  1U,  2U,  3U,  4U,  5U,  6U,  7U,  8U,  9U,  10U, 14U,
-                11U, 15U, 13U, 12U, 16U, 17U, 18U, 19U, 20U, 21U, 22U};
+            static constexpr std::array<std::size_t, 23> esac6aOrder{0U,  1U,  2U,  3U,  4U,  5U,
+                                                                     6U,  7U,  8U,  9U,  10U, 14U,
+                                                                     11U, 15U, 13U, 12U, 16U, 17U,
+                                                                     18U, 19U, 20U, 21U, 22U};
             payload.reserve(sourcePayload.size());
             for (const auto index : esac6aOrder) {
                 payload.push_back(sourcePayload[index]);
@@ -606,9 +607,8 @@ namespace {
             // and time-constant positions are not plausible.
             const auto values = gmlc::utilities::str2vector(sourcePayload, kNullVal);
             const bool pslfOrder = values[0] > 0.0 && values[3] > values[5] &&
-                values[5] >= values[7] && values[4] >= values[6] &&
-                values[6] >= values[7] && values[9] > 0.0 && values[11] > 0.0 &&
-                values[12] > 0.0;
+                values[5] >= values[7] && values[4] >= values[6] && values[6] >= values[7] &&
+                values[9] > 0.0 && values[11] > 0.0 && values[12] > 0.0;
             if (pslfOrder) {
                 static constexpr std::array<std::size_t, 14> genrouOrder{
                     9U, 11U, 10U, 12U, 0U, 1U, 3U, 4U, 5U, 6U, 7U, 8U, 13U, 14U};
@@ -936,8 +936,7 @@ namespace {
         }
         if (((sourceModelName == "esdc1a") || (sourceModelName == "esdc2a")) &&
             (payload.mPositional.size() == 18U) &&
-            (!isZeroDydParameter(payload.mPositional[16U]) ||
-             (payload.mPositional[17U] != "1"))) {
+            (!isZeroDydParameter(payload.mPositional[16U]) || (payload.mPositional[17U] != "1"))) {
             const auto selectors =
                 "UEL=" + payload.mPositional[16U] + ", exclim=" + payload.mPositional[17U];
             addIgnoredDydParameter(context.mIgnoredDcExciterSelectors,
