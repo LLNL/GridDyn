@@ -117,11 +117,11 @@ namespace {
         {
             const auto location = index(names);
             return (location < mValues.size()) ? std::string_view(mValues[location]) :
-                                                std::string_view{};
+                                                 std::string_view{};
         }
 
         [[nodiscard]] double number(std::initializer_list<std::string_view> names,
-                      double defaultValue = 0.0) const
+                                    double defaultValue = 0.0) const
         {
             const auto text = value(names);
             if (text.empty() || lowerAux(text) == "same") {
@@ -220,7 +220,8 @@ namespace {
             } else if (character == '/' && (position + 1 < line.size()) &&
                        line[position + 1] == '/') {
                 break;
-            } else if (std::isspace(static_cast<unsigned char>(character)) != 0 || character == ',') {
+            } else if (std::isspace(static_cast<unsigned char>(character)) != 0 ||
+                       character == ',') {
                 if (present) {
                     values.push_back(std::move(value));
                     value.clear();
@@ -514,7 +515,8 @@ namespace {
                 return;  // An AUX supplement may only amend an existing generator.
             }
             generator = network.mOptions.checkFlag(ASSUME_POWERFLOW_ONLY) ?
-                new Generator(name) : new DynamicGenerator(name);
+                new Generator(name) :
+                new DynamicGenerator(name);
             generator->set("basepower", network.mBase, units::MW);
             generator->set("basevoltage", bus->get("basevoltage", units::kV), units::kV);
             bus->add(generator);
@@ -1049,8 +1051,7 @@ void loadAux(CoreObject* parentObject,
                        .mRemoteGroups = {},
                        .mRemoteTerminalBuses = {},
                        .mBase = readerOptions.base,
-                       .mExistingNetwork =
-                           parentObject->getRoot()->getInt("totalbuscount") > 0};
+                       .mExistingNetwork = parentObject->getRoot()->getInt("totalbuscount") > 0};
     if (!network.mExistingNetwork) {
         GridSimulation::resetObjectCounters();
     }
