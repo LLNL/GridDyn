@@ -174,8 +174,8 @@ TEST_F(InputTests, TestPowerFlowInputs)
             for (size_t busIndex = 0; busIndex < reactiveGenerationSolved.size(); ++busIndex) {
                 const auto* bus = gds->getBus(static_cast<index_t>(busIndex));
                 ASSERT_NE(bus, nullptr);
-                const double qResidual = bus->getGenerationReactive() + bus->getLoadReactive() +
-                    bus->getLinkReactive();
+                const double qResidual =
+                    bus->getGenerationReactive() + bus->getLoadReactive() + bus->getLinkReactive();
                 EXPECT_NEAR(qResidual, 0.0, 1e-4) << "bus " << bus->getName();
             }
         } else {
