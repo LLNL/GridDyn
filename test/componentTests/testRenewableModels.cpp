@@ -2967,7 +2967,9 @@ TEST(RenewableModels, WT3P1AlignsInitialSetpointAndWarnsForNondefaultValue)
         double dyrPset;
         int expectedWarnings;
     };
-    for (const auto scenario : std::array{Scenario{1.0, 0}, Scenario{0.9, 1}, Scenario{0.8, 0}}) {
+    for (const auto scenario : std::array{Scenario{.dyrPset = 1.0, .expectedWarnings = 0},
+                                         Scenario{.dyrPset = 0.9, .expectedWarnings = 1},
+                                         Scenario{.dyrPset = 0.8, .expectedWarnings = 0}}) {
         auto simulation = renewableDyrSimulation();
         std::vector<std::string> logMessages;
         simulation->setLogger(
