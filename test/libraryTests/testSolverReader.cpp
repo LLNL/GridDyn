@@ -176,7 +176,11 @@ namespace {
         ZipLoad* load = nullptr;
         ZipLoad* shunt = nullptr;
         ZipLoad* busShunt = nullptr;
-        for (index_t index = 0; auto* candidate = loadBus->getLoad(index); ++index) {
+        for (index_t index = 0;; ++index) {
+            auto* candidate = loadBus->getLoad(index);
+            if (candidate == nullptr) {
+                break;
+            }
             auto* zip = dynamic_cast<ZipLoad*>(candidate);
             if (zip == nullptr) {
                 continue;
@@ -214,6 +218,17 @@ namespace {
 
         EXPECT_EQ(gds->powerflow(), 0);
         EXPECT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::POWERFLOW_COMPLETE);
+    }
+
+    TEST_F(SolverReaderTests, AuxExplicitUppercaseFormatUsesReader)
+    {
+        gds = std::make_unique<GridDynSimulation>();
+        loadFile(gds,
+                 std::string{inputTestDirectory} + "aux_basic_network.aux",
+                 nullptr,
+                 ".AUX");
+        EXPECT_EQ(gds->getInt("totalbuscount"), 3);
+        EXPECT_EQ(gds->getInt("totallinkcount"), 2);
     }
 
     TEST_F(SolverReaderTests, AuxRemoteGeneratorRegulation)

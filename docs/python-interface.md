@@ -33,6 +33,7 @@ case-insensitive):
 | `.xml`                  | GridDyn XML                                                           |
 | `.csv`                  | GridDyn CSV                                                           |
 | `.raw`, `.psse`, `.pti` | PSS/E RAW                                                             |
+| `.aux`                  | PowerWorld static power-flow network data                              |
 | `.dyr`                  | PSS/E dynamic models                                                  |
 | `.dyd`                  | PSLF dynamic models                                                   |
 | `.cdf`, `.txt`          | IEEE Common Data Format                                               |
@@ -50,6 +51,12 @@ reader name, such as `format="sav"`. Format names are case-insensitive; a
 leading period is accepted. Missing or unsupported formats raise
 `FileLoadError`. The `.sav` reader expects the PSLF SQLite schema; it does not
 load legacy binary PSS/E saved cases.
+
+For a PowerWorld network, use `gd.load("network.aux")` or
+`gd.load("network.data", format="aux")`. The AUX reader imports power-flow
+network data; PowerWorld dynamics and scripts are outside its current scope.
+See the [AUX reader guide](developer-guide/powerworld-aux-reader.md) for
+supported objects and limitations.
 
 `Simulation` owns the loaded system. Use it to load input, inspect or edit
 system-level properties and objects, write files, and execute general GridDyn

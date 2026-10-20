@@ -276,10 +276,13 @@ Relevant source: `src/fileInput/fileInput.cpp`.
 - Exercised by:
   - `.save` PSS/E binary saves: 18 files.
   - `.pwb` / `.pwd` PowerWorld files: 22 each.
-  - `.aux` PowerWorld auxiliary files: 5 files.
   - `.xlsx`: 4 files.
   - `.zip`: 14 files.
   - `.rar`: 3 files.
+
+PowerWorld `.aux` files now have a static network reader. Its supported
+power-flow objects and current limits are described in the
+[AUX reader guide](powerworld-aux-reader.md).
 
 ## DYR parser and dynamic model gaps
 

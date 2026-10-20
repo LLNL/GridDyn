@@ -191,6 +191,8 @@ namespace {
 
     std::vector<std::string> tokenizeAuxRow(std::string_view line)
     {
+        // Quoted fields can contain spaces and commas; doubled or backslash-escaped
+        // quote characters belong to the field rather than ending it.
         std::vector<std::string> values;
         std::string value;
         char quote = 0;
@@ -279,6 +281,8 @@ namespace {
                 header += trimmed;
             } else {
                 if (inSubdata) {
+                    // Embedded SUBDATA belongs to its parent PowerWorld object,
+                    // not to the tabular network row that precedes it.
                     if (lowerAux(trimmed).starts_with("</subdata")) {
                         inSubdata = false;
                     }
@@ -357,6 +361,8 @@ namespace {
             return found->second;
         }
         if (network.mExistingNetwork) {
+            // AUX can supplement a network loaded from another format. Reuse
+            // buses by PowerWorld user ID instead of creating duplicates.
             auto* bus = dynamic_cast<GridBus*>(
                 network.mParent->getRoot()->findByUserID("bus", static_cast<index_t>(number)));
             if (bus != nullptr) {
@@ -453,6 +459,8 @@ namespace {
         }
         const auto voltage = row.number({"buspuvolt", "vpu"});
         if (voltage > 0.0) {
+            // AUX has no RAW bus category; use the exported voltage as the
+            // initial local regulation target, as the RAW reader does.
             bus->set("voltage", voltage);
             bus->set("vtarget", voltage);
         }
@@ -596,6 +604,8 @@ namespace {
 
     void finishAuxGeneratorControls(AuxNetwork& network)
     {
+        // PowerWorld exports remote participation as percentages. GridDyn
+        // expects fractions that sum to one for each regulated bus.
         for (auto& [busNumber, generators] : network.mRemoteGroups) {
             (void)busNumber;
             double totalParticipation = 0.0;
@@ -609,6 +619,7 @@ namespace {
                 }
             }
         }
+        // A remote generator's terminal must not also regulate its own voltage.
         for (const auto terminalNumber : network.mRemoteTerminalBuses) {
             auto* terminalBus = findAuxBus(network, terminalNumber);
             if (terminalBus == nullptr) {
@@ -663,6 +674,8 @@ namespace {
             load->set("yp", row.number({"loadzmw", "zmw"}), units::MW);
         }
         if (row.has({"loadzmvr", "zmvar"})) {
+            // ZipLoad stores susceptance with the opposite sign from the
+            // PowerWorld constant-impedance reactive load field.
             load->set("yq", -row.number({"loadzmvr", "zmvar"}), units::MVAR);
         }
     }
@@ -803,6 +816,8 @@ namespace {
                     }
                 }
                 if (row.has({"xfregmin", "regmin"})) {
+                    // PowerWorld MW/Mvar limits must enter the transformer in
+                    // physical units; the default unit is a per-unit quantity.
                     auto unit = units::defunit;
                     if (phaseControl || controlMode.contains("mw")) {
                         unit = units::MW;
@@ -931,6 +946,8 @@ namespace {
                 reactance[index] *= network.mBase / pairBase[index];
             }
         }
+        // PowerWorld gives pairwise impedances. Convert them to the three
+        // terminal-to-star impedances used by GridDyn's explicit star bus.
         const std::array<double, 3> starR{(resistance[0] + resistance[2] - resistance[1]) / 2.0,
                                           (resistance[0] + resistance[1] - resistance[2]) / 2.0,
                                           (resistance[1] + resistance[2] - resistance[0]) / 2.0};
@@ -962,6 +979,8 @@ namespace {
             const auto legName = name + "_w" + std::to_string(index + 1);
             const auto key = auxBranchKey(numbers[index], numbers[3], circuit);
             Link* leg = nullptr;
+            // Detailed TransformerWinding rows may already have created each
+            // leg. Keep their electrical data and add the 3WXFormer controls.
             if (const auto found = network.mBranches.find(key); found != network.mBranches.end()) {
                 leg = found->second;
             } else {
@@ -1023,12 +1042,20 @@ void loadAux(CoreObject* parentObject,
     }
     AuxNetwork network{.mParent = parentObject,
                        .mOptions = readerOptions,
+                       .mAreas = {},
+                       .mBuses = {},
+                       .mBranches = {},
+                       .mGeneratorsByBus = {},
+                       .mRemoteGroups = {},
+                       .mRemoteTerminalBuses = {},
                        .mBase = readerOptions.base,
                        .mExistingNetwork =
                            parentObject->getRoot()->getInt("totalbuscount") > 0};
     if (!network.mExistingNetwork) {
         GridSimulation::resetObjectCounters();
     }
+    // Stream the file three times rather than buffering it. Areas and base
+    // power must precede buses, which must precede equipment references.
     scanAuxFile(
         fileName,
         [](std::string_view type) {
