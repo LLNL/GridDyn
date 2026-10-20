@@ -30,6 +30,7 @@ build/
 
 # latex temporary files
 *.aux
+!/test/test_files/input_tests/aux_*.aux
 *.toc
 *.out
 *.log

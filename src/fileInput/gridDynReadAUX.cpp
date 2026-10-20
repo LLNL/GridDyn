@@ -64,7 +64,7 @@ namespace {
         std::string result;
         result.reserve(field.size());
         for (const auto character : field) {
-            if (std::isalnum(static_cast<unsigned char>(character)) || character == ':') {
+            if (std::isalnum(static_cast<unsigned char>(character)) != 0 || character == ':') {
                 result.push_back(
                     static_cast<char>(std::tolower(static_cast<unsigned char>(character))));
             }
@@ -88,39 +88,39 @@ namespace {
     }
 
     struct AuxSection {
-        std::string type;
-        std::unordered_map<std::string, size_t> columns;
+        std::string mType;
+        std::unordered_map<std::string, size_t> mColumns;
     };
 
     struct AuxRow {
-        const AuxSection& section;
-        const std::vector<std::string>& values;
-        size_t lineNumber;
+        const AuxSection& mSection;
+        const std::vector<std::string>& mValues;
+        size_t mLineNumber;
 
-        size_t index(std::initializer_list<std::string_view> names) const
+        [[nodiscard]] size_t index(std::initializer_list<std::string_view> names) const
         {
             for (const auto name : names) {
-                if (const auto found = section.columns.find(std::string(name));
-                    found != section.columns.end()) {
+                if (const auto found = mSection.mColumns.find(std::string(name));
+                    found != mSection.mColumns.end()) {
                     return found->second;
                 }
             }
-            return values.size();
+            return mValues.size();
         }
 
-        bool has(std::initializer_list<std::string_view> names) const
+        [[nodiscard]] bool has(std::initializer_list<std::string_view> names) const
         {
-            return index(names) < values.size();
+            return index(names) < mValues.size();
         }
 
-        std::string_view value(std::initializer_list<std::string_view> names) const
+        [[nodiscard]] std::string_view value(std::initializer_list<std::string_view> names) const
         {
             const auto location = index(names);
-            return (location < values.size()) ? std::string_view(values[location]) :
+            return (location < mValues.size()) ? std::string_view(mValues[location]) :
                                                 std::string_view{};
         }
 
-        double number(std::initializer_list<std::string_view> names,
+        [[nodiscard]] double number(std::initializer_list<std::string_view> names,
                       double defaultValue = 0.0) const
         {
             const auto text = value(names);
@@ -135,7 +135,8 @@ namespace {
                 defaultValue;
         }
 
-        int integer(std::initializer_list<std::string_view> names, int defaultValue = 0) const
+        [[nodiscard]] int integer(std::initializer_list<std::string_view> names,
+                                  int defaultValue = 0) const
         {
             return static_cast<int>(number(names, static_cast<double>(defaultValue)));
         }
@@ -147,7 +148,7 @@ namespace {
         AuxSection section;
         const auto open = header.find('(');
         if (open == std::string_view::npos) {
-            section.type = "script";
+            section.mType = "script";
             return section;
         }
         const auto prefix = lowerAux(trimAux(header.substr(0, open)));
@@ -156,10 +157,10 @@ namespace {
             if (comma == std::string_view::npos) {
                 throw std::runtime_error("AUX DATA section has no object type");
             }
-            section.type = lowerAux(trimAux(header.substr(open + 1, comma - open - 1)));
+            section.mType = lowerAux(trimAux(header.substr(open + 1, comma - open - 1)));
         } else {
             const auto separator = prefix.find_first_of(" \t");
-            section.type = prefix.substr(0, separator);
+            section.mType = prefix.substr(0, separator);
         }
 
         const auto fieldsStart =
@@ -169,7 +170,7 @@ namespace {
             header.rfind(')');
         if (fieldsStart == std::string_view::npos || fieldsEnd == std::string_view::npos ||
             fieldsEnd <= fieldsStart) {
-            throw std::runtime_error("AUX DATA section has no field list: " + section.type);
+            throw std::runtime_error("AUX DATA section has no field list: " + section.mType);
         }
         const auto fields = header.substr(fieldsStart + 1, fieldsEnd - fieldsStart - 1);
         size_t start = 0;
@@ -178,7 +179,7 @@ namespace {
             const auto end = (comma == std::string_view::npos) ? fields.size() : comma;
             const auto name = fieldKey(trimAux(fields.substr(start, end - start)));
             if (!name.empty()) {
-                section.columns.emplace(name, section.columns.size());
+                section.mColumns.emplace(name, section.mColumns.size());
             }
             if (comma == std::string_view::npos) {
                 break;
@@ -217,7 +218,7 @@ namespace {
             } else if (character == '/' && (position + 1 < line.size()) &&
                        line[position + 1] == '/') {
                 break;
-            } else if (std::isspace(static_cast<unsigned char>(character)) || character == ',') {
+            } else if (std::isspace(static_cast<unsigned char>(character)) != 0 || character == ',') {
                 if (present) {
                     values.push_back(std::move(value));
                     value.clear();
@@ -266,8 +267,8 @@ namespace {
                 const auto lower = lowerAux(trimmed);
                 if (lower.starts_with("data ") || lower.starts_with("data(") ||
                     lower.starts_with("script ") || lower == "script" ||
-                    (std::isalpha(static_cast<unsigned char>(trimmed.front())) &&
-                     trimmed.find('(') != std::string::npos)) {
+                    (std::isalpha(static_cast<unsigned char>(trimmed.front())) != 0 &&
+                     trimmed.contains('('))) {
                     header = trimmed;
                     inHeader = true;
                 } else {
@@ -298,25 +299,27 @@ namespace {
                 try {
                     auto values = tokenizeAuxRow(trimmed);
                     if (!values.empty()) {
-                        if (values.size() != section.columns.size()) {
+                        if (values.size() != section.mColumns.size()) {
                             throw std::runtime_error(
-                                "expected " + std::to_string(section.columns.size()) +
+                                "expected " + std::to_string(section.mColumns.size()) +
                                 " fields, found " + std::to_string(values.size()));
                         }
-                        handleRow(AuxRow{section, values, lineNumber});
+                        handleRow(AuxRow{.mSection = section,
+                                         .mValues = values,
+                                         .mLineNumber = lineNumber});
                     }
                 }
                 catch (const std::exception& error) {
                     throw std::runtime_error(fileName + ':' + std::to_string(lineNumber) + " (" +
-                                             section.type + "): " + error.what());
+                                             section.mType + "): " + error.what());
                 }
                 continue;
             }
 
-            if (inHeader && header.find('{') != std::string::npos) {
+            if (inHeader && header.contains('{')) {
                 const auto brace = header.find('{');
                 section = parseAuxHeader(std::string_view(header).substr(0, brace));
-                active = wantsSection(section.type);
+                active = wantsSection(section.mType);
                 inHeader = false;
                 inBody = true;
                 header.clear();
@@ -328,36 +331,36 @@ namespace {
     }
 
     struct AuxNetwork {
-        CoreObject* parent;
-        const BasicReaderInfo& options;
-        std::unordered_map<int, GridArea*> areas;
-        std::unordered_map<int, GridBus*> buses;
-        std::unordered_map<std::string, Link*> branches;
-        std::unordered_map<int, std::vector<Generator*>> generatorsByBus;
-        std::unordered_map<int, std::vector<Generator*>> remoteGroups;
-        std::unordered_set<int> remoteTerminalBuses;
-        double base;
-        bool existingNetwork;
+        CoreObject* mParent;
+        const BasicReaderInfo& mOptions;
+        std::unordered_map<int, GridArea*> mAreas;
+        std::unordered_map<int, GridBus*> mBuses;
+        std::unordered_map<std::string, Link*> mBranches;
+        std::unordered_map<int, std::vector<Generator*>> mGeneratorsByBus;
+        std::unordered_map<int, std::vector<Generator*>> mRemoteGroups;
+        std::unordered_set<int> mRemoteTerminalBuses;
+        double mBase;
+        bool mExistingNetwork;
     };
 
     std::string auxName(const AuxNetwork& network, std::string name)
     {
-        if (!network.options.prefix.empty()) {
-            name.insert(0, network.options.prefix + '_');
+        if (!network.mOptions.prefix.empty()) {
+            name.insert(0, network.mOptions.prefix + '_');
         }
         return name;
     }
 
     GridBus* findAuxBus(AuxNetwork& network, int number)
     {
-        if (const auto found = network.buses.find(number); found != network.buses.end()) {
+        if (const auto found = network.mBuses.find(number); found != network.mBuses.end()) {
             return found->second;
         }
-        if (network.existingNetwork) {
+        if (network.mExistingNetwork) {
             auto* bus = dynamic_cast<GridBus*>(
-                network.parent->getRoot()->findByUserID("bus", static_cast<index_t>(number)));
+                network.mParent->getRoot()->findByUserID("bus", static_cast<index_t>(number)));
             if (bus != nullptr) {
-                network.buses.emplace(number, bus);
+                network.mBuses.emplace(number, bus);
             }
             return bus;
         }
@@ -369,8 +372,8 @@ namespace {
         auto* bus = findAuxBus(network, number);
         if (bus == nullptr) {
             throw std::runtime_error("bus " + std::to_string(number) + " referenced by " +
-                                     row.section.type + " at line " +
-                                     std::to_string(row.lineNumber) + " does not exist");
+                                     row.mSection.mType + " at line " +
+                                     std::to_string(row.mLineNumber) + " does not exist");
         }
         return bus;
     }
@@ -384,31 +387,31 @@ namespace {
         return (area1 != nullptr && area1 == area2) ? static_cast<CoreObject*>(area1) : parent;
     }
 
-    std::string auxBranchKey(int from, int to, std::string_view circuit)
+    std::string auxBranchKey(int fromBus, int toBus, std::string_view circuit)
     {
-        return std::to_string(from) + ':' + std::to_string(to) + ':' + trimAux(circuit);
+        return std::to_string(fromBus) + ':' + std::to_string(toBus) + ':' + trimAux(circuit);
     }
 
     void readAuxMetadata(AuxNetwork& network, const AuxRow& row)
     {
-        if (row.section.type == "sim_solution_options_value") {
+        if (row.mSection.mType == "sim_solution_options_value") {
             if (lowerAux(trimAux(row.value({"variablename", "option"}))) == "mvabase") {
-                const auto base = row.number({"valuefield", "value"}, network.base);
+                const auto base = row.number({"valuefield", "value"}, network.mBase);
                 if (base > 0.0) {
-                    network.base = base;
-                    network.parent->set("basepower", base, units::MW);
+                    network.mBase = base;
+                    network.mParent->set("basepower", base, units::MW);
                 }
             }
             return;
         }
         const int number = row.integer({"areanum", "number"});
-        if (number <= 0 || network.areas.contains(number)) {
+        if (number <= 0 || network.mAreas.contains(number)) {
             return;
         }
         auto* existing = dynamic_cast<GridArea*>(
-            network.parent->getRoot()->findByUserID("area", static_cast<index_t>(number)));
+            network.mParent->getRoot()->findByUserID("area", static_cast<index_t>(number)));
         if (existing != nullptr) {
-            network.areas.emplace(number, existing);
+            network.mAreas.emplace(number, existing);
             return;
         }
         auto name = trimAux(row.value({"areaname", "name"}));
@@ -417,8 +420,8 @@ namespace {
         }
         auto* area = new GridArea(auxName(network, std::move(name)));
         area->setUserID(static_cast<index_t>(number));
-        addToParentWithRename(area, network.parent);
-        network.areas.emplace(number, area);
+        addToParentWithRename(area, network.mParent);
+        network.mAreas.emplace(number, area);
     }
 
     void readAuxBus(AuxNetwork& network, const AuxRow& row)
@@ -435,14 +438,14 @@ namespace {
             }
             bus = new AcBus(auxName(network, std::move(name)));
             bus->setUserID(static_cast<index_t>(number));
-            bus->set("basepower", network.base, units::MW);
+            bus->set("basepower", network.mBase, units::MW);
             const auto areaNumber = row.integer({"areanum", "areanumber"});
-            auto* busParent = network.parent;
-            if (const auto area = network.areas.find(areaNumber); area != network.areas.end()) {
+            auto* busParent = network.mParent;
+            if (const auto area = network.mAreas.find(areaNumber); area != network.mAreas.end()) {
                 busParent = area->second;
             }
             addToParentWithRename(bus, busParent);
-            network.buses.emplace(number, bus);
+            network.mBuses.emplace(number, bus);
         }
         const auto baseVoltage = row.number({"busnomvolt", "nomkv"});
         if (baseVoltage > 0.0) {
@@ -459,7 +462,7 @@ namespace {
         if (row.has({"busslack", "slack"}) && auxYes(row.value({"busslack", "slack"}))) {
             bus->set("type", "swing");
             bus->set("atarget", row.number({"busangle", "vangle"}), units::deg);
-        } else if (!network.existingNetwork) {
+        } else if (!network.mExistingNetwork) {
             bus->set("type", "PQ");
         }
         const auto zone = row.number({"zonenum", "zonenumber"});
@@ -492,24 +495,23 @@ namespace {
     {
         const int busNumber = row.integer({"busnum"});
         auto* bus = requireAuxBus(network, busNumber, row);
-        auto id = trimAux(row.value({"genid", "id"}));
-        if (id.empty()) {
-            id = "1";
+        auto identifier = trimAux(row.value({"genid", "id"}));
+        if (identifier.empty()) {
+            identifier = "1";
         }
-        const auto name = bus->getName() + "_Gen_" + id;
+        const auto name = bus->getName() + "_Gen_" + identifier;
         auto* generator = dynamic_cast<Generator*>(bus->find(name));
         if (generator == nullptr) {
             if (!row.has({"genmwsetpoint", "mwsetpoint", "genmwmax", "mwmax"})) {
                 return;  // An AUX supplement may only amend an existing generator.
             }
-            generator = network.options.checkFlag(ASSUME_POWERFLOW_ONLY) ?
-                static_cast<Generator*>(new Generator(name)) :
-                static_cast<Generator*>(new DynamicGenerator(name));
-            generator->set("basepower", network.base, units::MW);
+            generator = network.mOptions.checkFlag(ASSUME_POWERFLOW_ONLY) ?
+                new Generator(name) : new DynamicGenerator(name);
+            generator->set("basepower", network.mBase, units::MW);
             generator->set("basevoltage", bus->get("basevoltage", units::kV), units::kV);
             bus->add(generator);
         }
-        auto& busGenerators = network.generatorsByBus[busNumber];
+        auto& busGenerators = network.mGeneratorsByBus[busNumber];
         if (std::find(busGenerators.begin(), busGenerators.end(), generator) ==
             busGenerators.end()) {
             busGenerators.push_back(generator);
@@ -584,8 +586,8 @@ namespace {
                 controlBus->set("vtarget", target);
             }
             generator->add(controlBus);
-            network.remoteGroups[regulatedBus].push_back(generator);
-            network.remoteTerminalBuses.insert(busNumber);
+            network.mRemoteGroups[regulatedBus].push_back(generator);
+            network.mRemoteTerminalBuses.insert(busNumber);
         }
         if (bus->getType() != GridBus::BusType::SLK) {
             bus->set("type", "PV");
@@ -594,7 +596,7 @@ namespace {
 
     void finishAuxGeneratorControls(AuxNetwork& network)
     {
-        for (auto& [busNumber, generators] : network.remoteGroups) {
+        for (auto& [busNumber, generators] : network.mRemoteGroups) {
             (void)busNumber;
             double totalParticipation = 0.0;
             for (const auto* generator : generators) {
@@ -607,7 +609,7 @@ namespace {
                 }
             }
         }
-        for (const auto terminalNumber : network.remoteTerminalBuses) {
+        for (const auto terminalNumber : network.mRemoteTerminalBuses) {
             auto* terminalBus = findAuxBus(network, terminalNumber);
             if (terminalBus == nullptr) {
                 continue;
@@ -618,7 +620,7 @@ namespace {
             } else {
                 terminalBus->set("type", "PQ");
             }
-            for (auto* generator : network.generatorsByBus[terminalNumber]) {
+            for (auto* generator : network.mGeneratorsByBus[terminalNumber]) {
                 generator->setFlag("local_voltage_control", false);
             }
         }
@@ -627,18 +629,18 @@ namespace {
     void readAuxLoad(AuxNetwork& network, const AuxRow& row)
     {
         auto* bus = requireAuxBus(network, row.integer({"busnum"}), row);
-        auto id = trimAux(row.value({"loadid", "id"}));
-        if (id.empty()) {
-            id = "1";
+        auto identifier = trimAux(row.value({"loadid", "id"}));
+        if (identifier.empty()) {
+            identifier = "1";
         }
-        const auto name = bus->getName() + "_load_" + id;
+        const auto name = bus->getName() + "_load_" + identifier;
         auto* load = dynamic_cast<ZipLoad*>(bus->find(name));
         if (load == nullptr) {
             if (!row.has({"loadsmw", "smw", "loadsmvr", "smvar"})) {
                 return;
             }
             load = new ZipLoad(name);
-            load->set("basepower", network.base, units::MW);
+            load->set("basepower", network.mBase, units::MW);
             load->set("basevoltage", bus->get("basevoltage", units::kV), units::kV);
             bus->add(load);
         }
@@ -668,11 +670,11 @@ namespace {
     void readAuxShunt(AuxNetwork& network, const AuxRow& row)
     {
         auto* bus = requireAuxBus(network, row.integer({"busnum"}), row);
-        auto id = trimAux(row.value({"shuntid", "id"}));
-        if (id.empty()) {
-            id = "1";
+        auto identifier = trimAux(row.value({"shuntid", "id"}));
+        if (identifier.empty()) {
+            identifier = "1";
         }
-        const auto name = bus->getName() + "_shunt_" + id;
+        const auto name = bus->getName() + "_shunt_" + identifier;
         if (bus->find(name) != nullptr) {
             return;
         }
@@ -684,7 +686,7 @@ namespace {
                 break;
             }
         }
-        const double mw = row.number({"ssnmw", "mwnom"});
+        const double megawatts = row.number({"ssnmw", "mwnom"});
         const double mvar = row.number({"ssnmvr", "mvarnom"});
         GridLoad* shunt = nullptr;
         if ((mode == "continuous" || mode == "discrete") && hasBlocks) {
@@ -716,11 +718,11 @@ namespace {
         } else {
             auto* fixed = new ZipLoad(name);
             fixed->setFixedShunt();
-            fixed->set("yp", mw, units::MW);
+            fixed->set("yp", megawatts, units::MW);
             fixed->set("yq", -mvar, units::MVAR);
             shunt = fixed;
         }
-        shunt->set("basepower", network.base, units::MW);
+        shunt->set("basepower", network.mBase, units::MW);
         shunt->set("basevoltage", bus->get("basevoltage", units::kV), units::kV);
         bus->add(shunt);
         if (row.has({"ssstatus", "status"}) && !auxClosed(row.value({"ssstatus", "status"}))) {
@@ -741,7 +743,7 @@ namespace {
             (deviceType.contains("transformer") && deviceType != "transformerwinding") ||
             row.has({"liner:1", "rxfbase", "xfxldcrcc", "tapxfbase"});
         Link* link = nullptr;
-        if (const auto found = network.branches.find(key); found != network.branches.end()) {
+        if (const auto found = network.mBranches.find(key); found != network.mBranches.end()) {
             link = found->second;
         } else {
             std::string name = transformer ? "tx_" : "";
@@ -754,19 +756,22 @@ namespace {
                 controlType != "fixed" && !controlType.empty();
             link = adjustable ? static_cast<Link*>(new links::AdjustableTransformer(name)) :
                                 static_cast<Link*>(new AcLine(name));
-            link->set("basepower", network.base, units::MW);
+            link->set("basepower", network.mBase, units::MW);
             link->updateBus(fromBus, 1);
             link->updateBus(toBus, 2);
-            addToParentWithRename(link, auxLinkParent(network.parent, link));
-            network.branches.emplace(key, link);
+            addToParentWithRename(link, auxLinkParent(network.mParent, link));
+            network.mBranches.emplace(key, link);
             if (auto* control = dynamic_cast<links::AdjustableTransformer*>(link)) {
                 const auto controlMode =
                     lowerAux(trimAux(row.value({"xfregtargettype", "regtargettype"})));
                 const bool phaseControl = controlType.contains("phase");
-                control->set("mode",
-                             phaseControl || controlMode.contains("mw") ? "mw" :
-                                 controlMode.contains("mvar")           ? "mvar" :
-                                                                          "voltage");
+                std::string_view mode = "voltage";
+                if (phaseControl || controlMode.contains("mw")) {
+                    mode = "mw";
+                } else if (controlMode.contains("mvar")) {
+                    mode = "mvar";
+                }
+                control->set("mode", mode);
                 const int controlBusNumber = row.integer({"xfregbus", "regbusnum"});
                 if (controlBusNumber > 0) {
                     if (controlBusNumber == fromNumber) {
@@ -798,15 +803,21 @@ namespace {
                     }
                 }
                 if (row.has({"xfregmin", "regmin"})) {
-                    const auto unit = phaseControl || controlMode.contains("mw") ? units::MW :
-                        controlMode.contains("mvar")                             ? units::MVAR :
-                                                                                   units::defunit;
+                    auto unit = units::defunit;
+                    if (phaseControl || controlMode.contains("mw")) {
+                        unit = units::MW;
+                    } else if (controlMode.contains("mvar")) {
+                        unit = units::MVAR;
+                    }
                     control->set("min", row.number({"xfregmin", "regmin"}), unit);
                 }
                 if (row.has({"xfregmax", "regmax"})) {
-                    const auto unit = phaseControl || controlMode.contains("mw") ? units::MW :
-                        controlMode.contains("mvar")                             ? units::MVAR :
-                                                                                   units::defunit;
+                    auto unit = units::defunit;
+                    if (phaseControl || controlMode.contains("mw")) {
+                        unit = units::MW;
+                    } else if (controlMode.contains("mvar")) {
+                        unit = units::MVAR;
+                    }
                     control->set("max", row.number({"xfregmax", "regmax"}), unit);
                 }
                 const auto step = row.number({"xfstep:1", "xfstep", "tapstepsizexfbase"});
@@ -819,8 +830,8 @@ namespace {
         }
 
         if (transformer) {
-            const auto windingBase = row.number({"xfmvabase"}, network.base);
-            double scale = (windingBase > 0.0) ? network.base / windingBase : 1.0;
+            const auto windingBase = row.number({"xfmvabase"}, network.mBase);
+            double scale = (windingBase > 0.0) ? network.mBase / windingBase : 1.0;
             const double nominalFrom = row.number({"xfnominalkv", "xfnomkvbasefrom"});
             const double nominalTo = row.number({"xfnominalkv:1", "xfnomkvbaseto"});
             double tap = row.number({"linetap:1", "tapxfbase", "linetap"}, 1.0);
@@ -830,7 +841,7 @@ namespace {
             const bool physicalPhaseTap =
                 lowerAux(trimAux(row.value({"linexftype", "controltype"}))).contains("phase") &&
                 nominalFrom > 0.0 && nominalTo > 0.0 &&
-                std::abs(tap - nominalTo / nominalFrom) < 0.05 && std::abs(tap - 1.0) > 0.2;
+                std::abs(tap - (nominalTo / nominalFrom)) < 0.05 && std::abs(tap - 1.0) > 0.2;
             if (physicalPhaseTap) {
                 scale *= (nominalTo / nominalFrom) * (nominalTo / nominalFrom);
             }
@@ -905,9 +916,9 @@ namespace {
         const auto circuit = trimAux(row.value({"linecircuit", "circuit"}));
         const auto name = "tx3_" + std::to_string(numbers[0]) + '_' + std::to_string(numbers[1]) +
             '_' + std::to_string(numbers[2]) + '_' + circuit;
-        const std::array<double, 3> pairBase{row.number({"xfmvabase"}, network.base),
-                                             row.number({"xfmvabase:1"}, network.base),
-                                             row.number({"xfmvabase:2"}, network.base)};
+        const std::array<double, 3> pairBase{row.number({"xfmvabase"}, network.mBase),
+                                             row.number({"xfmvabase:1"}, network.mBase),
+                                             row.number({"xfmvabase:2"}, network.mBase)};
         std::array<double, 3> resistance{row.number({"r3w:3"}),
                                          row.number({"r3w:4"}),
                                          row.number({"r3w:5"})};
@@ -916,8 +927,8 @@ namespace {
                                         row.number({"x3w:5"})};
         for (size_t index = 0; index < 3; ++index) {
             if (pairBase[index] > 0.0) {
-                resistance[index] *= network.base / pairBase[index];
-                reactance[index] *= network.base / pairBase[index];
+                resistance[index] *= network.mBase / pairBase[index];
+                reactance[index] *= network.mBase / pairBase[index];
             }
         }
         const std::array<double, 3> starR{(resistance[0] + resistance[2] - resistance[1]) / 2.0,
@@ -951,17 +962,17 @@ namespace {
             const auto legName = name + "_w" + std::to_string(index + 1);
             const auto key = auxBranchKey(numbers[index], numbers[3], circuit);
             Link* leg = nullptr;
-            if (const auto found = network.branches.find(key); found != network.branches.end()) {
+            if (const auto found = network.mBranches.find(key); found != network.mBranches.end()) {
                 leg = found->second;
             } else {
                 auto* newLeg = new AcLine(legName);
-                newLeg->set("basepower", network.base, units::MW);
+                newLeg->set("basepower", network.mBase, units::MW);
                 newLeg->updateBus(buses[index], 1);
                 newLeg->updateBus(buses[3], 2);
                 newLeg->set("r", starR[index]);
                 newLeg->set("x", starX[index]);
-                addToParentWithRename(newLeg, auxLinkParent(network.parent, newLeg));
-                network.branches.emplace(key, newLeg);
+                addToParentWithRename(newLeg, auxLinkParent(network.mParent, newLeg));
+                network.mBranches.emplace(key, newLeg);
                 leg = newLeg;
             }
             if (taps[index] > 0.0) {
@@ -986,10 +997,10 @@ namespace {
     void readAuxTransformerSettings(AuxNetwork& network, const AuxRow& row)
     {
         const auto from = row.integer({"busnum"});
-        const auto to = row.integer({"busnum:1"});
+        const auto toBus = row.integer({"busnum:1"});
         const auto circuit = trimAux(row.value({"linecircuit"}));
-        const auto found = network.branches.find(auxBranchKey(from, to, circuit));
-        if (found == network.branches.end()) {
+        const auto found = network.mBranches.find(auxBranchKey(from, toBus, circuit));
+        if (found == network.mBranches.end()) {
             return;
         }
         auto* link = found->second;
@@ -1010,17 +1021,12 @@ void loadAux(CoreObject* parentObject,
     if (parentObject == nullptr) {
         throw InvalidParameterValue("PowerWorld AUX reader requires a simulation parent object");
     }
-    AuxNetwork network{parentObject,
-                       readerOptions,
-                       {},
-                       {},
-                       {},
-                       {},
-                       {},
-                       {},
-                       readerOptions.base,
-                       parentObject->getRoot()->getInt("totalbuscount") > 0};
-    if (!network.existingNetwork) {
+    AuxNetwork network{.mParent = parentObject,
+                       .mOptions = readerOptions,
+                       .mBase = readerOptions.base,
+                       .mExistingNetwork =
+                           parentObject->getRoot()->getInt("totalbuscount") > 0};
+    if (!network.mExistingNetwork) {
         GridSimulation::resetObjectCounters();
     }
     scanAuxFile(
@@ -1040,17 +1046,17 @@ void loadAux(CoreObject* parentObject,
                 type == "3wxformer" || type == "transformer";
         },
         [&](const AuxRow& row) {
-            if (row.section.type == "gen") {
+            if (row.mSection.mType == "gen") {
                 readAuxGenerator(network, row);
-            } else if (row.section.type == "load") {
+            } else if (row.mSection.mType == "load") {
                 readAuxLoad(network, row);
-            } else if (row.section.type == "shunt") {
+            } else if (row.mSection.mType == "shunt") {
                 readAuxShunt(network, row);
-            } else if (row.section.type == "branch") {
+            } else if (row.mSection.mType == "branch") {
                 readAuxBranch(network, row);
-            } else if (row.section.type == "3wxformer") {
+            } else if (row.mSection.mType == "3wxformer") {
                 readAuxThreeWinding(network, row);
-            } else if (row.section.type == "transformer") {
+            } else if (row.mSection.mType == "transformer") {
                 readAuxTransformerSettings(network, row);
             }
         });

@@ -1,0 +1,25 @@
+// TransformerWinding rows already provide the three explicit star legs.
+DATA (Bus, [BusNum, BusName, BusNomVolt, BusPUVolt, BusAngle, BusSlack])
+{
+  10 "PRIMARY" 138 1.0 0 YES
+  20 "SECONDARY" 138 1.0 0 NO
+  30 "TERTIARY" 13.8 1.0 0 NO
+  40 "STAR" 138 1.0 0 NO
+}
+DATA (Branch, [BusNum, BusNum:1, LineCircuit, BranchDeviceType,
+               LineStatus, LineR, LineX])
+{
+  10 40 "1" TransformerWinding Closed 0.01 0.10
+  20 40 "1" TransformerWinding Closed 0.02 0.20
+  30 40 "1" TransformerWinding Closed 0.03 0.30
+}
+DATA (3WXFormer, [BusIdentifier, BusIdentifier:1, BusIdentifier:2,
+                  BusIdentifier:3, LineCircuit, XFMVABase,
+                  XFMVABase:1, XFMVABase:2, R3W:3, X3W:3,
+                  R3W:4, X3W:4, R3W:5, X3W:5,
+                  NomVolt3W, NomVolt3W:1, NomVolt3W:2,
+                  Tap3W, Tap3W:4, Tap3W:5, LinePhase,
+                  LineStatus, LineStatus:1, LineStatus:2])
+{
+  10 20 30 40 "1" 100 100 100 0.03 0.30 0.05 0.50 0.04 0.40 345 138 13.8 0.4 1.0 1.0 5.0 Closed Closed Closed
+}
