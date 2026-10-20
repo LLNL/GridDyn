@@ -1,0 +1,40 @@
+// Small PowerWorld-style case for the core static network reader.
+DATA (Sim_Solution_Options_Value, [VariableName, ValueField])
+{
+  "MvaBase" 100
+}
+DATA (Area, [AreaNum, AreaName])
+{
+  1 "TEST AREA"
+}
+DATA (Owner, [OwnerNum, OwnerName])
+{
+  1 "Ignored by the static reader"
+}
+DATA (Bus, [BusNum, BusName, BusNomVolt, BusPUVolt, BusAngle,
+            BusSlack, AreaNum, BusG:1, BusB:1])
+{
+  1 "SLACK" 230 1.00 0.0 YES 1 0 0
+  2 "GEN BUS" 230 1.02 -1.0 NO 1 0 0
+  3 "LOAD BUS" 230 0.99 -2.0 NO 1 0.5 -1.5
+}
+DATA (Gen, [BusNum, GenID, GenStatus, GenMWSetPoint, GenMvrSetPoint,
+            GenMVRMax, GenMVRMin, GenVoltSet, GenRegNum, GenAVRAble])
+{
+  2 "1" Closed 40 5 0 0 1.05 2 YES
+}
+DATA (Load, [BusNum, LoadID, LoadStatus, LoadSMW, LoadSMVR,
+             LoadIMW, LoadIMVR, LoadZMW, LoadZMVR])
+{
+  3 "A" Closed 30 10 2 1 3 2
+}
+DATA (Shunt, [BusNum, ShuntID, SSStatus, SSCMode, SSNMW, SSNMVR])
+{
+  3 "1" Closed Fixed 0 4
+}
+DATA (Branch, [BusNum, BusNum:1, LineCircuit, BranchDeviceType,
+               LineStatus, LineR, LineX, LineC, LineG])
+{
+  1 2 "1" Line Closed 0.01 0.10 0.04 0.002
+  2 3 "1" Line Closed 0.02 0.15 0.03 0
+}

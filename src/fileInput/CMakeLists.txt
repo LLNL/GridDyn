@@ -34,6 +34,7 @@ set(elementReader_sources
 set(formattedfileInput_sources
     gridDynReadCDF.cpp
     gridDynReadRAW.cpp
+    gridDynReadAUX.cpp
     gridDynReadDYR.cpp
     gridDynReadDYD.cpp
     gridDynReadPSP.cpp

@@ -1,0 +1,19 @@
+// Physical winding tap plus a from-side phase-shifter MW controller.
+Bus (BusNum, BusName, BusNomVolt, BusPUVolt, BusAngle, BusSlack)
+{
+  1 "FROM" 765 1.0 0 YES
+  2 "TO" 765 1.0 -1 NO
+}
+DATA (Branch, [BusNum, BusNum:1, LineCircuit, BranchDeviceType,
+               LineStatus, LineXFType, XFAuto, XFRegBus,
+               XFRegMax, XFRegMin, XFMVABase, XFNominalKV,
+               XFNominalKV:1, LineR:1, LineX:1, LineTap:1,
+               LinePhase, XFTapMax:1, XFTapMin:1, XFStep:1])
+{
+  1 2 "1" Transformer Closed Phase YES 0 2800 2500 100 765 18 0.18785 1.638269 0.023529411764705882 -7.69582 30 -30 2
+}
+DATA (Branch, [BusNum, BusNum:1, LineCircuit, BranchDeviceType,
+               LineStatus, LineR, LineX])
+{
+  1 2 "2" Line Closed 0.01 0.1
+}

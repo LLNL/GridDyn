@@ -174,6 +174,7 @@ void loadFile(CoreObject* parentObject,
         ext = sourcePath.extension().string();
     }
     ext = gmlc::utilities::convertToLowerCase(ext);
+    // Accept both a path suffix (".AUX") and an explicit format ("aux").
     if (!ext.empty() && ext.front() == '.') {
         ext.erase(0, 1);
     }
@@ -188,14 +189,14 @@ void loadFile(CoreObject* parentObject,
         readerInf = uniqueReaderInfo.get();
     }
 
-    // get rid of the . on the extension if it has one
-
     if (ext == "xml") {
         loadElementFile<XmlReaderElement>(parentObject, fileName, readerInf);
     } else if (ext == "csv") {
         loadCsv(parentObject, fileName, *readerInf);
     } else if (ext == "raw" || ext == "psse" || ext == "pss/e" || ext == "pti") {
         loadRaw(parentObject, fileName, *readerInf);
+    } else if (ext == "aux") {
+        loadAux(parentObject, fileName, *readerInf);
     } else if (ext == "dyr") {
         loadDyr(parentObject, fileName, *readerInf);
     } else if (ext == "dyd") {
