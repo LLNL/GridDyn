@@ -248,6 +248,45 @@ namespace {
     {
         const auto source = gmlc::utilities::convertToLowerCase(sourceModelName);
 
+        if (source == "ieeet1") {
+            // PSLF IEEET1 appends Spdmlt to the PSS/E-compatible parameter
+            // list. The native IEEET1 model has no speed-multiplier input.
+            if ((sourcePayload.size() != 14U) && (sourcePayload.size() != 15U)) {
+                return false;
+            }
+            payload.assign(sourcePayload.begin(), sourcePayload.begin() + 14);
+            return true;
+        }
+
+        if ((source == "esdc1a") || (source == "esdc2a")) {
+            // PSLF appends UEL and exclim selectors to the PSS/E-compatible
+            // fields. The shared exciter models do not expose those inputs.
+            if ((sourcePayload.size() != 16U) && (sourcePayload.size() != 18U)) {
+                return false;
+            }
+            payload.assign(sourcePayload.begin(), sourcePayload.begin() + 16);
+            return true;
+        }
+
+        if (source == "esac6a") {
+            // PSLF places Kh, Tj, Th, Vfelim, and Vhmax in a different order
+            // from the shared PSS/E loader; Spdmlt follows the core fields.
+            if ((sourcePayload.size() != 23U) && (sourcePayload.size() != 24U)) {
+                return false;
+            }
+            static constexpr std::array<std::size_t, 23> esac6aOrder{
+                0U,  1U,  2U,  3U,  4U,  5U,  6U,  7U,  8U,  9U,  10U, 14U,
+                11U, 15U, 13U, 12U, 16U, 17U, 18U, 19U, 20U, 21U, 22U};
+            payload.reserve(sourcePayload.size());
+            for (const auto index : esac6aOrder) {
+                payload.push_back(sourcePayload[index]);
+            }
+            if (sourcePayload.size() == 24U) {
+                payload.push_back(sourcePayload[23U]);
+            }
+            return true;
+        }
+
         if (source == "esac7b") {
             // PSLF ESAC7B:
             // Tr Kpr Kir Kdr Tdr Vrmax Vrmin Kpa Kia Vamax Vamin Kp Kl Te
@@ -560,6 +599,27 @@ namespace {
             return true;
         }
 
+        if (source == "genrou" && sourcePayload.size() >= 15U) {
+            // PSLF orders these fields as H, D, Ra, Xd, Xq, Xdp, Xqp,
+            // Xdpp, Xl, Tdop, Tqop, Tdopp, Tqopp, S1, S12. Older DYD test
+            // files used the PSS/E order; retain those when the PSLF reactance
+            // and time-constant positions are not plausible.
+            const auto values = gmlc::utilities::str2vector(sourcePayload, kNullVal);
+            const bool pslfOrder = values[0] > 0.0 && values[3] > values[5] &&
+                values[5] >= values[7] && values[4] >= values[6] &&
+                values[6] >= values[7] && values[9] > 0.0 && values[11] > 0.0 &&
+                values[12] > 0.0;
+            if (pslfOrder) {
+                static constexpr std::array<std::size_t, 14> genrouOrder{
+                    9U, 11U, 10U, 12U, 0U, 1U, 3U, 4U, 5U, 6U, 7U, 8U, 13U, 14U};
+                payload.reserve(genrouOrder.size());
+                for (const auto index : genrouOrder) {
+                    payload.push_back(sourcePayload[index]);
+                }
+                return true;
+            }
+        }
+
         if (source == "esac1a") {
             // PSLF ESAC1A order is TR, TB, TC, KA, TA, VAMAX, VAMIN, TE,
             // KF, TF, KC, KD, KE, E1, SE1, E2, SE2, VRMAX, VRMIN, Spdmlt.
@@ -744,6 +804,8 @@ namespace {
         std::map<std::string, UnsupportedDydModelSummary> mIgnoredNonessentialModels;
         UnsupportedDydModelSummary mSingleMassWtgtFallbacks;
         IgnoredDydParameterSummary mIgnoredIeeestTdelay;
+        IgnoredDydParameterSummary mIgnoredIeeet1Spdmlt;
+        IgnoredDydParameterSummary mIgnoredDcExciterSelectors;
         IgnoredDydParameterSummary mIgnoredEsac1aSpdmlt;
         LoadTemplateManager mWsccLoadTemplates;
         bool mHasWsccLoadTemplates = false;
@@ -864,6 +926,24 @@ namespace {
                                    lineTokens,
                                    recordLineNumber,
                                    payload.mPositional[19U]);
+        }
+        if ((sourceModelName == "ieeet1") && (payload.mPositional.size() > 14U) &&
+            !isZeroDydParameter(payload.mPositional[14U])) {
+            addIgnoredDydParameter(context.mIgnoredIeeet1Spdmlt,
+                                   lineTokens,
+                                   recordLineNumber,
+                                   payload.mPositional[14U]);
+        }
+        if (((sourceModelName == "esdc1a") || (sourceModelName == "esdc2a")) &&
+            (payload.mPositional.size() == 18U) &&
+            (!isZeroDydParameter(payload.mPositional[16U]) ||
+             (payload.mPositional[17U] != "1"))) {
+            const auto selectors =
+                "UEL=" + payload.mPositional[16U] + ", exclim=" + payload.mPositional[17U];
+            addIgnoredDydParameter(context.mIgnoredDcExciterSelectors,
+                                   lineTokens,
+                                   recordLineNumber,
+                                   selectors);
         }
         if ((sourceModelName == "esac1a") && (payload.mPositional.size() > 19U) &&
             !isZeroDydParameter(payload.mPositional[19U])) {
@@ -1131,7 +1211,8 @@ namespace {
                 !detail::loadDyrModelRecord(context.mParentObject,
                                             modelTokens,
                                             context.mDisableStabilizers,
-                                            context.mZeroGainStabilizers)) {
+                                            context.mZeroGainStabilizers,
+                                            sourceModelName == "wt3p")) {
                 addUnsupportedModel(context.mUnsupportedModels,
                                     displayModelName,
                                     lineTokens,
@@ -1291,6 +1372,26 @@ namespace {
                 std::to_string(summary.mCount) + " record(s); first at line " +
                 std::to_string(summary.mFirstLine) + ", bus " + summary.mFirstBus + " machine " +
                 summary.mFirstMachine + ", Tdelay=" + summary.mFirstValue;
+            parentObject->log(parentObject, PrintLevel::WARNING, message);
+        }
+        if (context.mIgnoredIeeet1Spdmlt.mCount > 0U) {
+            const auto& summary = context.mIgnoredIeeet1Spdmlt;
+            const std::string message = fileName +
+                ": ignored nonzero or invalid PSLF IEEET1 Spdmlt values (speed multiplier is not "
+                "modeled): " +
+                std::to_string(summary.mCount) + " record(s); first at line " +
+                std::to_string(summary.mFirstLine) + ", bus " + summary.mFirstBus + " machine " +
+                summary.mFirstMachine + ", Spdmlt=" + summary.mFirstValue;
+            parentObject->log(parentObject, PrintLevel::WARNING, message);
+        }
+        if (context.mIgnoredDcExciterSelectors.mCount > 0U) {
+            const auto& summary = context.mIgnoredDcExciterSelectors;
+            const std::string message = fileName +
+                ": ignored nondefault PSLF ESDC1A/ESDC2A UEL or exclim selectors (those inputs "
+                "are not modeled): " +
+                std::to_string(summary.mCount) + " record(s); first at line " +
+                std::to_string(summary.mFirstLine) + ", bus " + summary.mFirstBus + " machine " +
+                summary.mFirstMachine + ", " + summary.mFirstValue;
             parentObject->log(parentObject, PrintLevel::WARNING, message);
         }
         if (context.mIgnoredEsac1aSpdmlt.mCount > 0U) {

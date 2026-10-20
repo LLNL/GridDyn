@@ -681,6 +681,8 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     type = BusType::AFIX;
                     alert(this, JAC_COUNT_CHANGE);
                     out = ChangeCode::JACOBIAN_CHANGE;
+                } else {
+                    dispatchLocalVoltageControls(S.genQ, true);
                 }
 
                 break;
@@ -759,6 +761,12 @@ ChangeCode AcBus::powerFlowAdjust(const IOdata& inputs, std::uint32_t flags, Che
                     alert(this, JAC_COUNT_CHANGE);
                     out = ChangeCode::JACOBIAN_CHANGE;
                     logging::trace(this, "changing from PV to PQ from Qmax");
+                } else {
+                    // A PV bus has no reactive-balance equation in the Newton
+                    // system, so its generator outputs must be refreshed here.
+                    // In particular, a generator released from a Q limit stays
+                    // at that bound unless the bus explicitly redispatches it.
+                    dispatchLocalVoltageControls(S.genQ, true);
                 }
                 break;
             case BusType::AFIX:
@@ -970,78 +978,7 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
         case BusType::PV: {
             computePowerAdjustments();
             qgap = -S.sumQ();
-            std::vector<Generator*> localGeneratorControls;
-            bool allControlsAreLocalGenerators = busController.vControlLinks.empty();
-            for (auto* vco : busController.vControlObjects) {
-                auto* gen = dynamic_cast<Generator*>(vco);
-                if ((gen == nullptr) || !gen->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
-                    allControlsAreLocalGenerators = false;
-                    break;
-                }
-                localGeneratorControls.push_back(gen);
-            }
-            if (allControlsAreLocalGenerators && !localGeneratorControls.empty()) {
-                // The power-flow bus solves one aggregate Q balance.  Restore
-                // that balance across its local generator controls without
-                // assigning any unit outside its own reactive limits.
-                std::vector<double> qValues(localGeneratorControls.size());
-                std::vector<double> qMins(localGeneratorControls.size());
-                std::vector<double> qMaxs(localGeneratorControls.size());
-                double currentQTotal = 0.0;
-                for (std::size_t index = 0; index < localGeneratorControls.size(); ++index) {
-                    auto* gen = localGeneratorControls[index];
-                    qMins[index] = gen->getQmin();
-                    qMaxs[index] = gen->getQmax();
-                    qValues[index] =
-                        std::clamp(-gen->getReactivePower(), qMins[index], qMaxs[index]);
-                    currentQTotal += qValues[index];
-                }
-
-                double remainingQ = -qgap - currentQTotal;
-                for (std::size_t pass = 0;
-                     (pass < localGeneratorControls.size()) && (std::abs(remainingQ) > 1e-12);
-                     ++pass) {
-                    double activeWeight = 0.0;
-                    for (std::size_t index = 0; index < qValues.size(); ++index) {
-                        const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
-                                                                  (qValues[index] > qMins[index]);
-                        if (canMove) {
-                            activeWeight += std::max(0.0, busController.vcfrac[index]);
-                        }
-                    }
-                    if (activeWeight <= 0.0) {
-                        break;
-                    }
-                    double appliedQ = 0.0;
-                    for (std::size_t index = 0; index < qValues.size(); ++index) {
-                        const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
-                                                                  (qValues[index] > qMins[index]);
-                        if (canMove) {
-                            const double weight = std::max(0.0, busController.vcfrac[index]);
-                            const double requestedChange = remainingQ * weight / activeWeight;
-                            const double updatedQ = std::clamp(qValues[index] + requestedChange,
-                                                               qMins[index],
-                                                               qMaxs[index]);
-                            appliedQ += updatedQ - qValues[index];
-                            qValues[index] = updatedQ;
-                        }
-                    }
-                    if (std::abs(appliedQ) <= 1e-14) {
-                        break;
-                    }
-                    remainingQ -= appliedQ;
-                }
-
-                for (std::size_t index = 0; index < localGeneratorControls.size(); ++index) {
-                    localGeneratorControls[index]->set("q", qValues[index]);
-                }
-                if (std::abs(remainingQ) > 1e-5) {
-                    logging::warning(
-                        this,
-                        "Local generator Q limits leave a reactive initialization residual of {} pu",
-                        remainingQ);
-                }
-            } else {
+            if (!dispatchLocalVoltageControls(-qgap)) {
                 for (auto& vco : busController.vControlObjects) {
                     if (vco->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
                         vco->set("q", -qgap * busController.vcfrac[vci]);
@@ -2948,6 +2885,89 @@ void AcBus::computePowerAdjustments()
             S.genP += gen->getRealPower();
         }
     }
+}
+
+bool AcBus::dispatchLocalVoltageControls(double requiredReactivePower,
+                                         bool allowUniformFallback)
+{
+    if (busController.vControlObjects.empty() || !busController.vControlLinks.empty()) {
+        return false;
+    }
+
+    std::vector<Generator*> localGenerators;
+    localGenerators.reserve(busController.vControlObjects.size());
+    for (auto* control : busController.vControlObjects) {
+        auto* gen = dynamic_cast<Generator*>(control);
+        if ((gen == nullptr) || !gen->checkFlag(LOCAL_VOLTAGE_CONTROL)) {
+            return false;
+        }
+        localGenerators.push_back(gen);
+    }
+
+    std::vector<double> qValues(localGenerators.size());
+    std::vector<double> qMins(localGenerators.size());
+    std::vector<double> qMaxs(localGenerators.size());
+    double currentQTotal = 0.0;
+    for (std::size_t index = 0; index < localGenerators.size(); ++index) {
+        auto* gen = localGenerators[index];
+        qMins[index] = gen->getQmin();
+        qMaxs[index] = gen->getQmax();
+        qValues[index] = std::clamp(-gen->getReactivePower(), qMins[index], qMaxs[index]);
+        currentQTotal += qValues[index];
+    }
+
+    double remainingQ = requiredReactivePower - currentQTotal;
+    for (std::size_t pass = 0;
+         (pass < localGenerators.size()) && (std::abs(remainingQ) > 1e-12);
+         ++pass) {
+        double activeWeight = 0.0;
+        std::size_t activeCount = 0;
+        for (std::size_t index = 0; index < qValues.size(); ++index) {
+            const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
+                                                      (qValues[index] > qMins[index]);
+            if (canMove) {
+                activeWeight += std::max(0.0, busController.vcfrac[index]);
+                ++activeCount;
+            }
+        }
+        if (activeCount == 0 || (activeWeight <= 0.0 && !allowUniformFallback)) {
+            break;
+        }
+        const bool useUniformWeights = activeWeight <= 0.0;
+        if (useUniformWeights) {
+            activeWeight = static_cast<double>(activeCount);
+        }
+
+        double appliedQ = 0.0;
+        for (std::size_t index = 0; index < qValues.size(); ++index) {
+            const bool canMove = (remainingQ > 0.0) ? (qValues[index] < qMaxs[index]) :
+                                                      (qValues[index] > qMins[index]);
+            if (canMove) {
+                const double weight = useUniformWeights ? 1.0 :
+                    std::max(0.0, busController.vcfrac[index]);
+                const double requestedChange = remainingQ * weight / activeWeight;
+                const double updatedQ = std::clamp(qValues[index] + requestedChange,
+                                                   qMins[index],
+                                                   qMaxs[index]);
+                appliedQ += updatedQ - qValues[index];
+                qValues[index] = updatedQ;
+            }
+        }
+        if (std::abs(appliedQ) <= 1e-14) {
+            break;
+        }
+        remainingQ -= appliedQ;
+    }
+
+    for (std::size_t index = 0; index < localGenerators.size(); ++index) {
+        localGenerators[index]->set("q", qValues[index]);
+    }
+    if (std::abs(remainingQ) > 1e-5) {
+        logging::warning(this,
+                         "Local generator Q limits leave a reactive dispatch residual of {} pu",
+                         remainingQ);
+    }
+    return true;
 }
 
 double AcBus::getMaxGenReal() const

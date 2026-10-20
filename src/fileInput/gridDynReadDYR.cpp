@@ -146,7 +146,10 @@ namespace {
     void loadST2CUT(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadEXDC2(CoreObject* parentObject, stringVec& tokens);
     void loadSEXS(CoreObject* parentObject, stringVec& tokens);
-    void loadRenewable(CoreObject* parentObject, stringVec& tokens, std::string_view modelName);
+    void loadRenewable(CoreObject* parentObject,
+                       stringVec& tokens,
+                       std::string_view modelName,
+                       bool alignInitialPset = false);
     void loadMeasurement(CoreObject* parentObject, stringVec& tokens, std::string_view modelName);
     void loadTIOCR1(CoreObject* parentObject, stringVec& tokens);
     void loadIEELAL(CoreObject* parentObject, const stringVec& tokens);
@@ -282,7 +285,8 @@ namespace detail {
     bool loadDyrModelRecord(CoreObject* parentObject,
                             stringVec& lineTokens,
                             bool disableStabilizers,
-                            count_t& zeroGainStabilizers)
+                            count_t& zeroGainStabilizers,
+                            bool alignInitialPset)
     {
         if (lineTokens.size() < 2U) {
             return false;
@@ -445,7 +449,7 @@ namespace detail {
         } else if (type == "'WTARA1'") {
             loadRenewable(parentObject, lineTokens, "WTARA1");
         } else if (type == "'WTPTA1'") {
-            loadRenewable(parentObject, lineTokens, "WTPTA1");
+            loadRenewable(parentObject, lineTokens, "WTPTA1", alignInitialPset);
         } else if (type == "'WTTQA1'") {
             loadRenewable(parentObject, lineTokens, "WTTQA1");
         } else if (type == "'WT3P1'") {
@@ -476,7 +480,7 @@ namespace detail {
                                   lineTokens[10],
                                   std::format("{:.17g}", -params[10]),
                                   lineTokens[11]};
-            loadRenewable(parentObject, pitchTokens, "WTPTA1");
+            loadRenewable(parentObject, pitchTokens, "WTPTA1", true);
         } else if (type == "'WT3T1'") {
             // WT3T1 combines the legacy aerodynamic and shaft dynamics. Split
             // it into the existing WTARA1 and WTDS/WTDTA1 role components.
@@ -1499,7 +1503,10 @@ namespace {
         [[maybe_unused]] auto* areaOwnedSensor = sensor.release();
     }
 
-    void loadRenewable(CoreObject* parentObject, stringVec& tokens, std::string_view modelName)
+    void loadRenewable(CoreObject* parentObject,
+                       stringVec& tokens,
+                       std::string_view modelName,
+                       bool alignInitialPset)
     {
         static constexpr auto regcaFields = std::to_array<std::string_view>({"lvplsw",
                                                                              "tg",
@@ -1789,6 +1796,9 @@ namespace {
             setFields(wtptaFields, 3);
             if (tokens.size() == 14U) {
                 model->set("pset", params[13]);
+            }
+            if (alignInitialPset) {
+                model->set("aligninitialpset", 1.0);
             }
         } else if (modelName == "WTTQA1") {
             setFields(wttqaFields, 3);
@@ -2424,12 +2434,15 @@ namespace {
 
     void loadESAC6A(CoreObject* parentObject, stringVec& tokens)
     {
-        if (tokens.size() != 26U) {
-            throw InvalidParameterValue("ESAC6A DYR record must contain 26 fields");
+        if ((tokens.size() != 26U) && (tokens.size() != 27U)) {
+            throw InvalidParameterValue("ESAC6A DYR record must contain 26 or 27 fields");
         }
         auto* gen = requireDyrGenerator(parentObject, tokens, "ESAC6A");
 
         const auto params = gmlc::utilities::str2vector(tokens, kNullVal);
+        if ((tokens.size() == 27U) && (params[26] != 0.0) && (params[26] != 1.0)) {
+            throw InvalidParameterValue("ESAC6A Spdmlt must be 0 or 1");
+        }
         auto* model =
             static_cast<Exciter*>(CoreObjectFactory::instance()->createObject("exciter", "esac6a"));
         static constexpr std::array<std::string_view, 23> names{"tr",    "ka",    "ta",    "tk",
@@ -2440,6 +2453,9 @@ namespace {
                                                                 "se1",   "e2",    "se2"};
         for (std::size_t ii = 0; ii < names.size(); ++ii) {
             model->set(names[ii], params[ii + 3]);
+        }
+        if ((tokens.size() == 27U) && (params[26] != 0.0)) {
+            model->set("spdmlt", "on");
         }
         gen->add(model);
     }

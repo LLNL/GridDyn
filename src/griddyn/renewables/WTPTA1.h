@@ -46,7 +46,9 @@ class WTPTA1 final: public RenewableComponent {
     double thetaMax = 30.0, thetaMin = 0.0, rateMax = 5.0, rateMin = -5.0;
     double initialSpeed = 1.0;
     double Pset = 0.0;
+    double configuredPset = 0.0;
     bool hasFixedPset = false;
+    bool alignInitialPset = false;
     std::array<double, 3> rates(const IOdata& inputs, const double state[]) const;
 };
 

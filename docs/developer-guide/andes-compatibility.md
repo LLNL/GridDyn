@@ -1046,10 +1046,15 @@ ordinary AC-network elements.
 
 ### ACTIVSg70k dynamic-model demand and RAW support
 
-`C:\Users\phlpt\Downloads\ACTIVSg70k\ACTIVSg70k_dynamics.dyr` was inspected
-statically and was not loaded or run. It has 40,418 records in 22 model
-families. The record counts below describe the pre-renewable-integration
-scan; they are a historical baseline, not current importer status. That scan
+As of 2026-10-18, the supplied RAW and DYR load together in a power-flow-only
+run with exit code 0. This verifies import and attachment, not dynamic
+initialization or a time-domain result. The three static input results,
+including the unresolved MATPOWER reactive-balance mismatch, are recorded in
+the [ACTIVSg70k validation assessment](activsg-dyr-compatibility-plan.md#activsg70k-static-dyr-and-raw-assessment).
+
+The DYR has 40,418 records in 22 model families. The record counts below
+describe the pre-renewable-integration scan; they are a historical baseline,
+not current importer status. That scan
 recognized 34,790 records in `GENROU`,
 `IEEEST`, `IEEEG1`, `ESDC1A`, `ESDC2A`, `EXAC1`, `EXAC2`, `GGOV1`, `ESST4B`,
 `GENSAL`, `HYGOV`, `IEEET1`, `EXPIC1`, `SCRX`, and `ESAC6A`; the scan reported
@@ -1075,9 +1080,11 @@ transformers. Delta-to-star expansion gives the same 70,000 buses and 88,207
 links as `case_ACTIVSg70k.m`. All transformers use `CW=1`, `CZ=1`, and `CM=1`;
 2,083 winding records use fixed/manual `COD=-1`. There are no nonempty DC,
 FACTS, multisection-line, induction-machine, or system-switching-device
-sections. No additional RAW record family is needed, but whole-case validation
-of three-winding and fixed-control transformer behavior is required before
-accepting a power-flow/dynamic reference.
+sections. No additional RAW record family is needed. The 2026-10-18 RAW
+power-flow run exercises the three-winding and fixed-control transformer
+paths at scale; comparison against an external reference remains necessary
+before accepting numerical equivalence or using the result as a dynamic
+baseline.
 
 ## Numerical-regression policy
 

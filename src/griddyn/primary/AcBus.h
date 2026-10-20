@@ -223,6 +223,9 @@ class AcBus: public GridBus {
   protected:
     /** @brief  compute adjustments required for the dynamic update*/
     virtual void computePowerAdjustments();
+    /** Redispatch local voltage-controlling generators to meet reactive balance. */
+    bool dispatchLocalVoltageControls(double requiredReactivePower,
+                                      bool allowUniformFallback = false);
     /** @brief  compute the partial derivatives based on the given state data
     @param[in] stateDataValue  the state Data in question
     @param[in] sMode the solver mode*/

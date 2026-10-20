@@ -20,6 +20,7 @@ namespace detail {
     bool loadDyrModelRecord(CoreObject* parentObject,
                             stringVec& lineTokens,
                             bool disableStabilizers,
-                            count_t& zeroGainStabilizers);
+                            count_t& zeroGainStabilizers,
+                            bool alignInitialPset = false);
 }  // namespace detail
 }  // namespace griddyn
