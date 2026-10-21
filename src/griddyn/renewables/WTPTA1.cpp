@@ -59,7 +59,9 @@ CoreObject* WTPTA1::clone(CoreObject* obj) const
         out->rateMin = rateMin;
         out->initialSpeed = initialSpeed;
         out->Pset = Pset;
+        out->configuredPset = configuredPset;
         out->hasFixedPset = hasFixedPset;
+        out->alignInitialPset = alignInitialPset;
     }
     return out;
 }
@@ -99,7 +101,10 @@ void WTPTA1::set(std::string_view param, double val, units::unit unitType)
         rateMin = val;
     } else if (key == "pset") {
         Pset = val;
+        configuredPset = val;
         hasFixedPset = true;
+    } else if (key == "aligninitialpset") {
+        alignInitialPset = (val != 0.0);
     } else {
         RenewableComponent::set(param, val, unitType);
     }
@@ -158,6 +163,12 @@ void WTPTA1::dynObjectInitializeA(CoreTime time0, std::uint32_t /*flags*/)
     auto& local = offsets.local().local;
     local.diffSize = 3;
     local.jacSize = 24;
+    if (alignInitialPset) {
+        if (!hasFixedPset) {
+            throw InvalidParameterValue("WTPTA1 initial Pset alignment requires a fixed Pset");
+        }
+        Pset = configuredPset;
+    }
     prevTime = time0;
 }
 
@@ -168,6 +179,22 @@ void WTPTA1::dynObjectInitializeB(const IOdata& inputs,
     if (inputs.size() < 5 || !std::isfinite(inputs[0]) || !std::isfinite(inputs[4]) ||
         inputs[4] < thetaMin || inputs[4] > thetaMax) {
         throw InvalidParameterValue("WTPTA1 initial speed or pitch outside limits");
+    }
+    if (alignInitialPset) {
+        constexpr double alignmentTolerance = 1e-8;
+        if (!std::isfinite(inputs[1]) || inputs[1] == kNullVal) {
+            throw InvalidParameterValue("WT3P1 initial power order is invalid");
+        }
+        if (std::abs(Pset - inputs[1]) > alignmentTolerance) {
+            if (configuredPset != 1.0 && std::abs(Pset - configuredPset) <= alignmentTolerance) {
+                logging::warning(this,
+                                 "WT3P1 Pset {} differs from initial PORD {}; aligning Pset to "
+                                 "the operating point",
+                                 configuredPset,
+                                 inputs[1]);
+            }
+            Pset = inputs[1];
+        }
     }
     initialSpeed = inputs[0];
     m_state[theta] = inputs[4];

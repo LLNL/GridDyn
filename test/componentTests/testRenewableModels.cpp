@@ -2961,6 +2961,51 @@ TEST(RenewableModels, PitchChangesMechanicalPower)
     EXPECT_LT(aero.getOutput(0), 0.8);
 }
 
+TEST(RenewableModels, WT3P1AlignsInitialSetpointAndWarnsForNondefaultValue)
+{
+    struct Scenario {
+        double dyrPset;
+        int expectedWarnings;
+    };
+    for (const auto scenario : std::array{Scenario{.dyrPset = 1.0, .expectedWarnings = 0},
+                                          Scenario{.dyrPset = 0.9, .expectedWarnings = 1},
+                                          Scenario{.dyrPset = 0.8, .expectedWarnings = 0}}) {
+        auto simulation = renewableDyrSimulation();
+        std::vector<std::string> logMessages;
+        simulation->setLogger(
+            [&logMessages](int, const std::string& message) { logMessages.push_back(message); });
+        const auto file = std::filesystem::temp_directory_path() /
+            ("griddyn_wt3p1_alignment_" + std::to_string(simulation->getID()) + ".dyr");
+        {
+            std::ofstream stream(file);
+            ASSERT_TRUE(stream.is_open());
+            stream << "101 'WT3P1' '1' 0.3 150 25 3 30 -4 27 10 " << scenario.dyrPset << " /\n";
+        }
+        EXPECT_NO_THROW(loadDyr(simulation.get(), file.string(), BasicReaderInfo{}));
+        std::filesystem::remove(file);
+        auto* bus = dynamic_cast<GridBus*>(simulation->findByUserID("bus", 101));
+        ASSERT_NE(bus, nullptr);
+        auto* generator = dynamic_cast<RenewableGenerator*>(bus->getGen(0));
+        ASSERT_NE(generator, nullptr);
+        auto* pitch = dynamic_cast<WTPTA1*>(
+            generator->getSubObject("renewable_component",
+                                    static_cast<index_t>(RenewableRole::pitchControl)));
+        ASSERT_NE(pitch, nullptr);
+        const IOdata inputs{1.0, 0.8, 0.8, 1.0, 0.0};
+        IOdata fields;
+        pitch->dynInitializeB(inputs, {}, fields);
+        pitch->dynInitializeB(inputs, {}, fields);
+        EXPECT_DOUBLE_EQ(pitch->get("pset"), 0.8);
+        pitch->timestep(0.1, inputs, cLocalSolverMode);
+        EXPECT_NEAR(pitch->getOutput(0), 0.0, 1e-12);
+        const auto warnings =
+            std::count_if(logMessages.begin(), logMessages.end(), [](const auto& message) {
+                return message.find("WT3P1 Pset") != std::string::npos;
+            });
+        EXPECT_EQ(warnings, scenario.expectedWarnings);
+    }
+}
+
 TEST(RenewableModels, WindTorqueSetsNonunitySteadySpeed)
 {
     RenewableGenerator host;
