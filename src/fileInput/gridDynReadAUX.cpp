@@ -304,9 +304,16 @@ namespace {
                             handleSubdata(subdataName, trimmed, lineNumber);
                         }
                         catch (const std::exception& error) {
-                            throw std::runtime_error(fileName + ':' + std::to_string(lineNumber) +
-                                                     " (" + section.mType + " SUBDATA " +
-                                                     subdataName + "): " + error.what());
+                            std::string message = fileName;
+                            message.push_back(':');
+                            message.append(std::to_string(lineNumber));
+                            message.append(" (");
+                            message.append(section.mType);
+                            message.append(" SUBDATA ");
+                            message.append(subdataName);
+                            message.append("): ");
+                            message.append(error.what());
+                            throw std::runtime_error(std::move(message));
                         }
                     }
                     continue;
@@ -1127,9 +1134,10 @@ namespace {
                 curve.model = 2;
                 curve.coefficients = {multiplier * pending->mFuel * pending->mIoC,
                                       multiplier *
-                                          (pending->mFuel * pending->mIoB + pending->mVariableOm),
+                                          ((pending->mFuel * pending->mIoB) +
+                                           pending->mVariableOm),
                                       multiplier *
-                                          (pending->mFixed + pending->mFuel * pending->mIoA)};
+                                          (pending->mFixed + (pending->mFuel * pending->mIoA))};
             } else if (pending->mModel == "piecewise linear" && !pending->mBids.empty()) {
                 // PowerWorld stores the marginal price from each MW break to
                 // the next. MATPOWER stores total cost at each break instead.
@@ -1138,18 +1146,18 @@ namespace {
                 double cost = pending->mFixed * multiplier;
                 double price = pending->mBids.front().second * multiplier;
                 curve.coefficients = {0.0, cost};
-                for (const auto& [mw, nextPrice] : pending->mBids) {
-                    if (mw < previousMw) {
+                for (const auto& [breakpointMw, nextPrice] : pending->mBids) {
+                    if (breakpointMw < previousMw) {
                         ++invalidBids;
                         return;
                     }
                     // Repeated MW breaks have no width. Keep the last price
                     // as the slope of the segment to their right.
-                    if (mw > previousMw) {
-                        cost += (mw - previousMw) * price;
-                        curve.coefficients.insert(curve.coefficients.end(), {mw, cost});
+                    if (breakpointMw > previousMw) {
+                        cost += (breakpointMw - previousMw) * price;
+                        curve.coefficients.insert(curve.coefficients.end(), {breakpointMw, cost});
                     }
-                    previousMw = mw;
+                    previousMw = breakpointMw;
                     price = nextPrice * multiplier;
                 }
                 const double maximumMw = generator->get("pmax", units::MW);
@@ -1207,15 +1215,16 @@ namespace {
                         "AUX generator BidCurve requires MW and marginal price");
                 }
                 std::size_t used = 0;
-                const double mw = std::stod(values[0], &used);
-                if (used != values[0].size() || !std::isfinite(mw) || mw < 0.0) {
+                const double breakpointMw = std::stod(values[0], &used);
+                if (used != values[0].size() || !std::isfinite(breakpointMw) ||
+                    breakpointMw < 0.0) {
                     throw std::runtime_error("invalid AUX generator BidCurve MW break");
                 }
                 const double price = std::stod(values[1], &used);
                 if (used != values[1].size() || !std::isfinite(price)) {
                     throw std::runtime_error("invalid AUX generator BidCurve marginal price");
                 }
-                pending->mBids.emplace_back(mw, price);
+                pending->mBids.emplace_back(breakpointMw, price);
             });
         finish();
         if (unsupportedCubic + unsupportedExtras + missingBids + unmatchedGenerators +

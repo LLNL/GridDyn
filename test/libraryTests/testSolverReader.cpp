@@ -240,10 +240,8 @@ namespace {
         ASSERT_EQ(metadata.mSubstations.size(), 1);
         const auto& substation = metadata.mSubstations.at(20);
         EXPECT_EQ(substation.mName, "North Yard");
-        ASSERT_TRUE(substation.mLatitude.has_value());
-        ASSERT_TRUE(substation.mLongitude.has_value());
-        EXPECT_DOUBLE_EQ(*substation.mLatitude, 35.1);
-        EXPECT_DOUBLE_EQ(*substation.mLongitude, -118.1);
+        EXPECT_EQ(substation.mLatitude, std::optional<double>{35.1});
+        EXPECT_EQ(substation.mLongitude, std::optional<double>{-118.1});
         ASSERT_EQ(metadata.mSuperAreas.size(), 1);
         EXPECT_EQ(metadata.mSuperAreas.front(), "Western System");
         ASSERT_EQ(metadata.mBalancingAuthorities.size(), 1);
@@ -255,10 +253,8 @@ namespace {
         EXPECT_EQ(firstBus.mOwnerNumber, 7);
         EXPECT_EQ(firstBus.mSubstationNumber, 20);
         EXPECT_EQ(firstBus.mBalancingAuthorityNumber, 9);
-        ASSERT_TRUE(firstBus.mLatitude.has_value());
-        ASSERT_TRUE(firstBus.mLongitude.has_value());
-        EXPECT_DOUBLE_EQ(*firstBus.mLatitude, 35.2);
-        EXPECT_DOUBLE_EQ(*firstBus.mLongitude, -118.2);
+        EXPECT_EQ(firstBus.mLatitude, std::optional<double>{35.2});
+        EXPECT_EQ(firstBus.mLongitude, std::optional<double>{-118.2});
         EXPECT_FALSE(metadata.mBuses.at(102).mLatitude.has_value());
     }
 
