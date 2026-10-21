@@ -313,7 +313,7 @@ namespace {
                             message.append(subdataName);
                             message.append("): ");
                             message.append(error.what());
-                            throw std::runtime_error(std::move(message));
+                            throw std::runtime_error(message);
                         }
                     }
                     continue;
