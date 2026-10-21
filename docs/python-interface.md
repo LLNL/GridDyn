@@ -234,8 +234,10 @@ The result dictionary includes `success`, `status`, `message`, `solver`,
 `objective_value`, iteration count, feasibility/stationarity diagnostics, and
 whether the dispatch was applied. This entry point handles DC OPF with
 polynomial costs through quadratic order. AC OPF and integer commitment are
-outside its current scope. Piecewise-linear curves are retained and exported;
-the current OPF solvers return an unsupported status for them.
+outside its current scope. Convex piecewise-linear generator costs are also
+supported by the native DC OPF; nonconvex piecewise curves require HiGHS because
+their formulation contains binary segment selectors. A nonzero cubic cost term
+remains unsupported by this DC OPF.
 
 ## Capability notes
 

@@ -17,6 +17,9 @@
 #include "griddyn/loads/Svd.h"
 #include "griddyn/loads/ZipLoad.h"
 #include "griddyn/primary/AcBus.h"
+#ifdef GRIDDYN_ENABLE_OPTIMIZATION_LIBRARY
+#    include "optimization/gridDynOpt.h"
+#endif
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -27,6 +30,7 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -250,10 +254,12 @@ namespace {
 
     using AuxRowHandler = std::function<void(const AuxRow&)>;
     using AuxSectionFilter = std::function<bool(std::string_view)>;
+    using AuxSubdataHandler = std::function<void(std::string_view, std::string_view, size_t)>;
 
     void scanAuxFile(const std::string& fileName,
                      const AuxSectionFilter& wantsSection,
-                     const AuxRowHandler& handleRow)
+                     const AuxRowHandler& handleRow,
+                     const AuxSubdataHandler& handleSubdata = {})
     {
         std::ifstream input(fileName);
         if (!input) {
@@ -265,6 +271,7 @@ namespace {
         bool inHeader = false;
         bool inBody = false;
         bool inSubdata = false;
+        std::string subdataName;
         bool active = false;
         size_t lineNumber = 0;
         while (std::getline(input, line)) {
@@ -289,14 +296,33 @@ namespace {
                 header += trimmed;
             } else {
                 if (inSubdata) {
-                    // Embedded SUBDATA belongs to its parent PowerWorld object,
-                    // not to the tabular network row that precedes it.
                     if (lowerAux(trimmed).starts_with("</subdata")) {
                         inSubdata = false;
+                        subdataName.clear();
+                    } else if (active && handleSubdata != nullptr) {
+                        try {
+                            handleSubdata(subdataName, trimmed, lineNumber);
+                        }
+                        catch (const std::exception& error) {
+                            throw std::runtime_error(fileName + ':' +
+                                                     std::to_string(lineNumber) + " (" +
+                                                     section.mType + " SUBDATA " + subdataName +
+                                                     "): " + error.what());
+                        }
                     }
                     continue;
                 }
                 if (lowerAux(trimmed).starts_with("<subdata")) {
+                    // SUBDATA is attached to the preceding table row. Most
+                    // readers ignore it; the OPF pass consumes Gen BidCurve.
+                    const auto end = trimmed.find('>');
+                    if (end == std::string::npos) {
+                        throw std::runtime_error(fileName + ':' + std::to_string(lineNumber) +
+                                                 ": unterminated AUX SUBDATA tag");
+                    }
+                    subdataName = lowerAux(trimAux(std::string_view(trimmed).substr(
+                        std::string_view("<subdata").size(),
+                        end - std::string_view("<subdata").size())));
                     inSubdata = !lowerAux(trimmed).contains("</subdata");
                     continue;
                 }
@@ -337,7 +363,7 @@ namespace {
                 header.clear();
             }
         }
-        if (inHeader || inBody) {
+        if (inHeader || inBody || inSubdata) {
             throw std::runtime_error(fileName + ": unterminated AUX section");
         }
     }
@@ -518,7 +544,7 @@ namespace {
         const auto name = bus->getName() + "_Gen_" + identifier;
         auto* generator = dynamic_cast<Generator*>(bus->find(name));
         if (generator == nullptr) {
-            if (!row.has({"genmwsetpoint", "mwsetpoint", "genmwmax", "mwmax"})) {
+            if (!row.has({"genmwsetpoint", "genmw", "mwsetpoint", "genmwmax", "mwmax"})) {
                 return;  // An AUX supplement may only amend an existing generator.
             }
             generator = network.mOptions.checkFlag(ASSUME_POWERFLOW_ONLY) ?
@@ -536,11 +562,11 @@ namespace {
         if (row.has({"genstatus", "status"}) && !auxClosed(row.value({"genstatus", "status"}))) {
             generator->disable();
         }
-        if (row.has({"genmwsetpoint", "mwsetpoint"})) {
-            generator->set("p", row.number({"genmwsetpoint", "mwsetpoint"}), units::MW);
+        if (row.has({"genmwsetpoint", "genmw", "mwsetpoint"})) {
+            generator->set("p", row.number({"genmwsetpoint", "genmw", "mwsetpoint"}), units::MW);
         }
-        if (row.has({"genmvrsetpoint", "mvarsetpoint"})) {
-            generator->set("q", row.number({"genmvrsetpoint", "mvarsetpoint"}), units::MVAR);
+        if (row.has({"genmvrsetpoint", "genmvr", "mvarsetpoint"})) {
+            generator->set("q", row.number({"genmvrsetpoint", "genmvr", "mvarsetpoint"}), units::MVAR);
         }
         if (row.has({"genmwmax", "mwmax"})) {
             generator->set("pmax", row.number({"genmwmax", "mwmax"}), units::MW);
@@ -1040,6 +1066,171 @@ namespace {
         }
     }
 
+#ifdef GRIDDYN_ENABLE_OPTIMIZATION_LIBRARY
+    struct AuxGeneratorCost {
+        int mBusNumber = 0;
+        std::string mGeneratorId;
+        std::string mModel;
+        double mFixed = 0.0;
+        double mFuel = 0.0;
+        double mVariableOm = 0.0;
+        double mIoA = 0.0;
+        double mIoB = 0.0;
+        double mIoC = 0.0;
+        double mIoD = 0.0;
+        double mMultiplier = 1.0;
+        bool mHasUnsupportedExtras = false;
+        std::vector<std::pair<double, double>> mBids;
+    };
+
+    void loadAuxOpfCosts(AuxNetwork& network,
+                         const std::string& fileName,
+                         GridDynOptimization& optimization)
+    {
+        std::optional<AuxGeneratorCost> pending;
+        size_t unsupportedCubic = 0;
+        size_t unsupportedExtras = 0;
+        size_t missingBids = 0;
+        size_t unmatchedGenerators = 0;
+        size_t invalidBids = 0;
+        const auto finish = [&]() {
+            if (!pending.has_value() || (pending->mModel != "cubic" &&
+                                         pending->mModel != "piecewise linear")) {
+                return;
+            }
+            if (pending->mHasUnsupportedExtras) {
+                ++unsupportedExtras;
+                return;
+            }
+            auto* bus = findAuxBus(network, pending->mBusNumber);
+            if (bus == nullptr) {
+                ++unmatchedGenerators;
+                return;
+            }
+            auto* generator = dynamic_cast<Generator*>(
+                bus->find(bus->getName() + "_Gen_" + pending->mGeneratorId));
+            if (generator == nullptr) {
+                ++unmatchedGenerators;
+                return;
+            }
+            MatPowerCostCurve curve;
+            const auto multiplier = pending->mMultiplier;
+            if (pending->mModel == "cubic") {
+                // GridDyn's DC OPF evaluates costs through quadratic order.
+                // Never silently discard a nonzero cubic term.
+                if (pending->mIoD != 0.0) {
+                    ++unsupportedCubic;
+                    return;
+                }
+                curve.model = 2;
+                curve.coefficients = {
+                    multiplier * pending->mFuel * pending->mIoC,
+                    multiplier * (pending->mFuel * pending->mIoB + pending->mVariableOm),
+                    multiplier * (pending->mFixed + pending->mFuel * pending->mIoA)};
+            } else if (pending->mModel == "piecewise linear" && !pending->mBids.empty()) {
+                // PowerWorld stores the marginal price from each MW break to
+                // the next. MATPOWER stores total cost at each break instead.
+                curve.model = 1;
+                double previousMw = 0.0;
+                double cost = pending->mFixed * multiplier;
+                double price = pending->mBids.front().second * multiplier;
+                curve.coefficients = {0.0, cost};
+                for (const auto& [mw, nextPrice] : pending->mBids) {
+                    if (mw < previousMw) {
+                        ++invalidBids;
+                        return;
+                    }
+                    // Repeated MW breaks have no width. Keep the last price
+                    // as the slope of the segment to their right.
+                    if (mw > previousMw) {
+                        cost += (mw - previousMw) * price;
+                        curve.coefficients.insert(curve.coefficients.end(), {mw, cost});
+                    }
+                    previousMw = mw;
+                    price = nextPrice * multiplier;
+                }
+                const double maximumMw = generator->get("pmax", units::MW);
+                if (maximumMw > previousMw) {
+                    cost += (maximumMw - previousMw) * price;
+                    curve.coefficients.insert(curve.coefficients.end(), {maximumMw, cost});
+                }
+            } else {
+                ++missingBids;
+                return;
+            }
+            if (curve.valid()) {
+                optimization.setGeneratorCostCurve(generator, curve);
+            } else {
+                ++invalidBids;
+            }
+        };
+        scanAuxFile(
+            fileName,
+            [](std::string_view type) { return type == "gen"; },
+            [&](const AuxRow& row) {
+                finish();
+                pending.reset();
+                if (!row.has({"gencostmodel"})) {
+                    return;
+                }
+                AuxGeneratorCost cost;
+                cost.mBusNumber = row.integer({"busnum"});
+                cost.mGeneratorId = trimAux(row.value({"genid"}));
+                if (cost.mGeneratorId.empty()) {
+                    cost.mGeneratorId = "1";
+                }
+                cost.mModel = lowerAux(trimAux(row.value({"gencostmodel"})));
+                cost.mFixed = row.number({"genfixedcost"});
+                cost.mFuel = row.number({"genfuelcost"});
+                cost.mVariableOm = row.number({"genvariableom"});
+                cost.mIoA = row.number({"genioa"});
+                cost.mIoB = row.number({"geniob"});
+                cost.mIoC = row.number({"genioc"});
+                cost.mIoD = row.number({"geniod"});
+                cost.mMultiplier = row.number({"gencostmultiplier"}, 1.0);
+                // These PowerWorld adjustments need a separate, verified
+                // mapping; omitting them would change the OPF objective.
+                cost.mHasUnsupportedExtras =
+                    row.number({"genextrafuelcost"}) != 0.0 ||
+                    row.number({"genextraomcost"}) != 0.0 ||
+                    row.number({"gencostshift"}) != 0.0;
+                pending = std::move(cost);
+            },
+            [&](std::string_view name, std::string_view line, size_t /*lineNumber*/) {
+                if (!pending.has_value() || name != "bidcurve") {
+                    return;
+                }
+                const auto values = tokenizeAuxRow(line);
+                if (values.size() != 2U) {
+                    throw std::runtime_error("AUX generator BidCurve requires MW and marginal price");
+                }
+                std::size_t used = 0;
+                const double mw = std::stod(values[0], &used);
+                if (used != values[0].size() || !std::isfinite(mw) || mw < 0.0) {
+                    throw std::runtime_error("invalid AUX generator BidCurve MW break");
+                }
+                const double price = std::stod(values[1], &used);
+                if (used != values[1].size() || !std::isfinite(price)) {
+                    throw std::runtime_error("invalid AUX generator BidCurve marginal price");
+                }
+                pending->mBids.emplace_back(mw, price);
+            });
+        finish();
+        if (unsupportedCubic + unsupportedExtras + missingBids + unmatchedGenerators +
+                invalidBids != 0U) {
+            optimization.log(
+                &optimization,
+                PrintLevel::WARNING,
+                "AUX OPF costs skipped: " + std::to_string(unsupportedCubic) +
+                    " nonzero cubic terms, " + std::to_string(unsupportedExtras) +
+                    " unmodeled cost adjustments, " + std::to_string(missingBids) +
+                    " missing BidCurve data, " + std::to_string(unmatchedGenerators) +
+                    " unmatched generators, " + std::to_string(invalidBids) +
+                    " invalid curves");
+        }
+    }
+#endif
+
 }  // namespace
 
 void loadAux(CoreObject* parentObject,
@@ -1062,8 +1253,9 @@ void loadAux(CoreObject* parentObject,
     if (!network.mExistingNetwork) {
         GridSimulation::resetObjectCounters();
     }
-    // Stream the file three times rather than buffering it. Areas and base
-    // power must precede buses, which must precede equipment references.
+    // Stream the network in three passes rather than buffering it. Areas and
+    // base power precede buses and equipment; optimization costs need a fourth
+    // pass after their generator objects exist.
     scanAuxFile(
         fileName,
         [](std::string_view type) {
@@ -1082,7 +1274,9 @@ void loadAux(CoreObject* parentObject,
         },
         [&](const AuxRow& row) {
             if (row.mSection.mType == "gen") {
-                readAuxGenerator(network, row);
+                if (row.has({"genmwsetpoint", "genmw", "genmwmax", "genmwmin", "genstatus"})) {
+                    readAuxGenerator(network, row);
+                }
             } else if (row.mSection.mType == "load") {
                 readAuxLoad(network, row);
             } else if (row.mSection.mType == "shunt") {
@@ -1096,6 +1290,12 @@ void loadAux(CoreObject* parentObject,
             }
         });
     finishAuxGeneratorControls(network);
+#ifdef GRIDDYN_ENABLE_OPTIMIZATION_LIBRARY
+    auto* optimization = dynamic_cast<GridDynOptimization*>(parentObject->getRoot());
+    if (optimization != nullptr) {
+        loadAuxOpfCosts(network, fileName, *optimization);
+    }
+#endif
 }
 
 AuxCaseMetadata readAuxCaseMetadata(const std::string& fileName)

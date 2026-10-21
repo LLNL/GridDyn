@@ -938,6 +938,100 @@ TEST(OptimizationDcFormulationTests, NativeOptimizerMaterializesConvexPiecewiseL
               static_cast<std::size_t>(root->constraintSize(mode)));
 }
 
+TEST(OptimizationDcFormulationTests, AuxImportsCubicAndMarginalBidCosts)
+{
+    auto gds = std::make_unique<griddyn::GridDynOptimization>();
+    const auto filePath = std::filesystem::path{GRIDDYN_TEST_DIRECTORY} / "input_tests" /
+        "aux_opf_costs.aux";
+    griddyn::loadFile(gds.get(), filePath.string());
+
+    auto* bus1 = dynamic_cast<griddyn::GridBus*>(gds->findByUserID("bus", 1));
+    auto* bus2 = dynamic_cast<griddyn::GridBus*>(gds->findByUserID("bus", 2));
+    ASSERT_NE(bus1, nullptr);
+    ASSERT_NE(bus2, nullptr);
+    auto* generator1 = bus1->getGen(0);
+    auto* generator2 = bus2->getGen(0);
+    ASSERT_NE(generator1, nullptr);
+    ASSERT_NE(generator2, nullptr);
+
+    const auto* cubic = gds->matPowerCostCurve(generator1);
+    ASSERT_NE(cubic, nullptr);
+    EXPECT_EQ(cubic->model, 2);
+    EXPECT_EQ(cubic->coefficients, (std::vector<double>{0.2, 10.0, 7.0}));
+
+    const auto* bid = gds->matPowerCostCurve(generator2);
+    ASSERT_NE(bid, nullptr);
+    EXPECT_EQ(bid->model, 1);
+    EXPECT_EQ(bid->coefficients,
+              (std::vector<double>{0.0, 5.0, 20.0, 205.0, 40.0, 445.0, 60.0, 725.0}));
+
+    const auto mode = makeDcMode(griddyn::LinearityMode::QUADRATIC);
+    gds->initializeOptimizationModel(mode);
+    auto* root = gds->getOptimizationObject();
+    ASSERT_NE(root, nullptr);
+    griddyn::NativeOptimizer optimizer(gds.get(), mode);
+    ASSERT_EQ(optimizer.allocate(root->objSize(mode), root->constraintSize(mode)),
+              FUNCTION_EXECUTION_SUCCESS);
+    optimizer.initialize(0.0);
+    ASSERT_EQ(optimizer.prepareProblemData(0.0), FUNCTION_EXECUTION_SUCCESS)
+        << optimizer.getLastErrorString();
+#ifdef GRIDDYN_ENABLE_HIGHS
+    griddyn::HighsOptimizer highs(gds.get(), mode);
+    ASSERT_EQ(highs.allocate(root->objSize(mode), root->constraintSize(mode)),
+              FUNCTION_EXECUTION_SUCCESS);
+    highs.initialize(0.0);
+    double returnTime = -1.0;
+    ASSERT_EQ(highs.solve(0.0, returnTime), FUNCTION_EXECUTION_SUCCESS)
+        << highs.lastSolveResult().message;
+    EXPECT_EQ(highs.lastSolveResult().status, griddyn::NativeSolveStatus::OPTIMAL);
+#endif
+}
+
+TEST(OptimizationDcFormulationTests, AuxActivsg2000CostWhenCaseIsAvailable)
+{
+    const char* caseFile = std::getenv("GRIDDYN_ACTIVSG2000_AUX");
+    if (caseFile == nullptr || *caseFile == '\0') {
+        GTEST_SKIP() << "Set GRIDDYN_ACTIVSG2000_AUX to run the full-case cost check";
+    }
+    auto gds = std::make_unique<griddyn::GridDynOptimization>();
+    griddyn::loadFile(gds.get(), caseFile);
+    auto* bus = dynamic_cast<griddyn::GridBus*>(gds->findByUserID("bus", 2057));
+    ASSERT_NE(bus, nullptr);
+    auto* generator = bus->getGen(0);
+    ASSERT_NE(generator, nullptr);
+    const auto* curve = gds->matPowerCostCurve(generator);
+    ASSERT_NE(curve, nullptr);
+    EXPECT_EQ(curve->model, 2);
+    ASSERT_EQ(curve->coefficients.size(), 3U);
+    EXPECT_GT(curve->coefficients[0], 0.0);
+    EXPECT_GT(curve->coefficients[1], 0.0);
+}
+
+TEST(OptimizationDcFormulationTests, AuxTexas7kBidWhenCaseIsAvailable)
+{
+    const char* caseFile = std::getenv("GRIDDYN_TEXAS7K_AUX");
+    if (caseFile == nullptr || *caseFile == '\0') {
+        GTEST_SKIP() << "Set GRIDDYN_TEXAS7K_AUX to run the full-case bid check";
+    }
+    auto gds = std::make_unique<griddyn::GridDynOptimization>();
+    griddyn::loadFile(gds.get(), caseFile);
+    auto* bus = dynamic_cast<griddyn::GridBus*>(gds->findByUserID("bus", 111180));
+    ASSERT_NE(bus, nullptr);
+    auto* generator = bus->getGen(0);
+    ASSERT_NE(generator, nullptr);
+    const auto* curve = gds->matPowerCostCurve(generator);
+    ASSERT_NE(curve, nullptr);
+    EXPECT_EQ(curve->model, 1);
+    EXPECT_GE(curve->coefficients.size(), 4U);
+    if (curve->coefficients.size() >= 4U) {
+        EXPECT_NEAR(curve->coefficients[2], 94.0, 1e-8);
+        EXPECT_NEAR((curve->coefficients[3] - curve->coefficients[1]) /
+                        (curve->coefficients[2] - curve->coefficients[0]),
+                    45.83,
+                    1e-8);
+    }
+}
+
 #ifdef GRIDDYN_ENABLE_HIGHS
 TEST(OptimizationDcFormulationTests, HighsOptimizerSolvesNonconvexPiecewiseLinearCost)
 {
