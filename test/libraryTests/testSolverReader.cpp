@@ -231,8 +231,8 @@ namespace {
 
     TEST_F(SolverReaderTests, AuxCaseMetadataKeepsNamedReferencesAndBusAssignments)
     {
-        const auto metadata = readAuxCaseMetadata(
-            std::string{inputTestDirectory} + "aux_case_metadata.aux");
+        const auto metadata =
+            readAuxCaseMetadata(std::string{inputTestDirectory} + "aux_case_metadata.aux");
         ASSERT_EQ(metadata.mOwners.size(), 1);
         EXPECT_EQ(metadata.mOwners.at(7).mName, "First Owner");
         ASSERT_EQ(metadata.mZones.size(), 2);

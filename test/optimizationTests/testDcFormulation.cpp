@@ -941,8 +941,8 @@ TEST(OptimizationDcFormulationTests, NativeOptimizerMaterializesConvexPiecewiseL
 TEST(OptimizationDcFormulationTests, AuxImportsCubicAndMarginalBidCosts)
 {
     auto gds = std::make_unique<griddyn::GridDynOptimization>();
-    const auto filePath = std::filesystem::path{GRIDDYN_TEST_DIRECTORY} / "input_tests" /
-        "aux_opf_costs.aux";
+    const auto filePath =
+        std::filesystem::path{GRIDDYN_TEST_DIRECTORY} / "input_tests" / "aux_opf_costs.aux";
     griddyn::loadFile(gds.get(), filePath.string());
 
     auto* bus1 = dynamic_cast<griddyn::GridBus*>(gds->findByUserID("bus", 1));

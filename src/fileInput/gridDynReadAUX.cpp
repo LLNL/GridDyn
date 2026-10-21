@@ -146,8 +146,8 @@ namespace {
         }
     };
 
-    [[nodiscard]] std::optional<double> auxOptionalNumber(
-        const AuxRow& row, std::initializer_list<std::string_view> names)
+    [[nodiscard]] std::optional<double>
+        auxOptionalNumber(const AuxRow& row, std::initializer_list<std::string_view> names)
     {
         const auto value = row.number(names, std::numeric_limits<double>::quiet_NaN());
         return std::isfinite(value) ? std::optional<double>{value} : std::nullopt;
@@ -304,10 +304,9 @@ namespace {
                             handleSubdata(subdataName, trimmed, lineNumber);
                         }
                         catch (const std::exception& error) {
-                            throw std::runtime_error(fileName + ':' +
-                                                     std::to_string(lineNumber) + " (" +
-                                                     section.mType + " SUBDATA " + subdataName +
-                                                     "): " + error.what());
+                            throw std::runtime_error(fileName + ':' + std::to_string(lineNumber) +
+                                                     " (" + section.mType + " SUBDATA " +
+                                                     subdataName + "): " + error.what());
                         }
                     }
                     continue;
@@ -320,9 +319,10 @@ namespace {
                         throw std::runtime_error(fileName + ':' + std::to_string(lineNumber) +
                                                  ": unterminated AUX SUBDATA tag");
                     }
-                    subdataName = lowerAux(trimAux(std::string_view(trimmed).substr(
-                        std::string_view("<subdata").size(),
-                        end - std::string_view("<subdata").size())));
+                    subdataName = lowerAux(trimAux(
+                        std::string_view(trimmed).substr(std::string_view("<subdata").size(),
+                                                         end -
+                                                             std::string_view("<subdata").size())));
                     inSubdata = !lowerAux(trimmed).contains("</subdata");
                     continue;
                 }
@@ -566,7 +566,9 @@ namespace {
             generator->set("p", row.number({"genmwsetpoint", "genmw", "mwsetpoint"}), units::MW);
         }
         if (row.has({"genmvrsetpoint", "genmvr", "mvarsetpoint"})) {
-            generator->set("q", row.number({"genmvrsetpoint", "genmvr", "mvarsetpoint"}), units::MVAR);
+            generator->set("q",
+                           row.number({"genmvrsetpoint", "genmvr", "mvarsetpoint"}),
+                           units::MVAR);
         }
         if (row.has({"genmwmax", "mwmax"})) {
             generator->set("pmax", row.number({"genmwmax", "mwmax"}), units::MW);
@@ -1094,8 +1096,8 @@ namespace {
         size_t unmatchedGenerators = 0;
         size_t invalidBids = 0;
         const auto finish = [&]() {
-            if (!pending.has_value() || (pending->mModel != "cubic" &&
-                                         pending->mModel != "piecewise linear")) {
+            if (!pending.has_value() ||
+                (pending->mModel != "cubic" && pending->mModel != "piecewise linear")) {
                 return;
             }
             if (pending->mHasUnsupportedExtras) {
@@ -1123,10 +1125,11 @@ namespace {
                     return;
                 }
                 curve.model = 2;
-                curve.coefficients = {
-                    multiplier * pending->mFuel * pending->mIoC,
-                    multiplier * (pending->mFuel * pending->mIoB + pending->mVariableOm),
-                    multiplier * (pending->mFixed + pending->mFuel * pending->mIoA)};
+                curve.coefficients = {multiplier * pending->mFuel * pending->mIoC,
+                                      multiplier *
+                                          (pending->mFuel * pending->mIoB + pending->mVariableOm),
+                                      multiplier *
+                                          (pending->mFixed + pending->mFuel * pending->mIoA)};
             } else if (pending->mModel == "piecewise linear" && !pending->mBids.empty()) {
                 // PowerWorld stores the marginal price from each MW break to
                 // the next. MATPOWER stores total cost at each break instead.
@@ -1190,10 +1193,8 @@ namespace {
                 cost.mMultiplier = row.number({"gencostmultiplier"}, 1.0);
                 // These PowerWorld adjustments need a separate, verified
                 // mapping; omitting them would change the OPF objective.
-                cost.mHasUnsupportedExtras =
-                    row.number({"genextrafuelcost"}) != 0.0 ||
-                    row.number({"genextraomcost"}) != 0.0 ||
-                    row.number({"gencostshift"}) != 0.0;
+                cost.mHasUnsupportedExtras = row.number({"genextrafuelcost"}) != 0.0 ||
+                    row.number({"genextraomcost"}) != 0.0 || row.number({"gencostshift"}) != 0.0;
                 pending = std::move(cost);
             },
             [&](std::string_view name, std::string_view line, size_t /*lineNumber*/) {
@@ -1202,7 +1203,8 @@ namespace {
                 }
                 const auto values = tokenizeAuxRow(line);
                 if (values.size() != 2U) {
-                    throw std::runtime_error("AUX generator BidCurve requires MW and marginal price");
+                    throw std::runtime_error(
+                        "AUX generator BidCurve requires MW and marginal price");
                 }
                 std::size_t used = 0;
                 const double mw = std::stod(values[0], &used);
@@ -1217,16 +1219,16 @@ namespace {
             });
         finish();
         if (unsupportedCubic + unsupportedExtras + missingBids + unmatchedGenerators +
-                invalidBids != 0U) {
-            optimization.log(
-                &optimization,
-                PrintLevel::WARNING,
-                "AUX OPF costs skipped: " + std::to_string(unsupportedCubic) +
-                    " nonzero cubic terms, " + std::to_string(unsupportedExtras) +
-                    " unmodeled cost adjustments, " + std::to_string(missingBids) +
-                    " missing BidCurve data, " + std::to_string(unmatchedGenerators) +
-                    " unmatched generators, " + std::to_string(invalidBids) +
-                    " invalid curves");
+                invalidBids !=
+            0U) {
+            optimization.log(&optimization,
+                             PrintLevel::WARNING,
+                             "AUX OPF costs skipped: " + std::to_string(unsupportedCubic) +
+                                 " nonzero cubic terms, " + std::to_string(unsupportedExtras) +
+                                 " unmodeled cost adjustments, " + std::to_string(missingBids) +
+                                 " missing BidCurve data, " + std::to_string(unmatchedGenerators) +
+                                 " unmatched generators, " + std::to_string(invalidBids) +
+                                 " invalid curves");
         }
     }
 #endif
@@ -1352,14 +1354,13 @@ AuxCaseMetadata readAuxCaseMetadata(const std::string& fileName)
                 if (auto latitude = auxOptionalNumber(row, {"latitude"}); latitude.has_value()) {
                     substation.mLatitude = latitude;
                 }
-                if (auto longitude = auxOptionalNumber(row, {"longitude"});
-                    longitude.has_value()) {
+                if (auto longitude = auxOptionalNumber(row, {"longitude"}); longitude.has_value()) {
                     substation.mLongitude = longitude;
                 }
             } else if (type == "superarea") {
                 auto name = trimAux(row.value({"saname"}));
-                if (!name.empty() && std::find(metadata.mSuperAreas.begin(),
-                                               metadata.mSuperAreas.end(), name) ==
+                if (!name.empty() &&
+                    std::find(metadata.mSuperAreas.begin(), metadata.mSuperAreas.end(), name) ==
                         metadata.mSuperAreas.end()) {
                     metadata.mSuperAreas.push_back(std::move(name));
                 }
