@@ -1134,8 +1134,7 @@ namespace {
                 curve.model = 2;
                 curve.coefficients = {multiplier * pending->mFuel * pending->mIoC,
                                       multiplier *
-                                          ((pending->mFuel * pending->mIoB) +
-                                           pending->mVariableOm),
+                                          ((pending->mFuel * pending->mIoB) + pending->mVariableOm),
                                       multiplier *
                                           (pending->mFixed + (pending->mFuel * pending->mIoA))};
             } else if (pending->mModel == "piecewise linear" && !pending->mBids.empty()) {
