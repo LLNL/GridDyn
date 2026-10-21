@@ -142,6 +142,13 @@ namespace {
         }
     };
 
+    [[nodiscard]] std::optional<double> auxOptionalNumber(
+        const AuxRow& row, std::initializer_list<std::string_view> names)
+    {
+        const auto value = row.number(names, std::numeric_limits<double>::quiet_NaN());
+        return std::isfinite(value) ? std::optional<double>{value} : std::nullopt;
+    }
+
     // AUX has both DATA (Object, [columns], ...) and concise Object (columns) headers.
     AuxSection parseAuxHeader(std::string_view header)
     {
@@ -1089,6 +1096,108 @@ void loadAux(CoreObject* parentObject,
             }
         });
     finishAuxGeneratorControls(network);
+}
+
+AuxCaseMetadata readAuxCaseMetadata(const std::string& fileName)
+{
+    AuxCaseMetadata metadata;
+    scanAuxFile(
+        fileName,
+        [](std::string_view type) {
+            return type == "owner" || type == "zone" || type == "substation" ||
+                type == "superarea" || type == "balancingauthority" || type == "bus";
+        },
+        [&](const AuxRow& row) {
+            const auto& type = row.mSection.mType;
+            if (type == "owner") {
+                const int number = row.integer({"ownernum"});
+                if (number <= 0) {
+                    return;
+                }
+                auto& owner = metadata.mOwners[number];
+                owner.mNumber = number;
+                if (auto name = trimAux(row.value({"ownername"})); !name.empty()) {
+                    owner.mName = std::move(name);
+                }
+            } else if (type == "zone") {
+                const int number = row.integer({"zonenum"});
+                if (number <= 0) {
+                    return;
+                }
+                auto& zone = metadata.mZones[number];
+                zone.mNumber = number;
+                if (auto name = trimAux(row.value({"zonename"})); !name.empty()) {
+                    zone.mName = std::move(name);
+                }
+            } else if (type == "balancingauthority") {
+                const int number = row.integer({"banumber"});
+                if (number <= 0) {
+                    return;
+                }
+                auto& authority = metadata.mBalancingAuthorities[number];
+                authority.mNumber = number;
+                if (auto name = trimAux(row.value({"baname"})); !name.empty()) {
+                    authority.mName = std::move(name);
+                }
+            } else if (type == "substation") {
+                const int number = row.integer({"subnum"});
+                if (number <= 0) {
+                    return;
+                }
+                auto& substation = metadata.mSubstations[number];
+                substation.mNumber = number;
+                if (auto name = trimAux(row.value({"subname"})); !name.empty()) {
+                    substation.mName = std::move(name);
+                }
+                if (auto latitude = auxOptionalNumber(row, {"latitude"}); latitude.has_value()) {
+                    substation.mLatitude = latitude;
+                }
+                if (auto longitude = auxOptionalNumber(row, {"longitude"});
+                    longitude.has_value()) {
+                    substation.mLongitude = longitude;
+                }
+            } else if (type == "superarea") {
+                auto name = trimAux(row.value({"saname"}));
+                if (!name.empty() && std::find(metadata.mSuperAreas.begin(),
+                                               metadata.mSuperAreas.end(), name) ==
+                        metadata.mSuperAreas.end()) {
+                    metadata.mSuperAreas.push_back(std::move(name));
+                }
+            } else if (type == "bus") {
+                const int number = row.integer({"busnum"});
+                if (number <= 0) {
+                    return;
+                }
+                auto& bus = metadata.mBuses[number];
+                bus.mBusNumber = number;
+                // A later Bus section may supply only a few fields. Retain
+                // assignments obtained from earlier sections of the same file.
+                if (row.has({"areanum"})) {
+                    bus.mAreaNumber = row.integer({"areanum"});
+                }
+                if (row.has({"zonenum"})) {
+                    bus.mZoneNumber = row.integer({"zonenum"});
+                }
+                if (row.has({"ownernum"})) {
+                    bus.mOwnerNumber = row.integer({"ownernum"});
+                }
+                if (row.has({"subnum"})) {
+                    bus.mSubstationNumber = row.integer({"subnum"});
+                }
+                if (row.has({"banumber"})) {
+                    bus.mBalancingAuthorityNumber = row.integer({"banumber"});
+                }
+                if (auto latitude = auxOptionalNumber(row, {"latitude:1", "latitude"});
+                    latitude.has_value()) {
+                    bus.mLatitude = latitude;
+                }
+                if (auto longitude = auxOptionalNumber(row, {"longitude:1", "longitude"});
+                    longitude.has_value()) {
+                    bus.mLongitude = longitude;
+                }
+            }
+        });
+    return metadata;
 }
 
 }  // namespace griddyn

@@ -5,6 +5,7 @@
  */
 
 #include "../gtestHelper.h"
+#include "fileInput/fileInput.h"
 #include "fileInput/readerHelper.h"
 #include "griddyn/Generator.h"
 #include "griddyn/GridArea.h"
@@ -228,6 +229,39 @@ namespace {
         EXPECT_EQ(gds->getInt("totallinkcount"), 2);
     }
 
+    TEST_F(SolverReaderTests, AuxCaseMetadataKeepsNamedReferencesAndBusAssignments)
+    {
+        const auto metadata = readAuxCaseMetadata(
+            std::string{inputTestDirectory} + "aux_case_metadata.aux");
+        ASSERT_EQ(metadata.mOwners.size(), 1);
+        EXPECT_EQ(metadata.mOwners.at(7).mName, "First Owner");
+        ASSERT_EQ(metadata.mZones.size(), 2);
+        EXPECT_EQ(metadata.mZones.at(4).mName, "Inland");
+        ASSERT_EQ(metadata.mSubstations.size(), 1);
+        const auto& substation = metadata.mSubstations.at(20);
+        EXPECT_EQ(substation.mName, "North Yard");
+        ASSERT_TRUE(substation.mLatitude.has_value());
+        ASSERT_TRUE(substation.mLongitude.has_value());
+        EXPECT_DOUBLE_EQ(*substation.mLatitude, 35.1);
+        EXPECT_DOUBLE_EQ(*substation.mLongitude, -118.1);
+        ASSERT_EQ(metadata.mSuperAreas.size(), 1);
+        EXPECT_EQ(metadata.mSuperAreas.front(), "Western System");
+        ASSERT_EQ(metadata.mBalancingAuthorities.size(), 1);
+        EXPECT_EQ(metadata.mBalancingAuthorities.at(9).mName, "Test BA");
+        ASSERT_EQ(metadata.mBuses.size(), 2);
+        const auto& firstBus = metadata.mBuses.at(101);
+        EXPECT_EQ(firstBus.mAreaNumber, 5);
+        EXPECT_EQ(firstBus.mZoneNumber, 4);
+        EXPECT_EQ(firstBus.mOwnerNumber, 7);
+        EXPECT_EQ(firstBus.mSubstationNumber, 20);
+        EXPECT_EQ(firstBus.mBalancingAuthorityNumber, 9);
+        ASSERT_TRUE(firstBus.mLatitude.has_value());
+        ASSERT_TRUE(firstBus.mLongitude.has_value());
+        EXPECT_DOUBLE_EQ(*firstBus.mLatitude, 35.2);
+        EXPECT_DOUBLE_EQ(*firstBus.mLongitude, -118.2);
+        EXPECT_FALSE(metadata.mBuses.at(102).mLatitude.has_value());
+    }
+
     TEST_F(SolverReaderTests, AuxRemoteGeneratorRegulation)
     {
         gds = std::make_unique<GridDynSimulation>();
@@ -318,6 +352,23 @@ namespace {
         ASSERT_EQ(gds->getInt("totallinkcount"), 12706);
         ASSERT_EQ(gds->powerflow(), 0);
         EXPECT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::POWERFLOW_COMPLETE);
+    }
+
+    TEST_F(SolverReaderTests, AuxActivsg10kMetadataWhenCaseIsAvailable)
+    {
+        const char* path = std::getenv("GRIDDYN_ACTIVSG10K_AUX");
+        if (path == nullptr || *path == '\0') {
+            GTEST_SKIP() << "Set GRIDDYN_ACTIVSG10K_AUX to run the full-case metadata regression";
+        }
+        const auto metadata = readAuxCaseMetadata(path);
+        EXPECT_EQ(metadata.mBuses.size(), 10000);
+        EXPECT_FALSE(metadata.mOwners.empty());
+        EXPECT_FALSE(metadata.mZones.empty());
+        EXPECT_FALSE(metadata.mSubstations.empty());
+        const auto& firstBus = metadata.mBuses.at(10001);
+        EXPECT_EQ(firstBus.mSubstationNumber, 10000);
+        ASSERT_TRUE(firstBus.mLatitude.has_value());
+        ASSERT_TRUE(firstBus.mLongitude.has_value());
     }
 }  // namespace
 }  // namespace griddyn
