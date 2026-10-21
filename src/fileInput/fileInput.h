@@ -12,7 +12,10 @@ define some functions and operations for configuring file reader operations and 
 #include "../griddyn/gridDynDefinitions.hpp"
 #include "ReaderInfo.h"
 #include <memory>
+#include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace griddyn {
 class Event;
@@ -113,6 +116,44 @@ void loadRaw(CoreObject* parentObject,
 void loadAux(CoreObject* parentObject,
              const std::string& fileName,
              const BasicReaderInfo& readerOptions = defInfo);
+
+/** Named PowerWorld object whose numeric ID can be referenced by other AUX rows. */
+struct AuxNamedRecord {
+    int mNumber = 0;
+    std::string mName;
+};
+
+struct AuxSubstationRecord {
+    int mNumber = 0;
+    std::string mName;
+    std::optional<double> mLatitude;
+    std::optional<double> mLongitude;
+};
+
+/** Geographic and organizational references from an AUX Bus row. */
+struct AuxBusMetadata {
+    int mBusNumber = 0;
+    int mAreaNumber = 0;
+    int mZoneNumber = 0;
+    int mOwnerNumber = 0;
+    int mSubstationNumber = 0;
+    int mBalancingAuthorityNumber = 0;
+    std::optional<double> mLatitude;
+    std::optional<double> mLongitude;
+};
+
+/** Metadata that does not have a direct GridDyn simulation object. */
+struct AuxCaseMetadata {
+    std::unordered_map<int, AuxNamedRecord> mOwners;
+    std::unordered_map<int, AuxNamedRecord> mZones;
+    std::unordered_map<int, AuxNamedRecord> mBalancingAuthorities;
+    std::unordered_map<int, AuxSubstationRecord> mSubstations;
+    std::unordered_map<int, AuxBusMetadata> mBuses;
+    std::vector<std::string> mSuperAreas;
+};
+
+/** Read PowerWorld case hierarchy and bus assignments without changing a simulation. */
+[[nodiscard]] AuxCaseMetadata readAuxCaseMetadata(const std::string& fileName);
 
 void loadDyr(CoreObject* parentObject,
              const std::string& fileName,

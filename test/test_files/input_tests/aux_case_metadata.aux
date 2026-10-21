@@ -1,0 +1,35 @@
+// Case hierarchy can be read independently of network creation.
+DATA (Owner, [OwnerName,OwnerNum])
+{
+  "First Owner" 7
+}
+DATA (Owner, [OwnerNum,DataMaintainerAssign])
+{
+  7 ""
+}
+DATA (Zone, [ZoneNum,ZoneName])
+{
+  3 "Coastal"
+  4 "Inland"
+}
+DATA (Substation, [Latitude,SubName,SubNum,Longitude])
+{
+  35.1 "North Yard" 20 -118.1
+}
+DATA (SuperArea, [SAName])
+{
+  "Western System"
+}
+DATA (BalancingAuthority, [BAName,BANumber])
+{
+  "Test BA" 9
+}
+DATA (Bus, [BusNum,SubNum,ZoneNum,OwnerNum,AreaNum,BANumber,Latitude:1,Longitude:1])
+{
+  101 20 3 7 5 9 35.2 -118.2
+}
+DATA (Bus, [BusNum,ZoneNum])
+{
+  101 4
+  102 3
+}

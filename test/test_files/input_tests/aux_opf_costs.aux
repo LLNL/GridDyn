@@ -1,0 +1,38 @@
+// Cubic I/O data and a separate PowerWorld marginal BidCurve section.
+DATA (Sim_Solution_Options_Value, [VariableName, ValueField])
+{
+  "MvaBase" 100
+}
+DATA (Bus, [BusNum, BusName, BusNomVolt, BusPUVolt, BusSlack])
+{
+  1 "ONE" 230 1 YES
+  2 "TWO" 230 1 NO
+}
+DATA (Gen, [GenID, BusNum, GenStatus, GenMWSetPoint, GenMWMin, GenMWMax,
+            GenCostModel, GenFuelCost, GenIOA, GenIOB, GenIOC, GenIOD,
+            GenFixedCost, GenVariableOM])
+{
+  "A" 1 Closed 20 0 80 "Cubic" 2 0 3 0.1 0 7 4
+  "B" 2 Closed 30 0 60 "None" 0 0 0 0 0 0 0
+}
+DATA (Gen, [BusNum, GenID, GenCostModel, GenFixedCost, GenCostMultiplier])
+{
+  2 "B" "Piecewise Linear" 5 1
+  <SUBDATA BidCurve>
+    // MW  Price[$/MWhr], used as the slope beginning at this MW
+    0 10
+    20 12
+    // PowerWorld exports can repeat an MW break with no intervening segment.
+    20 12
+    40 14
+  </SUBDATA>
+}
+DATA (Load, [BusNum, LoadID, LoadStatus, LoadSMW, LoadSMVR])
+{
+  2 "1" Closed 50 0
+}
+DATA (Branch, [BusNum, BusNum:1, LineCircuit, BranchDeviceType,
+               LineStatus, LineR, LineX, LineAMVA])
+{
+  1 2 "1" Line Closed 0 0.1 100
+}
