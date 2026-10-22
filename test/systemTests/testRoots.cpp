@@ -17,7 +17,7 @@ using namespace griddyn;
 
 class RootTests: public GridDynSimulationTestFixture, public ::testing::Test {};
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(RootTests, RootTest1)
 {
     std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_roots1.xml");
@@ -38,7 +38,7 @@ TEST_F(RootTests, RootTest1)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(RootTests, TestRampLoadChange2)
 {
     std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_rampLoadChange2.xml");
@@ -79,7 +79,7 @@ TEST_F(RootTests, TestGovernorRoots)
 }
 */
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(RootTests, TestBusDisable)
 {
     std::string fileName = std::string(ROOTS_TEST_DIRECTORY "test_bus_disable.xml");

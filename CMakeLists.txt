@@ -149,6 +149,14 @@ cmake_dependent_option(
     GRIDDYN_BUILD_TESTS "Enable the test executables to be built" ON "PROJECT_IS_TOP_LEVEL" OFF
 )
 
+option(GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
+       "Enable experimental test cases that are excluded from regular test runs" OFF
+)
+
+option(GRIDDYN_ENABLE_PROBLEM_VALIDATION_TEST "Enable the large MATPOWER problem validation test"
+       OFF
+)
+
 cmake_dependent_option(
     GRIDDYN_BUILD_BENCHMARKS "Build GridDyn benchmarks" OFF "PROJECT_IS_TOP_LEVEL" OFF
 )

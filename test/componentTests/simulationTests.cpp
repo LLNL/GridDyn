@@ -4,17 +4,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "../gtestHelper.h"
+#include "core/CoreExceptions.h"
 #include "core/CoreOwningPtr.hpp"
 #include "core/ObjectFactoryTemplates.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
+#include "griddyn/GridDynSimulation.h"
 #include "griddyn/griddyn-config.h"
 #include <algorithm>
+#include <array>
 #include <cstdio>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <set>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -22,9 +25,38 @@
 #    include "optimization/optObjectFactory.h"
 #endif
 
-class SimulationTests: public GridDynSimulationTestFixture, public ::testing::Test {};
+namespace {
+class OrderingTestSimulation: public griddyn::GridDynSimulation {
+  public:
+    OffsetOrdering ordering() const { return default_ordering; }
+};
+}  // namespace
 
-TEST_F(SimulationTests, SimulationOrderingTests) {}
+TEST(SimulationOrderingTests, SupportedNamesSelectExpectedOrdering)
+{
+    using Ordering = griddyn::GridDynSimulation::OffsetOrdering;
+    constexpr std::array<std::pair<std::string_view, Ordering>, 6> orderings{{
+        {"mixed", Ordering::MIXED},
+        {"grouped", Ordering::GROUPED},
+        {"algebraic_grouped", Ordering::ALGEBRAIC_GROUPED},
+        {"voltage_first", Ordering::VOLTAGE_FIRST},
+        {"angle_first", Ordering::ANGLE_FIRST},
+        {"differential_first", Ordering::DIFFERENTIAL_FIRST},
+    }};
+
+    OrderingTestSimulation simulation;
+    for (const auto& [name, expected] : orderings) {
+        SCOPED_TRACE(name);
+        simulation.set("ordering", name);
+        EXPECT_EQ(simulation.ordering(), expected);
+    }
+}
+
+TEST(SimulationOrderingTests, UnknownNameIsRejected)
+{
+    OrderingTestSimulation simulation;
+    EXPECT_THROW(simulation.set("ordering", "unknown_order"), griddyn::InvalidParameterValue);
+}
 
 namespace {
 class CountingRootObject: public griddyn::CoreObject {

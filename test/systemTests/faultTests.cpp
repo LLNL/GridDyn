@@ -192,6 +192,9 @@ TEST_F(FaultTests, FaultTest3)  // NOLINT(readability-function-cognitive-complex
     }
 }
 
+// Disabled until the post-trip DAE failure is fixed: initialization and the initial Jacobian and
+// residual checks pass, but IDA fails corrector convergence after the GECO relay disconnects the
+// faulted line at about 1.002 s, so the full run does not complete.
 TEST_F(FaultTests, DISABLED_GecoFaultCase)
 {
     std::string fileName = std::string(fault_test_directory) + "geco_fault_uncoupled.xml";
@@ -200,19 +203,20 @@ TEST_F(FaultTests, DISABLED_GecoFaultCase)
     gds->consolePrintLevel = PrintLevel::DEBUG;
     int retval = gds->dynInitialize();
 
-    EXPECT_EQ(retval, 0);
+    ASSERT_EQ(retval, 0);
 
     int mmatch = runJacobianCheck(gds, cDaeSolverMode);
 
     ASSERT_EQ(mmatch, 0);
     runResidualCheck(gds, cDaeSolverMode);
 
-    gds->run();
+    retval = gds->run();
+    ASSERT_EQ(retval, 0);
     ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
     // simpleRunTestXML(fileName);
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultDynamic)
 {
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
@@ -235,7 +239,7 @@ TEST_F(FaultTests, LinkTestFaultDynamic)
 
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultFuse)
 {
     // test a fuse
@@ -257,7 +261,7 @@ TEST_F(FaultTests, LinkTestFaultFuse)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultFuse2)
 {
     // test whether fuses are working properly
@@ -277,7 +281,7 @@ TEST_F(FaultTests, LinkTestFaultFuse2)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultFuse3)
 {
     // test a bunch of different link parameters to make sure all the solve properly
@@ -302,7 +306,7 @@ TEST_F(FaultTests, LinkTestFaultFuse3)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultBreaker)
 {
     // test a bunch of different link parameters to make sure all the solve properly
@@ -324,7 +328,7 @@ TEST_F(FaultTests, LinkTestFaultBreaker)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultBreaker2)
 {
     // test a bunch of different link parameters to make sure all the solve properly
@@ -346,7 +350,7 @@ TEST_F(FaultTests, LinkTestFaultBreaker2)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultBreaker3)
 {
     // test a bunch of different link parameters to make sure all the solve properly
@@ -368,7 +372,7 @@ TEST_F(FaultTests, LinkTestFaultBreaker3)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FaultTests, LinkTestFaultBreaker4)
 {
     // test a bunch of different link parameters to make sure all the solve properly

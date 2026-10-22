@@ -183,7 +183,7 @@ TEST_F(ValidationTests, MatpowerValidationTestsGs)
     }
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(ValidationTests, MatpowerValidationTestsWithq)
 {
     const std::map<std::string, std::string> compare_cases_withq{
@@ -311,7 +311,7 @@ TEST_F(ValidationTests, MatpowerValidationTestsWithq)
 }
 #endif
 
-#ifdef ENABLE_PROBLEM_VALIDATION_TEST
+#ifdef GRIDDYN_ENABLE_PROBLEM_VALIDATION_TEST
 TEST_F(ValidationTests, MatpowerValidationTestsProblems)
 {
     const std::map<std::string, std::string> compare_p_cases{

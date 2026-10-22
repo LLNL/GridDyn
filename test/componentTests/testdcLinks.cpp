@@ -16,7 +16,7 @@
 
 class HvdcTests: public GridDynSimulationTestFixture, public ::testing::Test {};
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(HvdcTests, HvdcTest1)
 {
     std::string fileName = std::string(HVDC_TEST_DIRECTORY "test_hvdc1.xml");
@@ -51,7 +51,7 @@ TEST_F(HvdcTests, HvdcTest1)
 }
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(HvdcTests, HvdcTest2)
 {
     std::string fileName = std::string(HVDC_TEST_DIRECTORY "test_hvdc2.xml");

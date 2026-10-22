@@ -1115,8 +1115,7 @@ TEST_F(LoadTests, PartitionedDynamicMotorAndCimModelChecks)
     }
 }
 
-#ifdef ENABLE_IN_DEVELOPMENT_CASES
-#    ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(LoadTests, MotorTest5)
 {
     std::string fileName = std::string(LOAD_TEST_DIRECTORY "motorload_test5.xml");
@@ -1136,7 +1135,6 @@ TEST_F(LoadTests, MotorTest5)
     gds->run();
     requireStates(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
 }
-#    endif
 #endif
 
 TEST_F(LoadTests, FdepTest)
