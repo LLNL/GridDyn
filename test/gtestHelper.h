@@ -35,8 +35,6 @@ static const char ieee_test_directory[] = GRIDDYN_TEST_DIRECTORY "/IEEE_test_cas
 static const char matlab_test_directory[] = GRIDDYN_TEST_DIRECTORY "/matlab_test_files/";
 static const char other_test_directory[] = GRIDDYN_TEST_DIRECTORY "/other_test_cases/";
 
-#define ENABLE_IN_DEVELOPMENT_CASES
-
 namespace griddyn {
 class GridLoad;
 class SolverMode;

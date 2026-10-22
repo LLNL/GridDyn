@@ -25,8 +25,7 @@
 class LargeValidationTests: public GridDynSimulationTestFixture, public ::testing::Test {};
 using namespace griddyn;
 
-#ifdef ENABLE_IN_DEVELOPMENT_CASES
-#    ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(LargeValidationTests, TestPjmPflow)
 {
     std::string fileName = std::string(OTHER_TEST_DIRECTORY "pf.output.raw");
@@ -70,7 +69,6 @@ TEST_F(LargeValidationTests, TestPjmPflow)
                      gv2[bdiffi]);
     }
 }
-#    endif
 #endif
 
 TEST_F(LargeValidationTests, TestPgePflow)

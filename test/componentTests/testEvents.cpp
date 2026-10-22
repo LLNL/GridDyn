@@ -7,8 +7,6 @@
 #include "../gtestHelper.h"
 #include "fileInput/fileInput.h"
 #include "griddyn/events/Event.h"
-#include <cmath>
-#include <cstdio>
 #include <gtest/gtest.h>
 #include <string>
 
@@ -33,8 +31,3 @@ TEST_F(EventTests, EventTestLoadstring)
     EXPECT_EQ(gdEI.time[0], griddyn::CoreTime(2));
     EXPECT_EQ(gdEI.period, griddyn::CoreTime(3));
 }
-
-TEST_F(EventTests, EventTest1) {}
-TEST_F(EventTests, EventTest2) {}
-TEST_F(EventTests, EventTest3) {}
-TEST_F(EventTests, EventTest4) {}

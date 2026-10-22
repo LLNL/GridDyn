@@ -928,7 +928,7 @@ TEST_F(GeneratorTests, GenTestRemote2B)
     detailedStageCheck(fileName, GridDynSimulation::GridState::DYNAMIC_INITIALIZED);
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(GeneratorTests, GenTestIsoc)
 {
     std::string fileName = std::string(GEN_TEST_DIRECTORY "test_isoc2.xml");

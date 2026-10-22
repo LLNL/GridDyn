@@ -240,7 +240,7 @@ TEST_F(FmiTests, TestFmiApproxLoadXml)
 
 #endif
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(FmiTests, FmiTest1)
 {
     loadFmiLibrary();

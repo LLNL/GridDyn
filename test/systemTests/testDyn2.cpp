@@ -6,10 +6,12 @@
 
 #include "../gtestHelper.h"
 #include "gmlc/utilities/vectorOps.hpp"
+#include <algorithm>
 #include <cmath>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <vector>
 // test case for CoreObject object
 
@@ -113,13 +115,52 @@ TEST_F(DynamicSystemTests2, DynTestSinLoadChangePartArkode)
 
 #endif
 
-// now check if all the different solvers all produce the same results
 TEST_F(DynamicSystemTests2, DynTestCompareOde)
 {
-    SUCCEED();
+    std::vector<std::string_view> solvers{"basicode"};
+#ifdef GRIDDYN_ENABLE_CVODE
+    solvers.emplace_back("cvode");
+#endif
+#ifdef GRIDDYN_ENABLE_ARKODE
+    solvers.emplace_back("arkode");
+#endif
+    if (solvers.size() < 2) {
+        GTEST_SKIP() << "Solver comparison requires at least two available ODE solvers";
+    }
+
+    std::vector<double> referenceState;
+    for (const auto solver : solvers) {
+        SCOPED_TRACE(solver);
+        gds = readSimXMLFile(std::string(DYN2_TEST_DIRECTORY "test_2m4bDyn.xml"));
+        gds->consolePrintLevel = PrintLevel::NO_PRINT;
+        gds->set("dynamicsolvermethod", "partitioned");
+        gds->set("defdyndiff", solver);
+        gds->set("timestep", 0.001);
+        gds->set("stoptime", 0.9);
+
+        ASSERT_EQ(gds->run(), 0);
+        ASSERT_EQ(gds->currentProcessState(), GridDynSimulation::GridState::DYNAMIC_COMPLETE);
+        EXPECT_NEAR(static_cast<double>(gds->getSimulationTime()), 0.9, 1e-8);
+
+        const auto state = gds->getState(gds->getSolverMode("differential"));
+        ASSERT_FALSE(state.empty());
+        ASSERT_TRUE(std::all_of(state.begin(), state.end(), [](double value) {
+            return std::isfinite(value);
+        }));
+        if (referenceState.empty()) {
+            referenceState = state;
+            continue;
+        }
+
+        ASSERT_EQ(state.size(), referenceState.size());
+        for (std::size_t index = 0; index < state.size(); ++index) {
+            EXPECT_NEAR(state[index], referenceState[index], 5e-3)
+                << "state index " << index << " differed from the basicode result";
+        }
+    }
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST_F(DynamicSystemTests2, DynTestPulseLoadChangePart)
 {
     std::string fileName = std::string(DYN2_TEST_DIRECTORY "test_pulseLoadChange1_partitioned.xml");

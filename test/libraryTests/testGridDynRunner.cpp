@@ -19,8 +19,6 @@
 #include <string>
 #include <vector>
 
-TEST(RunnerTests, RunnerTest1) {}
-
 namespace {
 
 void runCoupledTimeStepCase(double timeStep)
@@ -80,6 +78,61 @@ void runCoupledTimeStepCase(double timeStep)
     EXPECT_NEAR(static_cast<double>(finalTime), nextGrant, timeTolerance);
 }
 
+void runCoupledTimeStepWithPreScheduledEvent(double timeStep)
+{
+    auto simulation = std::make_shared<griddyn::GridDynSimulation>();
+    simulation->consolePrintLevel = griddyn::PrintLevel::NO_PRINT;
+    griddyn::GriddynRunner runner(simulation);
+
+    std::string fileName =
+        std::string(GRIDDYN_TEST_DIRECTORY "/dyn_tests1/test_dynSimple1.xml");
+    char executable[] = "griddyn";
+    char* argv[] = {executable, fileName.data()};
+    ASSERT_EQ(runner.Initialize(2, argv), FUNCTION_EXECUTION_SUCCESS);
+
+    simulation->set("timestep", timeStep);
+    simulation->set("stoptime", 7.0);
+    runner.simInitialize();
+    ASSERT_TRUE(simulation->hasDynamics());
+    ASSERT_EQ(simulation->currentProcessState(),
+              griddyn::GridDynSimulation::GridState::DYNAMIC_INITIALIZED);
+
+    constexpr double precedingGrant = 6.690;
+    constexpr double grantedTime = 6.695;
+    constexpr double lateEventTime = 6.698;
+    constexpr double nextGrant = 6.705;
+    constexpr double timeTolerance = 1e-8;
+
+    const griddyn::CoreTime precedingTime = runner.Step(precedingGrant);
+    ASSERT_NEAR(static_cast<double>(precedingTime), precedingGrant, timeTolerance);
+
+    auto* load = simulation->getBus(0)->getLoad(0);
+    ASSERT_NE(load, nullptr);
+    const double initialLoad = load->get("p");
+    auto lateEvent = std::make_shared<griddyn::Event>();
+    ASSERT_TRUE(lateEvent->setTarget(load, "p"));
+    lateEvent->setValue(initialLoad + 0.1);
+    lateEvent->setTime(lateEventTime);
+    simulation->add(lateEvent);
+
+    const griddyn::CoreTime actualTime = runner.Step(grantedTime);
+    EXPECT_NEAR(static_cast<double>(actualTime), grantedTime, timeTolerance)
+        << "runner advanced past the co-simulation time grant toward a future event";
+    EXPECT_NEAR(static_cast<double>(simulation->getSimulationTime()),
+                grantedTime,
+                timeTolerance);
+    EXPECT_NEAR(load->get("p"), initialLoad, timeTolerance)
+        << "future event executed before its scheduled time";
+
+    const griddyn::CoreTime eventTime = runner.Step(lateEventTime);
+    EXPECT_NEAR(static_cast<double>(eventTime), lateEventTime, timeTolerance);
+    EXPECT_NEAR(load->get("p"), initialLoad + 0.1, timeTolerance)
+        << "future event did not execute when the runner reached it";
+
+    const griddyn::CoreTime finalTime = runner.Step(nextGrant);
+    EXPECT_NEAR(static_cast<double>(finalTime), nextGrant, timeTolerance);
+}
+
 }  // namespace
 
 TEST(RunnerTests, CoupledStepWithTenMillisecondTimestepHonorsGrantAndLateEvent)
@@ -90,6 +143,16 @@ TEST(RunnerTests, CoupledStepWithTenMillisecondTimestepHonorsGrantAndLateEvent)
 TEST(RunnerTests, CoupledStepWithOneMillisecondTimestepHonorsGrantAndLateEvent)
 {
     runCoupledTimeStepCase(0.001);
+}
+
+TEST(RunnerTests, CoupledStepWithTenMillisecondTimestepStopsBeforePreScheduledEvent)
+{
+    runCoupledTimeStepWithPreScheduledEvent(0.01);
+}
+
+TEST(RunnerTests, CoupledStepWithOneMillisecondTimestepStopsBeforePreScheduledEvent)
+{
+    runCoupledTimeStepWithPreScheduledEvent(0.001);
 }
 
 TEST(RunnerTests, UnresolvedCommandLineEventWarnsAndIsIgnored)

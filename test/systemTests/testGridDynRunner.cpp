@@ -16,7 +16,7 @@
 #include <sstream>
 #include <string>
 
-#ifdef ENABLE_THIS_CASE
+#ifdef GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES
 TEST(GridDynRunnerTests, RunnerTest1)
 {
     std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY "/runnerTests/test_180_trip.xml");

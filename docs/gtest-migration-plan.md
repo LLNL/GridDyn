@@ -397,7 +397,8 @@ Notable structure observations:
 - `testMainExe.cpp` is the only clearly active system test that currently
   requires `exeTestHelper`.
 - `testGridDynRunner.cpp` still includes `exeTestHelper`, but its primary case
-  is currently disabled behind `#ifdef ENABLE_THIS_CASE`.
+  is disabled by default behind `GRIDDYN_ENABLE_EXPERIMENTAL_TEST_CASES`; enable
+  it with the matching CMake option when exercising experimental cases.
 - `testInputs.cpp`, `testpFlow.cpp`, and `validationTests.cpp` are the heaviest
   files and should move later in the migration.
 - `testInputs.cpp`, `testpFlow.cpp`, and `validationTests.cpp` also contain
