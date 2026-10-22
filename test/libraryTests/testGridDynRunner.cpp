@@ -27,8 +27,7 @@ void runCoupledTimeStepCase(double timeStep)
     simulation->consolePrintLevel = griddyn::PrintLevel::NO_PRINT;
     griddyn::GriddynRunner runner(simulation);
 
-    std::string fileName =
-        std::string(GRIDDYN_TEST_DIRECTORY "/dyn_tests1/test_dynSimple1.xml");
+    std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY "/dyn_tests1/test_dynSimple1.xml");
     char executable[] = "griddyn";
     char* argv[] = {executable, fileName.data()};
     ASSERT_EQ(runner.Initialize(2, argv), FUNCTION_EXECUTION_SUCCESS);
@@ -84,8 +83,7 @@ void runCoupledTimeStepWithPreScheduledEvent(double timeStep)
     simulation->consolePrintLevel = griddyn::PrintLevel::NO_PRINT;
     griddyn::GriddynRunner runner(simulation);
 
-    std::string fileName =
-        std::string(GRIDDYN_TEST_DIRECTORY "/dyn_tests1/test_dynSimple1.xml");
+    std::string fileName = std::string(GRIDDYN_TEST_DIRECTORY "/dyn_tests1/test_dynSimple1.xml");
     char executable[] = "griddyn";
     char* argv[] = {executable, fileName.data()};
     ASSERT_EQ(runner.Initialize(2, argv), FUNCTION_EXECUTION_SUCCESS);
@@ -118,9 +116,7 @@ void runCoupledTimeStepWithPreScheduledEvent(double timeStep)
     const griddyn::CoreTime actualTime = runner.Step(grantedTime);
     EXPECT_NEAR(static_cast<double>(actualTime), grantedTime, timeTolerance)
         << "runner advanced past the co-simulation time grant toward a future event";
-    EXPECT_NEAR(static_cast<double>(simulation->getSimulationTime()),
-                grantedTime,
-                timeTolerance);
+    EXPECT_NEAR(static_cast<double>(simulation->getSimulationTime()), grantedTime, timeTolerance);
     EXPECT_NEAR(load->get("p"), initialLoad, timeTolerance)
         << "future event executed before its scheduled time";
 
