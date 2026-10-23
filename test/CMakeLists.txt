@@ -60,6 +60,7 @@ set(generator_component_gtest_sources
     componentTests/testBlocks.cpp
     componentTests/testGovernors.cpp
     componentTests/testStabilizers.cpp
+    componentTests/testPSS2BESAC2A.cpp
     componentTests/testGenerators.cpp
     componentTests/testGenModels.cpp
     componentTests/testEPCGEN.cpp

@@ -11,6 +11,7 @@
 #include "StabilizerIEEEST.h"
 #include "StabilizerIee2st.h"
 #include "StabilizerPss2a.h"
+#include "StabilizerPss2b.h"
 #include "StabilizerST2CUT.h"
 #include "StabilizerStab3.h"
 #include "core/CoreObjectTemplates.hpp"
@@ -30,6 +31,8 @@ static ChildTypeFactory<stabilizers::StabilizerIee2st, Stabilizer>
     gIee2stFactory("pss", std::to_array<std::string_view>({"iee2st"}));
 static ChildTypeFactory<stabilizers::StabilizerPss2a, Stabilizer>
     gPss2aFactory("pss", std::to_array<std::string_view>({"pss2a"}));
+static ChildTypeFactory<stabilizers::StabilizerPss2b, Stabilizer>
+    gPss2bFactory("pss", std::to_array<std::string_view>({"pss2b"}));
 static ChildTypeFactory<stabilizers::StabilizerStab3, Stabilizer>
     gStab3Factory("pss", std::to_array<std::string_view>({"stab3"}));
 

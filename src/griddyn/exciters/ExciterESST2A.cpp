@@ -57,24 +57,31 @@ CoreObject* ExciterESST2A::clone(CoreObject* obj) const
     result->Ke = Ke;
     result->Te = Te;
     result->Efdmax = Efdmax;
+    result->underSelectorEnabled = underSelectorEnabled;
     return result;
 }
 
 void ExciterESST2A::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t flags)
 {
     setInitialLimitPolicy(flags);
+    opFlags.reset(REGULATOR_LIMITED);
+    opFlags.reset(REGULATOR_LIMIT_HIGH);
+    opFlags.reset(FIELD_LIMITED);
+    opFlags.reset(FIELD_LIMIT_HIGH);
     const std::array<double, 14> parameters{
         Tr, Vrmax, Vrmin, Ka, Ta, Kp, Ki, Kc, Kf, Tf, Ke, Te, Efdmax, Vref};
     if (std::any_of(parameters.begin(),
                     parameters.end(),
                     [](double value) { return !std::isfinite(value); }) ||
-        (Tr < 0.0) || (Ka <= 0.0) || (Ta <= 0.0) || (Vrmax < Vrmin) || (Tf <= 0.0) || (Te <= 0.0) ||
-        (Efdmax < 0.0)) {
+        (Tr < 0.0) || (Ka <= 0.0) || (Ta < 0.0) || (Vrmax < Vrmin) || (Tf <= 0.0) || (Te <= 0.0) ||
+        (Kc < 0.0) || (Efdmax < 0.0)) {
         throw InvalidParameterValue("ESST2A gains, time constants, or limits");
     }
     offsets.local().local.algSize = 1;
     offsets.local().local.diffSize = stateCount;
-    offsets.local().local.jacSize = 80;
+    // Dense upper bound for differential state/input derivatives plus the
+    // algebraic output row. There is no EFD algebraic input to the dynamics.
+    offsets.local().local.jacSize = stateCount * (stateCount + exciterInputCount) + stateCount + 1;
     offsets.local().local.algRoots = 2;
 }
 
@@ -88,11 +95,9 @@ double ExciterESST2A::rectifierVoltage(const IOdata& inputs) const
         .voltage;
 }
 
-ExciterESST2A::Evaluation
-    ExciterESST2A::evaluate(const IOdata& inputs, double fieldVoltage, const double state[]) const
+ExciterESST2A::Evaluation ExciterESST2A::evaluate(const IOdata& inputs, const double state[]) const
 {
     using detail::addSignals;
-    using detail::algebraicSignal;
     using detail::clampSignal;
     using detail::constantSignal;
     using detail::inputSignal;
@@ -128,7 +133,8 @@ ExciterESST2A::Evaluation
         }
     }
 
-    const Signal fieldStateSignal = stateSignal<stateCount>(state[fieldState], fieldState);
+    const Signal fieldStateSignal =
+        clampSignal(stateSignal<stateCount>(state[fieldState], fieldState), 0.0, Efdmax);
     const Signal feedbackStateSignal = stateSignal<stateCount>(state[feedbackState], feedbackState);
     const Signal feedback =
         scaleSignal(subtractSignals(fieldStateSignal, feedbackStateSignal), Kf / Tf);
@@ -138,10 +144,18 @@ ExciterESST2A::Evaluation
     Signal input = addSignals(constantSignal<stateCount>(Vref + vBias - 1.0),
                               inputSignal<stateCount>(inputs, exciterVsetInLocation));
     input = addSignals(input, inputSignal<stateCount>(inputs, exciterVssInLocation));
+    // GridDyn OEL actions are positive reductions; OpenIPSL VOEL is signed.
+    input = subtractSignals(input, inputSignal<stateCount>(inputs, exciterVoelInLocation));
     input = subtractSignals(subtractSignals(input, measuredVoltage), feedback);
-    const Signal regulator = stateSignal<stateCount>(state[regulatorState], regulatorState);
-    const Signal regulatorDrive = subtractSignals(scaleSignal(input, Ka), regulator);
-    if (!opFlags[REGULATOR_LIMITED]) {
+    if (underSelectorEnabled && input.value < inputs[exciterVuelInLocation]) {
+        input = inputSignal<stateCount>(inputs, exciterVuelInLocation);
+    }
+    const Signal regulatorStateSignal =
+        stateSignal<stateCount>(state[regulatorState], regulatorState);
+    const Signal regulator =
+        clampSignal(Ta > 0.0 ? regulatorStateSignal : scaleSignal(input, Ka), Vrmin, Vrmax);
+    const Signal regulatorDrive = subtractSignals(scaleSignal(input, Ka), regulatorStateSignal);
+    if (Ta > 0.0 && !opFlags[REGULATOR_LIMITED]) {
         rates[regulatorState] = scaleSignal(regulatorDrive, 1.0 / Ta);
     }
 
@@ -150,18 +164,12 @@ ExciterESST2A::Evaluation
     if (!opFlags[FIELD_LIMITED]) {
         rates[fieldState] = scaleSignal(fieldDrive, 1.0 / Te);
     }
-    const Signal algebraicResidual =
-        subtractSignals(fieldStateSignal, algebraicSignal<stateCount>(fieldVoltage));
-
-    evaluation.fieldOutput = state[fieldState];
+    evaluation.fieldOutput = fieldStateSignal.value;
     evaluation.regulatorDrive = regulatorDrive.value;
     evaluation.fieldDrive = fieldDrive.value;
-    evaluation.algebraicDerivative = algebraicResidual.algebraic;
-    evaluation.fieldStateDerivatives = algebraicResidual.state;
-    evaluation.fieldInputDerivatives = algebraicResidual.input;
+    evaluation.fieldStateDerivatives = fieldStateSignal.state;
     for (index_t row = 0; row < stateCount; ++row) {
         evaluation.rates[row] = rates[row].value;
-        evaluation.rateAlgebraicDerivatives[row] = rates[row].algebraic;
         evaluation.rateStateDerivatives[row] = rates[row].state;
         evaluation.rateInputDerivatives[row] = rates[row].input;
     }
@@ -175,7 +183,10 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
     if (inputs.size() < exciterInputCount || desiredOutput.empty() ||
         !std::isfinite(inputs[exciterVoltageInLocation]) ||
         !std::isfinite(inputs[exciterVsetInLocation]) ||
-        !std::isfinite(inputs[exciterVssInLocation]) || !std::isfinite(desiredOutput[0])) {
+        !std::isfinite(inputs[exciterVssInLocation]) ||
+        !std::isfinite(inputs[exciterVoelInLocation]) ||
+        (underSelectorEnabled && !std::isfinite(inputs[exciterVuelInLocation])) ||
+        !std::isfinite(desiredOutput[0])) {
         throw InvalidParameterValue("ESST2A initial voltage signals");
     }
     if ((Kp > 0.0) || (Ki > 0.0)) {
@@ -190,7 +201,13 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
             }
         }
     }
-    const double fieldVoltage = desiredOutput[0];
+    if (desiredOutput[0] < -initializationTolerance ||
+        desiredOutput[0] > Efdmax + initializationTolerance) {
+        throw InvalidParameterValue("ESST2A initial field voltage outside limits");
+    }
+    // Accept roundoff near a bound, but initialize output, feedback, and the
+    // field equation at the same projected value.
+    const double fieldVoltage = std::clamp(desiredOutput[0], 0.0, static_cast<double>(Efdmax));
     const double rectifier = rectifierVoltage(inputs);
     if (std::abs(rectifier) <= 1e-12) {
         throw InvalidParameterValue("ESST2A initial rectifier voltage");
@@ -198,9 +215,7 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
     const double regulator = Ke * fieldVoltage / rectifier;
     const double originalRegulatorUpperLimit = Vrmax;
     if ((regulator < Vrmin - initializationTolerance) ||
-        !adjustInitialUpperLimit(regulator, Vrmax, "ESST2A initial regulator output") ||
-        (fieldVoltage < -initializationTolerance) ||
-        (fieldVoltage > Efdmax + initializationTolerance)) {
+        !adjustInitialUpperLimit(regulator, Vrmax, "ESST2A initial regulator output")) {
         throw InvalidParameterValue("ESST2A initial state outside limits");
     }
     m_state[0] = fieldVoltage;
@@ -210,18 +225,27 @@ void ExciterESST2A::dynObjectInitializeB(const IOdata& inputs,
     state[feedbackState] = fieldVoltage;
     state[fieldState] = fieldVoltage;
     vBias = (regulator / Ka) + state[voltageMeasurementState] - Vref -
-        (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation];
+        (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation] +
+        inputs[exciterVoelInLocation];
     const double correction = std::max(0.0, Vrmax - originalRegulatorUpperLimit);
     const double guard = 10.0 * limiterRootTolerance + std::abs(Ka) * 1e-5;
-    if (regulator >= Vrmax) {
+    if (Ta > 0.0 && regulator >= Vrmax) {
         vBias += std::max(0.2 * correction, guard) / Ka;
-    } else if (regulator <= Vrmin) {
+    } else if (Ta > 0.0 && regulator <= Vrmin) {
         vBias -= guard / Ka;
     }
     fieldSet.resize(std::max<std::size_t>(fieldSet.size(), 2U));
     fieldSet[exciterVsetInLocation] = Vref;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
-    updateLimitFlags(inputs, state, true);
+    updateLimitFlags(inputs, state);
+    const auto initial = evaluate(inputs, state);
+    if (!std::isfinite(initial.fieldOutput) ||
+        std::abs(initial.fieldOutput - m_state[0]) > initializationTolerance ||
+        std::any_of(initial.rates.begin(), initial.rates.end(), [](double rate) {
+            return !std::isfinite(rate) || std::abs(rate) > initializationTolerance;
+        })) {
+        throw InvalidParameterValue("ESST2A initial selector or field equations are inconsistent");
+    }
 }
 
 void ExciterESST2A::residual(const IOdata& inputs,
@@ -230,7 +254,7 @@ void ExciterESST2A::residual(const IOdata& inputs,
                              const SolverMode& sMode)
 {
     const auto loc = offsets.getLocations(stateData, resid, sMode, this);
-    const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
+    const auto evaluation = evaluate(inputs, loc.diffStateLoc);
     if (hasAlgebraic(sMode)) {
         loc.destLoc[0] = evaluation.fieldOutput - loc.algStateLoc[0];
     }
@@ -250,7 +274,7 @@ void ExciterESST2A::derivative(const IOdata& inputs,
         return;
     }
     const auto loc = offsets.getLocations(stateData, deriv, sMode, this);
-    const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
+    const auto evaluation = evaluate(inputs, loc.diffStateLoc);
     std::copy_n(evaluation.rates.begin(), loc.diffSize, loc.destDiffLoc);
 }
 
@@ -262,7 +286,7 @@ void ExciterESST2A::algebraicUpdate(const IOdata& /*inputs*/,
 {
     if (hasAlgebraic(sMode)) {
         const auto loc = offsets.getLocations(stateData, update, sMode, this);
-        loc.destLoc[0] = loc.diffStateLoc[fieldState];
+        loc.destLoc[0] = std::clamp(loc.diffStateLoc[fieldState], 0.0, static_cast<double>(Efdmax));
     }
 }
 
@@ -273,14 +297,16 @@ void ExciterESST2A::jacobianElements(const IOdata& inputs,
                                      const SolverMode& sMode)
 {
     const auto loc = offsets.getLocations(stateData, sMode, this);
-    const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
+    const auto evaluation = evaluate(inputs, loc.diffStateLoc);
     if (hasAlgebraic(sMode)) {
-        matrixData.assign(loc.algOffset, loc.algOffset, evaluation.algebraicDerivative);
+        matrixData.assign(loc.algOffset, loc.algOffset, -1.0);
         if (!isAlgebraicOnly(sMode)) {
             for (index_t column = 0; column < stateCount; ++column) {
-                matrixData.assign(loc.algOffset,
-                                  loc.diffOffset + column,
-                                  evaluation.fieldStateDerivatives[column]);
+                if (evaluation.fieldStateDerivatives[column] != 0.0) {
+                    matrixData.assign(loc.algOffset,
+                                      loc.diffOffset + column,
+                                      evaluation.fieldStateDerivatives[column]);
+                }
             }
         }
     }
@@ -288,20 +314,22 @@ void ExciterESST2A::jacobianElements(const IOdata& inputs,
         return;
     }
     for (index_t row = 0; row < stateCount; ++row) {
-        matrixData.assign(loc.diffOffset + row,
-                          loc.algOffset,
-                          evaluation.rateAlgebraicDerivatives[row]);
         for (index_t column = 0; column < stateCount; ++column) {
             double value = evaluation.rateStateDerivatives[row][column];
             if (row == column) {
                 value -= stateData.cj;
             }
-            matrixData.assign(loc.diffOffset + row, loc.diffOffset + column, value);
+            // Preserve a diagonal even at cj=0 for held CVODE integrators.
+            if (row == column || value != 0.0) {
+                matrixData.assign(loc.diffOffset + row, loc.diffOffset + column, value);
+            }
         }
         for (index_t input = 0; input < exciterInputCount; ++input) {
-            matrixData.assignCheckCol(loc.diffOffset + row,
-                                      inputLocs[input],
-                                      evaluation.rateInputDerivatives[row][input]);
+            if (evaluation.rateInputDerivatives[row][input] != 0.0) {
+                matrixData.assignCheckCol(loc.diffOffset + row,
+                                          inputLocs[input],
+                                          evaluation.rateInputDerivatives[row][input]);
+            }
         }
     }
 }
@@ -313,15 +341,15 @@ void ExciterESST2A::timestep(CoreTime time, const IOdata& inputs, const SolverMo
     for (index_t index = 0; index < stateCount; ++index) {
         m_state[index + 1] += timeStep * m_dstate_dt[index + 1];
     }
-    updateLimitFlags(inputs, m_state.data() + 1, true);
+    updateLimitFlags(inputs, m_state.data() + 1);
     m_state[0] = m_state[fieldState + 1];
     prevTime = time;
 }
 
-bool ExciterESST2A::updateLimitFlags(const IOdata& inputs, double state[], bool projectStates)
+bool ExciterESST2A::updateLimitFlags(const IOdata& inputs, double state[])
 {
     constexpr double tolerance = 1e-7;
-    const auto evaluation = evaluate(inputs, m_state[0], state);
+    const auto evaluation = evaluate(inputs, state);
     bool changed = false;
     const auto setLimited = [this,
                              &changed](int limitedFlag, int highFlag, bool limited, bool high) {
@@ -337,12 +365,11 @@ bool ExciterESST2A::updateLimitFlags(const IOdata& inputs, double state[], bool 
 
     const bool regulatorAbove = state[regulatorState] > Vrmax + tolerance;
     const bool regulatorBelow = state[regulatorState] < Vrmin - tolerance;
-    if (projectStates) {
-        state[regulatorState] = std::clamp(state[regulatorState],
-                                           static_cast<double>(Vrmin),
-                                           static_cast<double>(Vrmax));
-    }
-    if (opFlags[REGULATOR_LIMITED]) {
+    state[regulatorState] =
+        std::clamp(state[regulatorState], static_cast<double>(Vrmin), static_cast<double>(Vrmax));
+    if (Ta == 0.0) {
+        opFlags.reset(REGULATOR_LIMITED);
+    } else if (opFlags[REGULATOR_LIMITED]) {
         const bool release = opFlags[REGULATOR_LIMIT_HIGH] ? (evaluation.regulatorDrive < 0.0) :
                                                              (evaluation.regulatorDrive > 0.0);
         if (release) {
@@ -360,9 +387,7 @@ bool ExciterESST2A::updateLimitFlags(const IOdata& inputs, double state[], bool 
 
     const bool fieldAbove = state[fieldState] > Efdmax + tolerance;
     const bool fieldBelow = state[fieldState] < -tolerance;
-    if (projectStates) {
-        state[fieldState] = std::clamp(state[fieldState], 0.0, static_cast<double>(Efdmax));
-    }
+    state[fieldState] = std::clamp(state[fieldState], 0.0, static_cast<double>(Efdmax));
     if (opFlags[FIELD_LIMITED]) {
         const bool release = opFlags[FIELD_LIMIT_HIGH] ? (evaluation.fieldDrive < 0.0) :
                                                          (evaluation.fieldDrive > 0.0);
@@ -384,11 +409,15 @@ void ExciterESST2A::rootTest(const IOdata& inputs,
                              const SolverMode& sMode)
 {
     const auto loc = offsets.getLocations(stateData, sMode, this);
-    const auto evaluation = evaluate(inputs, loc.algStateLoc[0], loc.diffStateLoc);
+    const auto evaluation = evaluate(inputs, loc.diffStateLoc);
     const index_t root = offsets.getRootOffset(sMode);
-    if (opFlags[REGULATOR_LIMITED]) {
+    if (Ta == 0.0) {
+        roots[root] = 1.0;
+    } else if (opFlags[REGULATOR_LIMITED]) {
+        // Release only after the drive is inward; the opposite margin
+        // triggers on the outward side and leaves the integrator held.
         roots[root] = (opFlags[REGULATOR_LIMIT_HIGH] ? -evaluation.regulatorDrive :
-                                                       evaluation.regulatorDrive) +
+                                                       evaluation.regulatorDrive) -
             limiterRootTolerance;
     } else {
         roots[root] = std::min(Vrmax - loc.diffStateLoc[regulatorState],
@@ -398,7 +427,7 @@ void ExciterESST2A::rootTest(const IOdata& inputs,
     }
     if (opFlags[FIELD_LIMITED]) {
         roots[root + 1] =
-            (opFlags[FIELD_LIMIT_HIGH] ? -evaluation.fieldDrive : evaluation.fieldDrive) +
+            (opFlags[FIELD_LIMIT_HIGH] ? -evaluation.fieldDrive : evaluation.fieldDrive) -
             limiterRootTolerance;
     } else {
         roots[root + 1] =
@@ -415,7 +444,7 @@ void ExciterESST2A::rootTrigger(CoreTime /*time*/,
 {
     const index_t root = offsets.getRootOffset(sMode);
     if (((rootMask[root] != 0) || (rootMask[root + 1] != 0)) &&
-        updateLimitFlags(inputs, m_state.data() + 1, true)) {
+        updateLimitFlags(inputs, m_state.data() + 1)) {
         alert(this, JAC_COUNT_CHANGE);
     }
 }
@@ -425,7 +454,7 @@ ChangeCode ExciterESST2A::rootCheck(const IOdata& inputs,
                                     const SolverMode& /*sMode*/,
                                     CheckLevel /*level*/)
 {
-    if (updateLimitFlags(inputs, m_state.data() + 1, true)) {
+    if (updateLimitFlags(inputs, m_state.data() + 1)) {
         alert(this, JAC_COUNT_CHANGE);
         return ChangeCode::JACOBIAN_CHANGE;
     }
@@ -465,7 +494,18 @@ void ExciterESST2A::set(std::string_view param, std::string_view val)
 
 void ExciterESST2A::set(std::string_view param, double val, units::unit unitType)
 {
-    if (param == "tr") {
+    if (!std::isfinite(val)) {
+        throw InvalidParameterValue("ESST2A parameters must be finite");
+    }
+    if (((param == "tr" || param == "ta" || param == "kc" || param == "efdmax" ||
+          param == "efmax") &&
+         val < 0.0) ||
+        ((param == "ka" || param == "tf" || param == "te") && val <= 0.0)) {
+        throw InvalidParameterValue("ESST2A gain, time constant, or field limit");
+    }
+    if (param == "uel_enabled") {
+        underSelectorEnabled = val != 0.0;
+    } else if (param == "tr") {
         Tr = val;
     } else if (param == "kp") {
         Kp = val;
@@ -490,6 +530,9 @@ void ExciterESST2A::set(std::string_view param, double val, units::unit unitType
 
 double ExciterESST2A::get(std::string_view param, units::unit unitType) const
 {
+    if (param == "uel_enabled") {
+        return underSelectorEnabled ? 1.0 : 0.0;
+    }
     if (param == "ka") {
         return Ka;
     }
@@ -530,6 +573,11 @@ double ExciterESST2A::get(std::string_view param, units::unit unitType) const
         return Efdmax;
     }
     return Exciter::get(param, unitType);
+}
+
+bool ExciterESST2A::supportsLimiterSignal(ExciterLimiterSignal signal) const
+{
+    return signal == ExciterLimiterSignal::OVER || underSelectorEnabled;
 }
 // NOLINTEND(readability-math-missing-parentheses)
 }  // namespace griddyn::exciters

@@ -138,12 +138,23 @@ bound source. The host retains its feedback cache and controller stepping
 order. In particular, the machine-signal value snapshot precedes the exciter
 field refresh, matching the existing generator equations.
 
+`Stabilizer::electricalPowerSignal()` selects the machine quantity for the
+local power-input slot. PSS2B requests terminal electrical power on machine
+base, matching OpenIPSL's `PELEC` connection; existing stabilizers, including
+PSS2A, retain electrical torque. Values and sparse derivatives come from the
+same selected provider, including in partitioned solver modes. PSS2A/PSS2B
+modes 1 and 2 both use local speed deviation. Mode 4 uses mechanical-power
+deviation from initialization, without electrical-power subtraction. Remote
+`BUSR` and mode 6 are rejected. See [PSS2B model notes](pss2b-esac2a-models.md).
+
 ### Optional OEL and UEL routes
 
 `Exciter` now reserves `VUEL` and `VOEL` after `Vss`, leaving every previous
-input index unchanged. Both are positive action magnitudes. A missing or
-disabled limiter supplies exactly zero and has no solver location. A present
-limiter has a stable source identity after `dynInitializeA`; its algebraic
+input index unchanged. Limiter components normally supply positive action
+magnitudes; absolute selector ports require a compatible source as described
+below. A missing or disabled limiter supplies exactly zero and has no solver
+location. A present limiter has a stable source identity after
+`dynInitializeA`; its algebraic
 output value and solver location are read on every implicit callback. The
 same bindings are used during initialization and explicit stepping. Limiter
 inputs are routed from the machine's `XadIfd`, `Id`, `Iq`, `Vd`, and `Vq`
@@ -266,6 +277,16 @@ the loader rejects an opposite role before attachment.
 
 An exciter declares which action it implements. `SCRX` sums `+VUEL-VOEL` at
 its reference error. `ESAC6A` sums `+VUEL` there and does not accept OEL.
+`ESST2A` subtracts the positive OEL action at its supplementary sum by default.
+Its optional `uel_enabled` enables an absolute high selector before `KA`.
+`ESAC2A` has optional `uel_enabled`/`oel_enabled` absolute high/low selectors
+after `KB` and before the regulator clamp. All these absolute selectors default
+to disabled. Their inputs are absolute control levels, so additive limiter
+components must not be attached interchangeably. The host's
+`supportsLimiterSignal` check verifies that the port is enabled, but does not
+convert additive action magnitudes to absolute levels or validate that semantic
+compatibility. A compatible selector source is the caller's responsibility;
+the positional DYR/DYD payloads do not enable selectors.
 Other exciters currently reject an attached limiter during dynamic route
 compilation, rather than silently ignoring its output. Neutral zero inputs
 preserve their previous behavior when no limiter is attached. Replacing,
@@ -302,6 +323,11 @@ initialization; replace that submodel after resetting routes.
   `DynamicGenerator` reuses its sparse input maps, computes machine-signal
   derivatives only when an enabled controller uses them, and skips controller
   maps for external output derivatives.
+- `NewControlReaderTests` and `Esst2aReaderTests` cover the selected PSS2B
+  terminal-power route, ESST2A OEL action, coupled residuals/Jacobians and
+  algebraic updates in full and partitioned modes, and IDA/CVODE limit
+  entry/release. Independent OpenIPSL trajectories remain pending; see
+  [PSS2B/ESAC2A](pss2b-esac2a-models.md) and [ESST2A](esst2a-model.md).
 
 See [RenewableGenerator architecture refinement](renewable-generator-architecture-refinement.md)
 for the host's role and port policy and [WECC model coverage audit](wecc-model-coverage-audit.md)

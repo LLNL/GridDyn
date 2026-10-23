@@ -160,6 +160,7 @@ set(exciter_headers
     stabilizers/StabilizerIEEEST.h
     stabilizers/StabilizerIee2st.h
     stabilizers/StabilizerPss2a.h
+    stabilizers/StabilizerPss2b.h
     stabilizers/StabilizerStab3.h
     stabilizers/StabilizerST2CUT.h
     exciters/ExciterDC1A.h
@@ -175,6 +176,7 @@ set(exciter_headers
     exciters/StaticExciterRectifier.h
     exciters/ExciterEXAC1.h
     exciters/ExciterESAC1A.h
+    exciters/ExciterESAC2A.h
     exciters/ExciterESAC5A.h
     exciters/ExciterESAC6A.h
     exciters/ExciterEXAC2.h
@@ -203,6 +205,7 @@ set(exciter_sources
     exciters/StaticExciterRectifier.cpp
     exciters/ExciterEXAC1.cpp
     exciters/ExciterESAC1A.cpp
+    exciters/ExciterESAC2A.cpp
     exciters/ExciterESAC5A.cpp
     exciters/ExciterESAC6A.cpp
     exciters/ExciterEXAC2.cpp
@@ -218,6 +221,7 @@ set(exciter_sources
     stabilizers/StabilizerIEEEST.cpp
     stabilizers/StabilizerIee2st.cpp
     stabilizers/StabilizerPss2a.cpp
+    stabilizers/StabilizerPss2b.cpp
     stabilizers/StabilizerStab3.cpp
     stabilizers/StabilizerST2CUT.cpp
 )

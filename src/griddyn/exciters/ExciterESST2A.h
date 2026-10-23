@@ -22,8 +22,9 @@ namespace griddyn::exciters {
  * \f$V_m\f$, regulator output \f$V_A\f$, feedback state \f$x_F\f$, and field
  * state \f$E_{fd}\f$,
  * \f[
- * T_R\dot V_m=V_T-V_m,\quad V_F=K_F(E_{fd}-x_F)/T_F,\quad
- * V_i=V_{ref}+V_{bias}+V_{set}-1+V_{SS}-V_m-V_F,
+ * T_R\dot V_m=E_{COMP}-V_m,\quad V_F=K_F(E_{fd}-x_F)/T_F,\quad
+ * e=V_{ref}+V_{bias}+V_{set}-1+V_{SS}-V_{OEL}-V_m-V_F,\quad
+ * V_i=\max(e,V_{UEL})\ \text{when uel_enabled, otherwise }e,
  * \f]
  * \f[
  * T_A\dot V_A=K_AV_i-V_A,\quad
@@ -33,10 +34,21 @@ namespace griddyn::exciters {
  * \f$V_A\f$ is limited by \f$[V_{RMIN},V_{RMAX}]\f$ and \f$E_{fd}\f$ by
  * \f$[0,E_{FDMAX}]\f$ with event-aware non-windup behavior.
  *
- * This is the 13-parameter OpenIPSL core model. GridDyn's standard
- * stabilizer input supplies the normal summed supplementary path. Separate
- * VUEL/VOEL inputs and the high-value gate are not available in the current
- * exciter interface and are therefore outside this implementation.
+ * ECOMP is the routed sensed/compensated voltage; the compound source uses
+ * terminal VT/IT independently. TR=0 uses ECOMP directly;
+ * TA=0 uses clamp(KA*Vi,VRMIN,VRMAX).
+ * Bypassed measurement/regulator states have zero derivatives, retaining
+ * the five-state layout (efd,vmeas,va,wf,efstate). Output and feedback
+ * use clipped VA/Efd even during solver overshoot. Initialization uses
+ * VA0=KE*Efd0/VB0 and bias including the initial OEL action; previous
+ * limiter flags are cleared. The 13-parameter core uses GridDyn's compact
+ * DYR/explicit DYD schema, without general PSLF selectors/trailers or def.
+ * GridDyn's positive overexcitation-limiter action is subtracted at the supplementary
+ * summing junction, adapting OpenIPSL's signed VOEL input. The optional
+ * uel_enabled parameter enables an absolute VUEL high selector before KA;
+ * additive underexcitation-limiter actions are not interchangeable with it.
+ * OpenIPSL's limited lag has a different internal state/reset convention;
+ * external trajectory parity at limit transitions remains unverified.
  *
  * @par Equation source
  * OpenIPSL `Electrical.Controls.PSSE.ES.ESST2A` and its shared rectifier,
@@ -94,24 +106,22 @@ class ExciterESST2A final: public Exciter {
     void set(std::string_view param, std::string_view val) override;
     void set(std::string_view param, double val, units::unit unitType = units::defunit) override;
     double get(std::string_view param, units::unit unitType = units::defunit) const override;
+    bool supportsLimiterSignal(ExciterLimiterSignal signal) const override;
 
   private:
     static constexpr index_t stateCount = 4;
     struct Evaluation {
         double fieldOutput = 0.0;
-        double algebraicDerivative = 0.0;
         std::array<double, stateCount> fieldStateDerivatives{};
-        std::array<double, exciterInputCount> fieldInputDerivatives{};
         std::array<double, stateCount> rates{};
-        std::array<double, stateCount> rateAlgebraicDerivatives{};
         std::array<std::array<double, stateCount>, stateCount> rateStateDerivatives{};
         std::array<std::array<double, exciterInputCount>, stateCount> rateInputDerivatives{};
         double regulatorDrive = 0.0;
         double fieldDrive = 0.0;
     };
-    Evaluation evaluate(const IOdata& inputs, double fieldVoltage, const double state[]) const;
+    Evaluation evaluate(const IOdata& inputs, const double state[]) const;
     double rectifierVoltage(const IOdata& inputs) const;
-    bool updateLimitFlags(const IOdata& inputs, double state[], bool projectStates);
+    bool updateLimitFlags(const IOdata& inputs, double state[]);
 
     model_parameter Tr = 0.01;
     model_parameter Kp = 0.7;
@@ -122,5 +132,6 @@ class ExciterESST2A final: public Exciter {
     model_parameter Ke = 1.0;
     model_parameter Te = 0.5;
     model_parameter Efdmax = 5.0;
+    bool underSelectorEnabled = false;
 };
 }  // namespace griddyn::exciters

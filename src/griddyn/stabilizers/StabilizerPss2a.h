@@ -20,9 +20,10 @@ namespace griddyn::stabilizers {
  * through the ramp filter, differenced with the second branch, amplified,
  * lead-lag compensated, and limited at the output.
  *
- * Local MODE values 0, 1, 2, 3, 4, and 5 are supported. Modes 1 and 2 use
- * local speed/frequency deviation; modes 3, 4, and 5 use electrical power,
- * accelerating/mechanical power deviation, and terminal voltage. Nonzero
+ * The local MODE subset is 0: zero, 1/2: machine speed deviation,
+ * 3: electrical torque, 4: mechanical-power deviation from initialization,
+ * and 5: terminal voltage. MODE 2 uses speed as a local frequency proxy;
+ * MODE 4 does not subtract electrical power. Nonzero
  * BUSR values and mode 6 require cross-bus signal routing and are rejected.
  */
 class StabilizerPss2a: public Stabilizer {
@@ -33,8 +34,14 @@ class StabilizerPss2a: public Stabilizer {
     };
 
   protected:
-    static constexpr index_t rampLagCount = 5;
-    static constexpr index_t maxDifferentialStates = 14;
+    // Conservative storage for M,N<=8 (M*N<=8) plus six branch states and
+    // three lead-lags in the PSS2B extension; actual active layouts are smaller.
+    static constexpr index_t maximumRampStates = 16;
+    static constexpr index_t maxDifferentialStates = 25;
+    int rampM = 5;
+    int rampN = 1;
+    double T10 = 0.0;
+    double T11 = 0.0;
 
     int mode1 = 1;
     int remoteBus1 = 0;
@@ -65,9 +72,10 @@ class StabilizerPss2a: public Stabilizer {
     index_t branch2Derivative1State = kNullLocation;
     index_t branch2Derivative2State = kNullLocation;
     index_t branch2LagState = kNullLocation;
-    std::array<index_t, rampLagCount + 1> rampFilterState{};
+    std::array<index_t, maximumRampStates> rampFilterState{};
     index_t leadLag1State = kNullLocation;
     index_t leadLag2State = kNullLocation;
+    index_t leadLag3State = kNullLocation;
 
   public:
     explicit StabilizerPss2a(const std::string& objName = "pssPSS2A_#");
@@ -109,7 +117,7 @@ class StabilizerPss2a: public Stabilizer {
                          const SolverMode& sMode,
                          CheckLevel level) override;
 
-  private:
+  protected:
     struct LinearValue {
         double value = 0.0;
         std::array<double, maxDifferentialStates> stateGain{};
@@ -117,7 +125,9 @@ class StabilizerPss2a: public Stabilizer {
         double input2Gain = 0.0;
     };
 
-    [[nodiscard]] LinearValue selectedInput(const IOdata& inputs, int mode, bool first) const;
+    [[nodiscard]] virtual LinearValue
+        selectedInput(const IOdata& inputs, int mode, bool first) const;
+    [[nodiscard]] index_t rampStateCount() const;
     [[nodiscard]] static LinearValue derivativeBranch(const LinearValue& input,
                                                       const double state[],
                                                       index_t firstState,
