@@ -309,8 +309,10 @@ void DynamicGenerator::compileSignalRoutes()
     bind(PSS_LOC, pssPmechInLocation, mechanicalPower, "mechanical power");
     bind(PSS_LOC,
          pssElectricalPowerInLocation,
-         machineSignalBase + static_cast<index_t>(boundStabilizer != nullptr ?
-             boundStabilizer->electricalPowerSignal() : MachineControllerSignal::ELECTRICAL_TORQUE),
+         machineSignalBase +
+             static_cast<index_t>(boundStabilizer != nullptr ?
+                                      boundStabilizer->electricalPowerSignal() :
+                                      MachineControllerSignal::ELECTRICAL_TORQUE),
          "machine electrical power signal");
 
     bind(EXCITER_LOC, exciterVoltageInLocation, exciterVoltage, "exciter sensed voltage");

@@ -2131,10 +2131,12 @@ TEST(NewControlReaderTests, CoupledExciterEntersAndReleasesLimitsWithBothSolvers
 {
     for (const bool partitioned : {false, true}) {
         SCOPED_TRACE(partitioned);
-        auto simulation = loadComparisonDynamicCase("ieee14_genrou.dyr", {"ieee14_pss2b_esac2a.dyr"});
+        auto simulation =
+            loadComparisonDynamicCase("ieee14_genrou.dyr", {"ieee14_pss2b_esac2a.dyr"});
         auto* bus = dynamic_cast<griddyn::GridBus*>(simulation->findByUserID("bus", 2));
         ASSERT_NE(bus, nullptr);
-        auto* exciter = dynamic_cast<griddyn::exciters::ExciterESAC2A*>(bus->getGen(0)->find("exciter"));
+        auto* exciter =
+            dynamic_cast<griddyn::exciters::ExciterESAC2A*>(bus->getGen(0)->find("exciter"));
         ASSERT_NE(exciter, nullptr);
         for (const auto name : {"tr", "tb", "tc", "kc", "kd", "kf", "kh", "se1"}) {
             exciter->set(name, 0.0);

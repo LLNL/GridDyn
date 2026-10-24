@@ -32,14 +32,14 @@ is allowed. `M` and `N` must be integers in `[0,8]` with `M*N <= 8`.
 
 The supported signal subset is:
 
-| MODE | GridDyn input | Limitation |
-| --- | --- | --- |
-| 0 | Zero | Disabled input branch |
-| 1 | Machine speed minus 1 pu | Local machine only |
-| 2 | Machine speed minus 1 pu | Speed proxy; no independent bus-frequency measurement |
-| 3 | Terminal electrical power | Machine base, local machine only |
-| 4 | Mechanical power minus its initial value | No electrical-power subtraction; not a full accelerating-power signal |
-| 5 | Terminal voltage magnitude | Local terminal only |
+| MODE | GridDyn input                            | Limitation                                                            |
+| ---- | ---------------------------------------- | --------------------------------------------------------------------- |
+| 0    | Zero                                     | Disabled input branch                                                 |
+| 1    | Machine speed minus 1 pu                 | Local machine only                                                    |
+| 2    | Machine speed minus 1 pu                 | Speed proxy; no independent bus-frequency measurement                 |
+| 3    | Terminal electrical power                | Machine base, local machine only                                      |
+| 4    | Mechanical power minus its initial value | No electrical-power subtraction; not a full accelerating-power signal |
+| 5    | Terminal voltage magnitude               | Local terminal only                                                   |
 
 Nonzero `BUSR` and mode 6 are rejected.
 PSS2B requests terminal electrical power, including its analytic derivatives,
