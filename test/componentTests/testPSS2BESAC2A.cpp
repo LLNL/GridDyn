@@ -15,6 +15,7 @@
 #include <limits>
 #include <memory>
 #include <tuple>
+#include <vector>
 
 using namespace griddyn;
 
@@ -68,55 +69,59 @@ void configureStabilizer(stabilizers::StabilizerPss2b& model)
 
 // Numerical derivatives of the residual, including d(xdot)/dx=cj and every
 // input column. This also exercises clipped/limited branches away from kinks.
-void checkModelJacobian(GridSubModel& model, IOdata inputs, std::vector<double> state)
+void checkModelJacobian(GridSubModel& model, const IOdata& inputs, std::vector<double> state)
 {
     model.setOffset(0, cDaeSolverMode);
     ASSERT_EQ(model.stateSize(cDaeSolverMode), state.size());
+    const auto stateCount = static_cast<index_t>(state.size());
+    const auto inputCount = static_cast<index_t>(inputs.size());
     constexpr double step = 1e-6;
-    constexpr double cj = 0.73;
+    constexpr double jacobianCoefficient = 0.73;
     constexpr index_t inputBase = 100;
     std::vector<double> rate(state.size(), 0.0);
     IOlocs inputLocs(inputs.size());
-    for (index_t i = 0; i < inputs.size(); ++i) {
+    for (index_t i = 0; i < inputCount; ++i) {
         inputLocs[i] = inputBase + i;
     }
     StateData data(0.0, state.data(), rate.data());
-    data.cj = cj;
+    data.cj = jacobianCoefficient;
     data.stateSize = static_cast<count_t>(state.size());
     MatrixDataSparse<double> matrix;
     model.jacobianElements(inputs, data, matrix, inputLocs, cDaeSolverMode);
     EXPECT_LE(matrix.size(), model.jacSize(cDaeSolverMode));
     matrix.compact();
     const auto residual =
-        [&](const IOdata& in, const std::vector<double>& x, const std::vector<double>& dx) {
-            StateData trial(0.0, x.data(), dx.data());
-            trial.stateSize = static_cast<count_t>(x.size());
-            std::vector<double> values(x.size(), 0.0);
-            model.residual(in, trial, values.data(), cDaeSolverMode);
+        [&](const IOdata& inputValues,
+            const std::vector<double>& stateValues,
+            const std::vector<double>& rateValues) {
+            StateData trial(0.0, stateValues.data(), rateValues.data());
+            trial.stateSize = static_cast<count_t>(stateValues.size());
+            std::vector<double> values(stateValues.size(), 0.0);
+            model.residual(inputValues, trial, values.data(), cDaeSolverMode);
             return values;
         };
-    for (index_t col = 0; col < state.size() + inputs.size(); ++col) {
+    for (index_t col = 0; col < stateCount + inputCount; ++col) {
         auto plusState = state;
         auto minusState = state;
         auto plusRate = rate;
         auto minusRate = rate;
         auto plusInput = inputs;
         auto minusInput = inputs;
-        if (col < state.size()) {
+        if (col < stateCount) {
             plusState[col] += step;
             minusState[col] -= step;
             // Algebraic rows ignore xdot, so including cj there is harmless.
-            plusRate[col] += cj * step;
-            minusRate[col] -= cj * step;
+            plusRate[col] += jacobianCoefficient * step;
+            minusRate[col] -= jacobianCoefficient * step;
         } else {
-            plusInput[col - state.size()] += step;
-            minusInput[col - state.size()] -= step;
+            plusInput[col - stateCount] += step;
+            minusInput[col - stateCount] -= step;
         }
         const auto plus = residual(plusInput, plusState, plusRate);
         const auto minus = residual(minusInput, minusState, minusRate);
         const auto column =
-            col < state.size() ? col : inputBase + col - static_cast<index_t>(state.size());
-        for (index_t row = 0; row < state.size(); ++row) {
+            col < stateCount ? col : inputBase + col - stateCount;
+        for (index_t row = 0; row < stateCount; ++row) {
             const double numerical = (plus[row] - minus[row]) / (2.0 * step);
             EXPECT_NEAR(matrix.at(row, column),
                         numerical,
@@ -174,18 +179,18 @@ TEST(Pss2bTests, BypassedRampInputClippingAndThirdLeadLagMatchEquations)
 
 TEST(Pss2bTests, VariableRampOrdersAndPerturbedJacobians)
 {
-    for (const auto& [m, n] : {std::pair{5, 1}, {1, 3}, {2, 2}, {1, 8}, {8, 1}, {0, 0}}) {
-        SCOPED_TRACE(std::to_string(m) + "," + std::to_string(n));
+    for (const auto& [rampM, rampN] : {std::pair{5, 1}, {1, 3}, {2, 2}, {1, 8}, {8, 1}, {0, 0}}) {
+        SCOPED_TRACE(std::to_string(rampM) + "," + std::to_string(rampN));
         stabilizers::StabilizerPss2b model;
         configureStabilizer(model);
-        model.set("m", m);
-        model.set("n", n);
+        model.set("m", rampM);
+        model.set("n", rampN);
         model.dynInitializeA(0.0, 0);
         IOdata inputs{1.0, 1.0, 0.8, 0.7};
         IOdata fieldSet;
         model.dynInitializeB(inputs, {0.0}, fieldSet);
         const auto initialized = model.getStates();
-        const std::size_t rampStates = m == 0 || n == 0 ? 0 : m + n;
+        const std::size_t rampStates = rampM == 0 || rampN == 0 ? 0 : rampM + rampN;
         EXPECT_EQ(initialized.size(), 10 + rampStates);
         std::vector<double> residual(initialized.size(), 0.0);
         model.residual(inputs, emptyStateData, residual.data(), cLocalSolverMode);
@@ -245,7 +250,9 @@ TEST(Pss2bTests, BypassedWashoutsInitializeRemainingLagsAtSteadyState)
     for (const auto value : residual) {
         EXPECT_NEAR(value, 0.0, 1e-12);
     }
-    EXPECT_NEAR(model.getStates()[0], 2.0 * (0.02 + 0.8 * 0.7 * 0.7 - 0.7 * 0.7), 1e-12);
+    EXPECT_NEAR(model.getStates()[0],
+                2.0 * (0.02 + (0.8 * 0.7 * 0.7) - (0.7 * 0.7)),
+                1e-12);
     checkModelJacobian(model, inputs, model.getStates());
 }
 
@@ -261,12 +268,13 @@ TEST(Esac2aTests, SaturationRectifierAndNondefaultGainsInitializeAtEquilibrium)
     ASSERT_EQ(state.size(), 6U);
     // Chosen saturation points yield A=0, B=.1, VE*SE(VE)=.1*VE^2.
     // Low-current rectifier: EFD=VE-.577*.2*.5.
-    const double ve = 1.0577;
-    const double vfe = ve + 0.1 * ve * ve + 0.15;
-    EXPECT_NEAR(state[4], ve, 1e-12);
-    EXPECT_NEAR(state[5], vfe, 1e-12);
-    EXPECT_NEAR(state[3], 0.75 * vfe, 1e-12);
-    EXPECT_NEAR(state[2], 0.075 * vfe, 1e-12);
+    const double exciterVoltage = 1.0577;
+    const double fieldExcitationVoltage =
+        exciterVoltage + (0.1 * exciterVoltage * exciterVoltage) + 0.15;
+    EXPECT_NEAR(state[4], exciterVoltage, 1e-12);
+    EXPECT_NEAR(state[5], fieldExcitationVoltage, 1e-12);
+    EXPECT_NEAR(state[3], 0.75 * fieldExcitationVoltage, 1e-12);
+    EXPECT_NEAR(state[2], 0.075 * fieldExcitationVoltage, 1e-12);
     std::vector<double> residual(state.size(), 0.0);
     model.residual(inputs, emptyStateData, residual.data(), cLocalSolverMode);
     for (const auto value : residual) {
@@ -329,7 +337,7 @@ TEST(Esac2aTests, VariableFieldCeilingHasRectifiedSaturationAndCurrentJacobian)
     auto state = model.getStates();
     state[4] = 4.0;  // VE beyond the moving upper bound.
     state[3] = 10.0;  // Outward regulator drive freezes field integration.
-    const double ceiling = (-0.99423 + std::sqrt(0.99423 * 0.99423 + 1.14)) / 0.2;
+    const double ceiling = (-0.99423 + std::sqrt((0.99423 * 0.99423) + 1.14)) / 0.2;
     const double field = ceiling - 0.0577;
     std::vector<double> zero(state.size(), 0.0);
     model.setState(0.0, state.data(), zero.data(), cLocalSolverMode);
@@ -353,13 +361,14 @@ TEST(Esac2aTests, VariableFieldCeilingHasRectifiedSaturationAndCurrentJacobian)
 
 TEST(Esac2aTests, ZeroTimeBypassesAndRegulatorLimitsHaveAnalyticJacobians)
 {
-    for (const auto& [tr, tb, ta] : {std::tuple{0.0, 0.0, 0.0}, {0.0, 0.0, 0.2}, {0.1, 0.3, 0.0}}) {
+    for (const auto& [transducerTime, leadLagTime, amplifierTime] :
+         {std::tuple{0.0, 0.0, 0.0}, {0.0, 0.0, 0.2}, {0.1, 0.3, 0.0}}) {
         exciters::ExciterESAC2A model;
         configureExciter(model);
-        model.set("tr", tr);
-        model.set("tb", tb);
-        model.set("tc", tb == 0.0 ? 0.0 : 0.15);
-        model.set("ta", ta);
+        model.set("tr", transducerTime);
+        model.set("tb", leadLagTime);
+        model.set("tc", leadLagTime == 0.0 ? 0.0 : 0.15);
+        model.set("ta", amplifierTime);
         model.dynInitializeA(0.0, 0);
         auto inputs = exciterInputs();
         IOdata fieldSet;
@@ -367,7 +376,7 @@ TEST(Esac2aTests, ZeroTimeBypassesAndRegulatorLimitsHaveAnalyticJacobians)
         checkModelJacobian(model, inputs, model.getStates());
         inputs[exciterVsetInLocation] += 10.0;
         auto state = model.getStates();
-        if (ta > 0.0) {
+        if (amplifierTime > 0.0) {
             state[1] = 21.0;
         }
         checkModelJacobian(model, inputs, state);
@@ -435,9 +444,9 @@ TEST(Esac2aTests, VoltageStepsEnterAndReleaseRegulatorAndFieldLimits)
     IOdata fieldSet;
     model.dynInitializeB(inputs, {1.0}, fieldSet);
     inputs[exciterVsetInLocation] = 2.0;
-    constexpr double dt = 0.001;
+    constexpr double timeStep = 0.001;
     for (int i = 1; i <= 2000; ++i) {
-        model.timestep(i * dt, inputs, cLocalSolverMode);
+        model.timestep(i * timeStep, inputs, cLocalSolverMode);
     }
     // With TR/TB bypassed, the states are EFD, VA, VE and feedback.
     EXPECT_DOUBLE_EQ(model.getStates()[1], 3.0);
@@ -449,7 +458,7 @@ TEST(Esac2aTests, VoltageStepsEnterAndReleaseRegulatorAndFieldLimits)
     EXPECT_DOUBLE_EQ(rates[2], 0.0);
     inputs[exciterVsetInLocation] = 1.0;
     for (int i = 2001; i <= 6000; ++i) {
-        model.timestep(i * dt, inputs, cLocalSolverMode);
+        model.timestep(i * timeStep, inputs, cLocalSolverMode);
     }
     EXPECT_NEAR(model.getStates()[1], 1.0, 1e-7);
     EXPECT_NEAR(model.getStates()[2], 1.0, 0.001);

@@ -8,6 +8,9 @@
 #include "../Exciter.h"
 #include "ExciterSignalHelper.h"
 #include "utilities/Saturation.h"
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace griddyn::exciters {
 /** IEEE/PSS/E AC2A rotating excitation system.

@@ -10,9 +10,22 @@
 #include "utilities/MatrixData.hpp"
 #include <algorithm>
 #include <cmath>
+#include <string>
+#include <vector>
 
 namespace griddyn::exciters {
-using namespace detail;
+using detail::addSignals;
+using detail::applyFunction;
+using detail::clampSignal;
+using detail::constantSignal;
+using detail::divideSignals;
+using detail::inputSignal;
+using detail::integrationBlocked;
+using detail::multiplySignals;
+using detail::rectifierFactorSignal;
+using detail::scaleSignal;
+using detail::stateSignal;
+using detail::subtractSignals;
 namespace {
     constexpr int ceilingIterations = 60;
     constexpr int rectifierInverseIterations = 40;
@@ -34,7 +47,7 @@ CoreObject* ExciterESAC2A::clone(CoreObject* obj) const
     if (copy == nullptr) {
         return obj;
     }
-    for (const auto parameterName : {"tr",
+    for (const auto* const parameterName : {"tr",
                                      "tb",
                                      "tc",
                                      "te",
@@ -83,7 +96,7 @@ void ExciterESAC2A::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t flags
     if (!std::isfinite(Vref)) {
         throw InvalidParameterValue("ESAC2A voltage reference must be finite");
     }
-    for (const auto parameterName :
+    for (const auto* const parameterName :
          {"tr",     "tb", "tc", "ka", "ta", "te", "vamax", "vamin", "kb",  "vrmax", "vrmin",
           "vfemax", "kh", "kf", "tf", "kc", "kd", "ke",    "e1",    "se1", "e2",    "se2"}) {
         if (!std::isfinite(get(parameterName))) {
@@ -110,7 +123,7 @@ void ExciterESAC2A::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t flags
     offsets.local().local.diffSize = layout().count;
     offsets.local().local.algRoots = 4;
     offsets.local().local.jacSize =
-        maximumStates * (maximumStates + exciterInputCount) + exciterInputCount + 1;
+        (maximumStates * (maximumStates + exciterInputCount)) + exciterInputCount + 1;
 }
 
 ExciterESAC2A::Signal ExciterESAC2A::rectified(const Signal& voltage, const Signal& current) const
@@ -129,7 +142,7 @@ ExciterESAC2A::Signal ExciterESAC2A::saturated(const Signal& voltage) const
 
 ExciterESAC2A::Signal ExciterESAC2A::ceiling(const Signal& current) const
 {
-    const double available = Vfemax - Kd * current.value;
+    const double available = Vfemax - (Kd * current.value);
     if (available <= 0.0) {
         throw InvalidParameterValue("ESAC2A field-current ceiling must be positive");
     }
@@ -149,8 +162,9 @@ ExciterESAC2A::Signal ExciterESAC2A::ceiling(const Signal& current) const
     for (int iteration = 0; iteration < ceilingIterations; ++iteration) {
         const double value = 0.5 * (low + high);
         const auto field = rectified(constantSignal<maximumStates>(value), current);
-        const double se = field.value > 1e-12 ? saturation(field.value) / field.value : 0.0;
-        if (value * (Ke + se) > available) {
+        const double saturationRatio =
+            field.value > 1e-12 ? saturation(field.value) / field.value : 0.0;
+        if (value * (Ke + saturationRatio) > available) {
             high = value;
         } else {
             low = value;
@@ -158,13 +172,17 @@ ExciterESAC2A::Signal ExciterESAC2A::ceiling(const Signal& current) const
     }
     const double value = 0.5 * (low + high);
     const auto field = rectified(stateSignal<maximumStates>(value, 0), current);
-    const double se = field.value > 1e-12 ? saturation(field.value) / field.value : 0.0;
+    const double saturationRatio =
+        field.value > 1e-12 ? saturation(field.value) / field.value : 0.0;
     const double seDerivative =
-        field.value > 1e-12 ? (saturation.deriv(field.value) - se) / field.value : 0.0;
-    const double slope = Ke + se + value * seDerivative * field.state[0];
+        field.value > 1e-12 ? (saturation.deriv(field.value) - saturationRatio) / field.value : 0.0;
+    const double slope = Ke + saturationRatio + (value * seDerivative * field.state[0]);
     Signal result = constantSignal<maximumStates>(value);
-    for (index_t i = 0; i < exciterInputCount; ++i) {
-        result.input[i] = (-Kd * current.input[i] - value * seDerivative * field.input[i]) / slope;
+    for (index_t inputIndex = 0; inputIndex < exciterInputCount; ++inputIndex) {
+        result.input[inputIndex] =
+            ((-Kd * current.input[inputIndex]) -
+             (value * seDerivative * field.input[inputIndex])) /
+            slope;
     }
     return result;
 }
@@ -173,31 +191,36 @@ ExciterESAC2A::Evaluation ExciterESAC2A::evaluate(const IOdata& inputs, const do
 {
     const auto loc = layout();
     const auto constant = [](double value) { return constantSignal<maximumStates>(value); };
-    const auto x = [state](index_t i) { return stateSignal<maximumStates>(state[i], i); };
-    const auto in = [&inputs](index_t i) { return inputSignal<maximumStates>(inputs, i); };
-    const auto current = in(exciterXadIfdInLocation);
+    const auto stateAt = [state](index_t stateIndex) {
+        return stateSignal<maximumStates>(state[stateIndex], stateIndex);
+    };
+    const auto inputAt = [&inputs](index_t inputIndex) {
+        return inputSignal<maximumStates>(inputs, inputIndex);
+    };
+    const auto current = inputAt(exciterXadIfdInLocation);
     Evaluation result;
     result.ceiling = ceiling(current);
-    const auto voltage = clampSignal(x(loc.exciter), constant(0.0), result.ceiling);
+    const auto voltage = clampSignal(stateAt(loc.exciter), constant(0.0), result.ceiling);
     result.field = rectified(voltage, current);
     const auto feedback = addSignals(addSignals(scaleSignal(voltage, Ke), saturated(voltage)),
                                      scaleSignal(current, Kd));
-    const auto measured = Tr > 0.0 ? x(loc.voltage) : in(exciterVoltageInLocation);
+    const auto measured = Tr > 0.0 ? stateAt(loc.voltage) : inputAt(exciterVoltageInLocation);
     auto error =
         subtractSignals(addSignals(constant(Vref + vBias - 1.0),
-                                   addSignals(in(exciterVsetInLocation), in(exciterVssInLocation))),
+                                   addSignals(inputAt(exciterVsetInLocation),
+                                              inputAt(exciterVssInLocation))),
                         measured);
     error =
-        subtractSignals(error, scaleSignal(subtractSignals(feedback, x(loc.feedback)), Kf / Tf));
+        subtractSignals(error, scaleSignal(subtractSignals(feedback, stateAt(loc.feedback)), Kf / Tf));
     const auto lead = Tb > 0.0 ?
-        addSignals(x(loc.lead), scaleSignal(subtractSignals(error, x(loc.lead)), Tc / Tb)) :
+        addSignals(stateAt(loc.lead), scaleSignal(subtractSignals(error, stateAt(loc.lead)), Tc / Tb)) :
         error;
-    const auto regulatorState = Ta > 0.0 ? x(loc.regulator) : scaleSignal(lead, Ka);
+    const auto regulatorState = Ta > 0.0 ? stateAt(loc.regulator) : scaleSignal(lead, Ka);
     const auto regulator = clampSignal(regulatorState, Vamin, Vamax);
     result.regulatorDrive = subtractSignals(scaleSignal(lead, Ka), regulatorState);
     auto target = scaleSignal(subtractSignals(regulator, scaleSignal(feedback, Kh)), Kb);
-    const auto under = in(exciterVuelInLocation);
-    const auto over = in(exciterVoelInLocation);
+    const auto under = inputAt(exciterVuelInLocation);
+    const auto over = inputAt(exciterVoelInLocation);
     if (underSelectorEnabled && target.value < under.value) {
         target = under;
     }
@@ -208,10 +231,10 @@ ExciterESAC2A::Evaluation ExciterESAC2A::evaluate(const IOdata& inputs, const do
     result.exciterDrive = subtractSignals(target, feedback);
     if (Tr > 0.0) {
         result.rates[loc.voltage] =
-            scaleSignal(subtractSignals(in(exciterVoltageInLocation), measured), 1.0 / Tr);
+            scaleSignal(subtractSignals(inputAt(exciterVoltageInLocation), measured), 1.0 / Tr);
     }
     if (Tb > 0.0) {
-        result.rates[loc.lead] = scaleSignal(subtractSignals(error, x(loc.lead)), 1.0 / Tb);
+        result.rates[loc.lead] = scaleSignal(subtractSignals(error, stateAt(loc.lead)), 1.0 / Tb);
     }
     if (Ta > 0.0) {
         result.rates[loc.regulator] = integrationBlocked<maximumStates>(state[loc.regulator],
@@ -227,7 +250,8 @@ ExciterESAC2A::Evaluation ExciterESAC2A::evaluate(const IOdata& inputs, const do
                                                                   result.exciterDrive) ?
         constant(0.0) :
         scaleSignal(result.exciterDrive, 1.0 / Te);
-    result.rates[loc.feedback] = scaleSignal(subtractSignals(feedback, x(loc.feedback)), 1.0 / Tf);
+    result.rates[loc.feedback] =
+        scaleSignal(subtractSignals(feedback, stateAt(loc.feedback)), 1.0 / Tf);
     return result;
 }
 
@@ -249,7 +273,7 @@ void ExciterESAC2A::dynObjectInitializeB(const IOdata& inputs,
     }
     const double field = desiredOutput[0];
     const auto current = inputSignal<maximumStates>(inputs, exciterXadIfdInLocation);
-    double voltage = std::max(0.01, field + Kc * std::max(0.0, current.value));
+    double voltage = std::max(0.01, field + (Kc * std::max(0.0, current.value)));
     // Invert EFD=VE*FEX(KC*Ifd/VE) using the same piecewise analytic slope
     // as the solver callbacks. The final equilibrium check detects failure.
     for (int iteration = 0; iteration < rectifierInverseIterations; ++iteration) {
@@ -261,10 +285,10 @@ void ExciterESAC2A::dynObjectInitializeB(const IOdata& inputs,
             voltage *= 2.0;
             continue;
         }
-        voltage = std::max(0.0, voltage - (output.value - field) / output.state[0]);
+        voltage = std::max(0.0, voltage - ((output.value - field) / output.state[0]));
     }
-    const double feedback = Ke * voltage + saturation(voltage) + Kd * current.value;
-    const double regulator = (Kh + 1.0 / Kb) * feedback;
+    const double feedback = (Ke * voltage) + saturation(voltage) + (Kd * current.value);
+    const double regulator = (Kh + (1.0 / Kb)) * feedback;
     if (regulator < Vamin ||
         !adjustInitialUpperLimit(regulator, Vamax, "ESAC2A initial regulator") ||
         feedback < Vrmin ||
@@ -272,8 +296,8 @@ void ExciterESAC2A::dynObjectInitializeB(const IOdata& inputs,
         throw InvalidParameterValue("ESAC2A initial regulator or field drive outside limits");
     }
     if (voltage > ceiling(current).value + 1e-8) {
-        const double se = field > 1e-12 ? saturation(field) / field : 0.0;
-        if (!adjustInitialUpperLimit(voltage * (Ke + se) + Kd * current.value,
+        const double saturationRatio = field > 1e-12 ? saturation(field) / field : 0.0;
+        if (!adjustInitialUpperLimit((voltage * (Ke + saturationRatio)) + (Kd * current.value),
                                      Vfemax,
                                      "ESAC2A initial field ceiling")) {
             throw InvalidParameterValue("ESAC2A initial field voltage outside ceiling");
@@ -293,7 +317,7 @@ void ExciterESAC2A::dynObjectInitializeB(const IOdata& inputs,
     state[loc.exciter] = voltage;
     state[loc.feedback] = feedback;
     m_state[0] = field;
-    vBias = inputs[exciterVoltageInLocation] + regulator / Ka - Vref -
+    vBias = inputs[exciterVoltageInLocation] + (regulator / Ka) - Vref -
         (inputs[exciterVsetInLocation] - 1.0) - inputs[exciterVssInLocation];
     fieldSet.resize(2);
     fieldSet[exciterVsetInLocation] = Vref;
@@ -322,8 +346,9 @@ void ExciterESAC2A::residual(const IOdata& inputs,
         loc.destLoc[0] = result.field.value - loc.algStateLoc[0];
     }
     if (hasDifferential(sMode)) {
-        for (index_t i = 0; i < loc.diffSize; ++i) {
-            loc.destDiffLoc[i] = result.rates[i].value - loc.dstateLoc[i];
+        for (index_t differentialIndex = 0; differentialIndex < loc.diffSize; ++differentialIndex) {
+            loc.destDiffLoc[differentialIndex] =
+                result.rates[differentialIndex].value - loc.dstateLoc[differentialIndex];
         }
     }
 }
@@ -338,8 +363,8 @@ void ExciterESAC2A::derivative(const IOdata& inputs,
     }
     const auto loc = offsets.getLocations(stateData, deriv, sMode, this);
     const auto result = evaluate(inputs, loc.diffStateLoc);
-    for (index_t i = 0; i < loc.diffSize; ++i) {
-        loc.destDiffLoc[i] = result.rates[i].value;
+    for (index_t differentialIndex = 0; differentialIndex < loc.diffSize; ++differentialIndex) {
+        loc.destDiffLoc[differentialIndex] = result.rates[differentialIndex].value;
     }
 }
 
@@ -371,9 +396,9 @@ void ExciterESAC2A::jacobianElements(const IOdata& inputs,
                 }
             }
         }
-        for (index_t i = 0; i < exciterInputCount; ++i) {
-            if (signal.input[i] != 0.0) {
-                matrixData.assignCheckCol(row, inputLocs[i], signal.input[i]);
+        for (index_t inputIndex = 0; inputIndex < exciterInputCount; ++inputIndex) {
+            if (signal.input[inputIndex] != 0.0) {
+                matrixData.assignCheckCol(row, inputLocs[inputIndex], signal.input[inputIndex]);
             }
         }
     };
@@ -415,8 +440,8 @@ bool ExciterESAC2A::projectLimits(const IOdata& inputs)
 void ExciterESAC2A::timestep(CoreTime time, const IOdata& inputs, const SolverMode& /*sMode*/)
 {
     derivative(inputs, emptyStateData, m_dstate_dt.data(), cLocalSolverMode);
-    for (index_t i = 0; i < layout().count; ++i) {
-        m_state[i + 1] += (time - prevTime) * m_dstate_dt[i + 1];
+    for (index_t stateIndex = 0; stateIndex < layout().count; ++stateIndex) {
+        m_state[stateIndex + 1] += (time - prevTime) * m_dstate_dt[stateIndex + 1];
     }
     projectLimits(inputs);
     m_state[0] = evaluate(inputs, m_state.data() + 1).field.value;
@@ -445,8 +470,8 @@ void ExciterESAC2A::rootTrigger(CoreTime /*time*/,
                                 const SolverMode& sMode)
 {
     const auto start = offsets.getRootOffset(sMode);
-    for (index_t i = 0; i < 4; ++i) {
-        if (rootMask[start + i] != 0) {
+    for (index_t rootIndex = 0; rootIndex < 4; ++rootIndex) {
+        if (rootMask[start + rootIndex] != 0) {
             projectLimits(inputs);
             alert(this, JAC_COUNT_CHANGE);
             break;
@@ -489,12 +514,18 @@ index_t ExciterESAC2A::findIndex(std::string_view field, const SolverMode& sMode
         return offsets.getAlgOffset(sMode);
     }
     const auto loc = layout();
-    const index_t index = field == "vc" ? loc.voltage :
-        field == "xll"                  ? loc.lead :
-        field == "va"                   ? loc.regulator :
-        field == "ve"                   ? loc.exciter :
-        field == "vf"                   ? loc.feedback :
-                                          kNullLocation;
+    index_t index = kNullLocation;
+    if (field == "vc") {
+        index = loc.voltage;
+    } else if (field == "xll") {
+        index = loc.lead;
+    } else if (field == "va") {
+        index = loc.regulator;
+    } else if (field == "ve") {
+        index = loc.exciter;
+    } else if (field == "vf") {
+        index = loc.feedback;
+    }
     return index == kNullLocation ? kInvalidLocation : offsets.getDiffOffset(sMode) + index;
 }
 

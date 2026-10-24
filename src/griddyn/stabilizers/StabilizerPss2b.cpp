@@ -9,6 +9,8 @@
 #include "core/CoreObjectTemplates.hpp"
 #include <algorithm>
 #include <cmath>
+#include <string>
+#include <vector>
 
 namespace griddyn::stabilizers {
 StabilizerPss2b::StabilizerPss2b(const std::string& objName): StabilizerPss2a(objName)
@@ -73,7 +75,7 @@ void StabilizerPss2b::dynObjectInitializeB(const IOdata& inputs,
     if (branch2LagState != kNullLocation) {
         state[branch2LagState] = second;
     }
-    const double summed = first + Ks3 * second;
+    const double summed = first + (Ks3 * second);
     for (index_t stage = 0; stage < rampStateCount(); ++stage) {
         state[rampFilterState[stage]] = summed;
     }
@@ -121,8 +123,8 @@ void StabilizerPss2b::rootTrigger(CoreTime time,
 {
     StabilizerPss2a::rootTrigger(time, inputs, rootMask, sMode);
     const auto offset = offsets.getRootOffset(sMode) + 2;
-    for (index_t i = 0; i < 4; ++i) {
-        if (rootMask[offset + i] != 0) {
+    for (index_t rootIndex = 0; rootIndex < 4; ++rootIndex) {
+        if (rootMask[offset + rootIndex] != 0) {
             alert(this, JAC_COUNT_CHANGE);
             break;
         }

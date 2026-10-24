@@ -446,8 +446,8 @@ void StabilizerPss2a::derivative(const IOdata& inputs,
     for (index_t stage = 0; stage < rampStateCount(); ++stage) {
         stateDerivative[rampFilterState[stage]] = (previous - state[rampFilterState[stage]]) / T9;
         const double ratio = (stage < static_cast<index_t>(rampN)) ? T8 / T9 : 0.0;
-        previous =
-            state[rampFilterState[stage]] + ratio * (previous - state[rampFilterState[stage]]);
+        previous = state[rampFilterState[stage]] +
+            (ratio * (previous - state[rampFilterState[stage]]));
     }
     const double preCompensator = Ks1 * (previous - branch2);
     const double firstLeadLag = (T2 > 0.0) ?
@@ -460,7 +460,7 @@ void StabilizerPss2a::derivative(const IOdata& inputs,
         stateDerivative[leadLag2State] = (firstLeadLag - state[leadLag2State]) / T4;
     }
     const double secondLeadLag = (T4 > 0.0) ?
-        state[leadLag2State] + (T3 / T4) * (firstLeadLag - state[leadLag2State]) :
+        state[leadLag2State] + ((T3 / T4) * (firstLeadLag - state[leadLag2State])) :
         firstLeadLag;
     if (T11 > 0.0) {
         stateDerivative[leadLag3State] = (secondLeadLag - state[leadLag3State]) / T11;
@@ -667,7 +667,7 @@ void StabilizerPss2a::jacobianElements(const IOdata& inputs,
         addExpression(refDiff + leadLag3State, secondLeadLag, 1.0 / T11, true);
         matrixData.assign(refDiff + leadLag3State,
                           refDiff + leadLag3State,
-                          -1.0 / T11 - stateData.cj);
+                          -(1.0 / T11) - stateData.cj);
     }
 }
 

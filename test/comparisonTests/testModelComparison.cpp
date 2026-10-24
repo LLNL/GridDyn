@@ -2120,8 +2120,8 @@ TEST(NewControlReaderTests, CoupledModelsHavePartitionedEquationsAndJacobians)
         EXPECT_EQ(runJacobianCheck(simulation, diffMode, false), 0);
         for (const auto& mode : {algMode, diffMode}) {
             const auto states = simulation->getState(mode);
-            EXPECT_TRUE(std::all_of(states.begin(), states.end(), [](double x) {
-                return std::isfinite(x);
+            EXPECT_TRUE(std::all_of(states.begin(), states.end(), [](double stateValue) {
+                return std::isfinite(stateValue);
             }));
         }
     }
@@ -2197,8 +2197,8 @@ TEST(NewControlReaderTests, RejectsMalformedRecordsAndRemoteSignals)
             std::filesystem::path path;
             ~Cleanup()
             {
-                std::error_code ec;
-                std::filesystem::remove(path, ec);
+                std::error_code errorCode;
+                std::filesystem::remove(path, errorCode);
             }
         } cleanup{path};
         for (const auto& [name, payload] : payloads) {
@@ -2218,7 +2218,7 @@ TEST(NewControlReaderTests, RejectsMalformedRecordsAndRemoteSignals)
                         output << "2 '" << name << "' '1' " << bad << " /\n";
                     } else {
                         output << "models\n"
-                               << name << " 2 \"BUS2\" 69 \"1\" : #9 " << bad << " /\n";
+                               << name << R"( 2 "BUS2" 69 "1" : #9 )" << bad << " /\n";
                     }
                 }
                 auto simulation = loadComparisonDynamicCase("ieee14_genrou.dyr", {});
@@ -2388,8 +2388,8 @@ TEST(Esst2aReaderTests, CompoundSourceAndBypassesHavePartitionedEquationsWithPss
             for (const auto& mode : {algMode, diffMode}) {
                 EXPECT_EQ(runJacobianCheck(simulation, mode, false), 0);
                 const auto state = simulation->getState(mode);
-                EXPECT_TRUE(std::all_of(state.begin(), state.end(), [](double x) {
-                    return std::isfinite(x);
+                EXPECT_TRUE(std::all_of(state.begin(), state.end(), [](double stateValue) {
+                    return std::isfinite(stateValue);
                 }));
             }
         }

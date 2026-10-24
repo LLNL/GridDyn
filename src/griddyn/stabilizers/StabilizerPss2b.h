@@ -6,6 +6,9 @@
 #pragma once
 
 #include "StabilizerPss2a.h"
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace griddyn::stabilizers {
 /** PSS/E PSS2B dual-input power-system stabilizer.
