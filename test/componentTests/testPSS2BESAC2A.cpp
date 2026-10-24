@@ -90,16 +90,15 @@ void checkModelJacobian(GridSubModel& model, const IOdata& inputs, std::vector<d
     model.jacobianElements(inputs, data, matrix, inputLocs, cDaeSolverMode);
     EXPECT_LE(matrix.size(), model.jacSize(cDaeSolverMode));
     matrix.compact();
-    const auto residual =
-        [&](const IOdata& inputValues,
-            const std::vector<double>& stateValues,
-            const std::vector<double>& rateValues) {
-            StateData trial(0.0, stateValues.data(), rateValues.data());
-            trial.stateSize = static_cast<count_t>(stateValues.size());
-            std::vector<double> values(stateValues.size(), 0.0);
-            model.residual(inputValues, trial, values.data(), cDaeSolverMode);
-            return values;
-        };
+    const auto residual = [&](const IOdata& inputValues,
+                              const std::vector<double>& stateValues,
+                              const std::vector<double>& rateValues) {
+        StateData trial(0.0, stateValues.data(), rateValues.data());
+        trial.stateSize = static_cast<count_t>(stateValues.size());
+        std::vector<double> values(stateValues.size(), 0.0);
+        model.residual(inputValues, trial, values.data(), cDaeSolverMode);
+        return values;
+    };
     for (index_t col = 0; col < stateCount + inputCount; ++col) {
         auto plusState = state;
         auto minusState = state;
@@ -119,8 +118,7 @@ void checkModelJacobian(GridSubModel& model, const IOdata& inputs, std::vector<d
         }
         const auto plus = residual(plusInput, plusState, plusRate);
         const auto minus = residual(minusInput, minusState, minusRate);
-        const auto column =
-            col < stateCount ? col : inputBase + col - stateCount;
+        const auto column = col < stateCount ? col : inputBase + col - stateCount;
         for (index_t row = 0; row < stateCount; ++row) {
             const double numerical = (plus[row] - minus[row]) / (2.0 * step);
             EXPECT_NEAR(matrix.at(row, column),
@@ -250,9 +248,7 @@ TEST(Pss2bTests, BypassedWashoutsInitializeRemainingLagsAtSteadyState)
     for (const auto value : residual) {
         EXPECT_NEAR(value, 0.0, 1e-12);
     }
-    EXPECT_NEAR(model.getStates()[0],
-                2.0 * (0.02 + (0.8 * 0.7 * 0.7) - (0.7 * 0.7)),
-                1e-12);
+    EXPECT_NEAR(model.getStates()[0], 2.0 * (0.02 + (0.8 * 0.7 * 0.7) - (0.7 * 0.7)), 1e-12);
     checkModelJacobian(model, inputs, model.getStates());
 }
 

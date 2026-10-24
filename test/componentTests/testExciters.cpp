@@ -2550,8 +2550,7 @@ TEST(ExciterModelTests, Dc2aInitializedUpperLimitIsQuietUnderSmallVoltageNoise)
     class InspectableDC2A final: public exciters::ExciterDC2A {
       public:
         [[nodiscard]] double rawUpperLimit() const { return Vrmax; }
-        [[nodiscard]] double heldBranchDrive(const std::vector<double>& state,
-                                             double voltage) const
+        [[nodiscard]] double heldBranchDrive(const std::vector<double>& state, double voltage) const
         {
             return ((((Vref + vBias - voltage) - ((state[0] * Kf) / Tf)) + state[3]) * Ka * Tc /
                     Tb) +
@@ -3782,9 +3781,7 @@ TEST(Esst2aTests, CompoundSourceAllRectifierSegmentsAndBypassesHaveJacobians)
         } else if (normalizedCurrent <= 1.0) {
             fex = squareRootOfThreeApproximation * (1.0 - normalizedCurrent);
         }
-        EXPECT_NEAR(rates[4],
-                    ((voltageMagnitude * fex * 0.7) - 1.1) / 0.5,
-                    1e-12);
+        EXPECT_NEAR(rates[4], ((voltageMagnitude * fex * 0.7) - 1.1) / 0.5, 1e-12);
         expectExciterJacobian(model, inputs, state);
         expectExciterDaeJacobian(model, inputs, state, 0.7, 1e-4);
     }

@@ -446,8 +446,8 @@ void StabilizerPss2a::derivative(const IOdata& inputs,
     for (index_t stage = 0; stage < rampStateCount(); ++stage) {
         stateDerivative[rampFilterState[stage]] = (previous - state[rampFilterState[stage]]) / T9;
         const double ratio = (stage < static_cast<index_t>(rampN)) ? T8 / T9 : 0.0;
-        previous = state[rampFilterState[stage]] +
-            (ratio * (previous - state[rampFilterState[stage]]));
+        previous =
+            state[rampFilterState[stage]] + (ratio * (previous - state[rampFilterState[stage]]));
     }
     const double preCompensator = Ks1 * (previous - branch2);
     const double firstLeadLag = (T2 > 0.0) ?

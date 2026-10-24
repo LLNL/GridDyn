@@ -48,23 +48,23 @@ CoreObject* ExciterESAC2A::clone(CoreObject* obj) const
         return obj;
     }
     for (const auto* const parameterName : {"tr",
-                                     "tb",
-                                     "tc",
-                                     "te",
-                                     "vamax",
-                                     "vamin",
-                                     "kb",
-                                     "vfemax",
-                                     "kh",
-                                     "kf",
-                                     "tf",
-                                     "kc",
-                                     "kd",
-                                     "ke",
-                                     "e1",
-                                     "se1",
-                                     "e2",
-                                     "se2"}) {
+                                            "tb",
+                                            "tc",
+                                            "te",
+                                            "vamax",
+                                            "vamin",
+                                            "kb",
+                                            "vfemax",
+                                            "kh",
+                                            "kf",
+                                            "tf",
+                                            "kc",
+                                            "kd",
+                                            "ke",
+                                            "e1",
+                                            "se1",
+                                            "e2",
+                                            "se2"}) {
         copy->set(parameterName, get(parameterName));
     }
     copy->saturation = saturation;
@@ -180,8 +180,7 @@ ExciterESAC2A::Signal ExciterESAC2A::ceiling(const Signal& current) const
     Signal result = constantSignal<maximumStates>(value);
     for (index_t inputIndex = 0; inputIndex < exciterInputCount; ++inputIndex) {
         result.input[inputIndex] =
-            ((-Kd * current.input[inputIndex]) -
-             (value * seDerivative * field.input[inputIndex])) /
+            ((-Kd * current.input[inputIndex]) - (value * seDerivative * field.input[inputIndex])) /
             slope;
     }
     return result;
@@ -205,15 +204,15 @@ ExciterESAC2A::Evaluation ExciterESAC2A::evaluate(const IOdata& inputs, const do
     const auto feedback = addSignals(addSignals(scaleSignal(voltage, Ke), saturated(voltage)),
                                      scaleSignal(current, Kd));
     const auto measured = Tr > 0.0 ? stateAt(loc.voltage) : inputAt(exciterVoltageInLocation);
-    auto error =
-        subtractSignals(addSignals(constant(Vref + vBias - 1.0),
-                                   addSignals(inputAt(exciterVsetInLocation),
-                                              inputAt(exciterVssInLocation))),
-                        measured);
-    error =
-        subtractSignals(error, scaleSignal(subtractSignals(feedback, stateAt(loc.feedback)), Kf / Tf));
+    auto error = subtractSignals(addSignals(constant(Vref + vBias - 1.0),
+                                            addSignals(inputAt(exciterVsetInLocation),
+                                                       inputAt(exciterVssInLocation))),
+                                 measured);
+    error = subtractSignals(error,
+                            scaleSignal(subtractSignals(feedback, stateAt(loc.feedback)), Kf / Tf));
     const auto lead = Tb > 0.0 ?
-        addSignals(stateAt(loc.lead), scaleSignal(subtractSignals(error, stateAt(loc.lead)), Tc / Tb)) :
+        addSignals(stateAt(loc.lead),
+                   scaleSignal(subtractSignals(error, stateAt(loc.lead)), Tc / Tb)) :
         error;
     const auto regulatorState = Ta > 0.0 ? stateAt(loc.regulator) : scaleSignal(lead, Ka);
     const auto regulator = clampSignal(regulatorState, Vamin, Vamax);
