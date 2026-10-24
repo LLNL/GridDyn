@@ -193,7 +193,7 @@ void loadPSAT(CoreObject* parentObject,
                          swingBusData,
                          pvBusData,
                          pqBusData,
-                         filetext.find("Syn.con") != std::string::npos,
+                         filetext.contains("Syn.con"),
                          busNames,
                          busList);
     }

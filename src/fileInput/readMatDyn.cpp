@@ -72,7 +72,7 @@ void loadMatDyn(CoreObject* parentObject,
     std::vector<Generator*> genList;
     // read the frequency
     size_t openBracketPos = fileView.find_first_of('[', 0);
-    size_t closeBracketPos = fileView.find_first_of(']', 0);
+    const size_t closeBracketPos = fileView.find_first_of(']', 0);
     auto tokenString = fileView.substr(openBracketPos + 1, closeBracketPos - openBracketPos - 1);
     auto tokens = split(tokenString, "\t ,", delimiter_compression::on);
 
