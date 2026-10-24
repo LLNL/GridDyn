@@ -976,9 +976,9 @@ void AcBus::dynObjectInitializeB(const IOdata& /*inputs*/,
     // source available to cover the solved network injection.
     const bool useUniformPowerWeights = !busController.pcfrac.empty() &&
         busController.pControlLinks.empty() &&
-        std::all_of(busController.pcfrac.begin(),
-                    busController.pcfrac.end(),
-                    [](double weight) { return weight <= 0.0; });
+        std::all_of(busController.pcfrac.begin(), busController.pcfrac.end(), [](double weight) {
+            return weight <= 0.0;
+        });
     const auto powerControlWeight = [this, useUniformPowerWeights](size_t index) {
         return useUniformPowerWeights ? 1.0 / busController.pcfrac.size() :
                                         busController.pcfrac[index];

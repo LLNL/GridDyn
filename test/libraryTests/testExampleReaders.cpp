@@ -1184,8 +1184,7 @@ TEST(ExampleReaderTests, LoadAndInitializePsatDetailedModels)
 
 TEST(ExampleReaderTests, ExportPyPowerRoundTrip)
 {
-    const auto source =
-        makeMatlabTestPath("case9.m");
+    const auto source = makeMatlabTestPath("case9.m");
     const auto exported = std::filesystem::temp_directory_path() / "griddyn_pypower_roundtrip.py";
     auto original = std::make_unique<griddyn::GridDynSimulation>();
     griddyn::loadFile(original, source.string());

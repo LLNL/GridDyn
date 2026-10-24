@@ -9,8 +9,8 @@
 #include "griddyn/Generator.h"
 #include "griddyn/events/Event.h"
 #include "griddyn/exciters/ExciterIEEEtype1.h"
-#include "griddyn/griddyn-config.h"
 #include "griddyn/generators/DynamicGenerator.h"
+#include "griddyn/griddyn-config.h"
 #include "griddyn/links/AcLine.h"
 #include "griddyn/links/AdjustableTransformer.h"
 #include "griddyn/loads/MotorLoad.h"
@@ -672,7 +672,6 @@ namespace {
                           const mArray& syn,
                           const std::vector<GridBus*>& busList)
     {
-        using genmodels::GenModelClassical;
         using genmodels::GenModel3;
         using genmodels::GenModel4;
         using genmodels::GenModel5;
@@ -680,6 +679,7 @@ namespace {
         using genmodels::GenModel5type3;
         using genmodels::GenModel6type2;
         using genmodels::GenModel8;
+        using genmodels::GenModelClassical;
 
         int index = 1;
         for (const auto& genData : syn) {

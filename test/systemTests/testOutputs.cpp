@@ -33,96 +33,95 @@ static const char pFlow_test_directory[] = GRIDDYN_TEST_DIRECTORY "/pFlow_tests/
 class OutputTests: public GridDynSimulationTestFixture, public ::testing::Test {};
 
 namespace {
-    class OutputFileCleanup {
-      public:
-        void track(const std::string& fileName) { fileNames.push_back(fileName); }
+class OutputFileCleanup {
+  public:
+    void track(const std::string& fileName) { fileNames.push_back(fileName); }
 
-        ~OutputFileCleanup()
-        {
-            std::error_code error;
-            for (const auto& fileName : fileNames) {
-                std::filesystem::remove(fileName, error);
-                error.clear();
-            }
-        }
-
-      private:
-        std::vector<std::string> fileNames;
-    };
-
-    std::string readTextFile(const std::string& fileName)
+    ~OutputFileCleanup()
     {
-        std::ifstream input(fileName, std::ios::binary);
-        return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+        std::error_code error;
+        for (const auto& fileName : fileNames) {
+            std::filesystem::remove(fileName, error);
+            error.clear();
+        }
     }
 
-    std::vector<std::string> parseCsvRow(const std::string& line)
-    {
-        std::vector<std::string> fields;
-        std::string field;
-        bool inQuotes = false;
-        for (size_t charIndex = 0; charIndex < line.size(); ++charIndex) {
-            const char currentChar = line[charIndex];
-            if (currentChar == '"') {
-                if (inQuotes && charIndex + 1 < line.size() && line[charIndex + 1] == '"') {
-                    field.push_back('"');
-                    ++charIndex;
-                } else {
-                    inQuotes = !inQuotes;
-                }
-            } else if (currentChar == ',' && !inQuotes) {
-                fields.push_back(std::move(field));
-                field.clear();
+  private:
+    std::vector<std::string> fileNames;
+};
+
+std::string readTextFile(const std::string& fileName)
+{
+    std::ifstream input(fileName, std::ios::binary);
+    return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+}
+
+std::vector<std::string> parseCsvRow(const std::string& line)
+{
+    std::vector<std::string> fields;
+    std::string field;
+    bool inQuotes = false;
+    for (size_t charIndex = 0; charIndex < line.size(); ++charIndex) {
+        const char currentChar = line[charIndex];
+        if (currentChar == '"') {
+            if (inQuotes && charIndex + 1 < line.size() && line[charIndex + 1] == '"') {
+                field.push_back('"');
+                ++charIndex;
             } else {
-                field.push_back(currentChar);
+                inQuotes = !inQuotes;
             }
+        } else if (currentChar == ',' && !inQuotes) {
+            fields.push_back(std::move(field));
+            field.clear();
+        } else {
+            field.push_back(currentChar);
         }
-        fields.push_back(std::move(field));
-        for (auto& parsedField : fields) {
-            const auto first = parsedField.find_first_not_of(" \t\r\n");
-            if (first == std::string::npos) {
-                parsedField.clear();
-                continue;
-            }
-            const auto last = parsedField.find_last_not_of(" \t\r\n");
-            parsedField = parsedField.substr(first, last - first + 1);
-        }
-        return fields;
     }
+    fields.push_back(std::move(field));
+    for (auto& parsedField : fields) {
+        const auto first = parsedField.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) {
+            parsedField.clear();
+            continue;
+        }
+        const auto last = parsedField.find_last_not_of(" \t\r\n");
+        parsedField = parsedField.substr(first, last - first + 1);
+    }
+    return fields;
+}
 
-    std::vector<std::string> findCsvRow(const std::string& contents,
-                                        const std::string& name,
-                                        size_t nameColumn)
-    {
-        std::istringstream input(contents);
-        std::string line;
-        while (std::getline(input, line)) {
-            auto fields = parseCsvRow(line);
-            if (fields.size() > nameColumn && fields[nameColumn] == name) {
-                return fields;
-            }
+std::vector<std::string>
+    findCsvRow(const std::string& contents, const std::string& name, size_t nameColumn)
+{
+    std::istringstream input(contents);
+    std::string line;
+    while (std::getline(input, line)) {
+        auto fields = parseCsvRow(line);
+        if (fields.size() > nameColumn && fields[nameColumn] == name) {
+            return fields;
         }
-        return {};
     }
+    return {};
+}
 
-    std::vector<double> findTxtBusValues(const std::string& contents, const std::string& busName)
-    {
-        std::istringstream input(contents);
-        std::string line;
-        while (std::getline(input, line)) {
-            std::istringstream row(line);
-            int areaNumber = 0;
-            int busNumber = 0;
-            std::string name;
-            double voltage = 0.0;
-            double angleDegrees = 0.0;
-            if ((row >> areaNumber >> busNumber >> std::quoted(name) >> voltage >> angleDegrees) &&
-                name == busName) {
-                return {voltage, angleDegrees};
-            }
+std::vector<double> findTxtBusValues(const std::string& contents, const std::string& busName)
+{
+    std::istringstream input(contents);
+    std::string line;
+    while (std::getline(input, line)) {
+        std::istringstream row(line);
+        int areaNumber = 0;
+        int busNumber = 0;
+        std::string name;
+        double voltage = 0.0;
+        double angleDegrees = 0.0;
+        if ((row >> areaNumber >> busNumber >> std::quoted(name) >> voltage >> angleDegrees) &&
+            name == busName) {
+            return {voltage, angleDegrees};
         }
-        return {};
     }
+    return {};
+}
 }  // namespace
 
 TEST_F(OutputTests, OutputTest1)
