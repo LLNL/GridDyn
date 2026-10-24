@@ -62,6 +62,7 @@
 #include "griddyn/stabilizers/StabilizerIEEEST.h"
 #include "griddyn/stabilizers/StabilizerIee2st.h"
 #include "griddyn/stabilizers/StabilizerPss2a.h"
+#include "griddyn/stabilizers/StabilizerPss2b.h"
 #include "griddyn/stabilizers/StabilizerST2CUT.h"
 #include "griddyn/stabilizers/StabilizerStab3.h"
 #include "griddyn/voltagecompensators/VoltageCompensatorIeeeVC.h"
@@ -126,6 +127,7 @@ namespace {
     void loadEXST1(CoreObject* parentObject, stringVec& tokens);
     void loadEXAC1(CoreObject* parentObject, stringVec& tokens);
     void loadESAC1A(CoreObject* parentObject, stringVec& tokens);
+    void loadESAC2A(CoreObject* parentObject, stringVec& tokens);
     void loadESAC5A(CoreObject* parentObject, stringVec& tokens);
     void loadEXAC2(CoreObject* parentObject, stringVec& tokens);
     void loadEXAC4(CoreObject* parentObject, stringVec& tokens);
@@ -142,6 +144,7 @@ namespace {
     void loadIEEEST(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadIEE2ST(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadPSS2A(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
+    void loadPSS2B(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadSTAB3(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadST2CUT(CoreObject* parentObject, stringVec& tokens, bool zeroGain = false);
     void loadEXDC2(CoreObject* parentObject, stringVec& tokens);
@@ -257,6 +260,36 @@ namespace {
         generator->add(stabilizer);
     }
 
+    void loadPSS2B(CoreObject* parentObject, stringVec& tokens, bool zeroGain)
+    {
+        // ICON: MODE1, BUSR1, MODE2, BUSR2, M, N; CON: TW1..VSTMIN.
+        static constexpr std::array<std::string_view, 29> names{
+            "mode1",  "busr1",  "mode2",  "busr2",  "m",     "n",   "tw1", "tw2",
+            "t6",     "tw3",    "tw4",    "t7",     "ks2",   "ks3", "t8",  "t9",
+            "ks1",    "t1",     "t2",     "t3",     "t4",    "t10", "t11", "vs1max",
+            "vs1min", "vs2max", "vs2min", "vstmax", "vstmin"};
+        if (tokens.size() != names.size() + 3) {
+            throw InvalidParameterValue("PSS2B DYR record must contain 32 fields");
+        }
+        auto* generator =
+            dynamic_cast<DynamicGenerator*>(requireDyrGenerator(parentObject, tokens, "PSS2B"));
+        if (generator == nullptr) {
+            throw InvalidParameterValue("PSS2B requires a dynamic generator");
+        }
+        auto model = std::make_unique<stabilizers::StabilizerPss2b>();
+        const auto params = gmlc::utilities::str2vector(tokens, kNullVal);
+        for (std::size_t index = 0; index < names.size(); ++index) {
+            if (params[index + 3] == kNullVal || !std::isfinite(params[index + 3])) {
+                throw InvalidParameterValue("PSS2B invalid numeric field");
+            }
+            model->set(names[index], params[index + 3]);
+        }
+        if (zeroGain) {
+            model->set("ks1", 0.0);
+        }
+        generator->add(model.release());
+    }
+
     void loadSTAB3(CoreObject* parentObject, stringVec& tokens, bool zeroGain)
     {
         if (tokens.size() != 8U) {
@@ -346,6 +379,8 @@ namespace detail {
             loadEXAC1(parentObject, lineTokens);
         } else if (type == "'ESAC1A'") {
             loadESAC1A(parentObject, lineTokens);
+        } else if (type == "'ESAC2A'") {
+            loadESAC2A(parentObject, lineTokens);
         } else if (type == "'ESAC5A'") {
             loadESAC5A(parentObject, lineTokens);
         } else if (type == "'EXAC2'") {
@@ -399,6 +434,11 @@ namespace detail {
                 ++zeroGainStabilizers;
             }
             loadPSS2A(parentObject, lineTokens, disableStabilizers);
+        } else if (type == "'PSS2B'") {
+            if (disableStabilizers) {
+                ++zeroGainStabilizers;
+            }
+            loadPSS2B(parentObject, lineTokens, disableStabilizers);
         } else if (type == "'STAB3'") {
             if (disableStabilizers) {
                 ++zeroGainStabilizers;
@@ -2319,16 +2359,20 @@ namespace {
         }
         auto* gen = requireDyrGenerator(parentObject, tokens, "ESST2A");
         const auto params = gmlc::utilities::str2vector(tokens, kNullVal);
-        auto* model =
-            static_cast<Exciter*>(CoreObjectFactory::instance()->createObject("exciter", "esst2a"));
+        std::unique_ptr<CoreObject> model(
+            CoreObjectFactory::instance()->createObject("exciter", "esst2a"));
         // GridDyn's compact 13-parameter layout for the OpenIPSL ESST2A core.
-        // Separate VUEL/VOEL selector fields are intentionally not accepted.
+        // The payload has no selector flags; configure uel_enabled directly
+        // on the model. OEL actions use the generator's supplementary route.
         static constexpr std::array<std::string_view, 13> names{
             "tr", "ka", "ta", "vrmax", "vrmin", "kp", "ki", "kc", "kf", "tf", "ke", "te", "efdmax"};
         for (std::size_t index = 0; index < names.size(); ++index) {
+            if (params[index + 3] == kNullVal || !std::isfinite(params[index + 3])) {
+                throw InvalidParameterValue("ESST2A invalid numeric field");
+            }
             model->set(names[index], params[index + 3]);
         }
-        gen->add(model);
+        gen->add(model.release());
     }
 
     void loadESST3A(CoreObject* parentObject, stringVec& tokens)
@@ -2547,6 +2591,31 @@ namespace {
             exciter->set(names[index], params[index + 3]);
         }
         gen->add(exciter);
+    }
+
+    void loadESAC2A(CoreObject* parentObject, stringVec& tokens)
+    {
+        // PSS/E AC2A order, also present in griddyn_test_cases/Base.dyr.
+        static constexpr std::array<std::string_view, 22> names{"tr",    "tb",    "tc",    "ka",
+                                                                "ta",    "vamax", "vamin", "kb",
+                                                                "vrmax", "vrmin", "te",    "vfemax",
+                                                                "kh",    "kf",    "tf",    "kc",
+                                                                "kd",    "ke",    "e1",    "se1",
+                                                                "e2",    "se2"};
+        if (tokens.size() != names.size() + 3) {
+            throw InvalidParameterValue("ESAC2A DYR record must contain 25 fields");
+        }
+        auto* generator = requireDyrGenerator(parentObject, tokens, "ESAC2A");
+        std::unique_ptr<CoreObject> model(
+            CoreObjectFactory::instance()->createObject("exciter", "esac2a"));
+        const auto params = gmlc::utilities::str2vector(tokens, kNullVal);
+        for (std::size_t index = 0; index < names.size(); ++index) {
+            if (params[index + 3] == kNullVal || !std::isfinite(params[index + 3])) {
+                throw InvalidParameterValue("ESAC2A invalid numeric field");
+            }
+            model->set(names[index], params[index + 3]);
+        }
+        generator->add(model.release());
     }
 
     void loadESAC5A(CoreObject* parentObject, stringVec& tokens)

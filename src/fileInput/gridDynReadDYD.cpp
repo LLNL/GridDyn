@@ -85,14 +85,14 @@ namespace {
     bool isDydDirectModel(std::string_view modelName)
     {
         static constexpr std::array directModels{
-            "gencls", "genrou",  "genroe",  "gensae", "gensal", "esdc1a", "esdc2a", "ieeet1",
-            "ieeet3", "ieeex1",  "ac7b",    "ac8b",   "esst1a", "esst2a", "esst3a", "esst4b",
-            "expic1", "scrx",    "esac6a",  "exst1",  "exac1",  "esac1a", "exac2",  "exac4",
-            "exdc2",  "tgov1",   "hygov",   "gast",   "ggov1",  "ieeeg1", "ieesgo", "ieeest",
-            "iee2st", "pss2a",   "stab3",   "sexs",   "ieeeg2", "ieeevc", "regca1", "regcp1",
-            "reeca1", "reeca1e", "reeca1g", "reecb1", "repca1", "regcv1", "regcv2", "regf1",
-            "regf2",  "regf3",   "wtdta1",  "wtara1", "wtpta1", "wttqa1", "wtds",   "wt3g1",
-            "wt3e1",  "wt4g1",   "wt4e1",   "epcgen", "gpwscc"};
+            "gencls", "genrou", "genroe", "gensae",  "gensal",  "esdc1a", "esdc2a", "ieeet1",
+            "ieeet3", "ieeex1", "ac7b",   "ac8b",    "esst1a",  "esst2a", "esst3a", "esst4b",
+            "expic1", "scrx",   "esac6a", "exst1",   "exac1",   "esac1a", "esac2a", "exac2",
+            "exac4",  "exdc2",  "tgov1",  "hygov",   "gast",    "ggov1",  "ieeeg1", "ieesgo",
+            "ieeest", "iee2st", "pss2a",  "pss2b",   "stab3",   "sexs",   "ieeeg2", "ieeevc",
+            "regca1", "regcp1", "reeca1", "reeca1e", "reeca1g", "reecb1", "repca1", "regcv1",
+            "regcv2", "regf1",  "regf2",  "regf3",   "wtdta1",  "wtara1", "wtpta1", "wttqa1",
+            "wtds",   "wt3g1",  "wt3e1",  "wt4g1",   "wt4e1",   "epcgen", "gpwscc"};
         const auto normalized = gmlc::utilities::convertToLowerCase(modelName);
         return std::ranges::any_of(directModels, [normalized](const char* directModel) {
             return normalized == directModel;
@@ -247,6 +247,23 @@ namespace {
                            stringVec& payload)
     {
         const auto source = gmlc::utilities::convertToLowerCase(sourceModelName);
+
+        if (source == "esac2a" || source == "pss2b" || source == "esst2a") {
+            // Accept only the documented core payloads, including GridDyn's
+            // compact ESST2A schema. General PSLF selectors, trailers, and
+            // default parameter records are not mapped by this path.
+            std::size_t expected = 29U;  // PSS2B
+            if (source == "esac2a") {
+                expected = 22U;
+            } else if (source == "esst2a") {
+                expected = 13U;
+            }
+            if (sourcePayload.size() != expected) {
+                return false;
+            }
+            payload = sourcePayload;
+            return true;
+        }
 
         if (source == "ieeet1") {
             // PSLF IEEET1 appends Spdmlt to the PSS/E-compatible parameter

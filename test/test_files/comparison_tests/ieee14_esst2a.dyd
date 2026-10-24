@@ -1,0 +1,3 @@
+# Explicit positional ESST2A uses the GridDyn/OpenIPSL core parameter order.
+models
+esst2a 1 "BUS1" 69 "1" : #9 0.011 40.2 0.053 99.4 -99.5 0.71 1.02 0.033 0.054 0.75 1.06 0.57 9.8 /

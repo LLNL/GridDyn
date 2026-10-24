@@ -58,6 +58,10 @@ CoreObject* StabilizerPss2a::clone(CoreObject* obj) const
     stabilizerClone->T4 = T4;
     stabilizerClone->Vstmax = Vstmax;
     stabilizerClone->Vstmin = Vstmin;
+    stabilizerClone->rampM = rampM;
+    stabilizerClone->rampN = rampN;
+    stabilizerClone->T10 = T10;
+    stabilizerClone->T11 = T11;
     return stabilizerClone;
 }
 
@@ -66,35 +70,26 @@ bool StabilizerPss2a::supportedMode(int mode)
     return (mode >= 0) && (mode <= 5);
 }
 
+index_t StabilizerPss2a::rampStateCount() const
+{
+    return (rampM == 0 || rampN == 0) ? 0 : static_cast<index_t>(rampM + rampN);
+}
+
 void StabilizerPss2a::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t /*flags*/)
 {
-    const std::array<double, 19> parameters{Tw1,
-                                            Tw2,
-                                            T6,
-                                            Tw3,
-                                            Tw4,
-                                            T7,
-                                            Ks2,
-                                            Ks3,
-                                            T8,
-                                            T9,
-                                            Ks1,
-                                            T1,
-                                            T2,
-                                            T3,
-                                            T4,
-                                            Vstmax,
-                                            Vstmin,
-                                            initialPmech,
-                                            0.0};
+    const std::array<double, 20> parameters{Tw1, Tw2, T6,  Tw3,    Tw4,    T7,          Ks2,
+                                            Ks3, T8,  T9,  Ks1,    T1,     T2,          T3,
+                                            T4,  T10, T11, Vstmax, Vstmin, initialPmech};
     if (!std::all_of(parameters.begin(),
                      parameters.end(),
                      [](double value) { return std::isfinite(value); }) ||
         !supportedMode(mode1) || !supportedMode(mode2) || (remoteBus1 != 0) || (remoteBus2 != 0) ||
         (Tw1 < 0.0) || (Tw2 < 0.0) || (T6 < 0.0) || (Tw3 < 0.0) || (Tw4 < 0.0) || (T7 < 0.0) ||
-        (T9 <= 0.0) || (T8 < 0.0) || (T2 < 0.0) || (T4 < 0.0) || ((T2 == 0.0) && (T1 > 0.0)) ||
-        ((T4 == 0.0) && (T3 > 0.0)) || (Vstmax < Vstmin)) {
-        throw InvalidParameterValue("PSS2A modes, time constants, or limits");
+        ((rampStateCount() > 0) && (T9 <= 0.0)) || (T8 < 0.0) || (T2 < 0.0) || (T4 < 0.0) ||
+        ((T2 == 0.0) && (T1 > 0.0)) || ((T4 == 0.0) && (T3 > 0.0)) || (T10 < 0.0) || (T11 < 0.0) ||
+        ((T11 == 0.0) && (T10 > 0.0)) || (rampM < 0) || (rampN < 0) || (rampM > 8) || (rampN > 8) ||
+        (rampM * rampN > 8) || (Vstmax < Vstmin)) {
+        throw InvalidParameterValue("PSS2A/PSS2B modes, time constants, or limits");
     }
 
     branch1Derivative1State = kNullLocation;
@@ -106,6 +101,7 @@ void StabilizerPss2a::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t /*f
     rampFilterState.fill(kNullLocation);
     leadLag1State = kNullLocation;
     leadLag2State = kNullLocation;
+    leadLag3State = kNullLocation;
     index_t stateCount = 0;
     if (Tw1 > 0.0) {
         branch1Derivative1State = stateCount++;
@@ -125,14 +121,17 @@ void StabilizerPss2a::dynObjectInitializeA(CoreTime /*time0*/, std::uint32_t /*f
     if (T7 > 0.0) {
         branch2LagState = stateCount++;
     }
-    for (auto& state : rampFilterState) {
-        state = stateCount++;
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
+        rampFilterState[stage] = stateCount++;
     }
     if (T2 > 0.0) {
         leadLag1State = stateCount++;
     }
     if (T4 > 0.0) {
         leadLag2State = stateCount++;
+    }
+    if (T11 > 0.0) {
+        leadLag3State = stateCount++;
     }
 
     offsets.local().local.algSize = 1;
@@ -146,7 +145,7 @@ void StabilizerPss2a::dynObjectInitializeB(const IOdata& inputs,
                                            IOdata& /*fieldSet*/)
 {
     if (inputs.size() < pssInputCount) {
-        throw InvalidParameterValue("PSS2A controller inputs");
+        throw InvalidParameterValue("PSS2A/PSS2B controller inputs");
     }
     const auto validInput = [&inputs](index_t index) {
         return std::isfinite(inputs[index]) && (std::abs(inputs[index]) < inputValidityLimit);
@@ -169,7 +168,7 @@ void StabilizerPss2a::dynObjectInitializeB(const IOdata& inputs,
         }
     };
     if (!signalAvailable(mode1) || !signalAvailable(mode2)) {
-        throw InvalidParameterValue("PSS2A controller inputs");
+        throw InvalidParameterValue("PSS2A/PSS2B controller inputs");
     }
     initialPmech = ((mode1 == 4) || (mode2 == 4)) ? inputs[pssPmechInLocation] : 0.0;
     double* state = m_state.data() + 1;
@@ -195,14 +194,17 @@ void StabilizerPss2a::dynObjectInitializeB(const IOdata& inputs,
     if (branch2LagState != kNullLocation) {
         state[branch2LagState] = 0.0;
     }
-    for (const auto stateIndex : rampFilterState) {
-        state[stateIndex] = 0.0;
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
+        state[rampFilterState[stage]] = 0.0;
     }
     if (leadLag1State != kNullLocation) {
         state[leadLag1State] = 0.0;
     }
     if (leadLag2State != kNullLocation) {
         state[leadLag2State] = 0.0;
+    }
+    if (leadLag3State != kNullLocation) {
+        state[leadLag3State] = 0.0;
     }
     m_state[0] = 0.0;
     std::fill(m_dstate_dt.begin(), m_dstate_dt.end(), 0.0);
@@ -277,21 +279,15 @@ StabilizerPss2a::LinearValue StabilizerPss2a::derivativeBranch(const LinearValue
 StabilizerPss2a::LinearValue StabilizerPss2a::rampFilter(const LinearValue& input,
                                                          const double state[]) const
 {
-    const double scale = T8 / T9;
-    LinearValue first = input;
-    first.value = state[rampFilterState[0]] + (scale * (input.value - state[rampFilterState[0]]));
-    for (double& gain : first.stateGain) {
-        gain *= scale;
-    }
-    first.input1Gain *= scale;
-    first.input2Gain *= scale;
-    first.stateGain[rampFilterState[0]] += 1.0 - scale;
-    LinearValue previous = first;
-    for (index_t stage = 1; stage <= rampLagCount; ++stage) {
-        LinearValue current;
-        current.value = state[rampFilterState[stage]];
-        current.stateGain[rampFilterState[stage]] = 1.0;
-        previous = current;
+    // N lead-lags (1+s*T8)/(1+s*T9) followed by M pure lags give
+    // (1+s*T8)^N/(1+s*T9)^(M+N). A zero M or N bypasses the cascade.
+    LinearValue previous = input;
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
+        previous = leadLagOutput(previous,
+                                 state,
+                                 rampFilterState[stage],
+                                 (stage < static_cast<index_t>(rampN)) ? T8 : 0.0,
+                                 T9);
     }
     return previous;
 }
@@ -358,7 +354,8 @@ StabilizerPss2a::LinearValue StabilizerPss2a::outputExpression(const IOdata& inp
     difference.input1Gain *= Ks1;
     difference.input2Gain *= Ks1;
     const auto first = leadLagOutput(difference, state, leadLag1State, T1, T2);
-    return leadLagOutput(first, state, leadLag2State, T3, T4);
+    const auto second = leadLagOutput(first, state, leadLag2State, T3, T4);
+    return leadLagOutput(second, state, leadLag3State, T10, T11);
 }
 
 double StabilizerPss2a::output(const IOdata& inputs, const double state[]) const
@@ -445,15 +442,14 @@ void StabilizerPss2a::derivative(const IOdata& inputs,
     }
 
     const double summed = branch1 + (Ks3 * branch2);
-    const double rampFirst =
-        state[rampFilterState[0]] + ((T8 / T9) * (summed - state[rampFilterState[0]]));
-    stateDerivative[rampFilterState[0]] = (summed - state[rampFilterState[0]]) / T9;
-    double previous = rampFirst;
-    for (index_t stage = 1; stage <= rampLagCount; ++stage) {
+    double previous = summed;
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
         stateDerivative[rampFilterState[stage]] = (previous - state[rampFilterState[stage]]) / T9;
-        previous = state[rampFilterState[stage]];
+        const double ratio = (stage < static_cast<index_t>(rampN)) ? T8 / T9 : 0.0;
+        previous =
+            state[rampFilterState[stage]] + (ratio * (previous - state[rampFilterState[stage]]));
     }
-    const double preCompensator = Ks1 * (state[rampFilterState[rampLagCount]] - branch2);
+    const double preCompensator = Ks1 * (previous - branch2);
     const double firstLeadLag = (T2 > 0.0) ?
         state[leadLag1State] + ((T1 / T2) * (preCompensator - state[leadLag1State])) :
         preCompensator;
@@ -462,6 +458,12 @@ void StabilizerPss2a::derivative(const IOdata& inputs,
     }
     if (T4 > 0.0) {
         stateDerivative[leadLag2State] = (firstLeadLag - state[leadLag2State]) / T4;
+    }
+    const double secondLeadLag = (T4 > 0.0) ?
+        state[leadLag2State] + ((T3 / T4) * (firstLeadLag - state[leadLag2State])) :
+        firstLeadLag;
+    if (T11 > 0.0) {
+        stateDerivative[leadLag3State] = (secondLeadLag - state[leadLag3State]) / T11;
     }
 }
 
@@ -543,7 +545,8 @@ void StabilizerPss2a::jacobianElements(const IOdata& inputs,
     difference.input1Gain *= Ks1;
     difference.input2Gain *= Ks1;
     const auto firstLeadLag = leadLagOutput(difference, state, leadLag1State, T1, T2);
-    const auto finalOutput = leadLagOutput(firstLeadLag, state, leadLag2State, T3, T4);
+    const auto secondLeadLag = leadLagOutput(firstLeadLag, state, leadLag2State, T3, T4);
+    const auto finalOutput = leadLagOutput(secondLeadLag, state, leadLag3State, T10, T11);
     const auto addExpression = [this, &matrixData, &inputLocs, refDiff](index_t row,
                                                                         const LinearValue& value,
                                                                         double scale,
@@ -635,30 +638,18 @@ void StabilizerPss2a::jacobianElements(const IOdata& inputs,
                           (-1.0 / T7) - stateData.cj);
     }
 
-    for (index_t stage = 0; stage <= rampLagCount; ++stage) {
-        LinearValue rampInput = summed;
+    LinearValue rampInput = summed;
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
         const double lagTime = T9;
-        if (stage == 1) {
-            // The first low-pass stage follows the T8/T9 lead-lag output,
-            // rather than the first ramp-filter state directly.
-            const double scale = T8 / T9;
-            rampInput.value =
-                state[rampFilterState[0]] + (scale * (summed.value - state[rampFilterState[0]]));
-            for (double& gain : rampInput.stateGain) {
-                gain *= scale;
-            }
-            rampInput.input1Gain *= scale;
-            rampInput.input2Gain *= scale;
-            rampInput.stateGain[rampFilterState[0]] += 1.0 - scale;
-        } else if (stage > 1) {
-            rampInput = {};
-            rampInput.value = state[rampFilterState[stage - 1]];
-            rampInput.stateGain[rampFilterState[stage - 1]] = 1.0;
-        }
         addExpression(refDiff + rampFilterState[stage], rampInput, 1.0 / lagTime, true);
         matrixData.assign(refDiff + rampFilterState[stage],
                           refDiff + rampFilterState[stage],
                           (-1.0 / lagTime) - stateData.cj);
+        rampInput = leadLagOutput(rampInput,
+                                  state,
+                                  rampFilterState[stage],
+                                  (stage < static_cast<index_t>(rampN)) ? T8 : 0.0,
+                                  T9);
     }
     if (T2 > 0.0) {
         addExpression(refDiff + leadLag1State, difference, 1.0 / T2, true);
@@ -671,6 +662,12 @@ void StabilizerPss2a::jacobianElements(const IOdata& inputs,
         matrixData.assign(refDiff + leadLag2State,
                           refDiff + leadLag2State,
                           (-1.0 / T4) - stateData.cj);
+    }
+    if (T11 > 0.0) {
+        addExpression(refDiff + leadLag3State, secondLeadLag, 1.0 / T11, true);
+        matrixData.assign(refDiff + leadLag3State,
+                          refDiff + leadLag3State,
+                          -(1.0 / T11) - stateData.cj);
     }
 }
 
@@ -747,15 +744,17 @@ stringVec StabilizerPss2a::localStateNames() const
     if (branch2LagState != kNullLocation) {
         names.emplace_back("l2");
     }
-    names.emplace_back("rtf");
-    for (index_t stage = 1; stage <= rampLagCount; ++stage) {
-        names.emplace_back("rtf" + std::to_string(stage));
+    for (index_t stage = 0; stage < rampStateCount(); ++stage) {
+        names.emplace_back(stage == 0 ? "rtf" : "rtf" + std::to_string(stage));
     }
     if (leadLag1State != kNullLocation) {
         names.emplace_back("ll1");
     }
     if (leadLag2State != kNullLocation) {
         names.emplace_back("ll2");
+    }
+    if (leadLag3State != kNullLocation) {
+        names.emplace_back("ll3");
     }
     return names;
 }

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "ControllerSignals.h"
 #include "GridSubModel.h"
 #include <string>
 #include <vector>
@@ -57,6 +58,14 @@ class Stabilizer: public GridSubModel {
 
     virtual const std::vector<stringVec>& inputNames() const override;
     virtual const std::vector<stringVec>& outputNames() const override;
+    /** Electrical quantity used by local power-input modes.
+     * Defaults to the existing electrical-torque contract. PSS2B requests
+     * terminal electrical power; the host routes its value and derivatives.
+     */
+    virtual MachineControllerSignal electricalPowerSignal() const
+    {
+        return MachineControllerSignal::ELECTRICAL_TORQUE;
+    }
 
     virtual index_t findIndex(std::string_view field, const SolverMode& sMode) const override;
 };
